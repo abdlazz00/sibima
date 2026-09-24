@@ -1,6 +1,7 @@
 import '../css/app.css';
+import 'preline/preline';
 
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 
@@ -21,4 +22,8 @@ createInertiaApp({
     progress: {
         color: '#4B5563',
     },
+});
+
+router.on('navigate', () => {
+    window.HSStaticMethods?.autoInit();
 });
