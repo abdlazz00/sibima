@@ -37,4 +37,21 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Unit::class);
     }
+
+    public function canAccessUnit(Unit $unit): bool
+    {
+        if ($this->hasRole('kasubag')) {
+            return true;
+        }
+
+        if ($this->hasRole('camat')) {
+            if ($this->unit_id === null) {
+                return false;
+            }
+
+            return $unit->id === $this->unit_id || $unit->parent_id === $this->unit_id;
+        }
+
+        return $this->unit_id !== null && $this->unit_id === $unit->id;
+    }
 }
