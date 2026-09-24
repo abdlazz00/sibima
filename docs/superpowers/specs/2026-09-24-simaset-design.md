@@ -28,13 +28,36 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
 
 ## Arsitektur & Stack
 
-- **Backend:** Laravel, MySQL/PostgreSQL, `spatie/laravel-permission` untuk role & permission.
-- **Frontend:** Inertia.js + React + TypeScript, Tailwind CSS.
+**Backend**
+- Laravel (versi stabil terbaru), PHP 8.3+, MySQL.
+- `spatie/laravel-permission` untuk role & permission.
+- **Struktur folder** (default Laravel + Service/Repository pattern, controller tipis):
+  - `app/Http/Controllers` — orkestrasi saja: panggil Form Request untuk validasi, panggil Service, kembalikan Inertia response.
+  - `app/Http/Requests` — satu FormRequest per aksi, validasi & otorisasi dasar terpisah dari controller.
+  - `app/Services` — logic bisnis (mis. `AssetService`, `ApprovalWorkflowService`, `MutasiService`). Workflow engine (step progression, efek transaksi, trigger notifikasi) hidup di sini.
+  - `app/Repositories` — data access layer (interface + implementasi Eloquent), dipanggil dari Service, bukan langsung dari Controller.
+  - `app/Models`, `app/Policies` (otorisasi scoping per unit).
+- **Queue & Scheduler:** efek transaksi workflow & notifikasi in-app dijalankan lewat event/listener yang di-queue (`database` driver cukup untuk skala ini); Supervisor di VPS menjalankan queue worker, cron menjalankan `schedule:run` tiap menit.
+- **Testing:** Pest, feature test per alur approval + unit test untuk Service/workflow engine.
+- **Code style:** Laravel Pint (default config).
 - **Auth:** Session-based (Laravel Breeze/Fortify), satu akun per user termasuk Pegawai.
 - **File storage:** Laravel filesystem (local/S3) untuk multi-foto aset & lampiran laporan.
 - **QR/Barcode:** kode unik per aset, discan lewat kamera browser (tanpa app native) untuk pencarian cepat & opname/stock-take.
 - **Cetak PDF (MVP):** hanya label aset (QR/barcode + info ringkas) untuk ditempel fisik. Berita Acara Serah Terima & form KIB di luar scope MVP.
 - **Notifikasi:** Laravel Notifications, channel database (in-app), scoped ke role & unit yang relevan sebagai approver berikutnya.
+
+**Frontend**
+- Inertia.js + React + TypeScript.
+- Tailwind CSS + **Preline UI** untuk komponen (tabel, form, modal, dropdown, dll). Preline berbasis class Tailwind + JS plugin (bukan komponen React native), sehingga perlu re-init (`window.HSStaticMethods.autoInit()`) pada event `router.on('navigate')` Inertia supaya komponen interaktif tetap berfungsi setelah page transition.
+- Struktur `resources/js/`: `Pages/` (per fitur: Aset, Mutasi, Pengajuan, Laporan), `Components/` (reusable UI), `Layouts/`.
+- Package manager: npm.
+- Code style: ESLint + Prettier (default config) untuk TS/React.
+
+**Dev Environment**
+- Laragon (native, tanpa Docker) — PHP + MySQL lokal langsung di Windows.
+
+**Deployment**
+- VPS sendiri: Nginx + PHP-FPM, Supervisor untuk queue worker, cron untuk Laravel Scheduler.
 
 ## Struktur Organisasi & User
 
@@ -143,10 +166,11 @@ lanjut pada MVP — proses penghapusan pembukuan (write-off) di luar scope MVP.
 
 ## Testing Approach
 
+- Pest sebagai testing framework.
 - Feature test per alur approval (a–h): submit → tiap step approve/reject →
   efek akhir ke `assets`/`asset_histories` benar.
 - Policy test untuk scoping akses per role & per unit.
-- Unit test untuk workflow engine (step progression, trigger notifikasi, event efek transaksi).
+- Unit test untuk workflow engine (step progression, trigger notifikasi, event efek transaksi) di layer Service.
 
 ## Di Luar Scope MVP
 
