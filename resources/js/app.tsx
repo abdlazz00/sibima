@@ -18,6 +18,11 @@ createInertiaApp({
         const root = createRoot(el);
 
         root.render(<App {...props} />);
+
+        // Preline's auto-init runs on script load, before React has painted
+        // anything into `el` — re-run it once the initial page is actually
+        // in the DOM, otherwise nothing on the first page view initializes.
+        setTimeout(() => window.HSStaticMethods?.autoInit(), 0);
     },
     progress: {
         color: '#4B5563',
@@ -25,5 +30,7 @@ createInertiaApp({
 });
 
 router.on('navigate', () => {
-    window.HSStaticMethods?.autoInit();
+    // Same race as above: 'navigate' fires as the visit resolves, before
+    // React commits the new page's DOM, so defer to the next tick.
+    setTimeout(() => window.HSStaticMethods?.autoInit(), 0);
 });
