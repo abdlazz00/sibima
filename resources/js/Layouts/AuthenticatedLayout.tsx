@@ -1,8 +1,8 @@
-import { PropsWithChildren, ReactNode, useEffect } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
 import BrandMark from '@/Components/BrandMark';
 import { navItemsForRole, Role } from '@/config/navigation';
 import { PageProps } from '@/types';
+import { Link, router, usePage } from '@inertiajs/react';
+import { PropsWithChildren, ReactNode, useEffect } from 'react';
 
 export default function AuthenticatedLayout({
     header,
@@ -50,9 +50,12 @@ export default function AuthenticatedLayout({
             <div className="flex flex-1 flex-col">
                 <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3">
                     <div>
-                        <p className="text-sm font-medium text-gray-800">{auth.user?.name}</p>
+                        <p className="text-sm font-medium text-gray-800">
+                            {auth.user?.name}
+                        </p>
                         <p className="text-xs text-gray-500">
-                            {auth.user?.unit?.name ?? 'Kecamatan Sagulung'} · {role}
+                            {auth.user?.unit?.name ?? 'Kecamatan Sagulung'} ·{' '}
+                            {role}
                         </p>
                     </div>
 

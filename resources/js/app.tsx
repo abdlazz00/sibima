@@ -1,5 +1,5 @@
-import '../css/app.css';
 import 'preline/preline';
+import '../css/app.css';
 
 import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

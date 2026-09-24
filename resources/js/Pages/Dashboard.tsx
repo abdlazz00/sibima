@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 
 export default function Dashboard() {
     const { auth } = usePage<PageProps>().props;
@@ -14,8 +14,8 @@ export default function Dashboard() {
                     Selamat datang, {auth.user?.name}
                 </h1>
                 <p className="mt-1 text-sm text-gray-500">
-                    Anda login sebagai <strong>{auth.user?.roles?.[0]}</strong> di{' '}
-                    {auth.user?.unit?.name ?? 'Kecamatan Sagulung'}.
+                    Anda login sebagai <strong>{auth.user?.roles?.[0]}</strong>{' '}
+                    di {auth.user?.unit?.name ?? 'Kecamatan Sagulung'}.
                 </p>
             </div>
         </AuthenticatedLayout>
