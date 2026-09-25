@@ -40,6 +40,6 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
-        "preline": "^3.2.3"
+        "preline": "^2.7.0"
     }
 }
