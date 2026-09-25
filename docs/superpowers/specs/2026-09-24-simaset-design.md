@@ -66,6 +66,17 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
   memudahkan ekspansi ke kecamatan lain di masa depan bila diperlukan.
 - `users` — satu tabel untuk semua role, terhubung ke `unit_id`. Kasubag scope
   kecamatan/global (tidak terikat satu kelurahan).
+  - Field tambahan hasil peninjauan data kepegawaian riil (`docs/ABSENN STAF PNS DAN PPPK.xlsx`):
+    `nip`, `pangkat_golongan`, `jabatan` — informatif saja (ditampilkan di riwayat
+    approval/laporan/cetak dokumen), tidak mempengaruhi role atau hak akses sistem.
+    `jabatan` disimpan sebagai teks bebas dan boleh memuat info seksi/subbag (mis.
+    "Kasi Trantib Kelurahan Sei Lekop") — seksi/subbag **tidak** dimodelkan sebagai
+    level unit terpisah karena lokasi aset di data riil tidak dipecah sampai granularitas
+    seksi (cuma per kantor camat/lurah).
+  - **Login:** setiap akun wajib punya `email` unik, diisi manual saat provisioning
+    (bukan digenerate otomatis oleh sistem) — dipakai juga untuk fitur mendatang seperti
+    reset password & notifikasi email. Login bisa memakai email **atau** `nip`; sistem
+    mencari user berdasarkan input yang cocok dengan salah satu dari keduanya.
 - `employees`/pegawai memakai tabel `users` yang sama dengan role `pegawai`,
   terhubung ke `unit_id` tempat dia bertugas — dipakai sebagai konteks default
   saat pengajuan aset & lapor rusak/hilang.
@@ -74,14 +85,28 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
 
 ## Data Model — Aset
 
-- `asset_categories` — kategori aset hierarkis mengikuti kode barang BMD
-  (Bidang → Kelompok → Sub Kelompok → Sub-sub Kelompok).
+> Disesuaikan hasil peninjauan data master aset riil client
+> (`docs/PHOTO BARANG.xlsx`, sheet "DATA MASTER", 292 baris aset).
+
+- `asset_categories` — kategori aset **2 level flat**: Kategori (mis. "ALAT RUMAH TANGGA")
+  → Subkategori (mis. "ALAT PENDINGIN"). Disederhanakan dari rencana awal 4 level
+  BMD (Bidang → Kelompok → Sub Kelompok → Sub-sub Kelompok) karena data riil client
+  cuma pakai 2 level ini. `kode_barang` pada `assets` tetap memakai format kode BMD
+  lengkap (mis. `1.3.2.05.02.04.004`), tapi disimpan sebagai satu string utuh per
+  jenis aset — bukan disusun/diturunkan dari relasi kategori berjenjang.
 - `assets` — data inti aset:
-  - `kode_barang` (kode BMD hierarkis) + `nomor_register` (urut per kategori per unit)
+  - `kode_barang` (kode BMD, string utuh per jenis aset) + `nomor_register` (digenerate
+    sistem, urut per kategori per unit — identitas unik per unit fisik aset ke depan)
   - `nama_aset`, `category_id`, `unit_id` (lokasi/pemilik saat ini), `current_holder_id` (pegawai pemegang, nullable)
+  - `merk_type` — merek/tipe aset (mis. "PANASONIC")
   - `kondisi` (baik / rusak ringan / rusak berat / hilang)
   - `status` (aktif / dalam_proses_mutasi / dsb — dipakai untuk mengunci aset saat sedang diproses transaksi)
-  - `tahun_perolehan`, `sumber_perolehan`, `nilai_perolehan`, `keterangan`
+  - `tanggal_perolehan` (tanggal lengkap, bukan sekadar tahun — data riil punya tanggal lengkap)
+  - `sumber_perolehan`, `nilai_perolehan`, `nilai_buku` (nilai aset setelah penyusutan, terpisah dari `nilai_perolehan`)
+  - `no_dokumen` — nomor dokumen pengadaan/mutasi dari data lama (mis. `M#GW04A268636-378-2023-0001`),
+    disimpan sebagai field referensi historis/audit — **bukan** identitas utama unit fisik
+    (identitas utama tetap `nomor_register` yang digenerate sistem)
+  - `keterangan`
 - `asset_photos` — polymorphic multi-foto (`photoable_type`/`photoable_id`),
   dipakai untuk foto aset maupun lampiran laporan rusak/hilang.
 - `asset_histories` — log setiap perubahan kondisi/lokasi/pemegang aset, ditulis
