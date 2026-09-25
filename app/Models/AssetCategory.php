@@ -52,6 +52,11 @@ class AssetCategory extends Model
         return $this->hasMany(AssetCategory::class, 'parent_id')->orderBy('name');
     }
 
+    public function assets(): HasMany
+    {
+        return $this->hasMany(Asset::class, 'category_id');
+    }
+
     public function isSubcategory(): bool
     {
         return $this->parent_id !== null;

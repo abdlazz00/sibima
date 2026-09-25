@@ -14,6 +14,11 @@ class Unit extends Model
 
     protected $fillable = ['name', 'type', 'parent_id'];
 
+    protected function casts(): array
+    {
+        return ['parent_id' => 'integer'];
+    }
+
     protected static function booted(): void
     {
         static::saving(function (Unit $unit) {
