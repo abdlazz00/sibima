@@ -35,3 +35,17 @@ it('rejects a kecamatan that has a parent_id', function () {
         'parent_id' => $kecamatan->id,
     ]);
 })->throws(InvalidArgumentException::class);
+
+it('rejects a kelurahan whose parent is itself a kelurahan', function () {
+    $kecamatan = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
+    $kelurahanA = Unit::create(['name' => 'Kelurahan A', 'type' => 'kelurahan', 'parent_id' => $kecamatan->id]);
+
+    Unit::create(['name' => 'Kelurahan B', 'type' => 'kelurahan', 'parent_id' => $kelurahanA->id]);
+})->throws(InvalidArgumentException::class);
+
+it('prevents deleting a kecamatan that still has kelurahan', function () {
+    $kecamatan = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
+    Unit::create(['name' => 'Kelurahan A', 'type' => 'kelurahan', 'parent_id' => $kecamatan->id]);
+
+    $kecamatan->delete();
+})->throws(\Illuminate\Database\QueryException::class);

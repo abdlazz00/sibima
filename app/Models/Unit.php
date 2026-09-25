@@ -24,6 +24,14 @@ class Unit extends Model
             if ($unit->type === 'kecamatan' && $unit->parent_id !== null) {
                 throw new InvalidArgumentException('Kecamatan tidak boleh memiliki parent.');
             }
+
+            if ($unit->type === 'kelurahan' && $unit->parent_id !== null) {
+                $parent = Unit::find($unit->parent_id);
+
+                if (! $parent?->isKecamatan()) {
+                    throw new InvalidArgumentException('Parent kelurahan harus berupa kecamatan.');
+                }
+            }
         });
     }
 

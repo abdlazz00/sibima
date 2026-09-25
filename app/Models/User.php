@@ -51,6 +51,10 @@ class User extends Authenticatable
             return $unit->id === $this->unit_id || $unit->parent_id === $this->unit_id;
         }
 
+        if ($this->getRoleNames()->isEmpty()) {
+            return false;
+        }
+
         return $this->unit_id !== null && $this->unit_id === $unit->id;
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->enum('type', ['kecamatan', 'kelurahan']);
-            $table->foreignId('parent_id')->nullable()->constrained('units')->nullOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('units')->restrictOnDelete();
             $table->timestamps();
         });
     }
