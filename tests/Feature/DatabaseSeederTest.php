@@ -20,3 +20,16 @@ it('seeds roles, units, and one demo user per role idempotently', function () {
     expect($lurah->unit->isKelurahan())->toBeTrue()
         ->and($lurah->hasRole('lurah'))->toBeTrue();
 });
+
+it('does not seed demo user accounts outside local/testing environments', function () {
+    app()->instance('env', 'production');
+
+    try {
+        app(DatabaseSeeder::class)->run();
+    } finally {
+        app()->instance('env', 'testing');
+    }
+
+    expect(Unit::where('type', 'kecamatan')->count())->toBe(1)
+        ->and(User::count())->toBe(0);
+});

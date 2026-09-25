@@ -66,7 +66,7 @@ export default function AuthenticatedLayout({
                         >
                             Akun
                         </button>
-                        <div className="hs-dropdown-menu hs-dropdown-open:opacity-100 hidden w-40 rounded border border-gray-200 bg-white opacity-0 shadow-md">
+                        <div className="hs-dropdown-menu hidden w-40 rounded border border-gray-200 bg-white opacity-0 shadow-md hs-dropdown-open:opacity-100">
                             <button
                                 type="button"
                                 onClick={() => router.post('/logout')}

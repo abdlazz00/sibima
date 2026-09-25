@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Unit;
+use Illuminate\Database\QueryException;
 
 it('creates a kecamatan with no parent', function () {
     $unit = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
@@ -48,4 +49,4 @@ it('prevents deleting a kecamatan that still has kelurahan', function () {
     Unit::create(['name' => 'Kelurahan A', 'type' => 'kelurahan', 'parent_id' => $kecamatan->id]);
 
     $kecamatan->delete();
-})->throws(\Illuminate\Database\QueryException::class);
+})->throws(QueryException::class);
