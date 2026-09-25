@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AssetStatus;
 use App\Enums\Kondisi;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -86,6 +87,15 @@ class Asset extends Model
     public function histories(): HasMany
     {
         return $this->hasMany(AssetHistory::class)->latest()->latest('id');
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): void
+    {
+        $ids = $user->accessibleUnitIds();
+
+        if ($ids !== null) {
+            $query->whereIn('unit_id', $ids);
+        }
     }
 
     public function registerLabel(): string

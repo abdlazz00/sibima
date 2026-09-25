@@ -44,7 +44,22 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function userWithRole(string $role, ?\App\Models\Unit $unit = null): \App\Models\User
 {
-    // ..
+    \Spatie\Permission\Models\Role::findOrCreate($role);
+
+    $user = \App\Models\User::factory()->create(['unit_id' => $unit?->id]);
+    $user->assignRole($role);
+
+    return $user;
+}
+
+function makeKecamatan(string $name = 'Kecamatan Sagulung'): \App\Models\Unit
+{
+    return \App\Models\Unit::create(['name' => $name, 'type' => 'kecamatan']);
+}
+
+function makeKelurahan(\App\Models\Unit $kecamatan, string $name): \App\Models\Unit
+{
+    return \App\Models\Unit::create(['name' => $name, 'type' => 'kelurahan', 'parent_id' => $kecamatan->id]);
 }

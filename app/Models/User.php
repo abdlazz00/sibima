@@ -29,6 +29,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'unit_id' => 'integer',
         ];
     }
 
@@ -37,24 +38,37 @@ class User extends Authenticatable
         return $this->belongsTo(Unit::class);
     }
 
-    public function canAccessUnit(Unit $unit): bool
+    /**
+     * Unit ids this user may see: null means every unit.
+     *
+     * @return list<int>|null
+     */
+    public function accessibleUnitIds(): ?array
     {
         if ($this->hasRole('kasubag')) {
-            return true;
+            return null;
+        }
+
+        if ($this->getRoleNames()->isEmpty() || $this->unit_id === null) {
+            return [];
         }
 
         if ($this->hasRole('camat')) {
-            if ($this->unit_id === null) {
-                return false;
-            }
-
-            return $unit->id === $this->unit_id || $unit->parent_id === $this->unit_id;
+            return Unit::query()
+                ->where('id', $this->unit_id)
+                ->orWhere('parent_id', $this->unit_id)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
         }
 
-        if ($this->getRoleNames()->isEmpty()) {
-            return false;
-        }
+        return [$this->unit_id];
+    }
 
-        return $this->unit_id !== null && $this->unit_id === $unit->id;
+    public function canAccessUnit(Unit $unit): bool
+    {
+        $ids = $this->accessibleUnitIds();
+
+        return $ids === null || in_array($unit->id, $ids, true);
     }
 }
