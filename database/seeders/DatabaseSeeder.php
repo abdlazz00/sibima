@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             UnitSeeder::class,
+            AssetCategorySeeder::class,
         ]);
 
         if (app()->environment(['local', 'testing'])) {

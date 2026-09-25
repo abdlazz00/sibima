@@ -8,7 +8,7 @@ export default function AuthenticatedLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { auth } = usePage<PageProps>().props;
+    const { auth, flash } = usePage<PageProps>().props;
     const role = auth.user?.roles?.[0] as Role | undefined;
     const navItems = navItemsForRole(role);
 
@@ -79,6 +79,16 @@ export default function AuthenticatedLayout({
                 </header>
 
                 <main className="flex-1 p-6">
+                    {flash.success && (
+                        <div className="mb-4 rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                            {flash.success}
+                        </div>
+                    )}
+                    {flash.error && (
+                        <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                            {flash.error}
+                        </div>
+                    )}
                     {header && <div className="mb-6">{header}</div>}
                     {children}
                 </main>

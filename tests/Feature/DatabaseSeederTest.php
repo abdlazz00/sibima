@@ -33,3 +33,18 @@ it('does not seed demo user accounts outside local/testing environments', functi
     expect(Unit::where('type', 'kecamatan')->count())->toBe(1)
         ->and(User::count())->toBe(0);
 });
+
+it('seeds the client asset categories idempotently in every environment', function () {
+    app()->instance('env', 'production');
+
+    try {
+        app(DatabaseSeeder::class)->run();
+        app(DatabaseSeeder::class)->run();
+    } finally {
+        app()->instance('env', 'testing');
+    }
+
+    expect(\App\Models\AssetCategory::whereNull('parent_id')->count())->toBe(7)
+        ->and(\App\Models\AssetCategory::whereNotNull('parent_id')->count())->toBe(15)
+        ->and(\App\Models\AssetCategory::where('name', 'ALAT PENDINGIN')->first()->parent->name)->toBe('ALAT RUMAH TANGGA');
+});

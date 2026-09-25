@@ -18,7 +18,7 @@ export const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
     kasubag: [
         DASHBOARD,
         { label: 'Kelola User', href: '#', disabled: true },
-        { label: 'Master Data Aset', href: '#', disabled: true },
+        { label: 'Master Data Aset', href: '/asset-categories' },
     ],
     camat: [
         DASHBOARD,
