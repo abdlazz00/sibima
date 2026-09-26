@@ -19,7 +19,14 @@ it('shows admin_kelurahan only pegawai in their own unit', function () {
             ->component('Pegawai/Index')
             ->has('pegawais', 1)
             ->where('pegawais.0.nama', 'Di Kelurahan')
-            ->where('can.create', true));
+            ->where('can.create', true)
+            ->where('can.createUser', false));
+});
+
+it('only exposes can.createUser as true for kasubag', function () {
+    $this->actingAs(userWithRole('kasubag'))
+        ->get('/pegawais')
+        ->assertInertia(fn (Assert $page) => $page->where('can.createUser', true));
 });
 
 it('lets kasubag see every pegawai', function () {

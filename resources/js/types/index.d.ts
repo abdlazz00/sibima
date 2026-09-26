@@ -15,6 +15,20 @@ export interface AssetCategory {
     parent?: AssetCategory | null;
 }
 
+export interface Pegawai {
+    id: number;
+    nama: string;
+    nip: string | null;
+    pangkat_golongan: string | null;
+    jabatan: string;
+    status_kepegawaian: 'pns' | 'pppk';
+    unit_id: number;
+    foto_profile: string | null;
+    user_id: number | null;
+    unit?: { id: number; name: string; type: 'kecamatan' | 'kelurahan' };
+    user?: { id: number; email: string } | null;
+}
+
 export interface Flash {
     success: string | null;
     error: string | null;

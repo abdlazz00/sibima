@@ -29,7 +29,10 @@ class PegawaiController extends Controller
         return Inertia::render('Pegawai/Index', [
             'pegawais' => $this->pegawais->listVisibleTo($request->user()),
             'units' => Unit::orderBy('name')->get(['id', 'name', 'type']),
-            'can' => ['create' => $request->user()->can('create', Pegawai::class)],
+            'can' => [
+                'create' => $request->user()->can('create', Pegawai::class),
+                'createUser' => $request->user()->hasRole('kasubag'),
+            ],
         ]);
     }
 
