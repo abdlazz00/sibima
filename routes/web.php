@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\AssetLabelController;
 use App\Http\Controllers\AssetPhotoController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
@@ -23,6 +24,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/assets/labels', [AssetLabelController::class, 'show'])->name('assets.labels');
     Route::resource('assets', AssetController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::delete('/assets/{asset}/photos/{photo}', [AssetPhotoController::class, 'destroy'])
         ->scopeBindings()

@@ -10,6 +10,7 @@ use App\Repositories\Contracts\AssetCategoryRepositoryInterface;
 use App\Repositories\Contracts\AssetRepositoryInterface;
 use App\Repositories\Contracts\UnitRepositoryInterface;
 use App\Services\AssetService;
+use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +24,7 @@ class AssetController extends Controller
         private readonly AssetRepositoryInterface $assets,
         private readonly AssetCategoryRepositoryInterface $categories,
         private readonly UnitRepositoryInterface $units,
+        private readonly QrCodeService $qr,
     ) {}
 
     public function index(Request $request): Response
@@ -51,6 +53,7 @@ class AssetController extends Controller
             'asset' => $asset,
             'kondisiOptions' => Kondisi::options(),
             'can' => ['update' => $request->user()->can('update', $asset)],
+            'qr' => $this->qr->forAsset($asset),
         ]);
     }
 

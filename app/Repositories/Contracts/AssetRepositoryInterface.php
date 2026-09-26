@@ -5,6 +5,7 @@ namespace App\Repositories\Contracts;
 use App\Models\Asset;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 interface AssetRepositoryInterface
 {
@@ -14,6 +15,12 @@ interface AssetRepositoryInterface
     public function paginateVisibleTo(User $user, array $filters, int $perPage = 15): LengthAwarePaginator;
 
     public function maxRegisterNumber(string $kodeBarang): int;
+
+    /**
+     * @param  list<int>  $ids
+     * @return Collection<int, Asset>
+     */
+    public function findMany(array $ids): Collection;
 
     /** @param array<string, mixed> $attributes */
     public function create(array $attributes): Asset;

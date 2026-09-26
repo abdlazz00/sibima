@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\Contracts\AssetRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class EloquentAssetRepository implements AssetRepositoryInterface
 {
@@ -56,5 +57,15 @@ class EloquentAssetRepository implements AssetRepositoryInterface
         $asset->update($attributes);
 
         return $asset;
+    }
+
+    public function findMany(array $ids): Collection
+    {
+        return Asset::query()
+            ->with('unit')
+            ->whereIn('id', $ids)
+            ->orderBy('kode_barang')
+            ->orderBy('nomor_register')
+            ->get();
     }
 }
