@@ -1,11 +1,20 @@
 # SIMASET — Sistem Informasi Manajemen Aset Kecamatan Sagulung
 
+> **Revisi 2026-09-26:** Pegawai tidak lagi punya akun login — pegawai kini
+> murni data (lihat "Data Model — Pegawai"). Request aset dan lapor
+> rusak/hilang diajukan oleh admin kecamatan/kelurahan atas nama pegawai
+> (dari form kertas yang diserahkan pegawai), bukan oleh pegawai sendiri.
+> Alur f/g/h diganti model approval satu langkah tersendiri (lihat "Data
+> Model — Request & Laporan Aset"), lepas dari Generic Approval Workflow
+> Engine yang tetap dipakai untuk alur a–e.
+
 ## Ringkasan
 
 SIMASET mengelola seluruh aset milik Kecamatan Sagulung beserta kelurahan-kelurahan
 di bawahnya: pencatatan aset, penerimaan aset baru, mutasi aset lintas unit,
-pengajuan kebutuhan aset (oleh pegawai maupun kelurahan), dan pelaporan aset
-rusak/hilang. Sistem mengikuti kaidah pencatatan Barang Milik Daerah (BMD) agar
+pengajuan kebutuhan aset (oleh admin atas nama pegawai maupun atas nama
+kelurahan), dan pelaporan aset rusak/hilang (oleh admin atas nama pegawai
+pemegang aset). Sistem mengikuti kaidah pencatatan Barang Milik Daerah (BMD) agar
 selaras dengan format pelaporan pemerintah (kode barang, kategori hierarkis).
 
 Tujuan utama: satu sumber kebenaran untuk status & lokasi aset, dengan alur
@@ -16,15 +25,16 @@ setiap perubahan kondisi/kepemilikan aset.
 
 | Role | Scope | Tanggung jawab utama |
 |---|---|---|
-| Kasubag | Kecamatan (global) | Admin sistem (kelola user, master data) + verifikasi awal pada sebagian alur approval |
-| Camat | Kecamatan | Approve penerimaan aset & mutasi aset di level kecamatan |
-| Admin Aset Kecamatan | Kecamatan | Input aset masuk, ajukan mutasi aset ke/dari kelurahan |
-| Admin Aset Kelurahan | Kelurahan (unit sendiri) | Sama seperti admin kecamatan, scope hanya kelurahannya |
-| Lurah | Kelurahan (unit sendiri) | Approve mutasi aset masuk/keluar kelurahannya |
-| Pegawai | Unit tempat bertugas (kecamatan/kelurahan) | Ajukan kebutuhan aset untuk diri sendiri, lapor aset rusak/hilang |
+| Kasubag | Kecamatan (global) | Admin sistem (kelola user & pegawai, master data) + verifikasi awal pada sebagian alur approval + approve request aset kelurahan→kecamatan |
+| Camat | Kecamatan | Approve penerimaan aset & mutasi aset di level kecamatan; approve request aset & lapor rusak/hilang untuk pegawai di kecamatan |
+| Admin Aset Kecamatan | Kecamatan | Input aset masuk, ajukan mutasi aset ke/dari kelurahan, input request aset & lapor rusak/hilang atas nama pegawai kecamatan |
+| Admin Aset Kelurahan | Kelurahan (unit sendiri) | Sama seperti admin kecamatan, scope hanya kelurahannya; juga ajukan request aset kelurahan→kecamatan |
+| Lurah | Kelurahan (unit sendiri) | Approve mutasi aset masuk/keluar kelurahannya; approve request aset & lapor rusak/hilang untuk pegawai kelurahannya |
 
-Semua role punya akun login sendiri. Admin Kelurahan dan Lurah dibatasi (via
-Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
+Kelima role di atas punya akun login. **Pegawai bukan role login** — pegawai
+adalah data pemegang aset saja (lihat "Data Model — Pegawai"). Admin
+Kelurahan dan Lurah dibatasi (via Laravel Policy) hanya bisa mengakses data
+milik unit mereka sendiri.
 
 ## Arsitektur & Stack
 
@@ -40,7 +50,7 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
 - **Queue & Scheduler:** efek transaksi workflow & notifikasi in-app dijalankan lewat event/listener yang di-queue (`database` driver cukup untuk skala ini); Supervisor di VPS menjalankan queue worker, cron menjalankan `schedule:run` tiap menit.
 - **Testing:** Pest, feature test per alur approval + unit test untuk Service/workflow engine.
 - **Code style:** Laravel Pint (default config).
-- **Auth:** Session-based (Laravel Breeze/Fortify), satu akun per user termasuk Pegawai.
+- **Auth:** Session-based (Laravel Breeze/Fortify), satu akun per user login (Pegawai tidak punya akun kecuali lewat "create user dari pegawai").
 - **File storage:** Laravel filesystem (local/S3) untuk multi-foto aset & lampiran laporan.
 - **QR/Barcode:** kode unik per aset, discan lewat kamera browser (tanpa app native) untuk pencarian cepat & opname/stock-take.
 - **Cetak PDF (MVP):** hanya label aset (QR/barcode + info ringkas) untuk ditempel fisik. Berita Acara Serah Terima & form KIB di luar scope MVP.
@@ -49,7 +59,7 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
 **Frontend**
 - Inertia.js + React + TypeScript.
 - Tailwind CSS + **Preline UI** untuk komponen (tabel, form, modal, dropdown, dll). Preline berbasis class Tailwind + JS plugin (bukan komponen React native), sehingga perlu re-init (`window.HSStaticMethods.autoInit()`) pada event `router.on('navigate')` Inertia supaya komponen interaktif tetap berfungsi setelah page transition.
-- Struktur `resources/js/`: `Pages/` (per fitur: Aset, Mutasi, Pengajuan, Laporan), `Components/` (reusable UI), `Layouts/`.
+- Struktur `resources/js/`: `Pages/` (per fitur: Aset, Mutasi, Pegawai, Request, Laporan), `Components/` (reusable UI), `Layouts/`.
 - Package manager: npm.
 - Code style: ESLint + Prettier (default config) untuk TS/React.
 
@@ -64,24 +74,36 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
 - `units` — tabel tunggal untuk Kecamatan & Kelurahan: kolom `type` (kecamatan/kelurahan),
   `parent_id` (kelurahan punya parent = kecamatan). Struktur hierarkis ini
   memudahkan ekspansi ke kecamatan lain di masa depan bila diperlukan.
-- `users` — satu tabel untuk semua role, terhubung ke `unit_id`. Kasubag scope
+- `users` — satu tabel untuk role login (`kasubag`, `camat`, `admin_kecamatan`,
+  `admin_kelurahan`, `lurah`), terhubung ke `unit_id`. Kasubag scope
   kecamatan/global (tidak terikat satu kelurahan).
-  - Field tambahan hasil peninjauan data kepegawaian riil (`docs/ABSENN STAF PNS DAN PPPK.xlsx`):
-    `nip`, `pangkat_golongan`, `jabatan` — informatif saja (ditampilkan di riwayat
-    approval/laporan/cetak dokumen), tidak mempengaruhi role atau hak akses sistem.
-    `jabatan` disimpan sebagai teks bebas dan boleh memuat info seksi/subbag (mis.
-    "Kasi Trantib Kelurahan Sei Lekop") — seksi/subbag **tidak** dimodelkan sebagai
-    level unit terpisah karena lokasi aset di data riil tidak dipecah sampai granularitas
-    seksi (cuma per kantor camat/lurah).
   - **Login:** setiap akun wajib punya `email` unik, diisi manual saat provisioning
     (bukan digenerate otomatis oleh sistem) — dipakai juga untuk fitur mendatang seperti
-    reset password & notifikasi email. Login bisa memakai email **atau** `nip`; sistem
-    mencari user berdasarkan input yang cocok dengan salah satu dari keduanya.
-- `employees`/pegawai memakai tabel `users` yang sama dengan role `pegawai`,
-  terhubung ke `unit_id` tempat dia bertugas — dipakai sebagai konteks default
-  saat pengajuan aset & lapor rusak/hilang.
+    reset password & notifikasi email.
 - Otorisasi lintas unit ditegakkan di level Policy (bukan hanya UI): admin/lurah
   kelurahan yang mencoba mengakses data unit lain mendapat 403.
+
+## Data Model — Pegawai
+
+Pegawai **tidak** memakai tabel `users` dan tidak bisa login — pegawai adalah
+data pemegang aset dan sumber form request/lapor yang diinput admin, terpisah
+total dari akun sistem.
+
+- `pegawais` — field hasil peninjauan data kepegawaian riil
+  (`docs/ABSENN STAF PNS DAN PPPK.xlsx`): `nama`, `nip` (nullable),
+  `pangkat_golongan` (nullable), `jabatan` (teks bebas, boleh memuat info
+  seksi/subbag mis. "Kasi Trantib Kelurahan Sei Lekop" — seksi/subbag **tidak**
+  dimodelkan sebagai level unit terpisah karena lokasi aset di data riil tidak
+  dipecah sampai granularitas seksi), `status_kepegawaian` (enum `pns`/`pppk`),
+  `unit_id` (FK `units`, unit tempat bertugas), `foto_profile` (path, nullable),
+  `user_id` (FK `users`, **nullable** — lihat "create user dari pegawai").
+- **Create user dari pegawai:** aksi di halaman kelola pegawai untuk memberi
+  pegawai tertentu akses login — kasubag/camat/lurah pilih role + isi
+  email/password, sistem membuat baris `users` baru dan mengisi
+  `pegawais.user_id`. Bukan setiap pegawai perlu jalur ini; defaultnya pegawai
+  tidak punya akun sama sekali.
+- Dipakai sebagai `current_holder_id` pada `assets`/`asset_histories` (lihat
+  bagian berikut), dan sebagai target pada `asset_requests`/`asset_reports`.
 
 ## Data Model — Aset
 
@@ -97,7 +119,8 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
 - `assets` — data inti aset:
   - `kode_barang` (kode BMD, string utuh per jenis aset) + `nomor_register` (digenerate
     sistem, urut per kategori per unit — identitas unik per unit fisik aset ke depan)
-  - `nama_aset`, `category_id`, `unit_id` (lokasi/pemilik saat ini), `current_holder_id` (pegawai pemegang, nullable)
+  - `nama_aset`, `category_id`, `unit_id` (lokasi/pemilik saat ini), `current_holder_id`
+    (FK **`pegawais`**, bukan `users` — pegawai pemegang, nullable)
   - `merk_type` — merek/tipe aset (mis. "PANASONIC")
   - `kondisi` (baik / rusak ringan / rusak berat / hilang)
   - `status` (aktif / dalam_proses_mutasi / dsb — dipakai untuk mengunci aset saat sedang diproses transaksi)
@@ -111,17 +134,67 @@ Laravel Policy) hanya bisa mengakses data milik unit mereka sendiri.
   dipakai untuk foto aset maupun lampiran laporan rusak/hilang.
 - `asset_histories` — log setiap perubahan kondisi/lokasi/pemegang aset, ditulis
   otomatis oleh efek transaksi approval — dasar tampilan "riwayat aset".
+  `current_holder_id` di sini juga FK ke `pegawais`.
+
+## Data Model — Request & Laporan Aset
+
+Dua tabel dengan approval **satu langkah** (bukan lewat Generic Approval
+Workflow Engine di bawah — chain multi-step engine itu berlebihan untuk kasus
+yang cuma butuh satu approver).
+
+- `asset_requests` — menangani dua jenis request sekaligus lewat kolom `type`:
+  - `type`: enum `pegawai` (request aset untuk pegawai tertentu) / `unit`
+    (request kelurahan → kecamatan).
+  - `pegawai_id` (FK `pegawais`, nullable — wajib diisi kalau `type = pegawai`).
+  - `requesting_unit_id` (FK `units` — unit admin yang mengajukan).
+  - `category_id` (FK `asset_categories`, subkategori aset yang dibutuhkan).
+  - `keterangan` (teks — alasan/detail dari form kertas).
+  - `status`: `pending` → `approved`/`rejected` → `fulfilled`.
+  - `approved_by` (FK `users`), `approved_at`, `rejected_reason`.
+  - `fulfilled_asset_id` (FK `assets`, diisi manual admin saat serah terima),
+    `fulfilled_by` (FK `users`), `fulfilled_at`.
+  - `created_by` (FK `users` — admin yang input).
+  - **Routing approval:** `type = pegawai` → camat (pegawai di kecamatan) atau
+    lurah (pegawai di kelurahan), ditentukan dari `pegawais.unit_id`.
+    `type = unit` → selalu kasubag.
+  - **Efek fulfill:** untuk `type = pegawai`, `assets.current_holder_id` diisi
+    aset yang dipilih; untuk `type = unit`, `assets.unit_id` dipindah ke
+    `requesting_unit_id`. Keduanya menulis `asset_histories`. Fulfill hanya
+    valid dari status `approved` (state salah → exception, pola sama seperti
+    guard di model `Unit`/`Asset`).
+- `asset_reports` — lapor aset rusak/hilang:
+  - `asset_id` (FK `assets`), `pegawai_id` (FK `pegawais` — pemegang aset saat
+    lapor, dicatat eksplisit agar histori tetap benar meski pemegang berubah
+    kemudian).
+  - `type`: enum `rusak` / `hilang`.
+  - `kondisi_baru`: diisi kalau `type = rusak` (`rusak_ringan`/`rusak_berat`,
+    memakai enum `Kondisi` yang sudah ada); kalau `type = hilang`, otomatis
+    memetakan ke `Kondisi::Hilang` — tidak perlu enum status baru.
+  - `kronologi` (teks, wajib — penjelasan kerusakan/kronologi kehilangan).
+  - Foto: memakai relasi polymorphic `asset_photos` (`photoable`) yang sudah
+    ada, ditempelkan ke `AssetReport` — tidak ada tabel foto baru.
+  - `status`: `pending` → `approved`/`rejected`.
+  - `approved_by`, `approved_at`, `rejected_reason`, `created_by`.
+  - **Routing approval:** sama seperti request pegawai — camat/lurah berdasarkan
+    unit aset/pegawai.
+  - **Efek approval:** otomatis, tanpa input manual tambahan — `assets.kondisi`
+    ter-update sesuai `type`/`kondisi_baru`, dan `asset_histories` tercatat.
 
 ## Generic Approval Workflow Engine
 
+Lingkup engine ini **hanya alur a–e** (institusional: penerimaan & mutasi
+antar unit). Alur f/g (request) dan h (lapor rusak/hilang) memakai
+`asset_requests`/`asset_reports` di atas, bukan engine ini — approval-nya
+cuma satu langkah sehingga generic multi-step engine tidak diperlukan.
+
 - `workflow_definitions` — definisi urutan step approval per jenis transaksi
   (`penerimaan_aset`, `mutasi_kec_ke_kel`, `mutasi_antar_kel`, `retur_kel_ke_kec`,
-  `mutasi_internal`, `pengajuan_pegawai`, `pengajuan_kelurahan`).
+  `mutasi_internal`).
 - `workflow_steps` (definisi) — tiap definisi punya list step berurutan: role
   apa yang approve/verifikasi di step ke-berapa, dan scope unit mana (unit asal/
   unit tujuan) yang relevan untuk step tersebut.
 - `approval_requests` — instance transaksi berjalan, polymorphic ke model
-  transaksi asli (mis. `AssetIntake`, `AssetMutation`, `AssetRequest`), plus
+  transaksi asli (mis. `AssetIntake`, `AssetMutation`), plus
   `workflow_definition_id`, `current_step`, `status`
   (diajukan / berjalan / disetujui / ditolak).
 - `approval_actions` — log tiap aksi approve/reject per step: siapa, kapan,
@@ -155,21 +228,26 @@ Admin Kecamatan verifikasi → Kasubag verifikasi → Camat approve (masuk kemba
 Admin unit ajukan → atasan unit (Camat untuk kecamatan / Lurah untuk kelurahan)
 approve → langsung update lokasi/pemegang aset, tanpa lintas unit.
 
-### f. Pengajuan Aset Pegawai
-Pegawai ajukan → Admin unit review kelengkapan → atasan unit (Camat/Lurah sesuai
-unit pegawai) approve → jika stok/aset tersedia, otomatis berlanjut sebagai
-Mutasi Internal (alokasi aset ke `current_holder_id` = pegawai tsb).
-Validasi ketersediaan aset diulang saat approval final (bukan hanya saat submit)
-untuk menghindari race condition dua pengajuan rebutan aset yang sama.
+### f. Request Aset Pegawai
+Pegawai isi form kertas → Admin unit (kecamatan/kelurahan tempat pegawai
+bertugas) input jadi `asset_requests` (`type = pegawai`) → atasan unit
+(Camat/Lurah sesuai `pegawais.unit_id`) approve/reject → kalau approved,
+admin unit input manual aset mana yang diserahkan (`fulfilled_asset_id`) →
+`assets.current_holder_id` diisi pegawai tsb, `asset_histories` tercatat.
 
-### g. Pengajuan Aset Kelurahan → Kecamatan
-Admin/Lurah Kelurahan ajukan kebutuhan → Camat approve → berlanjut sebagai
-proses Mutasi Kecamatan → Kelurahan (alur b) untuk aset yang dipenuhi.
+### g. Request Aset Kelurahan → Kecamatan
+Admin Kelurahan input `asset_requests` (`type = unit`) → Kasubag approve/reject
+→ kalau approved, admin kecamatan input manual aset mana yang dikirim
+(`fulfilled_asset_id`) → `assets.unit_id` pindah ke kelurahan peminta,
+`asset_histories` tercatat.
 
 ### h. Lapor Aset Rusak/Hilang
-Pegawai lapor (dengan multi-foto) → Admin unit terkait verifikasi → `kondisi`
-aset diupdate (rusak ringan/berat/hilang). Tidak ada approval berjenjang lebih
-lanjut pada MVP — proses penghapusan pembukuan (write-off) di luar scope MVP.
+Pegawai lapor ke admin unit (dengan kronologi + multi-foto dari kertas/HP
+pegawai) → Admin unit input jadi `asset_reports` → atasan unit (Camat/Lurah
+sesuai unit aset/pegawai) approve/reject → kalau approved, `assets.kondisi`
+ter-update **otomatis** (rusak ringan/berat/hilang) tanpa input manual
+tambahan, `asset_histories` tercatat. Proses penghapusan pembukuan
+(write-off) di luar scope MVP.
 
 ### i. Modul Pendukung
 - **Scan QR/barcode** (kamera browser) — cari aset cepat & opname/stock-take.
@@ -188,13 +266,20 @@ lanjut pada MVP — proses penghapusan pembukuan (write-off) di luar scope MVP.
   sehingga tidak bisa diajukan ke transaksi lain secara bersamaan.
 - **Otorisasi lintas unit** → Policy menolak akses (403) bila admin/lurah
   kelurahan mencoba mengakses data unit lain.
+- **State salah pada `asset_requests`/`asset_reports`** (mis. `fulfill`
+  dipanggil bukan dari status `approved`, atau approve dua kali) → exception,
+  pola sama seperti guard di model `Unit`/`Asset`.
 
 ## Testing Approach
 
 - Pest sebagai testing framework.
-- Feature test per alur approval (a–h): submit → tiap step approve/reject →
-  efek akhir ke `assets`/`asset_histories` benar.
-- Policy test untuk scoping akses per role & per unit.
+- Feature test per alur approval (a–e, via workflow engine): submit → tiap
+  step approve/reject → efek akhir ke `assets`/`asset_histories` benar.
+- Feature test per alur f/g/h (`asset_requests`/`asset_reports`): submit →
+  approve/reject → (f/g) fulfill manual → efek akhir ke `assets`/`asset_histories`
+  benar; kasus reject tidak menyentuh `assets`.
+- Policy test untuk scoping akses per role & per unit, termasuk siapa boleh
+  approve `asset_requests`/`asset_reports` sesuai routing (camat/lurah/kasubag).
 - Unit test untuk workflow engine (step progression, trigger notifikasi, event efek transaksi) di layer Service.
 
 ## Di Luar Scope MVP
