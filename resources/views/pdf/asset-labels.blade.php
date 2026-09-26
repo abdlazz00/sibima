@@ -17,10 +17,10 @@
         }
         table.label td { padding: 0; vertical-align: middle; }
 
-        .logo-col { width: 14mm; text-align: center; padding: 0 0.7mm; border-right: 0.3mm solid #000; }
-        .logo-col img { width: 12.6mm; height: auto; }
+        .logo-col { width: 11mm; text-align: center; padding: 0 0.5mm; border-right: 0.3mm solid #000; }
+        .logo-col img { width: 10mm; height: auto; }
 
-        .info-col { width: 49mm; padding: 1.5mm 2.2mm; border-right: 0.3mm solid #000; }
+        .info-col { width: 57mm; padding: 1.5mm 2.2mm; border-right: 0.3mm solid #000; }
         .brand {
             font-weight: bold;
             font-size: 7pt;
@@ -31,9 +31,8 @@
         }
         .line { font-size: 5.6pt; font-weight: 500; margin-top: 0.8mm; line-height: 1.25; word-break: break-word; }
 
-        .qr-col { width: 20mm; text-align: center; padding: 1mm 0.8mm; }
-        .qr-col img { width: 17mm; height: 17mm; }
-        .reg { font-size: 5.5pt; font-family: 'DejaVu Sans Mono', monospace; color: #333; margin-top: 0.5mm; }
+        .qr-col { width: 15mm; text-align: center; padding: 0 0.8mm; }
+        .qr-col img { width: 13.4mm; height: 13.4mm; }
     </style>
 </head>
 <body>
@@ -52,7 +51,6 @@
                             </td>
                             <td class="qr-col">
                                 <img src="{{ $label['qr'] }}" alt="">
-                                <div class="reg">REG-{{ $label['asset']->registerLabel() }}</div>
                             </td>
                         </tr>
                     </table>
