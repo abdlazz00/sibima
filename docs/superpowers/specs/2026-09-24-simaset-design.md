@@ -1,6 +1,11 @@
-# SIMASET — Sistem Informasi Manajemen Aset Kecamatan Sagulung
+# SIBIMA — Sistem Informasi Barang Milik Daerah Kecamatan Sagulung
 
-> **Revisi 2026-09-26:** Pegawai tidak lagi punya akun login — pegawai kini
+> **Revisi 2026-09-26:** Aplikasi berganti nama dari "SIMASET" menjadi
+> "SIBIMA" (Sistem Informasi Barang Milik Daerah) — lihat
+> `docs/PANDUAN_DESAIN_UI_UX_SIBIMA.md`. Nama ini diselaraskan di seluruh
+> dokumen spec dan plan; kode/konfigurasi (`APP_NAME`, dsb.) menyusul terpisah.
+>
+> Pegawai tidak lagi punya akun login — pegawai kini
 > murni data (lihat "Data Model — Pegawai"). Request aset dan lapor
 > rusak/hilang diajukan oleh admin kecamatan/kelurahan atas nama pegawai
 > (dari form kertas yang diserahkan pegawai), bukan oleh pegawai sendiri.
@@ -10,7 +15,7 @@
 
 ## Ringkasan
 
-SIMASET mengelola seluruh aset milik Kecamatan Sagulung beserta kelurahan-kelurahan
+SIBIMA mengelola seluruh aset milik Kecamatan Sagulung beserta kelurahan-kelurahan
 di bawahnya: pencatatan aset, penerimaan aset baru, mutasi aset lintas unit,
 pengajuan kebutuhan aset (oleh admin atas nama pegawai maupun atas nama
 kelurahan), dan pelaporan aset rusak/hilang (oleh admin atas nama pegawai

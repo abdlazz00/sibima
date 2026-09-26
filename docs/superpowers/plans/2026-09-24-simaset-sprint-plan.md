@@ -1,6 +1,7 @@
-# SIMASET Sprint Plan
+# SIBIMA Sprint Plan
 
-> **Revisi 2026-09-26:** Pegawai tidak lagi jadi role login (lihat spec).
+> **Revisi 2026-09-26:** Aplikasi berganti nama dari "SIMASET" menjadi
+> "SIBIMA" — lihat spec. Pegawai tidak lagi jadi role login (lihat spec juga).
 > Alur f/g (pengajuan) dan h (lapor rusak/hilang) di Sprint 4 tidak lagi
 > dibangun di atas generic workflow engine — detailnya sekarang di tiga
 > implementation plan terpisah: `2026-09-26-pegawai-data.md`,
@@ -22,7 +23,7 @@ label, dashboard & laporan) + import data existing.
 
 **Catatan branding:** Logo kecamatan dan nama aplikasi resmi belum diterima
 dari client per tanggal spec ini ditulis. Frontend memakai placeholder
-("SIMASET" sebagai nama kerja + ikon generik) mulai Sprint 1, dan di-swap
+("SIBIMA" sebagai nama kerja + ikon generik) mulai Sprint 1, dan di-swap
 ke aset resmi begitu diterima (idealnya sebelum Sprint 5, kalau terlambat
 masuk beban Sprint 5).
 
@@ -58,7 +59,7 @@ dan siap dipakai — dikerjakan di Sprint 5.
 **Frontend:**
 - Scaffold Inertia.js + React + TypeScript.
 - Integrasi Tailwind CSS + Preline UI, termasuk re-init `HSStaticMethods.autoInit()` di `router.on('navigate')`.
-- Layout dasar: sidebar + navbar dengan placeholder branding ("SIMASET" + ikon generik).
+- Layout dasar: sidebar + navbar dengan placeholder branding ("SIBIMA" + ikon generik).
 - Halaman login.
 - Dashboard shell kosong per role (nav item beda sesuai role, belum ada konten fungsional).
 - Setup ESLint + Prettier.

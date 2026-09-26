@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Stand up the SIMASET Laravel + Inertia/React foundation — project scaffold, unit/role data model, authorization scoping, and a role-aware dashboard shell — so every later sprint has a working base to build on.
+**Goal:** Stand up the SIBIMA Laravel + Inertia/React foundation — project scaffold, unit/role data model, authorization scoping, and a role-aware dashboard shell — so every later sprint has a working base to build on.
 
 **Architecture:** A single Laravel app serves an Inertia.js + React + TypeScript frontend. `units` (Kecamatan/Kelurahan, self-referencing hierarchy) and `users` (with `unit_id` + spatie roles) are the only tables this sprint touches. Authorization scoping lives in a single `User::canAccessUnit()` helper that later Policies (Sprint 2+) will call. No business feature (assets, workflow engine, transactions) is built yet — this sprint only proves login, role, and unit scoping work end-to-end.
 
@@ -21,7 +21,7 @@
 - Code style: Laravel Pint (PHP), ESLint + Prettier (TypeScript/React).
 - Package manager: npm. Dev environment: Laragon (native PHP + MySQL on Windows, no Docker).
 - Auth: session-based (Laravel Breeze). Public self-registration is out of scope — accounts are provisioned by seeder/admin only.
-- Frontend branding is a placeholder ("SIMASET" + a generic inline icon) until the client delivers the official logo/app name (tracked for swap in Sprint 5).
+- Frontend branding is a placeholder ("SIBIMA" + a generic inline icon) until the client delivers the official logo/app name (tracked for swap in Sprint 5).
 - Unit scoping: Kasubag = global (any unit, including when `unit_id` is `null`); Camat = own kecamatan + all its kelurahan; Admin Kecamatan/Admin Kelurahan/Lurah/Pegawai = their own `unit_id` only, no exceptions (not even their parent unit).
 
 ## Review Focus
@@ -71,7 +71,7 @@ mysql -u root -e "CREATE DATABASE IF NOT EXISTS simaset CHARACTER SET utf8mb4 CO
 Open `.env` and set these keys (create them if `create-project` didn't already):
 
 ```
-APP_NAME=SIMASET
+APP_NAME=SIBIMA
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -1133,7 +1133,7 @@ export default function BrandMark({ className = '' }: { className?: string }) {
                     d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1"
                 />
             </svg>
-            <span className="text-lg font-semibold text-gray-800">SIMASET</span>
+            <span className="text-lg font-semibold text-gray-800">SIBIMA</span>
         </div>
     );
 }

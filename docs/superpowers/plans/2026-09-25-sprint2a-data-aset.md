@@ -3790,7 +3790,7 @@ Create `resources/views/pdf/asset-labels.blade.php`:
         <tr>
             @foreach ($row as $label)
                 <td class="label">
-                    <div class="brand">SIMASET · KECAMATAN SAGULUNG</div>
+                    <div class="brand">SIBIMA · KECAMATAN SAGULUNG</div>
                     <img class="qr" src="{{ $label['qr'] }}" alt="QR">
                     <div class="name">{{ $label['asset']->nama_aset }}</div>
                     <div class="code">{{ $label['asset']->kode_barang }} / {{ $label['asset']->registerLabel() }}</div>
@@ -4018,7 +4018,7 @@ git commit -m "feat: QR code per asset and printable label PDF"
 In `.env.example` set:
 
 ```
-APP_NAME=SIMASET
+APP_NAME=SIBIMA
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -4073,7 +4073,7 @@ Note anything that does not match as a finding before committing.
 ```bash
 git add -A
 git status --short
-git commit -m "chore: Sprint 2A lint pass and env example for SIMASET"
+git commit -m "chore: Sprint 2A lint pass and env example for SIBIMA"
 ```
 
 (Before committing, confirm `git status --short` lists no `docs/*.xlsx` / `docs/*.pdf` client files; unstage them with `git restore --staged <file>` if they appear.)
