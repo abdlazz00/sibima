@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pegawais', [PegawaiController::class, 'store'])->name('pegawais.store');
     Route::put('/pegawais/{pegawai}', [PegawaiController::class, 'update'])->name('pegawais.update');
     Route::delete('/pegawais/{pegawai}', [PegawaiController::class, 'destroy'])->name('pegawais.destroy');
+    Route::post('/pegawais/{pegawai}/user', [PegawaiController::class, 'createUser'])->name('pegawais.create-user');
 });
 
 require __DIR__.'/auth.php';

@@ -7,7 +7,10 @@ use App\Models\User;
 use App\Repositories\Contracts\PegawaiRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class PegawaiService
 {
@@ -37,6 +40,28 @@ class PegawaiService
     public function delete(Pegawai $pegawai): void
     {
         $this->pegawais->delete($pegawai);
+    }
+
+    public function createLoginForPegawai(Pegawai $pegawai, string $email, string $password, string $role): User
+    {
+        if ($pegawai->user_id !== null) {
+            throw new InvalidArgumentException('Pegawai ini sudah punya akun login.');
+        }
+
+        return DB::transaction(function () use ($pegawai, $email, $password, $role) {
+            $user = User::create([
+                'name' => $pegawai->nama,
+                'email' => $email,
+                'password' => Hash::make($password),
+                'unit_id' => $pegawai->unit_id,
+                'email_verified_at' => now(),
+            ]);
+
+            $user->assignRole($role);
+            $pegawai->update(['user_id' => $user->id]);
+
+            return $user;
+        });
     }
 
     private function attachPhoto(Pegawai $pegawai, ?UploadedFile $foto): Pegawai

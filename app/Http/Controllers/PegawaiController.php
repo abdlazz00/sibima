@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreatePegawaiUserRequest;
 use App\Http\Requests\PegawaiRequest;
 use App\Models\Pegawai;
 use App\Models\Unit;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class PegawaiController extends Controller
 {
@@ -52,5 +54,21 @@ class PegawaiController extends Controller
         $this->service->delete($pegawai);
 
         return back()->with('success', 'Pegawai berhasil dihapus.');
+    }
+
+    public function createUser(CreatePegawaiUserRequest $request, Pegawai $pegawai): RedirectResponse
+    {
+        try {
+            $this->service->createLoginForPegawai(
+                $pegawai,
+                $request->validated('email'),
+                $request->validated('password'),
+                $request->validated('role'),
+            );
+        } catch (InvalidArgumentException $e) {
+            return back()->withErrors(['email' => $e->getMessage()])->setStatusCode(422);
+        }
+
+        return back()->with('success', 'Akun login berhasil dibuat untuk pegawai ini.');
     }
 }

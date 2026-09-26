@@ -27,4 +27,9 @@ class PegawaiPolicy
     {
         return $this->update($user, $pegawai);
     }
+
+    public function createUser(User $user, Pegawai $pegawai): bool
+    {
+        return $user->hasRole('kasubag');
+    }
 }
