@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('nama_aset');
             $table->foreignId('category_id')->constrained('asset_categories')->restrictOnDelete();
             $table->foreignId('unit_id')->constrained('units')->restrictOnDelete();
-            $table->foreignId('current_holder_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('current_holder_id')->nullable()->constrained('pegawais')->nullOnDelete();
             $table->string('merk_type')->nullable();
             $table->string('kondisi');
             $table->string('status')->default('aktif');
@@ -43,7 +43,7 @@ return new class extends Migration
             $table->foreignId('asset_id')->constrained()->cascadeOnDelete();
             $table->string('event');
             $table->foreignId('unit_id')->constrained('units')->restrictOnDelete();
-            $table->foreignId('current_holder_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('current_holder_id')->nullable()->constrained('pegawais')->nullOnDelete();
             $table->string('kondisi');
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->text('keterangan')->nullable();

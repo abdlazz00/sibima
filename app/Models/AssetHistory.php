@@ -40,6 +40,6 @@ class AssetHistory extends Model
 
     public function currentHolder(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'current_holder_id');
+        return $this->belongsTo(Pegawai::class, 'current_holder_id');
     }
 }
