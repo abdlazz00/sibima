@@ -17,10 +17,10 @@
         }
         table.label td { padding: 0; vertical-align: middle; }
 
-        .logo-col { width: 17mm; text-align: center; padding: 0 1.5mm; border-right: 0.3mm solid #000; }
-        .logo-col img { width: 11mm; height: auto; }
+        .logo-col { width: 14mm; text-align: center; padding: 0 0.7mm; border-right: 0.3mm solid #000; }
+        .logo-col img { width: 12.6mm; height: auto; }
 
-        .info-col { width: 47.7mm; padding: 1.5mm 2.2mm; border-right: 0.3mm solid #000; }
+        .info-col { width: 49mm; padding: 1.5mm 2.2mm; border-right: 0.3mm solid #000; }
         .brand {
             font-weight: bold;
             font-size: 7pt;
@@ -31,8 +31,8 @@
         }
         .line { font-size: 5.6pt; font-weight: 500; margin-top: 0.8mm; line-height: 1.25; word-break: break-word; }
 
-        .barcode-col { width: 18.3mm; text-align: center; padding: 1mm 1.2mm; }
-        .barcode-col img { max-width: 100%; height: 9mm; }
+        .qr-col { width: 20mm; text-align: center; padding: 1mm 0.8mm; }
+        .qr-col img { width: 17mm; height: 17mm; }
         .reg { font-size: 5.5pt; font-family: 'DejaVu Sans Mono', monospace; color: #333; margin-top: 0.5mm; }
     </style>
 </head>
@@ -50,8 +50,8 @@
                                 <div class="line">NAMA ASET : {{ $label['asset']->nama_aset }}</div>
                                 <div class="line">NOMOR ASET: {{ $label['asset']->kode_barang }}</div>
                             </td>
-                            <td class="barcode-col">
-                                <img src="{{ $label['barcode'] }}" alt="">
+                            <td class="qr-col">
+                                <img src="{{ $label['qr'] }}" alt="">
                                 <div class="reg">REG-{{ $label['asset']->registerLabel() }}</div>
                             </td>
                         </tr>
