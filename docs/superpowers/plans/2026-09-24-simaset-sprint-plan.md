@@ -1,5 +1,11 @@
 # SIMASET Sprint Plan
 
+> **Revisi 2026-09-26:** Pegawai tidak lagi jadi role login (lihat spec).
+> Alur f/g (pengajuan) dan h (lapor rusak/hilang) di Sprint 4 tidak lagi
+> dibangun di atas generic workflow engine — detailnya sekarang di tiga
+> implementation plan terpisah: `2026-09-26-pegawai-data.md`,
+> `2026-09-26-asset-request.md`, `2026-09-26-asset-report.md`.
+
 **Spec:** `docs/superpowers/specs/2026-09-24-simaset-design.md`
 
 **Timeline:** 25 September 2026 – 10 Oktober 2026 (16 hari kalender), production-ready
@@ -8,9 +14,11 @@ termasuk import data existing di tanggal 10 Oktober 2026.
 **Tim:** Solo developer. Tiap modul dikerjakan Backend dulu, baru Frontend
 (bukan paralel).
 
-**Scope:** Full scope sesuai spec — seluruh 8 alur transaksi (penerimaan,
-4 jenis mutasi, 2 jenis pengajuan, lapor rusak/hilang) + modul pendukung
-(QR scan, cetak label, dashboard & laporan) + import data existing.
+**Scope:** Full scope sesuai spec — penerimaan aset, 4 jenis mutasi (via generic
+workflow engine), data pegawai + create-user-dari-pegawai, request aset
+(pegawai & kelurahan→kecamatan) dan lapor rusak/hilang (keduanya lewat model
+approval satu langkah, bukan generic engine) + modul pendukung (QR scan, cetak
+label, dashboard & laporan) + import data existing.
 
 **Catatan branding:** Logo kecamatan dan nama aplikasi resmi belum diterima
 dari client per tanggal spec ini ditulis. Frontend memakai placeholder
@@ -29,11 +37,11 @@ dan siap dipakai — dikerjakan di Sprint 5.
   Sprint 5 kalau client terlambat mengirim.
 - Solo dev — satu hari terhambat (sakit/urusan lain) langsung menggeser
   seluruh sprint di belakangnya.
-- Scope penuh (8 alur transaksi + generic workflow engine + modul
-  pendukung) dikejar dalam 16 hari adalah keputusan sadar (client memilih
-  kejar full scope, bukan MVP dipangkas) — kualitas testing per alur harus
-  tetap dijaga sesuai Testing Approach di spec, jangan dikorbankan demi
-  kecepatan.
+- Scope penuh (5 alur transaksi lewat generic workflow engine + request aset +
+  lapor rusak/hilang + modul pendukung) dikejar dalam 16 hari adalah keputusan
+  sadar (client memilih kejar full scope, bukan MVP dipangkas) — kualitas
+  testing per alur harus tetap dijaga sesuai Testing Approach di spec, jangan
+  dikorbankan demi kecepatan.
 
 ---
 
@@ -42,7 +50,7 @@ dan siap dipakai — dikerjakan di Sprint 5.
 **Backend:**
 - Install Laravel, konfigurasi `.env` (MySQL, app name placeholder).
 - Migration: `units` (type, parent_id), `users` (unit_id), tabel role/permission via `spatie/laravel-permission`.
-- Seeder: unit Kecamatan Sagulung + kelurahan-kelurahan awal, satu user dummy per role (kasubag, camat, admin_kecamatan, admin_kelurahan, lurah, pegawai).
+- Seeder: unit Kecamatan Sagulung + kelurahan-kelurahan awal, satu user dummy per role login (kasubag, camat, admin_kecamatan, admin_kelurahan, lurah — pegawai bukan role login, datanya diseed terpisah di Sprint 2/3, lihat `2026-09-26-pegawai-data.md`).
 - Auth: Laravel Breeze (session-based), scaffolding login/logout.
 - `app/Policies` dasar: scoping akses per `unit_id` (skeleton, diisi detail penuh di sprint-sprint berikutnya seiring model transaksi ditambahkan).
 - Setup Pest (testing) + Laravel Pint (code style).
@@ -55,7 +63,7 @@ dan siap dipakai — dikerjakan di Sprint 5.
 - Dashboard shell kosong per role (nav item beda sesuai role, belum ada konten fungsional).
 - Setup ESLint + Prettier.
 
-**Deliverable:** Bisa login sebagai tiap role (kasubag/camat/admin_kecamatan/admin_kelurahan/lurah/pegawai) dan melihat dashboard shell dengan navigasi sesuai hak akses masing-masing.
+**Deliverable:** Bisa login sebagai tiap role (kasubag/camat/admin_kecamatan/admin_kelurahan/lurah) dan melihat dashboard shell dengan navigasi sesuai hak akses masing-masing.
 
 ---
 
@@ -95,22 +103,34 @@ dan siap dipakai — dikerjakan di Sprint 5.
 
 ---
 
-## Sprint 4 — Pengajuan, Laporan & Modul Pendukung (6–8 Okt, 3 hari)
+## Sprint 4 — Pegawai, Request, Laporan & Modul Pendukung (6–8 Okt, 3 hari)
+
+> Alur f/g/h tidak lagi lewat `workflow_definitions`/generic engine — lihat
+> revisi 2026-09-26. Implementasinya dipecah ke tiga plan terpisah, urutan
+> eksekusi: `2026-09-26-pegawai-data.md` dulu (prasyarat), baru
+> `2026-09-26-asset-request.md` dan `2026-09-26-asset-report.md` (keduanya
+> independen satu sama lain, bisa paralel).
 
 **Backend:**
-- `workflow_definitions` untuk `pengajuan_pegawai` (f) dan `pengajuan_kelurahan` (g); `pengajuan_pegawai` approved berlanjut otomatis sebagai Mutasi Internal (alokasi ke `current_holder_id`), dengan validasi ulang ketersediaan aset saat approval final (race condition).
-- `pengajuan_kelurahan` approved berlanjut sebagai proses Mutasi Kec→Kel (alur b).
-- Model & endpoint Lapor Rusak/Hilang (h): submit oleh pegawai (multi-foto), verifikasi admin unit terkait → update `assets.kondisi` langsung (tanpa approval berjenjang).
+- `2026-09-26-pegawai-data.md`: tabel `pegawais`, repoint `current_holder_id`
+  ke `pegawais`, CRUD pegawai scoped per unit, create-user-dari-pegawai.
+- `2026-09-26-asset-request.md`: tabel `asset_requests` (tipe pegawai & unit),
+  approval satu langkah (camat/lurah untuk pegawai, kasubag untuk unit),
+  fulfillment manual oleh admin.
+- `2026-09-26-asset-report.md`: tabel `asset_reports` (rusak/hilang, multi-foto
+  lewat `asset_photos` yang sudah ada), approval satu langkah (camat/lurah),
+  efek approve otomatis update `assets.kondisi`.
 - API scan QR: lookup aset by kode QR untuk pencarian cepat.
 - Query dashboard: rekap jumlah aset per kelurahan/kategori/kondisi; endpoint export Excel.
 
 **Frontend:**
-- Form Pengajuan Aset Pegawai, form Pengajuan Aset Kelurahan (reuse approval inbox untuk approval-nya).
-- Form Lapor Aset Rusak/Hilang dengan upload multi-foto.
+- Halaman Pegawai (CRUD + tombol buat akun login) — dari plan Pegawai.
+- Halaman Request Aset (form untuk pegawai/unit + approve/reject/fulfill) — dari plan Asset Request.
+- Halaman Lapor Rusak/Hilang (form multi-foto + kronologi + approve/reject) — dari plan Asset Report.
 - Halaman scan QR (akses kamera browser) → langsung ke detail aset.
 - Dashboard: kartu rekap + tabel laporan dengan filter, tombol export Excel.
 
-**Deliverable:** Seluruh 8 alur transaksi + modul pendukung (scan QR, dashboard, laporan) lengkap dan berfungsi.
+**Deliverable:** Data pegawai terkelola, request aset & lapor rusak/hilang berjalan end-to-end dari submit sampai efek ke aset, + modul pendukung (scan QR, dashboard, laporan) lengkap dan berfungsi.
 
 ---
 
