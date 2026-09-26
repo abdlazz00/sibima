@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Kondisi;
+use App\Http\Requests\StoreAssetRequest;
+use App\Http\Requests\UpdateAssetRequest;
 use App\Models\Asset;
 use App\Repositories\Contracts\AssetCategoryRepositoryInterface;
 use App\Repositories\Contracts\AssetRepositoryInterface;
 use App\Repositories\Contracts\UnitRepositoryInterface;
 use App\Services\AssetService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -49,5 +52,45 @@ class AssetController extends Controller
             'kondisiOptions' => Kondisi::options(),
             'can' => ['update' => $request->user()->can('update', $asset)],
         ]);
+    }
+
+    public function create(): Response
+    {
+        Gate::authorize('create', Asset::class);
+
+        return Inertia::render('Assets/Create', [
+            'categories' => $this->categories->tree(),
+            'kondisiOptions' => Kondisi::options(),
+            'maxPhotos' => StoreAssetRequest::MAX_PHOTOS,
+        ]);
+    }
+
+    public function store(StoreAssetRequest $request): RedirectResponse
+    {
+        $asset = $this->service->create(
+            $request->safe()->except('photos'),
+            $request->file('photos', []),
+            $request->user(),
+        );
+
+        return redirect()->route('assets.show', $asset)->with('success', 'Aset berhasil dicatat.');
+    }
+
+    public function edit(Asset $asset): Response
+    {
+        Gate::authorize('update', $asset);
+
+        return Inertia::render('Assets/Edit', [
+            'asset' => $asset->load('photos'),
+            'categories' => $this->categories->tree(),
+            'maxPhotos' => StoreAssetRequest::MAX_PHOTOS,
+        ]);
+    }
+
+    public function update(UpdateAssetRequest $request, Asset $asset): RedirectResponse
+    {
+        $this->service->update($asset, $request->safe()->except('photos'), $request->file('photos', []));
+
+        return redirect()->route('assets.show', $asset)->with('success', 'Aset berhasil diperbarui.');
     }
 }
