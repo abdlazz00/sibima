@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use InvalidArgumentException;
+use Illuminate\Validation\ValidationException;
 
 class PegawaiService
 {
@@ -45,7 +45,7 @@ class PegawaiService
     public function createLoginForPegawai(Pegawai $pegawai, string $email, string $password, string $role): User
     {
         if ($pegawai->user_id !== null) {
-            throw new InvalidArgumentException('Pegawai ini sudah punya akun login.');
+            throw ValidationException::withMessages(['email' => 'Pegawai ini sudah punya akun login.']);
         }
 
         return DB::transaction(function () use ($pegawai, $email, $password, $role) {

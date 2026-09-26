@@ -41,7 +41,7 @@ it('rejects creating a second login for an already-linked pegawai', function () 
             'password' => 'password123',
             'role' => 'lurah',
         ])
-        ->assertStatus(422);
+        ->assertSessionHasErrors('email');
 
     expect(User::where('email', 'budi2@simaset.test')->exists())->toBeFalse();
 });

@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use InvalidArgumentException;
 
 class PegawaiController extends Controller
 {
@@ -61,16 +60,12 @@ class PegawaiController extends Controller
 
     public function createUser(CreatePegawaiUserRequest $request, Pegawai $pegawai): RedirectResponse
     {
-        try {
-            $this->service->createLoginForPegawai(
-                $pegawai,
-                $request->validated('email'),
-                $request->validated('password'),
-                $request->validated('role'),
-            );
-        } catch (InvalidArgumentException $e) {
-            return back()->withErrors(['email' => $e->getMessage()])->setStatusCode(422);
-        }
+        $this->service->createLoginForPegawai(
+            $pegawai,
+            $request->validated('email'),
+            $request->validated('password'),
+            $request->validated('role'),
+        );
 
         return back()->with('success', 'Akun login berhasil dibuat untuk pegawai ini.');
     }

@@ -98,10 +98,13 @@ total dari akun sistem.
   `unit_id` (FK `units`, unit tempat bertugas), `foto_profile` (path, nullable),
   `user_id` (FK `users`, **nullable** — lihat "create user dari pegawai").
 - **Create user dari pegawai:** aksi di halaman kelola pegawai untuk memberi
-  pegawai tertentu akses login — kasubag/camat/lurah pilih role + isi
-  email/password, sistem membuat baris `users` baru dan mengisi
-  `pegawais.user_id`. Bukan setiap pegawai perlu jalur ini; defaultnya pegawai
-  tidak punya akun sama sekali.
+  pegawai tertentu akses login — **hanya kasubag** yang boleh, karena aksi ini
+  memilih role baru (termasuk role `kasubag` sendiri) untuk akun yang dibuat;
+  membuka aksi ini ke camat/lurah/admin berarti mereka bisa mencetak akun
+  dengan role lebih tinggi dari role mereka sendiri (eskalasi privilese).
+  Kasubag isi email/password/role, sistem membuat baris `users` baru dan
+  mengisi `pegawais.user_id`. Bukan setiap pegawai perlu jalur ini; defaultnya
+  pegawai tidak punya akun sama sekali.
 - Dipakai sebagai `current_holder_id` pada `assets`/`asset_histories` (lihat
   bagian berikut), dan sebagai target pada `asset_requests`/`asset_reports`.
 

@@ -29,6 +29,12 @@ it('only exposes can.createUser as true for kasubag', function () {
         ->assertInertia(fn (Assert $page) => $page->where('can.createUser', true));
 });
 
+it('exposes can.create as false for camat and lurah, who may only approve not edit pegawai data', function (string $role) {
+    $this->actingAs(userWithRole($role, $this->kec))
+        ->get('/pegawais')
+        ->assertInertia(fn (Assert $page) => $page->where('can.create', false));
+})->with(['camat', 'lurah']);
+
 it('lets kasubag see every pegawai', function () {
     Pegawai::factory()->create(['unit_id' => $this->kel->id]);
     Pegawai::factory()->create(['unit_id' => $this->kec->id]);

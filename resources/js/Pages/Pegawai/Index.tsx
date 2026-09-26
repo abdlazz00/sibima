@@ -193,9 +193,11 @@ export default function Index({ pegawais, units, can }: PageProps<{ pegawais: Pe
                                     <CreateUserForm pegawai={pegawai} canCreateUser={can.createUser} />
                                 </td>
                                 <td className="px-4 py-2">
-                                    <DangerButton type="button" onClick={() => remove(pegawai)}>
-                                        Hapus
-                                    </DangerButton>
+                                    {can.create && (
+                                        <DangerButton type="button" onClick={() => remove(pegawai)}>
+                                            Hapus
+                                        </DangerButton>
+                                    )}
                                 </td>
                             </tr>
                         ))}
