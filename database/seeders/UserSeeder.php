@@ -20,7 +20,6 @@ class UserSeeder extends Seeder
             ['name' => 'Admin Kecamatan Demo', 'email' => 'admin.kecamatan@simaset.test', 'unit_id' => $kecamatan->id, 'role' => 'admin_kecamatan'],
             ['name' => 'Admin Kelurahan Demo', 'email' => 'admin.kelurahan@simaset.test', 'unit_id' => $kelurahan->id, 'role' => 'admin_kelurahan'],
             ['name' => 'Lurah Demo', 'email' => 'lurah@simaset.test', 'unit_id' => $kelurahan->id, 'role' => 'lurah'],
-            ['name' => 'Pegawai Demo', 'email' => 'pegawai@simaset.test', 'unit_id' => $kelurahan->id, 'role' => 'pegawai'],
         ];
 
         foreach ($accounts as $account) {

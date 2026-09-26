@@ -45,7 +45,7 @@ it('shows a user with no role nothing', function () {
 });
 
 it('agrees with canAccessUnit for every role and unit', function (string $role) {
-    $home = in_array($role, ['admin_kelurahan', 'lurah', 'pegawai'], true) ? $this->kelA : $this->kec;
+    $home = in_array($role, ['admin_kelurahan', 'lurah'], true) ? $this->kelA : $this->kec;
     $user = userWithRole($role, $role === 'kasubag' ? null : $home);
     $ids = $user->accessibleUnitIds();
 
@@ -53,4 +53,4 @@ it('agrees with canAccessUnit for every role and unit', function (string $role) 
         $inList = $ids === null || in_array($unit->id, $ids, true);
         expect($user->canAccessUnit($unit))->toBe($inList);
     }
-})->with(['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah', 'pegawai']);
+})->with(['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah']);

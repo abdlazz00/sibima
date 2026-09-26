@@ -22,7 +22,6 @@ it('shares role and unit info with the dashboard for every seeded role', functio
     ['admin.kecamatan@simaset.test', 'admin_kecamatan'],
     ['admin.kelurahan@simaset.test', 'admin_kelurahan'],
     ['lurah@simaset.test', 'lurah'],
-    ['pegawai@simaset.test', 'pegawai'],
 ]);
 
 it('shares a null unit for the kasubag global account', function () {

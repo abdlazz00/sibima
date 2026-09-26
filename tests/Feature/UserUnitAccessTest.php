@@ -5,7 +5,7 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
-    foreach (['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah', 'pegawai'] as $role) {
+    foreach (['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah'] as $role) {
         Role::findOrCreate($role);
     }
 
@@ -76,15 +76,10 @@ it('restricts lurah to only their own kelurahan, not the parent kecamatan', func
         ->and($user->canAccessUnit($this->kecamatan))->toBeFalse();
 });
 
-it('restricts admin_kecamatan and pegawai to exactly their own unit', function () {
+it('restricts admin_kecamatan to exactly their own unit', function () {
     $adminKecamatan = User::factory()->create(['unit_id' => $this->kecamatan->id]);
     $adminKecamatan->assignRole('admin_kecamatan');
 
-    $pegawai = User::factory()->create(['unit_id' => $this->kelurahanA->id]);
-    $pegawai->assignRole('pegawai');
-
     expect($adminKecamatan->canAccessUnit($this->kecamatan))->toBeTrue()
-        ->and($adminKecamatan->canAccessUnit($this->kelurahanA))->toBeFalse()
-        ->and($pegawai->canAccessUnit($this->kelurahanA))->toBeTrue()
-        ->and($pegawai->canAccessUnit($this->kecamatan))->toBeFalse();
+        ->and($adminKecamatan->canAccessUnit($this->kelurahanA))->toBeFalse();
 });
