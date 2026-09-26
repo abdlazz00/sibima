@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\AssetCategory;
+use App\Models\Pegawai;
 use App\Models\Unit;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
@@ -11,7 +13,7 @@ it('seeds roles, units, and one demo user per role idempotently', function () {
     expect(Unit::where('type', 'kecamatan')->count())->toBe(1)
         ->and(Unit::where('type', 'kelurahan')->count())->toBe(7)
         ->and(User::count())->toBe(5)
-        ->and(\App\Models\Pegawai::count())->toBe(2);
+        ->and(Pegawai::count())->toBe(2);
 
     $kasubag = User::where('email', 'kasubag@simaset.test')->firstOrFail();
     expect($kasubag->unit_id)->toBeNull()
@@ -45,7 +47,7 @@ it('seeds the client asset categories idempotently in every environment', functi
         app()->instance('env', 'testing');
     }
 
-    expect(\App\Models\AssetCategory::whereNull('parent_id')->count())->toBe(7)
-        ->and(\App\Models\AssetCategory::whereNotNull('parent_id')->count())->toBe(15)
-        ->and(\App\Models\AssetCategory::where('name', 'ALAT PENDINGIN')->first()->parent->name)->toBe('ALAT RUMAH TANGGA');
+    expect(AssetCategory::whereNull('parent_id')->count())->toBe(7)
+        ->and(AssetCategory::whereNotNull('parent_id')->count())->toBe(15)
+        ->and(AssetCategory::where('name', 'ALAT PENDINGIN')->first()->parent->name)->toBe('ALAT RUMAH TANGGA');
 });

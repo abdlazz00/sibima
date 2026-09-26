@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Asset;
-use App\Models\AssetHistory;
 use App\Models\Pegawai;
 
 it('links Asset.currentHolder to a Pegawai', function () {

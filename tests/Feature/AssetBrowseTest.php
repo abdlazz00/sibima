@@ -2,6 +2,7 @@
 
 use App\Models\Asset;
 use App\Models\AssetCategory;
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -41,7 +42,7 @@ it('lists only its own kelurahan assets for admin_kelurahan', function () {
 });
 
 it('forbids a user with no role from browsing assets', function () {
-    $user = \App\Models\User::factory()->create(['unit_id' => $this->kec->id]);
+    $user = User::factory()->create(['unit_id' => $this->kec->id]);
 
     $this->actingAs($user)->get('/assets')->assertForbidden();
 });

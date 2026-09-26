@@ -4,6 +4,7 @@ use App\Enums\AssetStatus;
 use App\Enums\Kondisi;
 use App\Models\Asset;
 use App\Models\AssetCategory;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -83,7 +84,7 @@ it('forbids non-admin roles from recording assets', function (string $role) {
 })->with(['kasubag', 'camat', 'lurah']);
 
 it('forbids a user with no role from recording assets', function () {
-    $user = \App\Models\User::factory()->create(['unit_id' => $this->kec->id]);
+    $user = User::factory()->create(['unit_id' => $this->kec->id]);
 
     $this->actingAs($user)->get('/assets/create')->assertForbidden();
     $this->actingAs($user)->post('/assets', ($this->payload)())->assertForbidden();

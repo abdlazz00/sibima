@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /*
@@ -44,22 +47,22 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function userWithRole(string $role, ?\App\Models\Unit $unit = null): \App\Models\User
+function userWithRole(string $role, ?Unit $unit = null): User
 {
-    \Spatie\Permission\Models\Role::findOrCreate($role);
+    Role::findOrCreate($role);
 
-    $user = \App\Models\User::factory()->create(['unit_id' => $unit?->id]);
+    $user = User::factory()->create(['unit_id' => $unit?->id]);
     $user->assignRole($role);
 
     return $user;
 }
 
-function makeKecamatan(string $name = 'Kecamatan Sagulung'): \App\Models\Unit
+function makeKecamatan(string $name = 'Kecamatan Sagulung'): Unit
 {
-    return \App\Models\Unit::create(['name' => $name, 'type' => 'kecamatan']);
+    return Unit::create(['name' => $name, 'type' => 'kecamatan']);
 }
 
-function makeKelurahan(\App\Models\Unit $kecamatan, string $name): \App\Models\Unit
+function makeKelurahan(Unit $kecamatan, string $name): Unit
 {
-    return \App\Models\Unit::create(['name' => $name, 'type' => 'kelurahan', 'parent_id' => $kecamatan->id]);
+    return Unit::create(['name' => $name, 'type' => 'kelurahan', 'parent_id' => $kecamatan->id]);
 }
