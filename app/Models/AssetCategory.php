@@ -12,11 +12,25 @@ class AssetCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'parent_id'];
+    protected $fillable = ['name', 'parent_id', 'code', 'description'];
 
-    protected function casts(): array
+    protected $casts = [
+        'parent_id' => 'integer',
+    ];
+
+    protected $appends = ['formatted_code'];
+
+    public function getFormattedCodeAttribute(): string
     {
-        return ['parent_id' => 'integer'];
+        if (! empty($this->code)) {
+            return $this->code;
+        }
+
+        if ($this->parent_id === null) {
+            return sprintf('01.%02d', $this->id);
+        }
+
+        return sprintf('01.%02d.%02d', $this->parent_id, $this->id);
     }
 
     protected static function booted(): void

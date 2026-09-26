@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Pegawai;
 use App\Models\User;
 
 test('login screen can be rendered', function () {
@@ -17,6 +18,22 @@ test('users can authenticate using the login screen', function () {
     ]);
 
     $this->assertAuthenticated();
+    $response->assertRedirect(route('dashboard', absolute: false));
+});
+
+test('users can authenticate using their nip', function () {
+    $user = User::factory()->create();
+    $pegawai = Pegawai::factory()->create([
+        'user_id' => $user->id,
+        'nip' => '198501012010011001',
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $pegawai->nip,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticatedAs($user);
     $response->assertRedirect(route('dashboard', absolute: false));
 });
 

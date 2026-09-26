@@ -21,6 +21,8 @@ class Pegawai extends Model
         'status_kepegawaian',
         'unit_id',
         'foto_profile',
+        'no_hp',
+        'email_dinas',
         'user_id',
     ];
 

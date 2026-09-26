@@ -1,6 +1,7 @@
 *.log
 .DS_Store
 .superpowers/
+.playwright-mcp/
 .env
 .env.backup
 .env.production

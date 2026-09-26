@@ -27,21 +27,66 @@ it('shows kasubag the category tree', function () {
 
 it('forbids every other role from managing categories', function (string $role) {
     $user = userWithRole($role, $this->kec);
+    $cat = AssetCategory::create(['name' => 'TES KATEGORI']);
 
     $this->actingAs($user)->get('/asset-categories')->assertForbidden();
+    $this->actingAs($user)->get('/asset-categories/create')->assertForbidden();
+    $this->actingAs($user)->get("/asset-categories/{$cat->id}/edit")->assertForbidden();
     $this->actingAs($user)->post('/asset-categories', ['name' => 'X'])->assertForbidden();
 })->with(['camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah', 'pegawai']);
 
-it('lets kasubag create a kategori and a subkategori', function () {
+it('shows kasubag the create category page with parents list', function () {
+    AssetCategory::create(['name' => 'KOMPUTER', 'code' => '02.09']);
+
     $this->actingAs($this->kasubag)
-        ->post('/asset-categories', ['name' => 'ALAT KANTOR'])
+        ->get('/asset-categories/create')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('AssetCategories/Create')
+            ->has('parents', 1)
+            ->where('parents.0.name', 'KOMPUTER'));
+});
+
+it('shows kasubag the edit category page with category data and parents list', function () {
+    $parent = AssetCategory::create(['name' => 'KOMPUTER', 'code' => '02.09']);
+    $child = AssetCategory::create([
+        'name' => 'LAPTOP',
+        'parent_id' => $parent->id,
+        'code' => '02.09.01',
+        'description' => 'Laptop operasional dinas',
+    ]);
+
+    $this->actingAs($this->kasubag)
+        ->get("/asset-categories/{$child->id}/edit")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('AssetCategories/Edit')
+            ->where('category.name', 'LAPTOP')
+            ->where('category.code', '02.09.01')
+            ->has('parents', 1)
+            ->where('parents.0.name', 'KOMPUTER'));
+});
+
+it('lets kasubag create a kategori and a subkategori with code and description', function () {
+    $this->actingAs($this->kasubag)
+        ->post('/asset-categories', [
+            'name' => 'ALAT KANTOR',
+            'code' => '02.06',
+            'description' => 'Peralatan kantor dinas',
+        ])
         ->assertRedirect()
         ->assertSessionHas('success');
 
     $kategori = AssetCategory::where('name', 'ALAT KANTOR')->firstOrFail();
+    expect($kategori->code)->toBe('02.06')
+        ->and($kategori->description)->toBe('Peralatan kantor dinas');
 
     $this->actingAs($this->kasubag)
-        ->post('/asset-categories', ['name' => 'ALAT KANTOR LAINNYA', 'parent_id' => $kategori->id])
+        ->post('/asset-categories', [
+            'name' => 'ALAT KANTOR LAINNYA',
+            'parent_id' => $kategori->id,
+            'code' => '02.06.01',
+        ])
         ->assertSessionHasNoErrors();
 
     expect($kategori->children()->pluck('name')->all())->toBe(['ALAT KANTOR LAINNYA']);

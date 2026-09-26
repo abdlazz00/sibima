@@ -1,54 +1,134 @@
 export type Role =
-    | 'kasubag'
-    | 'camat'
-    | 'admin_kecamatan'
-    | 'admin_kelurahan'
-    | 'lurah';
+    'kasubag' | 'camat' | 'admin_kecamatan' | 'admin_kelurahan' | 'lurah';
 
 export interface NavItem {
     label: string;
     href: string;
+    icon: string;
+    badge?: string | number;
     disabled?: boolean;
 }
 
-const DASHBOARD: NavItem = { label: 'Dashboard', href: '/dashboard' };
-const PEGAWAI: NavItem = { label: 'Kelola Pegawai', href: '/pegawais' };
+export interface NavGroup {
+    title: string;
+    items: NavItem[];
+}
 
-export const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
-    kasubag: [
-        DASHBOARD,
-        { label: 'Kelola User', href: '#', disabled: true },
-        PEGAWAI,
-        { label: 'Master Data Aset', href: '/asset-categories' },
-    ],
-    camat: [
-        DASHBOARD,
-        { label: 'Approval Penerimaan Aset', href: '#', disabled: true },
-        { label: 'Approval Mutasi Aset', href: '#', disabled: true },
-    ],
-    admin_kecamatan: [
-        DASHBOARD,
-        { label: 'Data Aset', href: '#', disabled: true },
-        PEGAWAI,
-        { label: 'Penerimaan Aset', href: '#', disabled: true },
-        { label: 'Mutasi Aset', href: '#', disabled: true },
-    ],
-    admin_kelurahan: [
-        DASHBOARD,
-        { label: 'Data Aset', href: '#', disabled: true },
-        PEGAWAI,
-        { label: 'Mutasi Aset', href: '#', disabled: true },
-    ],
-    lurah: [
-        DASHBOARD,
-        { label: 'Approval Mutasi Aset', href: '#', disabled: true },
-    ],
-};
+export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
+    {
+        title: 'UTAMA',
+        items: [{ label: 'Dashboard', href: '/dashboard', icon: 'grid' }],
+    },
+    {
+        title: 'DATA MASTER',
+        items: [
+            { label: 'Data Aset', href: '/assets', icon: 'package' },
+            {
+                label: 'Kategori Aset',
+                href: '/asset-categories',
+                icon: 'layers',
+            },
+            { label: 'Data Pegawai', href: '/pegawais', icon: 'users' },
+        ],
+    },
+    {
+        title: 'TRANSAKSI',
+        items: [
+            {
+                label: 'Penerimaan Aset',
+                href: '#',
+                icon: 'download',
+                disabled: true,
+            },
+            {
+                label: 'Mutasi Aset',
+                href: '#',
+                icon: 'shuffle',
+                disabled: true,
+            },
+            {
+                label: 'Kotak Persetujuan',
+                href: '#',
+                icon: 'check-square',
+                badge: 3,
+                disabled: true,
+            },
+            {
+                label: 'Permohonan Aset',
+                href: '#',
+                icon: 'file-text',
+                disabled: true,
+            },
+            {
+                label: 'Lapor Rusak/Hilang',
+                href: '#',
+                icon: 'alert-triangle',
+                disabled: true,
+            },
+        ],
+    },
+    {
+        title: 'ALAT BANTU',
+        items: [
+            {
+                label: 'Pindai QR Code',
+                href: '#',
+                icon: 'aperture',
+                disabled: true,
+            },
+            {
+                label: 'Laporan & Ekspor',
+                href: '#',
+                icon: 'printer',
+                disabled: true,
+            },
+        ],
+    },
+];
+
+export function navGroupsForRole(role?: Role): NavGroup[] {
+    if (!role) {
+        return SIDEBAR_NAV_GROUPS;
+    }
+    return SIDEBAR_NAV_GROUPS;
+}
 
 export function navItemsForRole(role: Role | undefined): NavItem[] {
-    if (!role || !(role in NAV_ITEMS_BY_ROLE)) {
-        return [DASHBOARD];
-    }
+    return navGroupsForRole(role).flatMap((group) => group.items);
+}
 
-    return NAV_ITEMS_BY_ROLE[role];
+export const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
+    kasubag: navItemsForRole('kasubag'),
+    camat: navItemsForRole('camat'),
+    admin_kecamatan: navItemsForRole('admin_kecamatan'),
+    admin_kelurahan: navItemsForRole('admin_kelurahan'),
+    lurah: navItemsForRole('lurah'),
+};
+
+export function formatRole(role?: string): string {
+    switch (role) {
+        case 'kasubag':
+            return 'Kasubag';
+        case 'camat':
+            return 'Camat Sagulung';
+        case 'admin_kecamatan':
+            return 'Admin Kecamatan';
+        case 'admin_kelurahan':
+            return 'Admin Kelurahan';
+        case 'lurah':
+            return 'Lurah';
+        default:
+            return role
+                ? role
+                      .replace(/_/g, ' ')
+                      .replace(/\b\w/g, (c) => c.toUpperCase())
+                : 'Pengguna';
+    }
+}
+
+export function getInitials(name?: string): string {
+    if (!name) return 'SB';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
 }

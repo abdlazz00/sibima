@@ -79,10 +79,47 @@ it('forbids camat and lurah from creating, updating or deleting a pegawai', func
     $pegawai = Pegawai::factory()->create(['unit_id' => $this->kec->id]);
     $user = userWithRole($role, $this->kec->id === $pegawai->unit_id ? $this->kec : $this->kel);
 
+    $this->actingAs($user)->get('/pegawais/create')->assertForbidden();
     $this->actingAs($user)->post('/pegawais', ['nama' => 'X'])->assertForbidden();
     $this->actingAs($user)->put("/pegawais/{$pegawai->id}", ['nama' => 'Y'])->assertForbidden();
     $this->actingAs($user)->delete("/pegawais/{$pegawai->id}")->assertForbidden();
 })->with(['camat', 'lurah']);
+
+it('shows kasubag the create pegawai page with units', function () {
+    $this->actingAs(userWithRole('kasubag'))
+        ->get('/pegawais/create')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Pegawai/Create')
+            ->has('units'));
+});
+
+it('shows kasubag the show pegawai page with relations', function () {
+    $pegawai = Pegawai::factory()->create(['unit_id' => $this->kel->id, 'nama' => 'Budi Santoso']);
+
+    $this->actingAs(userWithRole('kasubag'))
+        ->get("/pegawais/{$pegawai->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Pegawai/Show')
+            ->where('pegawai.id', $pegawai->id)
+            ->where('pegawai.nama', 'Budi Santoso')
+            ->where('can.update', true)
+            ->where('can.createUser', true));
+});
+
+it('shows kasubag the edit pegawai page with units', function () {
+    $pegawai = Pegawai::factory()->create(['unit_id' => $this->kel->id, 'nama' => 'Budi Santoso']);
+
+    $this->actingAs(userWithRole('kasubag'))
+        ->get("/pegawais/{$pegawai->id}/edit")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Pegawai/Edit')
+            ->where('pegawai.id', $pegawai->id)
+            ->where('pegawai.nama', 'Budi Santoso')
+            ->has('units'));
+});
 
 it('lets an admin update a pegawai in their own unit', function () {
     $pegawai = Pegawai::factory()->create(['unit_id' => $this->kel->id, 'jabatan' => 'Staff']);

@@ -38,6 +38,8 @@ class AssetCategoryRequest extends FormRequest
                 Rule::exists('asset_categories', 'id')->whereNull('parent_id'),
                 Rule::notIn(array_filter([$category?->id])),
             ],
+            'code' => ['nullable', 'string', 'max:50'],
+            'description' => ['nullable', 'string', 'max:500'],
         ];
     }
 

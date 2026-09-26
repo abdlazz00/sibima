@@ -30,6 +30,8 @@ class PegawaiRequest extends FormRequest
             'status_kepegawaian' => ['required', Rule::in(['pns', 'pppk'])],
             'unit_id' => ['required', 'integer', Rule::exists('units', 'id')],
             'foto_profile' => ['nullable', 'image', 'max:2048'],
+            'no_hp' => ['nullable', 'string', 'max:50'],
+            'email_dinas' => ['nullable', 'string', 'max:150'],
         ];
     }
 

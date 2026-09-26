@@ -10,9 +10,21 @@ export interface AssetCategory {
     id: number;
     name: string;
     parent_id: number | null;
+    code?: string | null;
+    description?: string | null;
+    formatted_code?: string;
     assets_count?: number;
     children?: AssetCategory[];
     parent?: AssetCategory | null;
+}
+
+export interface PegawaiAsset {
+    id: number;
+    nama_aset: string;
+    kode_barang: string;
+    kondisi: 'baik' | 'rusak_ringan' | 'rusak_berat';
+    nilai_perolehan: number | string;
+    category?: { id: number; name: string };
 }
 
 export interface Pegawai {
@@ -24,9 +36,17 @@ export interface Pegawai {
     status_kepegawaian: 'pns' | 'pppk';
     unit_id: number;
     foto_profile: string | null;
+    no_hp?: string | null;
+    email_dinas?: string | null;
     user_id: number | null;
     unit?: { id: number; name: string; type: 'kecamatan' | 'kelurahan' };
-    user?: { id: number; email: string } | null;
+    user?: {
+        id: number;
+        email: string;
+        roles?: { id: number; name: string }[];
+    } | null;
+    assets?: PegawaiAsset[];
+    assets_count?: number;
 }
 
 export interface AssetPhoto {

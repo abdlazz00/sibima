@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class PegawaiService
 {
-    public const FIELDS = ['nama', 'nip', 'pangkat_golongan', 'jabatan', 'status_kepegawaian'];
+    public const FIELDS = ['nama', 'nip', 'pangkat_golongan', 'jabatan', 'status_kepegawaian', 'no_hp', 'email_dinas'];
 
     public function __construct(private readonly PegawaiRepositoryInterface $pegawais) {}
 

@@ -1,22 +1,22 @@
-// Placeholder brand mark; swap icon + name once the client delivers the official logo/app name (Sprint 5).
 export default function BrandMark({ className = '' }: { className?: string }) {
     return (
-        <div className={`flex items-center gap-2 ${className}`}>
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                className="h-8 w-8 text-blue-600"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1"
-                />
-            </svg>
-            <span className="text-lg font-semibold text-gray-800">SIMASET</span>
+        <div className={`flex items-center gap-3 ${className}`}>
+            <img
+                src="/images/lambang-kota-batam.png"
+                alt="Lambang Kota Batam"
+                className="h-11 w-auto shrink-0 object-contain"
+            />
+            <div className="flex min-w-0 flex-col">
+                <span className="text-base font-bold leading-tight tracking-tight text-white">
+                    SIBIMA
+                </span>
+                <span className="truncate text-[10px] font-normal leading-tight text-slate-300">
+                    Sistem Informasi Barang Milik Daerah
+                </span>
+                <span className="text-[10px] font-normal leading-tight text-slate-400">
+                    Kecamatan Sagulung
+                </span>
+            </div>
         </div>
     );
 }

@@ -18,7 +18,7 @@ class CreatePegawaiUserRequest extends FormRequest
         return [
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', Rule::in(['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah'])],
+            'role' => ['required', Rule::in(['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah', 'pegawai'])],
         ];
     }
 }
