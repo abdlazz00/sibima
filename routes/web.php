@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssetCategoryController;
+use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/asset-categories', [AssetCategoryController::class, 'store'])->name('asset-categories.store');
     Route::put('/asset-categories/{assetCategory}', [AssetCategoryController::class, 'update'])->name('asset-categories.update');
     Route::delete('/asset-categories/{assetCategory}', [AssetCategoryController::class, 'destroy'])->name('asset-categories.destroy');
+
+    Route::get('/pegawais', [PegawaiController::class, 'index'])->name('pegawais.index');
+    Route::post('/pegawais', [PegawaiController::class, 'store'])->name('pegawais.store');
+    Route::put('/pegawais/{pegawai}', [PegawaiController::class, 'update'])->name('pegawais.update');
+    Route::delete('/pegawais/{pegawai}', [PegawaiController::class, 'destroy'])->name('pegawais.destroy');
 });
 
 require __DIR__.'/auth.php';
