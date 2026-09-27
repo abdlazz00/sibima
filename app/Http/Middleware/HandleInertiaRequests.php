@@ -48,6 +48,14 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'notifications' => $request->user() ? [
+                'unread_count' => $request->user()->unreadNotifications()->count(),
+                'items' => $request->user()->unreadNotifications()->latest()->take(5)->get()->map(fn ($n) => [
+                    'id' => $n->id,
+                    'message' => $n->data['message'],
+                    'created_at' => $n->created_at->diffForHumans(),
+                ]),
+            ] : ['unread_count' => 0, 'items' => []],
         ];
     }
 }

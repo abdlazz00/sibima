@@ -4,6 +4,7 @@ use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetLabelController;
 use App\Http\Controllers\AssetPhotoController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -32,6 +33,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::get('/asset-categories/create', [AssetCategoryController::class, 'create'])->name('asset-categories.create');
