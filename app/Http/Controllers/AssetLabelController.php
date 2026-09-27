@@ -23,7 +23,7 @@ class AssetLabelController extends Controller
             Gate::authorize('view', $asset);
         }
 
-        return response($this->labels->pdf($assets), 200, [
+        return response($this->labels->pdf($assets, $request->validated('size')), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="label-aset.pdf"',
         ]);

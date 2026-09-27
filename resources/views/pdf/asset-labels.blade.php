@@ -6,103 +6,45 @@
         @page { margin: 8mm; }
         body { font-family: 'DejaVu Sans', sans-serif; color: #000; margin: 0; padding: 0; }
         table.sheet { width: 100%; border-collapse: separate; border-spacing: 3mm 2.5mm; }
-        td.cell { width: 50%; vertical-align: top; padding: 0; }
+        td.cell { width: {{ 100 / $dims['per_row'] }}%; vertical-align: top; padding: 0; }
 
         .cut-guide { border: 0.15mm dashed #999; padding: 1.2mm; display: inline-block; }
 
         table.label {
-            width: 83mm;
-            height: 25mm;
+            width: {{ $dims['width'] }}mm;
+            height: {{ $dims['height'] }}mm;
             border: 0.35mm solid #000;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         table.label td { padding: 0; vertical-align: middle; }
 
-        .logo-col {
-            width: 15mm;
-            text-align: center;
-            vertical-align: middle;
-            border-right: 0.35mm solid #000;
-            padding: 0.5mm;
-        }
-        .logo-col img {
-            width: 13.5mm;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .info-col {
-            width: 48mm;
-            vertical-align: top !important;
-            border-right: 0.35mm solid #000;
-            padding: 0;
-        }
-        .inner-table {
-            width: 100%;
-            height: 25mm;
-            border-collapse: collapse;
-            border: none;
-        }
-        .brand-header {
-            height: 7.5mm;
-            border-bottom: 0.35mm solid #000;
-            border-top: none;
-            border-left: none;
-            border-right: none;
-            padding: 0.8mm 1.5mm;
-            text-align: center;
-            vertical-align: middle;
-            font-weight: bold;
-            font-size: 6pt;
-            line-height: 1.2;
-            letter-spacing: 0.2pt;
-        }
-        .brand-header-kel {
-            height: 8.5mm;
-            font-size: 5.2pt;
-            line-height: 1.15;
-            padding: 0.6mm 1.5mm;
-        }
-        .detail-cell {
-            height: 17.5mm;
-            border: none !important;
-            padding: 0 2.5mm;
-            vertical-align: middle;
-            text-align: left;
-        }
-        .detail-cell-kel {
-            height: 16.5mm;
-        }
-        .asset-name {
-            font-size: 7.2pt;
-            font-weight: bold;
-            line-height: 1.25;
-            word-break: break-word;
-            margin-bottom: 1.2mm;
-            max-height: 6.5mm;
-            overflow: hidden;
-        }
-        .asset-code {
-            font-size: 6.2pt;
-            font-weight: 500;
-            line-height: 1.15;
-            letter-spacing: 0.3pt;
-            word-break: break-word;
-        }
-
         .qr-col {
-            width: 20mm;
+            width: {{ $dims['qr_col'] }}mm;
             text-align: center;
-            vertical-align: middle;
-            padding: 0.5mm;
+            border-right: 0.35mm solid #000;
         }
         .qr-col img {
-            width: 19mm;
-            height: 19mm;
+            width: {{ $dims['qr'] }}mm;
+            height: {{ $dims['qr'] }}mm;
             display: block;
             margin: 0 auto;
         }
+
+        .info-col { width: {{ $dims['info_col'] }}mm; padding: 0; }
+        .info-table { width: 100%; height: {{ $dims['height'] }}mm; border-collapse: collapse; }
+        .info-table td {
+            height: {{ $dims['row_height'] }}mm;
+            border-bottom: 0.3mm solid #000;
+            padding: 0.5mm 2mm;
+            vertical-align: middle;
+        }
+        .info-table tr:last-child td { border-bottom: none; }
+
+        .header-row { text-align: center; font-weight: bold; font-size: {{ $dims['header_font'] }}pt; line-height: 1.2; letter-spacing: 0.2pt; }
+        .header-row.kel { font-size: {{ $dims['header_font_kel'] }}pt; line-height: 1.1; }
+        .name-row { font-size: {{ $dims['name_font'] }}pt; font-weight: bold; line-height: 1.2; word-break: break-word; max-height: {{ $dims['row_height'] }}mm; overflow: hidden; }
+        .code-row { font-size: {{ $dims['code_font'] }}pt; font-weight: 500; letter-spacing: 0.3pt; word-break: break-word; }
     </style>
 </head>
 <body>
@@ -110,46 +52,42 @@
     @foreach ($rows as $row)
         <tr>
             @foreach ($row as $label)
+                @php $isKel = isset($label['asset']->unit) && $label['asset']->unit->type === 'kelurahan'; @endphp
                 <td class="cell">
                     <div class="cut-guide">
                     <table class="label">
                         <tr>
-                            <td class="logo-col" style="width: 15mm;">
-                                <img src="{{ $logo }}" alt="Logo">
+                            <td class="qr-col">
+                                <img src="{{ $label['qr'] }}" alt="QR Code">
                             </td>
-                            <td class="info-col" style="width: 48mm;">
-                                <table class="inner-table">
+                            <td class="info-col">
+                                <table class="info-table">
                                     <tr>
-                                        @if (isset($label['asset']->unit) && $label['asset']->unit->type === 'kelurahan')
-                                            <td class="brand-header brand-header-kel">
+                                        <td class="header-row {{ $isKel ? 'kel' : '' }}">
+                                            @if ($isKel)
                                                 INVENTARIS<br>
                                                 {{ strtoupper($label['asset']->unit->name) }}<br>
                                                 KECAMATAN SAGULUNG
-                                            </td>
-                                        @else
-                                            <td class="brand-header">
+                                            @else
                                                 INVENTARIS<br>
                                                 {{ strtoupper($label['asset']->unit->name ?? 'KECAMATAN SAGULUNG') }}
-                                            </td>
-                                        @endif
-                                    </tr>
-                                    <tr>
-                                        <td class="detail-cell {{ isset($label['asset']->unit) && $label['asset']->unit->type === 'kelurahan' ? 'detail-cell-kel' : '' }}">
-                                            <div class="asset-name">{{ $label['name'] }}</div>
-                                            <div class="asset-code">{{ $label['asset']->kode_barang }}</div>
+                                            @endif
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <td class="name-row">{{ $label['name'] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="code-row">{{ $label['asset']->kode_barang }}</td>
+                                    </tr>
                                 </table>
-                            </td>
-                            <td class="qr-col" style="width: 20mm;">
-                                <img src="{{ $label['qr'] }}" alt="QR Code">
                             </td>
                         </tr>
                     </table>
                     </div>
                 </td>
             @endforeach
-            @for ($i = $row->count(); $i < 2; $i++)
+            @for ($i = $row->count(); $i < $dims['per_row']; $i++)
                 <td class="cell"></td>
             @endfor
         </tr>

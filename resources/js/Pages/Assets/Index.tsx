@@ -9,6 +9,7 @@ import {
     SearchIcon as Search,
     XIcon as X,
 } from '@/Components/Icons';
+import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -83,6 +84,21 @@ function pageNumbersWithGaps(current: number, last: number): (number | '...')[] 
 
 export default function Index({ assets, filters, categories, units, kondisiOptions, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [printIds, setPrintIds] = useState<number[] | null>(null);
+
+    const toggleRow = (id: number) => {
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+    };
+
+    const pageIds = assets.data.map((a) => a.id);
+    const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+
+    const toggleAllOnPage = () => {
+        setSelectedIds((prev) =>
+            allOnPageSelected ? prev.filter((id) => !pageIds.includes(id)) : Array.from(new Set([...prev, ...pageIds])),
+        );
+    };
 
     const applyFilters = (next: Partial<Filters>) => {
         router.get(
@@ -131,15 +147,27 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                         </h1>
                     </div>
 
-                    {can.create && (
-                        <Link
-                            href={route('assets.create')}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                        >
-                            <Plus className="h-4 w-4" />
-                            <span>Tambah Aset Baru</span>
-                        </Link>
-                    )}
+                    <div className="flex items-center gap-3">
+                        {selectedIds.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={() => setPrintIds(selectedIds)}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            >
+                                <Printer className="h-4 w-4" />
+                                <span>Cetak Label ({selectedIds.length})</span>
+                            </button>
+                        )}
+                        {can.create && (
+                            <Link
+                                href={route('assets.create')}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                            >
+                                <Plus className="h-4 w-4" />
+                                <span>Tambah Aset Baru</span>
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
                 {/* Filter Toolbar */}
@@ -228,6 +256,15 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                         <table className="w-full border-collapse text-left">
                             <thead>
                                 <tr className="border-b border-slate-200 bg-slate-50">
+                                    <th className="w-10 px-4 py-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={allOnPageSelected}
+                                            onChange={toggleAllOnPage}
+                                            aria-label="Pilih semua aset di halaman ini"
+                                            className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+                                        />
+                                    </th>
                                     <th className="w-16 px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                                         Foto
                                     </th>
@@ -257,13 +294,22 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <tbody className="divide-y divide-slate-100">
                                 {assets.data.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} className="py-14 text-center text-sm text-slate-400">
+                                        <td colSpan={9} className="py-14 text-center text-sm text-slate-400">
                                             Tidak ada aset yang cocok dengan pencarian/filter ini.
                                         </td>
                                     </tr>
                                 ) : (
                                     assets.data.map((asset) => (
                                         <tr key={asset.id} className="transition hover:bg-slate-50/60">
+                                            <td className="px-4 py-3">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(asset.id)}
+                                                    onChange={() => toggleRow(asset.id)}
+                                                    aria-label={`Pilih ${asset.nama_aset}`}
+                                                    className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+                                                />
+                                            </td>
                                             <td className="px-4 py-3">
                                                 <div className="h-12 w-12 overflow-hidden rounded bg-slate-100">
                                                     {asset.photos?.[0] && (
@@ -325,15 +371,14 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                                     >
                                                         <Pencil className="h-4 w-4" />
                                                     </Link>
-                                                    <a
-                                                        href={route('assets.labels', { ids: [asset.id] })}
-                                                        target="_blank"
-                                                        rel="noreferrer"
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPrintIds([asset.id])}
                                                         title="Cetak label QR"
                                                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
                                                     >
                                                         <Printer className="h-4 w-4" />
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -420,6 +465,8 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                     </div>
                 </div>
             </div>
+
+            {printIds && <PrintLabelModal assetIds={printIds} onClose={() => setPrintIds(null)} />}
         </AuthenticatedLayout>
     );
 }

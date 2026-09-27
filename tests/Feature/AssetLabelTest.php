@@ -26,24 +26,24 @@ it('shows the QR code on the asset page', function () {
         ->assertInertia(fn (Assert $page) => $page->where('qr', fn (string $qr) => str_starts_with($qr, 'data:image/png;base64,')));
 });
 
-it('prints in-scope asset labels as a PDF', function () {
+it('prints in-scope asset labels as a PDF', function (string $size) {
     $response = $this->actingAs($this->admin)
-        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id, $this->own2->id]]));
+        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id, $this->own2->id], 'size' => $size]));
 
     $response->assertOk()->assertHeader('Content-Type', 'application/pdf');
     expect(substr($response->getContent(), 0, 5))->toBe('%PDF-');
-});
+})->with(['kecil', 'besar']);
 
 it('refuses to print when any selected asset is out of scope', function () {
     $this->actingAs($this->admin)
-        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id, $this->foreign->id]]))
+        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id, $this->foreign->id], 'size' => 'kecil']))
         ->assertForbidden();
 });
 
 it('validates the id list', function (array $ids) {
     $this->actingAs($this->admin)
         ->from('/assets')
-        ->get('/assets/labels?'.http_build_query(['ids' => $ids]))
+        ->get('/assets/labels?'.http_build_query(['ids' => $ids, 'size' => 'kecil']))
         ->assertRedirect('/assets')
         ->assertSessionHasErrors();
 })->with([
@@ -52,11 +52,19 @@ it('validates the id list', function (array $ids) {
     'too many' => [range(1, 100)],
 ]);
 
+it('rejects an invalid label size', function () {
+    $this->actingAs($this->admin)
+        ->from('/assets')
+        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id], 'size' => 'raksasa']))
+        ->assertRedirect('/assets')
+        ->assertSessionHasErrors('size');
+});
+
 it('forbids a user with no role from printing labels', function () {
     $user = User::factory()->create(['unit_id' => $this->kel->id]);
 
     $this->actingAs($user)
-        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id]]))
+        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id], 'size' => 'kecil']))
         ->assertForbidden();
 });
 

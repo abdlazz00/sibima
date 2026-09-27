@@ -4,6 +4,7 @@ import {
     PencilIcon as Pencil,
     PrinterIcon as Printer,
 } from '@/Components/Icons';
+import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Asset, PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -65,6 +66,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
     const photos = asset.photos ?? [];
     const [activePhoto, setActivePhoto] = useState(0);
     const histories = asset.histories ?? [];
+    const [showPrintModal, setShowPrintModal] = useState(false);
 
     return (
         <AuthenticatedLayout>
@@ -101,15 +103,14 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <a
-                            href={route('assets.labels', { ids: [asset.id] })}
-                            target="_blank"
-                            rel="noreferrer"
+                        <button
+                            type="button"
+                            onClick={() => setShowPrintModal(true)}
                             className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
                         >
                             <Printer className="h-4 w-4" />
                             <span>Cetak Label QR</span>
-                        </a>
+                        </button>
                         {can.update && (
                             <Link
                                 href={route('assets.edit', asset.id)}
@@ -229,6 +230,10 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                     )}
                 </div>
             </div>
+
+            {showPrintModal && (
+                <PrintLabelModal assetIds={[asset.id]} onClose={() => setShowPrintModal(false)} />
+            )}
         </AuthenticatedLayout>
     );
 }
