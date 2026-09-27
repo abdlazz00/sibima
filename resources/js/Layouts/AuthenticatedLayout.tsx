@@ -20,10 +20,13 @@ export default function AuthenticatedLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { auth, flash } = usePage<PageProps>().props;
+    const { auth, flash, notifications } = usePage<PageProps>().props;
     const { url } = usePage();
     const role = auth.user?.roles?.[0] as Role | undefined;
     const navGroups = navGroupsForRole(role);
+
+    const badgeFor = (item: { href: string; badge?: string | number }) =>
+        item.href === '/persetujuan' ? notifications.unread_count || undefined : item.badge;
 
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -134,9 +137,9 @@ export default function AuthenticatedLayout({
                                                     {item.label}
                                                 </span>
                                             </div>
-                                            {item.badge !== undefined && (
+                                            {badgeFor(item) !== undefined && (
                                                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white">
-                                                    {item.badge}
+                                                    {badgeFor(item)}
                                                 </span>
                                             )}
                                         </div>
@@ -169,9 +172,9 @@ export default function AuthenticatedLayout({
                                                 {item.label}
                                             </span>
                                         </div>
-                                        {item.badge !== undefined && (
+                                        {badgeFor(item) !== undefined && (
                                             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white">
-                                                {item.badge}
+                                                {badgeFor(item)}
                                             </span>
                                         )}
                                     </Link>
@@ -277,9 +280,11 @@ export default function AuthenticatedLayout({
                                     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                                 </svg>
-                                <span className="shadow-xs absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                                    5
-                                </span>
+                                {notifications.unread_count > 0 && (
+                                    <span className="shadow-xs absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                                        {notifications.unread_count}
+                                    </span>
+                                )}
                             </button>
 
                             {isNotifOpen && (
@@ -288,27 +293,28 @@ export default function AuthenticatedLayout({
                                         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-900">
                                             Notifikasi
                                         </h3>
-                                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-600">
-                                            5 Baru
-                                        </span>
+                                        {notifications.unread_count > 0 && (
+                                            <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-600">
+                                                {notifications.unread_count} Baru
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="space-y-2 text-xs text-gray-600">
-                                        <div className="rounded border border-blue-100/60 bg-blue-50/50 p-2">
-                                            <p className="font-medium text-gray-800">
-                                                3 permohonan aset baru
-                                            </p>
-                                            <p className="mt-0.5 text-[11px] text-gray-500">
-                                                Menunggu persetujuan Anda
-                                            </p>
-                                        </div>
-                                        <div className="rounded p-2 hover:bg-gray-50">
-                                            <p className="font-medium text-gray-800">
-                                                Mutasi aset selesai
-                                            </p>
-                                            <p className="mt-0.5 text-[11px] text-gray-500">
-                                                2 aset telah dipindahkan
-                                            </p>
-                                        </div>
+                                        {notifications.items.length === 0 ? (
+                                            <p className="p-2 text-center text-gray-400">Tidak ada notifikasi baru.</p>
+                                        ) : (
+                                            notifications.items.map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    type="button"
+                                                    onClick={() => router.post(route('notifications.read', item.id))}
+                                                    className="block w-full rounded p-2 text-left hover:bg-gray-50"
+                                                >
+                                                    <p className="font-medium text-gray-800">{item.message}</p>
+                                                    <p className="mt-0.5 text-[11px] text-gray-500">{item.created_at}</p>
+                                                </button>
+                                            ))
+                                        )}
                                     </div>
                                 </div>
                             )}

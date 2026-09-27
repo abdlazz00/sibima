@@ -36,9 +36,8 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
         items: [
             {
                 label: 'Penerimaan Aset',
-                href: '#',
+                href: '/penerimaan-aset',
                 icon: 'download',
-                disabled: true,
             },
             {
                 label: 'Mutasi Aset',
@@ -48,10 +47,8 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
             },
             {
                 label: 'Kotak Persetujuan',
-                href: '#',
+                href: '/persetujuan',
                 icon: 'check-square',
-                badge: 3,
-                disabled: true,
             },
             {
                 label: 'Permohonan Aset',
