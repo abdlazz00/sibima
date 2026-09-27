@@ -99,6 +99,60 @@ export interface Paginated<T> {
     per_page: number;
 }
 
+export interface BeritaAcaraItem {
+    id: number;
+    nama_aset: string;
+    merk_type: string | null;
+    category_id: number;
+    jumlah_unit: number;
+    nilai_per_unit: string;
+    kondisi_awal: 'baik' | 'rusak_ringan' | 'rusak_berat' | 'hilang';
+    category?: { id: number; name: string };
+}
+
+export interface ApprovalActionEntry {
+    id: number;
+    step_order: number;
+    action: 'approve' | 'reject';
+    note: string | null;
+    created_at: string;
+    user?: { id: number; name: string };
+}
+
+export interface ApprovalStep {
+    step_order: number;
+    approver_role: string;
+}
+
+export interface ApprovalRequestSummary {
+    id: number;
+    current_step: number;
+    status: 'pending' | 'approved' | 'rejected';
+    definition?: { name: string; steps?: ApprovalStep[] };
+    actions?: ApprovalActionEntry[];
+}
+
+export interface BeritaAcaraPenerimaan {
+    id: number;
+    no_berita_acara: string;
+    tanggal_penerimaan: string;
+    sumber_perolehan: string | null;
+    no_kontrak_spk: string;
+    vendor: string | null;
+    catatan: string | null;
+    status: 'draft' | 'submitted';
+    unit?: { id: number; name: string };
+    creator?: { id: number; name: string };
+    items?: BeritaAcaraItem[];
+    approval_request?: ApprovalRequestSummary | null;
+}
+
+export interface NotificationItem {
+    id: string;
+    message: string;
+    created_at: string;
+}
+
 export interface Flash {
     success: string | null;
     error: string | null;
@@ -111,4 +165,8 @@ export type PageProps<
         user: AuthUser | null;
     };
     flash: Flash;
+    notifications: {
+        unread_count: number;
+        items: NotificationItem[];
+    };
 };
