@@ -58,3 +58,17 @@ it('rejects with a note via HTTP', function () {
 
     expect($this->request->fresh()->status->value)->toBe('rejected');
 });
+
+it('shows a clear flash error instead of a 500 when the category loses its BMD code before final approval', function () {
+    $this->actingAs($this->kasubag)
+        ->post("/approval-requests/{$this->request->id}/approve");
+
+    $this->category->update(['code' => null]);
+
+    $this->actingAs($this->camat)
+        ->post("/approval-requests/{$this->request->id}/approve")
+        ->assertRedirect()
+        ->assertSessionHas('error');
+
+    expect($this->request->fresh()->status->value)->toBe('pending');
+});

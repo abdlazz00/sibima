@@ -21,6 +21,8 @@ class PenerimaanAsetEffect implements WorkflowEffect
         }
 
         DB::transaction(function () use ($approvable) {
+            $noDokumenSeq = 0;
+
             foreach ($approvable->items as $item) {
                 $category = $item->category;
 
@@ -35,6 +37,7 @@ class PenerimaanAsetEffect implements WorkflowEffect
                 for ($i = 0; $i < $item->jumlah_unit; $i++) {
                     $suffix = $this->assets->maxKodeBarangSuffix($category->code) + 1;
                     $kodeBarang = $category->code.'.'.str_pad((string) $suffix, 3, '0', STR_PAD_LEFT);
+                    $noDokumenSeq++;
 
                     $asset = $this->assets->create([
                         'kode_barang' => $kodeBarang,
@@ -50,9 +53,10 @@ class PenerimaanAsetEffect implements WorkflowEffect
                         'nilai_perolehan' => $item->nilai_per_unit,
                         'nilai_buku' => $item->nilai_per_unit,
                         // assets.no_dokumen is unique, but one Berita Acara covers many
-                        // units — append the per-unit sequence so each unit still
-                        // traces back to the same BA without colliding.
-                        'no_dokumen' => $approvable->no_berita_acara.'-'.str_pad((string) $suffix, 3, '0', STR_PAD_LEFT),
+                        // units across possibly several categories — a BA-wide counter
+                        // (not the per-category kode_barang suffix) keeps every unit's
+                        // no_dokumen distinct even when two categories share a suffix.
+                        'no_dokumen' => $approvable->no_berita_acara.'-'.str_pad((string) $noDokumenSeq, 3, '0', STR_PAD_LEFT),
                     ]);
 
                     $asset->histories()->create([

@@ -7,6 +7,7 @@ use App\Models\ApprovalRequest;
 use App\Services\ApprovalWorkflowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 
 class ApprovalActionController extends Controller
 {
@@ -16,7 +17,11 @@ class ApprovalActionController extends Controller
     {
         abort_unless($this->workflow->canAct($request->user(), $approvalRequest), 403);
 
-        $this->workflow->approve($approvalRequest, $request->user());
+        try {
+            $this->workflow->approve($approvalRequest, $request->user());
+        } catch (InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', 'Persetujuan berhasil dicatat.');
     }
@@ -25,7 +30,11 @@ class ApprovalActionController extends Controller
     {
         abort_unless($this->workflow->canAct($request->user(), $approvalRequest), 403);
 
-        $this->workflow->reject($approvalRequest, $request->user(), $request->validated('note'));
+        try {
+            $this->workflow->reject($approvalRequest, $request->user(), $request->validated('note'));
+        } catch (InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', 'Pengajuan ditolak.');
     }

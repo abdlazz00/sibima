@@ -57,28 +57,32 @@ class ApprovalWorkflowService
 
     public function approve(ApprovalRequest $request, User $approver, ?string $note = null): void
     {
-        if ($request->status !== ApprovalStatus::Pending) {
-            throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
-        }
-
         if (! $this->canAct($approver, $request)) {
             throw new InvalidArgumentException('Anda tidak berwenang menyetujui step ini.');
         }
 
         DB::transaction(function () use ($request, $approver, $note) {
-            $request->actions()->create([
-                'step_order' => $request->current_step,
+            $locked = ApprovalRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->status !== ApprovalStatus::Pending || $locked->current_step !== $request->current_step) {
+                throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+            }
+
+            $locked->actions()->create([
+                'step_order' => $locked->current_step,
                 'user_id' => $approver->id,
                 'action' => ApprovalActionType::Approve,
                 'note' => $note,
             ]);
 
-            if ($request->isLastStep()) {
-                $request->update(['status' => ApprovalStatus::Approved]);
-                $this->runEffect($request);
+            if ($locked->isLastStep()) {
+                $locked->update(['status' => ApprovalStatus::Approved]);
+                $this->runEffect($locked);
             } else {
-                $request->update(['current_step' => $request->current_step + 1]);
+                $locked->update(['current_step' => $locked->current_step + 1]);
             }
+
+            $request->setRawAttributes($locked->getAttributes());
         });
 
         if ($request->fresh()->status === ApprovalStatus::Approved) {
@@ -90,23 +94,26 @@ class ApprovalWorkflowService
 
     public function reject(ApprovalRequest $request, User $approver, string $note): void
     {
-        if ($request->status !== ApprovalStatus::Pending) {
-            throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
-        }
-
         if (! $this->canAct($approver, $request)) {
             throw new InvalidArgumentException('Anda tidak berwenang menolak step ini.');
         }
 
         DB::transaction(function () use ($request, $approver, $note) {
-            $request->actions()->create([
-                'step_order' => $request->current_step,
+            $locked = ApprovalRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->status !== ApprovalStatus::Pending || $locked->current_step !== $request->current_step) {
+                throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+            }
+
+            $locked->actions()->create([
+                'step_order' => $locked->current_step,
                 'user_id' => $approver->id,
                 'action' => ApprovalActionType::Reject,
                 'note' => $note,
             ]);
 
-            $request->update(['status' => ApprovalStatus::Rejected]);
+            $locked->update(['status' => ApprovalStatus::Rejected]);
+            $request->setRawAttributes($locked->getAttributes());
         });
 
         $this->notifySubmitter($request, "Pengajuan Anda ditolak: {$note}");

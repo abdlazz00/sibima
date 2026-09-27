@@ -95,6 +95,44 @@ it('fails the final approval clearly when the category has no BMD code', functio
     expect(Asset::where('category_id', $this->category->id)->count())->toBe(0);
 });
 
+it('gives every unit a distinct no_dokumen even when items span different categories', function () {
+    $otherCategory = AssetCategory::factory()->subcategory()->create(['code' => '1.3.2.10.01.02']);
+
+    $ba = BeritaAcaraPenerimaan::create([
+        'no_berita_acara' => 'BA/900/IX/2025',
+        'tanggal_penerimaan' => '2025-08-05',
+        'sumber_perolehan' => 'APBD',
+        'no_kontrak_spk' => 'SPK/900/IX/2025',
+        'vendor' => 'PT. Test',
+        'unit_id' => $this->kec->id,
+        'created_by' => $this->admin->id,
+        'status' => 'submitted',
+    ]);
+    $ba->items()->create([
+        'nama_aset' => 'AC Split',
+        'merk_type' => 'FTXM35',
+        'category_id' => $this->category->id,
+        'jumlah_unit' => 1,
+        'nilai_per_unit' => 5500000,
+        'kondisi_awal' => 'baik',
+    ]);
+    $ba->items()->create([
+        'nama_aset' => 'Komputer',
+        'merk_type' => 'HP',
+        'category_id' => $otherCategory->id,
+        'jumlah_unit' => 1,
+        'nilai_per_unit' => 8000000,
+        'kondisi_awal' => 'baik',
+    ]);
+
+    $request = $this->service->submit($ba, 'penerimaan_aset', $this->admin);
+    $this->service->approve($request, $this->kasubag);
+    $this->service->approve($request, $this->camat);
+
+    $noDokumens = Asset::whereIn('category_id', [$this->category->id, $otherCategory->id])->pluck('no_dokumen');
+    expect($noDokumens->unique())->toHaveCount(2);
+});
+
 it('does not create any asset when rejected before the final step', function () {
     $ba = makeBeritaAcaraForEffectTest($this);
     $request = $this->service->submit($ba, 'penerimaan_aset', $this->admin);

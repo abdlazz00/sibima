@@ -2,6 +2,7 @@
 
 use App\Contracts\WorkflowEffect;
 use App\Enums\ApprovalStatus;
+use App\Models\ApprovalRequest;
 use App\Models\WorkflowDefinition;
 use App\Services\ApprovalWorkflowService;
 use Illuminate\Database\Eloquent\Model;
@@ -104,4 +105,20 @@ it('reports canAct as false once approved, even for the deciding step\'s own app
     $this->service->approve($request, $this->camat);
 
     expect($this->service->canAct($this->camat, $request->fresh()))->toBeFalse();
+});
+
+it('refuses a concurrent double approve on the final step, even from two stale copies of the same request', function () {
+    $request = $this->service->submit($this->submitter, 'test_workflow', $this->submitter);
+    $this->service->approve($request, $this->kasubag);
+
+    $staleA = ApprovalRequest::find($request->id);
+    $staleB = ApprovalRequest::find($request->id);
+
+    $this->service->approve($staleA, $this->camat);
+
+    expect(fn () => $this->service->approve($staleB, $this->camat))
+        ->toThrow(InvalidArgumentException::class);
+
+    expect(TestWorkflowEffect::$applied)->toBe($this->submitter->id)
+        ->and($request->fresh()->actions()->where('action', 'approve')->count())->toBe(2);
 });
