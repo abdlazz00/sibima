@@ -1,0 +1,154 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\ApprovalActionType;
+use App\Enums\ApprovalStatus;
+use App\Enums\UnitScope;
+use App\Models\ApprovalRequest;
+use App\Models\User;
+use App\Models\WorkflowDefinition;
+use App\Models\WorkflowStep;
+use App\Notifications\ApprovalStepNotification;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+
+class ApprovalWorkflowService
+{
+    public function submit(Model $approvable, string $workflowCode, User $submitter): ApprovalRequest
+    {
+        $definition = WorkflowDefinition::where('code', $workflowCode)->firstOrFail();
+
+        $request = ApprovalRequest::create([
+            'workflow_definition_id' => $definition->id,
+            'approvable_type' => $approvable->getMorphClass(),
+            'approvable_id' => $approvable->getKey(),
+            'current_step' => 1,
+            'status' => ApprovalStatus::Pending,
+            'created_by' => $submitter->id,
+        ]);
+
+        $request->setRelation('approvable', $approvable);
+        $this->notifyApprovers($request);
+
+        return $request;
+    }
+
+    public function canAct(User $user, ApprovalRequest $request): bool
+    {
+        $step = $request->currentStepDefinition();
+
+        if ($step === null || ! $user->hasRole($step->approver_role)) {
+            return false;
+        }
+
+        return match ($step->unit_scope) {
+            UnitScope::None => true,
+            UnitScope::Subject => $user->canAccessUnit($request->approvable->unit),
+            UnitScope::Origin, UnitScope::Destination => false,
+        };
+    }
+
+    public function approve(ApprovalRequest $request, User $approver, ?string $note = null): void
+    {
+        if ($request->status !== ApprovalStatus::Pending) {
+            throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+        }
+
+        if (! $this->canAct($approver, $request)) {
+            throw new InvalidArgumentException('Anda tidak berwenang menyetujui step ini.');
+        }
+
+        DB::transaction(function () use ($request, $approver, $note) {
+            $request->actions()->create([
+                'step_order' => $request->current_step,
+                'user_id' => $approver->id,
+                'action' => ApprovalActionType::Approve,
+                'note' => $note,
+            ]);
+
+            if ($request->isLastStep()) {
+                $request->update(['status' => ApprovalStatus::Approved]);
+                $this->runEffect($request);
+            } else {
+                $request->update(['current_step' => $request->current_step + 1]);
+            }
+        });
+
+        if ($request->fresh()->status === ApprovalStatus::Approved) {
+            $this->notifySubmitter($request, 'Pengajuan Anda telah disetujui.');
+        } else {
+            $this->notifyApprovers($request->fresh());
+        }
+    }
+
+    public function reject(ApprovalRequest $request, User $approver, string $note): void
+    {
+        if ($request->status !== ApprovalStatus::Pending) {
+            throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+        }
+
+        if (! $this->canAct($approver, $request)) {
+            throw new InvalidArgumentException('Anda tidak berwenang menolak step ini.');
+        }
+
+        DB::transaction(function () use ($request, $approver, $note) {
+            $request->actions()->create([
+                'step_order' => $request->current_step,
+                'user_id' => $approver->id,
+                'action' => ApprovalActionType::Reject,
+                'note' => $note,
+            ]);
+
+            $request->update(['status' => ApprovalStatus::Rejected]);
+        });
+
+        $this->notifySubmitter($request, "Pengajuan Anda ditolak: {$note}");
+    }
+
+    private function runEffect(ApprovalRequest $request): void
+    {
+        $effectClass = config("workflow.effects.{$request->definition->code}");
+
+        if ($effectClass === null) {
+            throw new InvalidArgumentException("Tidak ada effect terdaftar untuk alur \"{$request->definition->code}\".");
+        }
+
+        app($effectClass)->apply($request->approvable);
+    }
+
+    private function notifyApprovers(ApprovalRequest $request): void
+    {
+        $step = $request->currentStepDefinition();
+
+        if ($step === null) {
+            return;
+        }
+
+        $this->approversFor($step, $request->approvable)->each(
+            fn (User $user) => $user->notify(new ApprovalStepNotification(
+                $request,
+                "Menunggu persetujuan Anda: {$request->definition->name}",
+            ))
+        );
+    }
+
+    private function notifySubmitter(ApprovalRequest $request, string $message): void
+    {
+        $request->creator->notify(new ApprovalStepNotification($request, $message));
+    }
+
+    /** @return Collection<int, User> */
+    private function approversFor(WorkflowStep $step, Model $approvable): Collection
+    {
+        $users = User::role($step->approver_role)->get();
+
+        if ($step->unit_scope === UnitScope::Subject) {
+            return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->unit))->values();
+        }
+
+        return $users;
+    }
+}
