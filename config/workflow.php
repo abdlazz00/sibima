@@ -1,9 +1,13 @@
 <?php
 
+use App\Services\PenerimaanAsetEffect;
+
 return [
     /*
      * Maps a workflow_definitions.code to the WorkflowEffect implementation
      * that runs when a request under that code reaches its final approval.
      */
-    'effects' => [],
+    'effects' => [
+        'penerimaan_aset' => PenerimaanAsetEffect::class,
+    ],
 ];

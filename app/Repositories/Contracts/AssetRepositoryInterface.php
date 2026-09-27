@@ -16,6 +16,8 @@ interface AssetRepositoryInterface
 
     public function maxRegisterNumber(string $kodeBarang): int;
 
+    public function maxKodeBarangSuffix(string $prefix): int;
+
     /**
      * @param  list<int>  $ids
      * @return Collection<int, Asset>

@@ -47,6 +47,16 @@ class EloquentAssetRepository implements AssetRepositoryInterface
             ->max('nomor_register');
     }
 
+    public function maxKodeBarangSuffix(string $prefix): int
+    {
+        return Asset::query()
+            ->where('kode_barang', 'like', $prefix.'.%')
+            ->lockForUpdate()
+            ->get(['kode_barang'])
+            ->map(fn (Asset $a) => (int) substr($a->kode_barang, strlen($prefix) + 1))
+            ->max() ?? 0;
+    }
+
     public function create(array $attributes): Asset
     {
         return Asset::create($attributes);
