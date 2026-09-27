@@ -4,6 +4,7 @@ use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetLabelController;
 use App\Http\Controllers\AssetPhotoController;
+use App\Http\Controllers\ApprovalActionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenerimaanAsetController;
@@ -41,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/penerimaan-aset/create', [PenerimaanAsetController::class, 'create'])->name('penerimaan-aset.create');
     Route::post('/penerimaan-aset', [PenerimaanAsetController::class, 'store'])->name('penerimaan-aset.store');
     Route::get('/penerimaan-aset/{beritaAcara}', [PenerimaanAsetController::class, 'show'])->name('penerimaan-aset.show');
+
+    Route::post('/approval-requests/{approvalRequest}/approve', [ApprovalActionController::class, 'approve'])->name('approval-requests.approve');
+    Route::post('/approval-requests/{approvalRequest}/reject', [ApprovalActionController::class, 'reject'])->name('approval-requests.reject');
 
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::get('/asset-categories/create', [AssetCategoryController::class, 'create'])->name('asset-categories.create');

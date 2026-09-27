@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\RejectApprovalRequest;
+use App\Models\ApprovalRequest;
+use App\Services\ApprovalWorkflowService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+
+class ApprovalActionController extends Controller
+{
+    public function __construct(private readonly ApprovalWorkflowService $workflow) {}
+
+    public function approve(Request $request, ApprovalRequest $approvalRequest): RedirectResponse
+    {
+        abort_unless($this->workflow->canAct($request->user(), $approvalRequest), 403);
+
+        $this->workflow->approve($approvalRequest, $request->user());
+
+        return back()->with('success', 'Persetujuan berhasil dicatat.');
+    }
+
+    public function reject(RejectApprovalRequest $request, ApprovalRequest $approvalRequest): RedirectResponse
+    {
+        abort_unless($this->workflow->canAct($request->user(), $approvalRequest), 403);
+
+        $this->workflow->reject($approvalRequest, $request->user(), $request->validated('note'));
+
+        return back()->with('success', 'Pengajuan ditolak.');
+    }
+}
