@@ -97,3 +97,11 @@ it('refuses to act twice on an already-decided request', function () {
     expect(fn () => $this->service->approve($request, $this->kasubag))
         ->toThrow(InvalidArgumentException::class);
 });
+
+it('reports canAct as false once approved, even for the deciding step\'s own approver', function () {
+    $request = $this->service->submit($this->submitter, 'test_workflow', $this->submitter);
+    $this->service->approve($request, $this->kasubag);
+    $this->service->approve($request, $this->camat);
+
+    expect($this->service->canAct($this->camat, $request->fresh()))->toBeFalse();
+});

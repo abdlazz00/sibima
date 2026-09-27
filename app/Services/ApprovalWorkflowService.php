@@ -38,6 +38,10 @@ class ApprovalWorkflowService
 
     public function canAct(User $user, ApprovalRequest $request): bool
     {
+        if ($request->status !== ApprovalStatus::Pending) {
+            return false;
+        }
+
         $step = $request->currentStepDefinition();
 
         if ($step === null || ! $user->hasRole($step->approver_role)) {
