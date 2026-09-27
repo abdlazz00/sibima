@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UnitSeeder::class,
             AssetCategorySeeder::class,
+            WorkflowDefinitionSeeder::class,
         ]);
 
         if (app()->environment(['local', 'testing'])) {
