@@ -8,6 +8,7 @@ use App\Http\Controllers\ApprovalActionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenerimaanAsetController;
+use App\Http\Controllers\PersetujuanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/approval-requests/{approvalRequest}/approve', [ApprovalActionController::class, 'approve'])->name('approval-requests.approve');
     Route::post('/approval-requests/{approvalRequest}/reject', [ApprovalActionController::class, 'reject'])->name('approval-requests.reject');
+
+    Route::get('/persetujuan', [PersetujuanController::class, 'index'])->name('persetujuan.index');
 
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::get('/asset-categories/create', [AssetCategoryController::class, 'create'])->name('asset-categories.create');
