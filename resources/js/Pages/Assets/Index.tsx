@@ -11,6 +11,7 @@ import {
 } from '@/Components/Icons';
 import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { pageNumbersWithGaps } from '@/lib/pagination';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
@@ -59,27 +60,6 @@ function formatRupiah(value: string | number): string {
 
 function registerLabel(nomor: number): string {
     return String(nomor).padStart(4, '0');
-}
-
-function pageNumbersWithGaps(current: number, last: number): (number | '...')[] {
-    if (last <= 7) {
-        return Array.from({ length: last }, (_, i) => i + 1);
-    }
-
-    const pages = new Set<number>([1, 2, last - 1, last, current - 1, current, current + 1]);
-    const sorted = Array.from(pages)
-        .filter((p) => p >= 1 && p <= last)
-        .sort((a, b) => a - b);
-
-    const result: (number | '...')[] = [];
-    sorted.forEach((page, idx) => {
-        if (idx > 0 && page - (sorted[idx - 1] as number) > 1) {
-            result.push('...');
-        }
-        result.push(page);
-    });
-
-    return result;
 }
 
 export default function Index({ assets, filters, categories, units, kondisiOptions, can }: IndexProps) {
