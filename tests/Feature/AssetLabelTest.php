@@ -59,3 +59,12 @@ it('forbids a user with no role from printing labels', function () {
         ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id]]))
         ->assertForbidden();
 });
+
+it('returns a guest scanning the QR straight back to the asset after login', function () {
+    $this->get("/assets/{$this->own->id}")->assertRedirect('/login');
+
+    $this->post('/login', [
+        'email' => $this->admin->email,
+        'password' => 'password',
+    ])->assertRedirect("/assets/{$this->own->id}");
+});

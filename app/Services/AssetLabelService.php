@@ -6,9 +6,12 @@ use App\Models\Asset;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class AssetLabelService
 {
+    private const MAX_NAME_LENGTH = 56;
+
     public function __construct(private readonly QrCodeService $qr) {}
 
     /** @param Collection<int, Asset> $assets */
@@ -18,6 +21,7 @@ class AssetLabelService
 
         $labels = $assets->map(fn (Asset $asset) => [
             'asset' => $asset,
+            'name' => Str::limit($asset->nama_aset, self::MAX_NAME_LENGTH),
             'qr' => $this->qr->forAsset($asset),
         ]);
 

@@ -8,6 +8,8 @@
         table.sheet { width: 100%; border-collapse: separate; border-spacing: 3mm 2.5mm; }
         td.cell { width: 50%; vertical-align: top; padding: 0; }
 
+        .cut-guide { border: 0.15mm dashed #999; padding: 1.2mm; display: inline-block; }
+
         table.label {
             width: 83mm;
             height: 25mm;
@@ -78,6 +80,8 @@
             line-height: 1.25;
             word-break: break-word;
             margin-bottom: 1.2mm;
+            max-height: 6.5mm;
+            overflow: hidden;
         }
         .asset-code {
             font-size: 6.2pt;
@@ -107,6 +111,7 @@
         <tr>
             @foreach ($row as $label)
                 <td class="cell">
+                    <div class="cut-guide">
                     <table class="label">
                         <tr>
                             <td class="logo-col" style="width: 15mm;">
@@ -130,7 +135,7 @@
                                     </tr>
                                     <tr>
                                         <td class="detail-cell {{ isset($label['asset']->unit) && $label['asset']->unit->type === 'kelurahan' ? 'detail-cell-kel' : '' }}">
-                                            <div class="asset-name">{{ $label['asset']->nama_aset }}</div>
+                                            <div class="asset-name">{{ $label['name'] }}</div>
                                             <div class="asset-code">{{ $label['asset']->kode_barang }}</div>
                                         </td>
                                     </tr>
@@ -141,6 +146,7 @@
                             </td>
                         </tr>
                     </table>
+                    </div>
                 </td>
             @endforeach
             @for ($i = $row->count(); $i < 2; $i++)
