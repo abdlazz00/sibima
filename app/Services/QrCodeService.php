@@ -10,12 +10,12 @@ use BaconQrCode\Writer;
 
 class QrCodeService
 {
-    public function pngDataUri(string $content, int $size = 300): string
+    public function pngDataUri(string $content, int $size = 300, int $margin = 1): string
     {
-        $png = (new Writer(new GDLibRenderer($size)))->writeString(
+        $png = (new Writer(new GDLibRenderer($size, $margin)))->writeString(
             $content,
             Encoder::DEFAULT_BYTE_MODE_ENCODING,
-            ErrorCorrectionLevel::Q()
+            ErrorCorrectionLevel::M()
         );
 
         return 'data:image/png;base64,'.base64_encode($png);

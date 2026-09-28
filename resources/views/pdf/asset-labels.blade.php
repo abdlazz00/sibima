@@ -3,12 +3,39 @@
 <head>
     <meta charset="utf-8">
     <style>
-        @page { margin: 8mm; }
-        body { font-family: 'DejaVu Sans', sans-serif; color: #000; margin: 0; padding: 0; }
-        table.sheet { width: 100%; border-collapse: separate; border-spacing: 3mm 2.5mm; }
-        td.cell { width: {{ 100 / $dims['per_row'] }}%; vertical-align: top; padding: 0; }
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
+        }
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+        table.sheet {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 3mm 2.5mm;
+            page-break-inside: auto;
+        }
+        table.sheet tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        td.cell {
+            width: {{ 100 / $dims['per_row'] }}%;
+            vertical-align: top;
+            padding: 0;
+            page-break-inside: avoid;
+        }
 
-        .cut-guide { border: 0.15mm dashed #999; padding: 1.2mm; display: inline-block; }
+        .cut-guide {
+            border: 0.15mm dashed #888;
+            padding: 1.0mm;
+            display: inline-block;
+            page-break-inside: avoid;
+        }
 
         table.label {
             width: {{ $dims['width'] }}mm;
@@ -16,13 +43,21 @@
             border: 0.35mm solid #000;
             border-collapse: collapse;
             table-layout: fixed;
+            page-break-inside: avoid;
         }
-        table.label td { padding: 0; vertical-align: middle; }
+        table.label td {
+            padding: 0;
+            vertical-align: middle;
+        }
 
         .qr-col {
-            width: {{ $dims['qr_col'] }}mm;
+            width: {{ $dims['qr_pct'] }}%;
+            max-width: {{ $dims['qr_col'] }}mm;
+            height: {{ $dims['height'] }}mm;
             text-align: center;
             border-right: 0.35mm solid #000;
+            vertical-align: middle;
+            padding: 0;
         }
         .qr-col img {
             width: {{ $dims['qr'] }}mm;
@@ -31,20 +66,86 @@
             margin: 0 auto;
         }
 
-        .info-col { width: {{ $dims['info_col'] }}mm; padding: 0; }
-        .info-table { width: 100%; height: {{ $dims['height'] }}mm; border-collapse: collapse; }
+        .info-col {
+            width: {{ $dims['info_pct'] }}%;
+            height: {{ $dims['height'] }}mm;
+            padding: 0;
+            vertical-align: top;
+        }
+        .info-table {
+            width: 100%;
+            height: {{ $dims['height'] }}mm;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .info-table tr.header-tr,
+        .info-table tr.header-tr td {
+            height: {{ $dims['header_row_height'] }}mm;
+        }
+        .info-table tr.name-tr,
+        .info-table tr.name-tr td {
+            height: {{ $dims['name_row_height'] }}mm;
+        }
+        .info-table tr.code-tr,
+        .info-table tr.code-tr td {
+            height: {{ $dims['code_row_height'] }}mm;
+        }
         .info-table td {
-            height: {{ $dims['row_height'] }}mm;
-            border-bottom: 0.3mm solid #000;
-            padding: 0.5mm 2mm;
+            border-bottom: 0.35mm solid #000;
+            vertical-align: middle;
+            padding: 0;
+        }
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .info-table td.header-row {
+            text-align: center;
+            font-size: {{ $dims['header_font'] }}pt;
+            font-weight: bold;
+            line-height: 1.15;
+            letter-spacing: 0.2pt;
+            padding: 0.2mm 1.5mm;
             vertical-align: middle;
         }
-        .info-table tr:last-child td { border-bottom: none; }
-
-        .header-row { text-align: center; font-weight: bold; font-size: {{ $dims['header_font'] }}pt; line-height: 1.2; letter-spacing: 0.2pt; }
-        .header-row.kel { font-size: {{ $dims['header_font_kel'] }}pt; line-height: 1.1; }
-        .name-row { font-size: {{ $dims['name_font'] }}pt; font-weight: bold; line-height: 1.2; word-break: break-word; max-height: {{ $dims['row_height'] }}mm; overflow: hidden; }
-        .code-row { font-size: {{ $dims['code_font'] }}pt; font-weight: 500; letter-spacing: 0.3pt; word-break: break-word; }
+        .info-table td.header-row.kel {
+            font-size: {{ $dims['header_font_kel'] }}pt;
+            line-height: 1.1;
+        }
+        .info-table td.name-row {
+            padding-left: 4.5mm;
+            padding-right: 2.0mm;
+            vertical-align: middle;
+        }
+        .name-box {
+            font-size: {{ $dims['name_font'] }}pt;
+            font-weight: bold;
+            line-height: 1.2;
+            max-height: {{ $dims['name_box_height'] }}mm;
+            overflow: hidden;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+        .info-table td.code-row {
+            padding-left: 4.5mm;
+            padding-right: 2.0mm;
+            vertical-align: middle;
+        }
+        .code-box {
+            font-size: {{ $dims['code_font'] }}pt;
+            line-height: 1.2;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+        .code-main {
+            font-weight: bold;
+            letter-spacing: 0.2pt;
+        }
+        .code-meta {
+            font-size: {{ $dims['code_font'] * 0.92 }}pt;
+            color: #333;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
@@ -56,29 +157,42 @@
                 <td class="cell">
                     <div class="cut-guide">
                     <table class="label">
+                        <colgroup>
+                            <col style="width: {{ $dims['qr_pct'] }}%;">
+                            <col style="width: {{ $dims['info_pct'] }}%;">
+                        </colgroup>
                         <tr>
                             <td class="qr-col">
-                                <img src="{{ $label['qr'] }}" alt="QR Code">
+                                <img src="{{ $label['qr'] }}" alt="QR Code Aset {{ $label['asset']->kode_barang }} - {{ $label['asset']->registerLabel() }}">
                             </td>
                             <td class="info-col">
                                 <table class="info-table">
-                                    <tr>
+                                    <tr class="header-tr">
                                         <td class="header-row {{ $isKel ? 'kel' : '' }}">
                                             @if ($isKel)
-                                                INVENTARIS<br>
+                                                INVENTARIS BMD<br>
                                                 {{ strtoupper($label['asset']->unit->name) }}<br>
                                                 KECAMATAN SAGULUNG
                                             @else
-                                                INVENTARIS<br>
+                                                INVENTARIS BMD<br>
                                                 {{ strtoupper($label['asset']->unit->name ?? 'KECAMATAN SAGULUNG') }}
                                             @endif
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="name-row">{{ $label['name'] }}</td>
+                                    <tr class="name-tr">
+                                        <td class="name-row">
+                                            <div class="name-box">{{ $label['name'] }}</div>
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <td class="code-row">{{ $label['asset']->kode_barang }}</td>
+                                    <tr class="code-tr">
+                                        <td class="code-row">
+                                            <div class="code-box">
+                                                <span class="code-main">{{ $label['asset']->kode_barang }} / {{ $label['asset']->registerLabel() }}</span>
+                                                @if (isset($label['tahun']) && $label['tahun'] !== '-')
+                                                    <span class="code-meta">({{ $label['tahun'] }})</span>
+                                                @endif
+                                            </div>
+                                        </td>
                                     </tr>
                                 </table>
                             </td>

@@ -132,16 +132,23 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <button
                                 type="button"
                                 onClick={() => setPrintIds(selectedIds)}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                                className={`inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold shadow-sm transition ${
+                                    selectedIds.length > 99
+                                        ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                                }`}
                             >
                                 <Printer className="h-4 w-4" />
-                                <span>Cetak Label ({selectedIds.length})</span>
+                                <span>
+                                    Cetak Label ({selectedIds.length})
+                                    {selectedIds.length > 99 && ' · Maks 99'}
+                                </span>
                             </button>
                         )}
                         {can.create && (
                             <Link
                                 href={route('assets.create')}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                             >
                                 <Plus className="h-4 w-4" />
                                 <span>Tambah Aset Baru</span>

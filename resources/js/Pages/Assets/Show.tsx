@@ -114,7 +114,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                         {can.update && (
                             <Link
                                 href={route('assets.edit', asset.id)}
-                                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#1E40AF] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+                                className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                             >
                                 <Pencil className="h-4 w-4" />
                                 <span>Edit Data</span>
