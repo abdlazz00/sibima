@@ -41,9 +41,8 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
             },
             {
                 label: 'Mutasi Aset',
-                href: '#',
+                href: '/asset-mutations',
                 icon: 'shuffle',
-                disabled: true,
             },
             {
                 label: 'Kotak Persetujuan',

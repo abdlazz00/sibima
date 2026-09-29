@@ -122,6 +122,7 @@ export interface ApprovalActionEntry {
 export interface ApprovalStep {
     step_order: number;
     approver_role: string;
+    unit_scope?: string;
 }
 
 export interface ApprovalRequestSummary {
@@ -145,6 +146,37 @@ export interface BeritaAcaraPenerimaan {
     creator?: { id: number; name: string };
     items?: BeritaAcaraItem[];
     approval_request?: ApprovalRequestSummary | null;
+}
+
+export type MutationType = 'kec_ke_kel' | 'antar_kel' | 'retur_kel_ke_kec' | 'internal';
+export type MutationStatus = 'pending' | 'approved' | 'rejected';
+
+export interface AssetMutationItem {
+    id: number;
+    asset_mutation_id: number;
+    asset_id: number;
+    target_holder_id: number | null;
+    catatan: string | null;
+    asset?: Asset;
+    target_holder?: Pegawai | null;
+}
+
+export interface AssetMutation {
+    id: number;
+    nomor_mutasi: string;
+    jenis_mutasi: MutationType;
+    origin_unit_id: number;
+    destination_unit_id: number;
+    tanggal_mutasi: string;
+    keterangan: string | null;
+    status: MutationStatus;
+    created_by: number;
+    origin_unit?: { id: number; name: string; type: 'kecamatan' | 'kelurahan' };
+    destination_unit?: { id: number; name: string; type: 'kecamatan' | 'kelurahan' };
+    creator?: { id: number; name: string };
+    items?: AssetMutationItem[];
+    approval_request?: ApprovalRequestSummary | null;
+    photos?: AssetPhoto[];
 }
 
 export interface NotificationItem {

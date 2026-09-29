@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AssetStatus;
 use App\Http\Requests\StoreAssetMutationRequest;
+use App\Models\Asset;
 use App\Models\AssetMutation;
+use App\Models\Pegawai;
 use App\Models\Unit;
 use App\Repositories\Contracts\AssetMutationRepositoryInterface;
+use App\Services\ApprovalWorkflowService;
 use App\Services\AssetMutationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +32,9 @@ class AssetMutationController extends Controller
 
         return Inertia::render('AssetMutations/Index', [
             'mutations' => $mutations,
+            'can' => [
+                'create' => $request->user()->can('create', AssetMutation::class),
+            ],
         ]);
     }
 
@@ -44,9 +51,21 @@ class AssetMutationController extends Controller
 
         $allUnits = Unit::all();
 
+        $assets = Asset::query()
+            ->where('status', AssetStatus::Aktif)
+            ->when($accessibleUnitIds !== null, fn ($q) => $q->whereIn('unit_id', $accessibleUnitIds))
+            ->with(['category', 'currentHolder'])
+            ->get();
+
+        $pegawais = Pegawai::query()
+            ->select(['id', 'nama', 'nip', 'jabatan', 'unit_id'])
+            ->get();
+
         return Inertia::render('AssetMutations/Create', [
             'units' => $units,
             'allUnits' => $allUnits,
+            'assets' => $assets,
+            'pegawais' => $pegawais,
         ]);
     }
 
@@ -61,7 +80,7 @@ class AssetMutationController extends Controller
         return redirect()->route('asset-mutations.index')->with('success', "Mutasi aset #{$mutation->nomor_mutasi} berhasil diajukan.");
     }
 
-    public function show(AssetMutation $assetMutation): Response
+    public function show(Request $request, AssetMutation $assetMutation): Response
     {
         Gate::authorize('view', $assetMutation);
 
@@ -70,14 +89,20 @@ class AssetMutationController extends Controller
             'destinationUnit',
             'creator',
             'items.asset.category',
+            'items.asset.currentHolder',
             'items.targetHolder',
             'approvalRequest.definition.steps',
             'approvalRequest.actions.user',
             'photos',
         ]);
 
+        $approvalRequest = $assetMutation->approvalRequest;
+
         return Inertia::render('AssetMutations/Show', [
             'mutation' => $assetMutation,
+            'can' => [
+                'act' => $approvalRequest !== null && app(ApprovalWorkflowService::class)->canAct($request->user(), $approvalRequest),
+            ],
         ]);
     }
 }

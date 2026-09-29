@@ -71,6 +71,9 @@ it('executes full mutation HTTP lifecycle: create via POST, index, show, and app
         ->and($mutation->status)->toBe(MutationStatus::Pending)
         ->and($asset->fresh()->status)->toBe(AssetStatus::DalamProses);
 
+    // Create view
+    $this->actingAs($this->adminKec)->get(route('asset-mutations.create'))->assertOk();
+
     // List mutations
     $this->actingAs($this->adminKec)->get(route('asset-mutations.index'))->assertOk();
 
