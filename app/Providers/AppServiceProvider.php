@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AssetCategoryRepositoryInterface::class, EloquentAssetCategoryRepository::class);
         $this->app->bind(PegawaiRepositoryInterface::class, EloquentPegawaiRepository::class);
         $this->app->bind(UnitRepositoryInterface::class, EloquentUnitRepository::class);
+        $this->app->bind(
+            \App\Repositories\Contracts\AssetMutationRepositoryInterface::class,
+            \App\Repositories\AssetMutationRepository::class
+        );
     }
 
     /**
