@@ -63,9 +63,9 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
     // Eligible destination units based on mutation type & origin unit
     const destinationOptions = useMemo(() => {
         const originId = Number(form.data.origin_unit_id);
-        const origin = allUnits.find((u) => u.id === originId);
 
         if (form.data.jenis_mutasi === 'internal') {
+            const origin = allUnits.find((u) => u.id === originId);
             return origin ? [origin] : [];
         }
 
@@ -175,15 +175,15 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
         <AuthenticatedLayout>
             <Head title="Formulir Pengajuan Mutasi Aset" />
 
-            <div className="mx-auto max-w-5xl space-y-6">
+            <div className="space-y-6">
                 {/* Breadcrumbs & Header */}
                 <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">
+                    <nav className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                        <Link href={route('dashboard')} className="transition hover:text-blue-700">
                             Home
                         </Link>
                         <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <Link href={route('asset-mutations.index')} className="hover:text-blue-700">
+                        <Link href={route('asset-mutations.index')} className="transition hover:text-blue-700">
                             Mutasi Aset
                         </Link>
                         <ChevronRight className="h-3 w-3 text-slate-400" />
@@ -192,19 +192,24 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                     <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
                         Formulir Pengajuan Mutasi Aset
                     </h1>
-                    <p className="mt-1 text-sm text-slate-500">
-                        Lengkapi dokumen berita acara mutasi dan pilih unit aset yang akan dipindahkan kepemilikannya.
+                    <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                        Lengkapi dokumen berita acara mutasi dan tentukan aset yang dialihkan kepemilikannya.
                     </p>
                 </div>
 
-                <form onSubmit={submit} className="space-y-8">
+                <form onSubmit={submit} className="space-y-6 sm:space-y-8">
                     {/* Section 1: Informasi Dokumen Mutasi */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
-                        <h2 className="border-b border-slate-100 pb-3 text-base font-semibold text-slate-900">
-                            1. Dokumen & Alur Mutasi
-                        </h2>
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:p-6 lg:p-8">
+                        <div className="border-b border-slate-100 pb-3">
+                            <h2 className="text-base font-semibold text-slate-900">
+                                Informasi Dokumen & Alur Mutasi
+                            </h2>
+                            <p className="text-xs text-slate-500">
+                                Identitas surat pengajuan dan relasi unit kerja yang terlibat
+                            </p>
+                        </div>
 
-                        <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div className="mt-5 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
                             <div>
                                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
                                     Nomor Dokumen Mutasi <span className="text-red-500">*</span>
@@ -337,11 +342,11 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                     </div>
 
                     {/* Section 2: Daftar Aset yang Dimutasi */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:p-6 lg:p-8">
+                        <div className="flex flex-col gap-3 border-b border-slate-100 pb-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 className="text-base font-semibold text-slate-900">
-                                    2. Daftar Aset yang Dimutasi
+                                    Daftar Aset yang Dimutasi
                                 </h2>
                                 <p className="text-xs text-slate-500">
                                     Pilih barang aktif yang akan diserahterimakan (tersedia {availableAssets.length} aset aktif di {originUnit?.name}).
@@ -350,7 +355,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                             <button
                                 type="button"
                                 onClick={addItem}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50/50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100/60 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
+                                className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50/50 px-3.5 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100/60 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 sm:w-auto"
                             >
                                 <Plus className="h-3.5 w-3.5" /> Tambah Aset Lain
                             </button>
@@ -373,26 +378,26 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                 return (
                                     <div
                                         key={idx}
-                                        className="relative rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition hover:border-slate-300"
+                                        className="relative rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition hover:border-slate-300 sm:p-5"
                                     >
                                         <div className="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
-                                            <span className="text-xs font-bold text-slate-700">
+                                            <span className="text-xs font-bold text-slate-800">
                                                 Aset #{idx + 1}
                                             </span>
                                             {form.data.items.length > 1 && (
                                                 <button
                                                     type="button"
                                                     onClick={() => removeItem(idx)}
-                                                    className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700"
+                                                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
                                                 >
                                                     <Trash className="h-3.5 w-3.5" /> Hapus
                                                 </button>
                                             )}
                                         </div>
 
-                                        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                                        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
                                             {/* Pilih Aset */}
-                                            <div className="sm:col-span-2 md:col-span-1">
+                                            <div className="lg:col-span-5">
                                                 <label className="mb-1 block text-xs font-medium text-slate-700">
                                                     Pilih Barang / Aset <span className="text-red-500">*</span>
                                                 </label>
@@ -423,19 +428,21 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                                     <p className="mt-1 text-xs text-red-600">{itemAssetError}</p>
                                                 )}
                                                 {selectedAsset && (
-                                                    <div className="mt-1.5 flex flex-wrap gap-1 text-[11px] text-slate-500">
+                                                    <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[11px] text-slate-500">
                                                         <span>Merk: {selectedAsset.merk_type ?? '—'}</span>
-                                                        <span>•</span>
+                                                        <span aria-hidden="true">&bull;</span>
                                                         <span>
-                                                            Pemegang:{' '}
-                                                            {selectedAsset.current_holder?.nama ?? 'Inventaris Unit'}
+                                                            Pemegang Saat Ini:{' '}
+                                                            <strong className="font-medium text-slate-700">
+                                                                {selectedAsset.current_holder?.nama ?? 'Inventaris Unit'}
+                                                            </strong>
                                                         </span>
                                                     </div>
                                                 )}
                                             </div>
 
                                             {/* Pemegang Baru */}
-                                            <div>
+                                            <div className="lg:col-span-4">
                                                 <label className="mb-1 block text-xs font-medium text-slate-700">
                                                     Pegawai Pemegang Baru{' '}
                                                     {form.data.jenis_mutasi === 'internal' ? (
@@ -471,7 +478,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                             </div>
 
                                             {/* Catatan Item */}
-                                            <div>
+                                            <div className="lg:col-span-3">
                                                 <label className="mb-1 block text-xs font-medium text-slate-700">
                                                     Catatan Fisik / Kelengkapan
                                                 </label>
@@ -491,17 +498,17 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                     </div>
 
                     {/* Submit Actions */}
-                    <div className="flex items-center justify-end gap-3 pt-2">
+                    <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:justify-end">
                         <Link
                             href={route('asset-mutations.index')}
-                            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                            className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 sm:w-auto"
                         >
                             Batal
                         </Link>
                         <button
                             type="submit"
                             disabled={form.processing}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 sm:w-auto"
                         >
                             {form.processing ? 'Menyimpan...' : 'Kirim Pengajuan Mutasi'}
                         </button>
