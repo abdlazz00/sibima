@@ -105,3 +105,56 @@ it('executes full mutation HTTP lifecycle: create via POST, index, show, and app
         ->and($asset->fresh()->current_holder_id)->toBe($pegawai->id)
         ->and($asset->fresh()->status)->toBe(AssetStatus::Aktif);
 });
+
+it('submits and processes internal mutation within same unit', function () {
+    $pegawaiOld = Pegawai::factory()->create(['unit_id' => $this->kec->id]);
+    $pegawaiNew = Pegawai::factory()->create(['unit_id' => $this->kec->id]);
+
+    $asset = Asset::create([
+        'kode_barang' => '1.3.2.05.02.04.002',
+        'nomor_register' => 2,
+        'nama_aset' => 'Laptop Inventaris',
+        'category_id' => $this->category->id,
+        'unit_id' => $this->kec->id,
+        'current_holder_id' => $pegawaiOld->id,
+        'kondisi' => 'baik',
+        'status' => AssetStatus::Aktif,
+        'tanggal_perolehan' => '2025-01-01',
+        'sumber_perolehan' => 'APBD',
+        'nilai_perolehan' => 15000000,
+        'nilai_buku' => 15000000,
+    ]);
+
+    $payload = [
+        'nomor_mutasi' => 'MUT/INTERNAL/0001',
+        'jenis_mutasi' => MutationType::Internal->value,
+        'origin_unit_id' => $this->kec->id,
+        'destination_unit_id' => $this->kec->id,
+        'tanggal_mutasi' => '2026-09-29',
+        'keterangan' => 'Pengalihan laptop ke pegawai baru di kecamatan',
+        'items' => [
+            [
+                'asset_id' => $asset->id,
+                'target_holder_id' => $pegawaiNew->id,
+                'catatan' => 'Unit lengkap',
+            ],
+        ],
+    ];
+
+    $response = $this->actingAs($this->adminKec)->post(route('asset-mutations.store'), $payload);
+    $response->assertRedirect(route('asset-mutations.index'));
+
+    $mutation = AssetMutation::where('nomor_mutasi', 'MUT/INTERNAL/0001')->first();
+    expect($mutation)->not->toBeNull()
+        ->and($mutation->status)->toBe(MutationStatus::Pending);
+
+    // Approval internal kecamatan: Camat (single step)
+    $this->actingAs($this->camat)
+        ->post(route('approval-requests.approve', $mutation->approvalRequest), ['note' => 'Setuju'])
+        ->assertRedirect();
+
+    expect($mutation->fresh()->status)->toBe(MutationStatus::Approved)
+        ->and($asset->fresh()->current_holder_id)->toBe($pegawaiNew->id)
+        ->and($asset->fresh()->unit_id)->toBe($this->kec->id)
+        ->and($asset->fresh()->status)->toBe(AssetStatus::Aktif);
+});
