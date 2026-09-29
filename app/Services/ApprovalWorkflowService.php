@@ -51,7 +51,10 @@ class ApprovalWorkflowService
         return match ($step->unit_scope) {
             UnitScope::None => true,
             UnitScope::Subject => $user->canAccessUnit($request->approvable->unit),
-            UnitScope::Origin, UnitScope::Destination => false,
+            UnitScope::Origin => $request->approvable instanceof \App\Contracts\HasWorkflowUnits
+                && $user->canAccessUnit($request->approvable->getOriginUnit()),
+            UnitScope::Destination => $request->approvable instanceof \App\Contracts\HasWorkflowUnits
+                && $user->canAccessUnit($request->approvable->getDestinationUnit()),
         };
     }
 
@@ -158,6 +161,14 @@ class ApprovalWorkflowService
 
         if ($step->unit_scope === UnitScope::Subject) {
             return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->unit))->values();
+        }
+
+        if ($step->unit_scope === UnitScope::Origin && $approvable instanceof \App\Contracts\HasWorkflowUnits) {
+            return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->getOriginUnit()))->values();
+        }
+
+        if ($step->unit_scope === UnitScope::Destination && $approvable instanceof \App\Contracts\HasWorkflowUnits) {
+            return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->getDestinationUnit()))->values();
         }
 
         return $users;
