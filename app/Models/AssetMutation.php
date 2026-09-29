@@ -85,6 +85,11 @@ class AssetMutation extends Model implements HasWorkflowUnits
         return "Mutasi Aset #{$this->nomor_mutasi}";
     }
 
+    public function approvalShowUrl(): string
+    {
+        return route('asset-mutations.show', $this);
+    }
+
     public function onApprovalRejected(): void
     {
         $this->update(['status' => MutationStatus::Rejected]);

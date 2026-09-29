@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\WorkflowEffect;
 use App\Enums\AssetStatus;
 use App\Enums\MutationStatus;
+use App\Models\Asset;
 use App\Models\AssetHistory;
 use App\Models\AssetMutation;
 use Illuminate\Database\Eloquent\Model;
@@ -20,10 +21,21 @@ class AssetMutationEffect implements WorkflowEffect
         }
 
         DB::transaction(function () use ($approvable) {
-            $approvable->load(['items.asset', 'originUnit', 'destinationUnit']);
+            $approvable->load(['items', 'originUnit', 'destinationUnit']);
+
+            $assets = Asset::whereIn('id', $approvable->items->pluck('asset_id'))->lockForUpdate()->get()->keyBy('id');
 
             foreach ($approvable->items as $item) {
-                $asset = $item->asset;
+                $asset = $assets->get($item->asset_id);
+
+                if ($asset === null || $asset->unit_id !== $approvable->origin_unit_id || $asset->status !== AssetStatus::DalamProses) {
+                    $name = $asset?->nama_aset ?? "#{$item->asset_id}";
+                    throw new InvalidArgumentException("Aset \"{$name}\" sudah tidak berada di unit asal atau tidak lagi dalam proses mutasi ini.");
+                }
+            }
+
+            foreach ($approvable->items as $item) {
+                $asset = $assets->get($item->asset_id);
 
                 $asset->update([
                     'unit_id' => $approvable->destination_unit_id,

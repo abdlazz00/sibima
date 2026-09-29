@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class AssetMutationController extends Controller
 {
@@ -58,7 +59,7 @@ class AssetMutationController extends Controller
             ->get();
 
         $pegawais = Pegawai::query()
-            ->select(['id', 'nama', 'nip', 'jabatan', 'unit_id'])
+            ->select(['id', 'nama', 'jabatan', 'unit_id'])
             ->get();
 
         return Inertia::render('AssetMutations/Create', [
@@ -75,7 +76,11 @@ class AssetMutationController extends Controller
         $items = $validated['items'];
         unset($validated['items']);
 
-        $mutation = $this->service->submit($validated, $items, $request->user());
+        try {
+            $mutation = $this->service->submit($validated, $items, $request->user());
+        } catch (InvalidArgumentException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         return redirect()->route('asset-mutations.index')->with('success', "Mutasi aset #{$mutation->nomor_mutasi} berhasil diajukan.");
     }

@@ -6,6 +6,7 @@ use App\Enums\AssetStatus;
 use App\Enums\MutationStatus;
 use App\Enums\MutationType;
 use App\Models\Asset;
+use App\Models\Pegawai;
 use App\Models\AssetMutation;
 use App\Models\Unit;
 use App\Models\User;
@@ -41,10 +42,18 @@ class AssetMutationService
             throw new InvalidArgumentException('Mutasi antar unit harus memiliki unit asal dan tujuan yang berbeda.');
         }
 
+        $this->assertUnitKindsMatch($type, $originUnit, $destUnit);
+
+        $assetIds = array_column($items, 'asset_id');
+        if (count($assetIds) !== count(array_unique($assetIds))) {
+            throw new InvalidArgumentException('Satu aset tidak boleh dipilih lebih dari sekali.');
+        }
+
+        $this->assertHoldersBelongToUnit($items, $destUnit);
+
         $workflowCode = $this->resolveWorkflowCode($type, $originUnit);
 
-        return DB::transaction(function () use ($data, $items, $creator, $originUnit, $type, $workflowCode) {
-            $assetIds = array_column($items, 'asset_id');
+        return DB::transaction(function () use ($data, $items, $creator, $originUnit, $type, $workflowCode, $assetIds) {
             $assets = Asset::whereIn('id', $assetIds)->lockForUpdate()->get();
 
             if ($assets->count() !== count($assetIds)) {
@@ -89,5 +98,34 @@ class AssetMutationService
                 ? 'mutasi_internal_kec'
                 : 'mutasi_internal_kel',
         };
+    }
+
+    private function assertUnitKindsMatch(MutationType $type, Unit $origin, Unit $dest): void
+    {
+        $valid = match ($type) {
+            MutationType::KecKeKel => $origin->isKecamatan() && $dest->isKelurahan(),
+            MutationType::AntarKel => $origin->isKelurahan() && $dest->isKelurahan(),
+            MutationType::ReturKelKeKec => $origin->isKelurahan() && $dest->isKecamatan(),
+            MutationType::Internal => true,
+        };
+
+        if (! $valid) {
+            throw new InvalidArgumentException("Unit asal dan tujuan tidak sesuai untuk jenis \"{$type->label()}\".");
+        }
+    }
+
+    private function assertHoldersBelongToUnit(array $items, Unit $destUnit): void
+    {
+        $holderIds = array_filter(array_column($items, 'target_holder_id'));
+
+        if ($holderIds === []) {
+            return;
+        }
+
+        $outside = Pegawai::whereIn('id', $holderIds)->where('unit_id', '!=', $destUnit->id)->exists();
+
+        if ($outside) {
+            throw new InvalidArgumentException("Pegawai pemegang baru harus terdaftar di unit tujuan ({$destUnit->name}).");
+        }
     }
 }
