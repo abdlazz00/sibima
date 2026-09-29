@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AssetHistory extends Model
 {
     protected $fillable = [
+        'asset_id',
         'event',
         'unit_id',
         'current_holder_id',

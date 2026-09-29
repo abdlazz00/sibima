@@ -83,4 +83,11 @@ class AssetMutation extends Model implements HasWorkflowUnits
     {
         return "Mutasi Aset #{$this->nomor_mutasi}";
     }
+
+    public function onApprovalRejected(): void
+    {
+        $this->update(['status' => MutationStatus::Rejected]);
+        $assetIds = $this->items()->pluck('asset_id');
+        Asset::whereIn('id', $assetIds)->update(['status' => \App\Enums\AssetStatus::Aktif]);
+    }
 }

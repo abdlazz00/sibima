@@ -116,6 +116,11 @@ class ApprovalWorkflowService
             ]);
 
             $locked->update(['status' => ApprovalStatus::Rejected]);
+
+            if (method_exists($locked->approvable, 'onApprovalRejected')) {
+                $locked->approvable->onApprovalRejected();
+            }
+
             $request->setRawAttributes($locked->getAttributes());
         });
 
