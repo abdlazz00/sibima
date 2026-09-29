@@ -16,7 +16,7 @@ beforeEach(function () {
     $this->admin = userWithRole('admin_kecamatan', $this->kec);
     $this->kasubag = userWithRole('kasubag');
     $this->camat = userWithRole('camat', $this->kec);
-    $this->category = AssetCategory::factory()->create(['code' => '1.3.2.05.02.04']);
+    $this->category = AssetCategory::factory()->subcategory()->create(['code' => '1.3.2.05.02.04']);
 
     $this->ba = BeritaAcaraPenerimaan::create([
         'no_berita_acara' => 'BA/050/IX/2025', 'tanggal_penerimaan' => '2025-09-01',

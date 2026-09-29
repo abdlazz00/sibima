@@ -129,7 +129,9 @@ Matriks berikut menggabungkan spesifikasi dokumen desain (`PANDUAN_DESAIN_UI_UX_
 | **Penerimaan Aset (Verifikasi)** | ✅ Step 1 (Kasubag) | ✅ Step 2 (Camat) | ❌ Read Only | ❌ Dilarang | ❌ Dilarang | ✅ Selesai (`Workflow penerimaan_aset`) |
 | **Mutasi Aset (Ajukan)** | ❌ Read Only | ❌ Read Only | ✅ Unit Asal Kec. | ✅ Unit Asal Kel. | ❌ Read Only | ✅ Selesai (`AssetMutationPolicy::create`) |
 | **Mutasi Aset (Persetujuan)** | Sesuai Alur | Sesuai Alur | Sesuai Alur (Konfirmasi) | Sesuai Alur (Konfirmasi) | Sesuai Alur | ✅ Selesai (`ApprovalWorkflowService`) |
-| **Kotak Persetujuan (`/persetujuan`)** | ✅ Tugas Kasubag | ✅ Tugas Camat | ❌ Kosong | ❌ Kosong | ✅ Tugas Lurah | ✅ Selesai (`PersetujuanController`) |
+| **Kotak Persetujuan (`/persetujuan`)** | ✅ Tugas Kasubag | ✅ Tugas Camat | ✅ Langkah verifikasi retur | ✅ Langkah verifikasi mutasi masuk | ✅ Tugas Lurah | ✅ Selesai (`PersetujuanController`) |
+| **Batalkan Pengajuan** | ❌ | ❌ | ✅ Hanya pengaju, selama pending | ✅ Hanya pengaju, selama pending | ❌ | ✅ Selesai (`ApprovalWorkflowService::cancel`) |
+| **Draft Berita Acara (lihat/edit/hapus)** | ❌ Tidak terlihat | ❌ Tidak terlihat | ✅ Admin unit yang sama | ❌ | ❌ | ✅ Selesai (`BeritaAcaraPenerimaanPolicy`) |
 | **Permohonan Kebutuhan Aset** | Approve Req Unit | Approve Peg. Kec. | Input Form | Input Form | Approve Peg. Kel. | ⏳ *Next Roadmap* |
 | **Pelaporan Rusak / Hilang** | Monitor Laporan | Approve Peg. Kec. | Input Form | Input Form | Approve Peg. Kel. | ⏳ *Next Roadmap* |
 | **Pindai QR Code Kamera** | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ⏳ *Next Roadmap* |
@@ -185,6 +187,18 @@ public function create(User $user): bool
     // Hanya Admin Kecamatan yang berhak menginput dokumen penerimaan
     return $user->hasRole('admin_kecamatan') && $user->unit_id !== null;
 }
+
+public function view(User $user, BeritaAcaraPenerimaan $ba): bool
+{
+    // Draft hanya terlihat oleh admin_kecamatan di unit yang sama;
+    // Kasubag/Camat baru melihat BA setelah diajukan
+    if ($ba->status === BeritaAcaraStatus::Draft) {
+        return $user->hasRole('admin_kecamatan') && $user->canAccessUnit($ba->unit);
+    }
+    return $user->hasRole('kasubag') || $user->canAccessUnit($ba->unit);
+}
+
+// update & delete: hanya untuk draft, oleh admin_kecamatan unit yang sama
 ```
 
 #### D. `AssetMutationPolicy` (`app/Policies/AssetMutationPolicy.php`)
@@ -287,9 +301,9 @@ public function canAct(User $user, ApprovalRequest $request): bool
 ## 7. OTORISASI PADA ANTARMUKA FRONTEND (INERTIA REACT)
 
 Frontend menerapkan prinsip **Defense in Depth**:
-1. **Navigasi Sidebar Responsif Per Role** (`resources/js/config/navigation.ts`):
-   - Menu *Kategori Aset* hanya dirender jika role memiliki hak akses.
-   - Menu *Kotak Persetujuan* hanya menampilkan badge angka jika user adalah pejabat penandatangan (`kasubag`, `camat`, `lurah`).
+1. **Navigasi Sidebar Responsif Per Role** (`resources/js/config/navigation.ts`, properti `roles` per item):
+   - *Kategori Aset* hanya untuk `kasubag`; *Penerimaan Aset* hanya untuk `kasubag`, `camat`, `admin_kecamatan`.
+   - *Kotak Persetujuan* tampil untuk semua role karena admin kecamatan/kelurahan juga menjadi approver pada langkah verifikasi mutasi. Badge angkanya adalah jumlah pengajuan yang **sedang menunggu tindakan user tersebut** (prop bersama `pending_approvals`, dihitung dengan `canAct()` yang sama dengan halaman inbox), bukan jumlah notifikasi belum dibaca.
 2. **Prop Otorisasi Komponen (`can`)**:
    - Controller selalu mengirimkan objek otorisasi eksplisit via Inertia:
      ```php
@@ -319,5 +333,5 @@ Berdasarkan evaluasi as-built dan rencana modul berikutnya:
    - Menjaga integritas bahwa pembuatan akun login `User` baru bagi pegawai tetap berada di bawah kendali tunggal `kasubag` untuk mencegah pembuatan akun liar di luar verifikasi kepegawaian resmi.
 
 ---
-*Dokumen diperbarui: 29 September 2026*  
+*Dokumen diperbarui: 29 September 2026 (selaras dengan perilaku as-built setelah code review Sprint 3)*  
 *Versi Arsitektur: SIBIMA v1.1-Production*

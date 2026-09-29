@@ -7,6 +7,7 @@ export interface NavItem {
     icon: string;
     badge?: string | number;
     disabled?: boolean;
+    roles?: Role[];
 }
 
 export interface NavGroup {
@@ -27,6 +28,7 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
                 label: 'Kategori Aset',
                 href: '/asset-categories',
                 icon: 'layers',
+                roles: ['kasubag'],
             },
             { label: 'Data Pegawai', href: '/pegawais', icon: 'users' },
         ],
@@ -38,6 +40,7 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
                 label: 'Penerimaan Aset',
                 href: '/penerimaan-aset',
                 icon: 'download',
+                roles: ['kasubag', 'camat', 'admin_kecamatan'],
             },
             {
                 label: 'Mutasi Aset',
@@ -83,10 +86,12 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
 ];
 
 export function navGroupsForRole(role?: Role): NavGroup[] {
-    if (!role) {
-        return SIDEBAR_NAV_GROUPS;
-    }
-    return SIDEBAR_NAV_GROUPS;
+    return SIDEBAR_NAV_GROUPS.map((group) => ({
+        ...group,
+        items: group.items.filter(
+            (item) => !item.roles || (role !== undefined && item.roles.includes(role)),
+        ),
+    })).filter((group) => group.items.length > 0);
 }
 
 export function navItemsForRole(role: Role | undefined): NavItem[] {

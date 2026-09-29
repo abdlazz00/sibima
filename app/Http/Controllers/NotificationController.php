@@ -9,8 +9,11 @@ class NotificationController extends Controller
 {
     public function markRead(Request $request, string $notification): RedirectResponse
     {
-        $request->user()->unreadNotifications()->where('id', $notification)->first()?->markAsRead();
+        $found = $request->user()->unreadNotifications()->where('id', $notification)->first();
+        $found?->markAsRead();
 
-        return back();
+        $url = $found?->data['url'] ?? null;
+
+        return $url ? redirect($url) : back();
     }
 }

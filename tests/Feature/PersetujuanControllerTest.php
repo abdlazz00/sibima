@@ -17,7 +17,7 @@ it('lists only requests the current user can act on right now', function () {
     $admin = userWithRole('admin_kecamatan', $kec);
     $kasubag = userWithRole('kasubag');
     $camat = userWithRole('camat', $kec);
-    $category = AssetCategory::factory()->create(['code' => '1.3.2.05.02.04']);
+    $category = AssetCategory::factory()->subcategory()->create(['code' => '1.3.2.05.02.04']);
 
     $ba = BeritaAcaraPenerimaan::create([
         'no_berita_acara' => 'BA/060/IX/2025', 'tanggal_penerimaan' => '2025-09-01',

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Contracts\Approvable;
 use App\Models\ApprovalRequest;
 use Illuminate\Notifications\Notification;
 
@@ -25,6 +26,9 @@ class ApprovalStepNotification extends Notification
             'approval_request_id' => $this->request->id,
             'workflow_code' => $this->request->definition->code,
             'message' => $this->message,
+            'url' => $this->request->approvable instanceof Approvable
+                ? $this->request->approvable->approvalShowUrl()
+                : null,
         ];
     }
 }

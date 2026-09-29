@@ -16,24 +16,27 @@ import {
     PageProps,
     Pegawai,
 } from '@/types';
+import CancelRequestModal from '@/Components/CancelRequestModal';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 interface ShowProps extends PageProps {
     mutation: AssetMutation;
-    can: { act: boolean };
+    can: { act: boolean; cancel: boolean };
 }
 
 const STATUS_STYLE: Record<MutationStatus, string> = {
     pending: 'bg-amber-50 text-amber-700 border-amber-200/60',
     approved: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
     rejected: 'bg-red-50 text-red-700 border-red-200/60',
+    cancelled: 'bg-slate-100 text-slate-500 border-slate-200',
 };
 
 const STATUS_LABEL: Record<MutationStatus, string> = {
     pending: 'Menunggu Persetujuan',
     approved: 'Disetujui',
     rejected: 'Ditolak',
+    cancelled: 'Dibatalkan',
 };
 
 const MUTATION_TYPE_STYLE: Record<MutationType, string> = {
@@ -132,6 +135,7 @@ function getStepRoleTitle(
 
 export default function Show({ mutation, can }: ShowProps) {
     const [showReject, setShowReject] = useState(false);
+    const [showCancel, setShowCancel] = useState(false);
     const [note, setNote] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [activePhoto, setActivePhoto] = useState<AssetPhoto | null>(null);
@@ -180,6 +184,7 @@ export default function Show({ mutation, can }: ShowProps) {
     ): 'done' | 'current' | 'upcoming' | 'rejected' => {
         if (!req) return 'upcoming';
         if (req.status === 'approved') return 'done';
+        if (req.status === 'cancelled') return order < req.current_step ? 'done' : 'upcoming';
         if (req.status === 'rejected' && order === req.current_step)
             return 'rejected';
         if (order < req.current_step) return 'done';
@@ -188,6 +193,7 @@ export default function Show({ mutation, can }: ShowProps) {
     };
 
     const rejectionAction = req?.actions?.find((a) => a.action === 'reject');
+    const cancelAction = req?.actions?.find((a) => a.action === 'cancel');
 
     return (
         <AuthenticatedLayout>
@@ -246,6 +252,16 @@ export default function Show({ mutation, can }: ShowProps) {
                             <Printer className="h-4 w-4 text-slate-500" />
                             Cetak
                         </button>
+
+                        {can.cancel && mutation.status === 'pending' && (
+                            <button
+                                type="button"
+                                onClick={() => setShowCancel(true)}
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                            >
+                                Batalkan Pengajuan
+                            </button>
+                        )}
 
                         {can.act && mutation.status === 'pending' && (
                             <>
@@ -313,6 +329,22 @@ export default function Show({ mutation, can }: ShowProps) {
                                 )}
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {mutation.status === 'cancelled' && cancelAction && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-800 shadow-xs">
+                        <h3 className="font-semibold">Pengajuan Mutasi Ini Dibatalkan</h3>
+                        <p className="text-xs text-slate-600">
+                            Dibatalkan oleh{' '}
+                            <span className="font-medium">{cancelAction.user?.name ?? 'pengaju'}</span> pada{' '}
+                            {formatDateTime(cancelAction.created_at)}
+                        </p>
+                        {cancelAction.note && (
+                            <div className="mt-2 rounded-lg border border-slate-200 bg-white p-3 text-xs italic">
+                                &ldquo;{cancelAction.note}&rdquo;
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -835,6 +867,14 @@ export default function Show({ mutation, can }: ShowProps) {
                     </div>
                 )}
             </div>
+
+            {showCancel && req && (
+                <CancelRequestModal
+                    approvalRequestId={req.id}
+                    onClose={() => setShowCancel(false)}
+                    description="Pengajuan dihentikan dan aset yang diajukan dikembalikan ke status Aktif di unit asal. Persetujuan yang sudah diberikan ikut hangus."
+                />
+            )}
 
             {/* Modal Tolak Pengajuan */}
             {showReject && (

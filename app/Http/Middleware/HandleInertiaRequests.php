@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\ApprovalWorkflowService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -48,6 +49,9 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'pending_approvals' => fn () => $request->user()
+                ? app(ApprovalWorkflowService::class)->pendingFor($request->user())->count()
+                : 0,
             'notifications' => $request->user() ? [
                 'unread_count' => $request->user()->unreadNotifications()->count(),
                 'items' => $request->user()->unreadNotifications()->latest()->take(5)->get()->map(fn ($n) => [

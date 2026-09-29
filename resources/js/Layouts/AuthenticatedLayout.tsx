@@ -20,13 +20,14 @@ export default function AuthenticatedLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { auth, flash, notifications } = usePage<PageProps>().props;
+    const { auth, flash, notifications, pending_approvals } =
+        usePage<PageProps>().props;
     const { url } = usePage();
     const role = auth.user?.roles?.[0] as Role | undefined;
     const navGroups = navGroupsForRole(role);
 
     const badgeFor = (item: { href: string; badge?: string | number }) =>
-        item.href === '/persetujuan' ? notifications.unread_count || undefined : item.badge;
+        item.href === '/persetujuan' ? pending_approvals || undefined : item.badge;
 
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

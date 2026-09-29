@@ -1,13 +1,36 @@
+import CancelRequestModal from '@/Components/CancelRequestModal';
 import { CheckCircleIcon as Check, ChevronRightIcon as ChevronRight } from '@/Components/Icons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { PENERIMAAN_STATUS_LABEL, PENERIMAAN_STATUS_STYLE, penerimaanStatus } from '@/lib/penerimaanStatus';
 import { BeritaAcaraPenerimaan, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 interface ShowProps extends PageProps {
     beritaAcara: BeritaAcaraPenerimaan;
-    can: { act: boolean };
+    can: { act: boolean; cancel: boolean; edit: boolean; delete: boolean };
 }
+
+type StepState = 'done' | 'current' | 'upcoming' | 'rejected' | 'cancelled';
+
+const STEP_CIRCLE: Record<StepState, string> = {
+    done: 'bg-emerald-100',
+    current: 'bg-amber-100',
+    upcoming: 'bg-slate-100',
+    rejected: 'bg-red-100',
+    cancelled: 'bg-slate-200',
+};
+
+const STEP_TEXT: Record<StepState, string> = {
+    done: 'Selesai',
+    current: 'Menunggu',
+    upcoming: 'Belum dimulai',
+    rejected: 'Ditolak',
+    cancelled: 'Dibatalkan',
+};
+
+const ACTION_LABEL = { approve: 'Disetujui', reject: 'Ditolak', cancel: 'Dibatalkan' } as const;
+const ACTION_DOT = { approve: 'bg-emerald-600', reject: 'bg-red-600', cancel: 'bg-slate-500' } as const;
 
 function formatRupiah(value: string | number): string {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value));
@@ -19,26 +42,45 @@ function stepLabel(role: string): string {
 
 export default function Show({ beritaAcara, can }: ShowProps) {
     const [showReject, setShowReject] = useState(false);
+    const [showCancel, setShowCancel] = useState(false);
     const [note, setNote] = useState('');
+    const [submitting, setSubmitting] = useState(false);
     const req = beritaAcara.approval_request;
     const steps = req?.definition?.steps ?? [];
     const total = (beritaAcara.items ?? []).reduce((sum, i) => sum + Number(i.nilai_per_unit) * i.jumlah_unit, 0);
+    const status = penerimaanStatus(beritaAcara);
 
     const approve = () => {
-        if (!req) return;
-        router.post(route('approval-requests.approve', req.id));
+        if (!req || submitting) return;
+        setSubmitting(true);
+        router.post(route('approval-requests.approve', req.id), {}, { preserveScroll: true, onFinish: () => setSubmitting(false) });
     };
 
     const reject = () => {
-        if (!req) return;
-        router.post(route('approval-requests.reject', req.id), { note }, { onSuccess: () => setShowReject(false) });
+        if (!req || submitting) return;
+        setSubmitting(true);
+        router.post(
+            route('approval-requests.reject', req.id),
+            { note },
+            { preserveScroll: true, onSuccess: () => setShowReject(false), onFinish: () => setSubmitting(false) },
+        );
     };
 
-    const stepState = (order: number): 'done' | 'current' | 'upcoming' => {
+    const deleteDraft = () => {
+        if (window.confirm('Hapus draft ini? Tindakan ini tidak dapat dibatalkan.')) {
+            router.delete(route('penerimaan-aset.destroy', beritaAcara.id));
+        }
+    };
+
+    const stepState = (order: number): StepState => {
         if (!req) return 'upcoming';
         if (req.status === 'approved') return 'done';
         if (order < req.current_step) return 'done';
-        if (order === req.current_step) return 'current';
+        if (order === req.current_step) {
+            if (req.status === 'rejected') return 'rejected';
+            if (req.status === 'cancelled') return 'cancelled';
+            return 'current';
+        }
         return 'upcoming';
     };
 
@@ -47,7 +89,7 @@ export default function Show({ beritaAcara, can }: ShowProps) {
             <Head title={`Penerimaan Aset #${beritaAcara.no_berita_acara}`} />
 
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <nav className="flex items-center gap-1.5 text-xs text-slate-500">
                             <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
@@ -56,21 +98,49 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                             <ChevronRight className="h-3 w-3 text-slate-400" />
                             <span className="font-medium text-slate-800">Detail</span>
                         </nav>
-                        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-                            Penerimaan Aset #{beritaAcara.no_berita_acara}
-                        </h1>
-                    </div>
-                    {can.act && (
-                        <div className="flex gap-3">
-                            <button onClick={() => setShowReject(true)} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                                Tolak
-                            </button>
-                            <button onClick={approve} className="rounded-lg bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
-                                Setujui
-                            </button>
+                        <div className="mt-1 flex items-center gap-3">
+                            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                                Penerimaan Aset #{beritaAcara.no_berita_acara}
+                            </h1>
+                            <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${PENERIMAAN_STATUS_STYLE[status]}`}>
+                                {PENERIMAAN_STATUS_LABEL[status]}
+                            </span>
                         </div>
-                    )}
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        {can.delete && (
+                            <button onClick={deleteDraft} className="rounded-lg border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50">
+                                Hapus Draft
+                            </button>
+                        )}
+                        {can.edit && (
+                            <Link href={route('penerimaan-aset.edit', beritaAcara.id)} className="rounded-lg bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                                Edit &amp; Ajukan
+                            </Link>
+                        )}
+                        {can.cancel && (
+                            <button onClick={() => setShowCancel(true)} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                Batalkan Pengajuan
+                            </button>
+                        )}
+                        {can.act && (
+                            <>
+                                <button onClick={() => setShowReject(true)} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+                                    Tolak
+                                </button>
+                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+                                    {submitting ? 'Memproses...' : 'Setujui'}
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
+
+                {!req && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                        Draft ini belum diajukan. Approver baru dapat melihatnya setelah Anda mengajukannya.
+                    </div>
+                )}
 
                 {req && (
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -81,16 +151,14 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                                 return (
                                     <div key={step.step_order} className="flex flex-1 flex-col gap-2">
                                         <div className="flex items-center gap-2">
-                                            <div className={`flex h-6 w-6 items-center justify-center rounded-full ${state === 'done' ? 'bg-emerald-100' : state === 'current' ? 'bg-amber-100' : 'bg-slate-100'}`}>
+                                            <div className={`flex h-6 w-6 items-center justify-center rounded-full ${STEP_CIRCLE[state]}`}>
                                                 {state === 'done' && <Check className="h-3.5 w-3.5 text-emerald-700" />}
                                             </div>
                                             {idx < steps.length - 1 && <div className="h-px flex-1 bg-slate-200" />}
                                         </div>
                                         <div>
                                             <p className="text-xs font-semibold text-slate-900">Step {step.step_order}: {stepLabel(step.approver_role)}</p>
-                                            <p className="text-[11px] text-slate-500">
-                                                {state === 'done' ? 'Selesai' : state === 'current' ? 'Menunggu' : 'Belum dimulai'}
-                                            </p>
+                                            <p className="text-[11px] text-slate-500">{STEP_TEXT[state]}</p>
                                         </div>
                                     </div>
                                 );
@@ -151,9 +219,9 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                             </li>
                             {req.actions?.map((action) => (
                                 <li key={action.id} className="relative">
-                                    <span className={`absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full ${action.action === 'approve' ? 'bg-emerald-600' : 'bg-red-600'}`} />
+                                    <span className={`absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full ${ACTION_DOT[action.action]}`} />
                                     <p className="text-sm font-semibold text-slate-900">
-                                        {action.action === 'approve' ? 'Disetujui' : 'Ditolak'} oleh {action.user?.name}
+                                        {ACTION_LABEL[action.action]} oleh {action.user?.name}
                                     </p>
                                     {action.note && <p className="text-xs text-slate-500">{action.note}</p>}
                                 </li>
@@ -162,6 +230,14 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                     </div>
                 )}
             </div>
+
+            {showCancel && req && (
+                <CancelRequestModal
+                    approvalRequestId={req.id}
+                    onClose={() => setShowCancel(false)}
+                    description="Pengajuan akan dihentikan dan tidak lagi muncul di kotak persetujuan. Persetujuan yang sudah diberikan ikut hangus."
+                />
+            )}
 
             {showReject && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowReject(false)}>
@@ -176,7 +252,7 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                         />
                         <div className="flex justify-end gap-3">
                             <button onClick={() => setShowReject(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</button>
-                            <button onClick={reject} disabled={!note.trim()} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">Ya, Tolak</button>
+                            <button onClick={reject} disabled={!note.trim() || submitting} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">Ya, Tolak</button>
                         </div>
                     </div>
                 </div>

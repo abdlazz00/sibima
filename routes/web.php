@@ -44,9 +44,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/penerimaan-aset/create', [PenerimaanAsetController::class, 'create'])->name('penerimaan-aset.create');
     Route::post('/penerimaan-aset', [PenerimaanAsetController::class, 'store'])->name('penerimaan-aset.store');
     Route::get('/penerimaan-aset/{beritaAcara}', [PenerimaanAsetController::class, 'show'])->name('penerimaan-aset.show');
+    Route::get('/penerimaan-aset/{beritaAcara}/edit', [PenerimaanAsetController::class, 'edit'])->name('penerimaan-aset.edit');
+    Route::put('/penerimaan-aset/{beritaAcara}', [PenerimaanAsetController::class, 'update'])->name('penerimaan-aset.update');
+    Route::delete('/penerimaan-aset/{beritaAcara}', [PenerimaanAsetController::class, 'destroy'])->name('penerimaan-aset.destroy');
 
     Route::post('/approval-requests/{approvalRequest}/approve', [ApprovalActionController::class, 'approve'])->name('approval-requests.approve');
     Route::post('/approval-requests/{approvalRequest}/reject', [ApprovalActionController::class, 'reject'])->name('approval-requests.reject');
+    Route::post('/approval-requests/{approvalRequest}/cancel', [ApprovalActionController::class, 'cancel'])->name('approval-requests.cancel');
 
     Route::get('/persetujuan', [PersetujuanController::class, 'index'])->name('persetujuan.index');
 

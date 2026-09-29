@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\Approvable;
+use App\Contracts\HandlesApprovalOutcome;
 use App\Contracts\HasWorkflowUnits;
 use App\Enums\AssetStatus;
 use App\Enums\MutationStatus;
@@ -13,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class AssetMutation extends Model implements HasWorkflowUnits
+class AssetMutation extends Model implements Approvable, HandlesApprovalOutcome, HasWorkflowUnits
 {
     use HasFactory;
 
@@ -92,8 +94,17 @@ class AssetMutation extends Model implements HasWorkflowUnits
 
     public function onApprovalRejected(): void
     {
-        $this->update(['status' => MutationStatus::Rejected]);
-        $assetIds = $this->items()->pluck('asset_id');
-        Asset::whereIn('id', $assetIds)->update(['status' => AssetStatus::Aktif]);
+        $this->release(MutationStatus::Rejected);
+    }
+
+    public function onApprovalCancelled(): void
+    {
+        $this->release(MutationStatus::Cancelled);
+    }
+
+    private function release(MutationStatus $status): void
+    {
+        $this->update(['status' => $status]);
+        Asset::whereIn('id', $this->items()->pluck('asset_id'))->update(['status' => AssetStatus::Aktif]);
     }
 }

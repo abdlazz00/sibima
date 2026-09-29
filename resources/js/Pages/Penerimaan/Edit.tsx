@@ -1,5 +1,5 @@
 import PenerimaanForm, { PenerimaanFormProps } from './PenerimaanForm';
 
-export default function Create(props: PenerimaanFormProps) {
+export default function Edit(props: PenerimaanFormProps) {
     return <PenerimaanForm {...props} />;
 }

@@ -2,17 +2,21 @@
 
 namespace App\Services;
 
+use App\Contracts\HandlesApprovalOutcome;
 use App\Contracts\HasWorkflowUnits;
 use App\Enums\ApprovalActionType;
 use App\Enums\ApprovalStatus;
 use App\Enums\UnitScope;
 use App\Models\ApprovalRequest;
+use App\Models\AssetMutation;
+use App\Models\BeritaAcaraPenerimaan;
 use App\Models\User;
 use App\Models\WorkflowDefinition;
 use App\Models\WorkflowStep;
 use App\Notifications\ApprovalStepNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -118,7 +122,7 @@ class ApprovalWorkflowService
 
             $locked->update(['status' => ApprovalStatus::Rejected]);
 
-            if (method_exists($locked->approvable, 'onApprovalRejected')) {
+            if ($locked->approvable instanceof HandlesApprovalOutcome) {
                 $locked->approvable->onApprovalRejected();
             }
 
@@ -126,6 +130,59 @@ class ApprovalWorkflowService
         });
 
         $this->notifySubmitter($request, "Pengajuan Anda ditolak: {$note}");
+    }
+
+    public function canCancel(User $user, ApprovalRequest $request): bool
+    {
+        return $request->status === ApprovalStatus::Pending && $request->created_by === $user->id;
+    }
+
+    public function cancel(ApprovalRequest $request, User $submitter, string $note): void
+    {
+        if (! $this->canCancel($submitter, $request)) {
+            throw new InvalidArgumentException('Hanya pengaju yang dapat membatalkan pengajuan yang masih menunggu persetujuan.');
+        }
+
+        DB::transaction(function () use ($request, $submitter, $note) {
+            $locked = ApprovalRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->status !== ApprovalStatus::Pending) {
+                throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+            }
+
+            $locked->actions()->create([
+                'step_order' => $locked->current_step,
+                'user_id' => $submitter->id,
+                'action' => ApprovalActionType::Cancel,
+                'note' => $note,
+            ]);
+
+            $locked->update(['status' => ApprovalStatus::Cancelled]);
+
+            if ($locked->approvable instanceof HandlesApprovalOutcome) {
+                $locked->approvable->onApprovalCancelled();
+            }
+
+            $request->setRawAttributes($locked->getAttributes());
+        });
+    }
+
+    /** @return Collection<int, ApprovalRequest> */
+    public function pendingFor(User $user): Collection
+    {
+        return ApprovalRequest::query()
+            ->with([
+                'definition',
+                'creator',
+                'approvable' => fn (MorphTo $morph) => $morph->morphWith([
+                    BeritaAcaraPenerimaan::class => ['unit'],
+                    AssetMutation::class => ['originUnit', 'destinationUnit'],
+                ]),
+            ])
+            ->where('status', ApprovalStatus::Pending)
+            ->get()
+            ->filter(fn (ApprovalRequest $r) => $this->canAct($user, $r))
+            ->values();
     }
 
     private function runEffect(ApprovalRequest $request): void

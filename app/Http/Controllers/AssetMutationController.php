@@ -107,6 +107,7 @@ class AssetMutationController extends Controller
             'mutation' => $assetMutation,
             'can' => [
                 'act' => $approvalRequest !== null && app(ApprovalWorkflowService::class)->canAct($request->user(), $approvalRequest),
+                'cancel' => $approvalRequest !== null && app(ApprovalWorkflowService::class)->canCancel($request->user(), $approvalRequest),
             ],
         ]);
     }

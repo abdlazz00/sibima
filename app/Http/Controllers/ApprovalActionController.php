@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CancelApprovalRequest;
 use App\Http\Requests\RejectApprovalRequest;
 use App\Models\ApprovalRequest;
 use App\Services\ApprovalWorkflowService;
@@ -37,5 +38,18 @@ class ApprovalActionController extends Controller
         }
 
         return back()->with('success', 'Pengajuan ditolak.');
+    }
+
+    public function cancel(CancelApprovalRequest $request, ApprovalRequest $approvalRequest): RedirectResponse
+    {
+        abort_unless($this->workflow->canCancel($request->user(), $approvalRequest), 403);
+
+        try {
+            $this->workflow->cancel($approvalRequest, $request->user(), $request->validated('note'));
+        } catch (InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Pengajuan dibatalkan.');
     }
 }

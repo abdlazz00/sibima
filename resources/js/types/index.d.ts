@@ -113,7 +113,7 @@ export interface BeritaAcaraItem {
 export interface ApprovalActionEntry {
     id: number;
     step_order: number;
-    action: 'approve' | 'reject';
+    action: 'approve' | 'reject' | 'cancel';
     note: string | null;
     created_at: string;
     user?: { id: number; name: string };
@@ -128,7 +128,7 @@ export interface ApprovalStep {
 export interface ApprovalRequestSummary {
     id: number;
     current_step: number;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'cancelled';
     definition?: { name: string; steps?: ApprovalStep[] };
     actions?: ApprovalActionEntry[];
 }
@@ -145,11 +145,12 @@ export interface BeritaAcaraPenerimaan {
     unit?: { id: number; name: string };
     creator?: { id: number; name: string };
     items?: BeritaAcaraItem[];
+    photos?: { id: number; path: string }[];
     approval_request?: ApprovalRequestSummary | null;
 }
 
 export type MutationType = 'kec_ke_kel' | 'antar_kel' | 'retur_kel_ke_kec' | 'internal';
-export type MutationStatus = 'pending' | 'approved' | 'rejected';
+export type MutationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
 export interface AssetMutationItem {
     id: number;
@@ -197,6 +198,7 @@ export type PageProps<
         user: AuthUser | null;
     };
     flash: Flash;
+    pending_approvals: number;
     notifications: {
         unread_count: number;
         items: NotificationItem[];

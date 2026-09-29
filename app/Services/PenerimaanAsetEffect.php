@@ -33,9 +33,10 @@ class PenerimaanAsetEffect implements WorkflowEffect
                 }
 
                 $assetIds = [];
+                $suffix = $this->assets->maxKodeBarangSuffix($category->code);
 
                 for ($i = 0; $i < $item->jumlah_unit; $i++) {
-                    $suffix = $this->assets->maxKodeBarangSuffix($category->code) + 1;
+                    $suffix++;
                     $kodeBarang = $category->code.'.'.str_pad((string) $suffix, 3, '0', STR_PAD_LEFT);
                     $noDokumenSeq++;
 

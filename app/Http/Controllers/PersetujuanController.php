@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ApprovalStatus;
 use App\Models\ApprovalRequest;
 use App\Services\ApprovalWorkflowService;
 use Illuminate\Http\Request;
@@ -17,12 +16,7 @@ class PersetujuanController extends Controller
     {
         $user = $request->user();
 
-        $pending = ApprovalRequest::query()
-            ->with(['definition', 'approvable', 'creator'])
-            ->where('status', ApprovalStatus::Pending)
-            ->get()
-            ->filter(fn (ApprovalRequest $r) => $this->workflow->canAct($user, $r))
-            ->values();
+        $pending = $this->workflow->pendingFor($user);
 
         return Inertia::render('Persetujuan/Index', [
             'items' => $pending->map(fn (ApprovalRequest $r) => [

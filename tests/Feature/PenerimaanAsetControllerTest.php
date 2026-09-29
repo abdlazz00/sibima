@@ -103,19 +103,19 @@ it('allows saving a draft with a category that has no BMD code yet', function ()
     expect(BeritaAcaraPenerimaan::where('no_berita_acara', 'BA/013/IX/2025')->exists())->toBeTrue();
 });
 
-it('shows kasubag every berita acara regardless of unit, and scopes admin_kecamatan to their own', function () {
+it('shows kasubag every submitted berita acara regardless of unit, and scopes admin_kecamatan to their own', function () {
     $otherKec = makeKecamatan('Kecamatan Lain');
     $otherAdmin = userWithRole('admin_kecamatan', $otherKec);
 
     $mine = BeritaAcaraPenerimaan::create([
         'no_berita_acara' => 'BA/020/IX/2025', 'tanggal_penerimaan' => '2025-09-01',
         'no_kontrak_spk' => 'SPK/020', 'unit_id' => $this->kec->id,
-        'created_by' => $this->admin->id, 'status' => 'draft',
+        'created_by' => $this->admin->id, 'status' => 'submitted',
     ]);
     $theirs = BeritaAcaraPenerimaan::create([
         'no_berita_acara' => 'BA/021/IX/2025', 'tanggal_penerimaan' => '2025-09-01',
         'no_kontrak_spk' => 'SPK/021', 'unit_id' => $otherKec->id,
-        'created_by' => $otherAdmin->id, 'status' => 'draft',
+        'created_by' => $otherAdmin->id, 'status' => 'submitted',
     ]);
 
     $this->actingAs($this->admin)->get('/penerimaan-aset')

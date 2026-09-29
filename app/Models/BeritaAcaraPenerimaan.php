@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\Approvable;
+use App\Contracts\HandlesApprovalOutcome;
 use App\Enums\BeritaAcaraStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class BeritaAcaraPenerimaan extends Model
+class BeritaAcaraPenerimaan extends Model implements Approvable, HandlesApprovalOutcome
 {
     use HasFactory;
 
@@ -62,4 +64,9 @@ class BeritaAcaraPenerimaan extends Model
     {
         return route('penerimaan-aset.show', $this);
     }
+
+    // The berita acara keeps status=submitted; its displayed state comes from the approval request.
+    public function onApprovalRejected(): void {}
+
+    public function onApprovalCancelled(): void {}
 }

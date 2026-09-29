@@ -1,29 +1,15 @@
 import { ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight, EyeIcon as Eye, PlusIcon as Plus, SearchIcon as Search } from '@/Components/Icons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { pageNumbersWithGaps } from '@/lib/pagination';
+import { PENERIMAAN_STATUS_LABEL, PENERIMAAN_STATUS_STYLE, PenerimaanStatusKey, penerimaanStatus } from '@/lib/penerimaanStatus';
 import { BeritaAcaraPenerimaan, Paginated, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 
 interface IndexProps extends PageProps {
     items: Paginated<BeritaAcaraPenerimaan>;
-    filters: { search?: string };
+    filters: { search?: string; status?: string; dari?: string; sampai?: string };
     can: { create: boolean };
-}
-
-const STATUS_STYLE: Record<string, string> = {
-    diajukan: 'bg-blue-50 text-blue-700',
-    diverifikasi: 'bg-amber-50 text-amber-700',
-    disetujui: 'bg-emerald-50 text-emerald-700',
-    ditolak: 'bg-red-50 text-red-700',
-};
-
-function statusLabel(ba: BeritaAcaraPenerimaan): { key: string; label: string } {
-    const req = ba.approval_request;
-    if (!req) return { key: 'diajukan', label: 'Draft' };
-    if (req.status === 'approved') return { key: 'disetujui', label: 'Disetujui' };
-    if (req.status === 'rejected') return { key: 'ditolak', label: 'Ditolak' };
-    return req.current_step >= 2 ? { key: 'diverifikasi', label: 'Diverifikasi' } : { key: 'diajukan', label: 'Diajukan' };
 }
 
 function formatRupiah(value: string | number): string {
@@ -34,9 +20,15 @@ export default function Index({ items, filters, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
     const pages = pageNumbersWithGaps(items.current_page, items.last_page);
 
+    const goTo = (changes: Record<string, string | number | undefined>) => {
+        const params = { ...filters, search: search || undefined, ...changes };
+        const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== ''));
+        router.get(route('penerimaan-aset.index'), clean, { preserveState: true, preserveScroll: true, replace: true });
+    };
+
     const submitSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get(route('penerimaan-aset.index'), { search: search || undefined }, { preserveState: true, preserveScroll: true, replace: true });
+        goTo({ page: undefined });
     };
 
     return (
@@ -71,12 +63,43 @@ export default function Index({ items, filters, can }: IndexProps) {
                     />
                 </form>
 
+                <div className="flex flex-wrap items-end gap-3">
+                    <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</label>
+                        <select
+                            value={filters.status ?? ''}
+                            onChange={(e) => goTo({ status: e.target.value || undefined, page: undefined })}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                        >
+                            <option value="">Semua status</option>
+                            {(Object.keys(PENERIMAAN_STATUS_LABEL) as PenerimaanStatusKey[]).map((key) => (
+                                <option key={key} value={key}>{PENERIMAAN_STATUS_LABEL[key]}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Dari tanggal</label>
+                        <input type="date" value={filters.dari ?? ''} onChange={(e) => goTo({ dari: e.target.value || undefined, page: undefined })} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                    </div>
+                    <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Sampai tanggal</label>
+                        <input type="date" value={filters.sampai ?? ''} onChange={(e) => goTo({ sampai: e.target.value || undefined, page: undefined })} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                    </div>
+                    {(filters.status || filters.dari || filters.sampai) && (
+                        <button type="button" onClick={() => goTo({ status: undefined, dari: undefined, sampai: undefined, page: undefined })} className="pb-2 text-sm font-medium text-blue-700 hover:underline">
+                            Reset filter
+                        </button>
+                    )}
+                </div>
+
                 <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
                     <table className="w-full border-collapse text-left">
                         <thead>
                             <tr className="border-b border-slate-200 bg-slate-50">
                                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No. Berita Acara</th>
                                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Aset</th>
+                                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Kategori</th>
+                                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nilai</th>
                                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Pengaju</th>
                                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tanggal</th>
                                 <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
@@ -85,11 +108,12 @@ export default function Index({ items, filters, can }: IndexProps) {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {items.data.length === 0 ? (
-                                <tr><td colSpan={6} className="py-14 text-center text-sm text-slate-400">Belum ada pengajuan penerimaan aset.</td></tr>
+                                <tr><td colSpan={8} className="py-14 text-center text-sm text-slate-400">Belum ada pengajuan penerimaan aset.</td></tr>
                             ) : (
                                 items.data.map((ba) => {
-                                    const status = statusLabel(ba);
+                                    const status = penerimaanStatus(ba);
                                     const extra = (ba.items?.length ?? 0) - 1;
+                                    const nilai = (ba.items ?? []).reduce((sum, i) => sum + Number(i.nilai_per_unit) * i.jumlah_unit, 0);
                                     return (
                                         <tr key={ba.id} className="hover:bg-slate-50/60">
                                             <td className="px-4 py-3 text-sm text-slate-800">{ba.no_berita_acara}</td>
@@ -97,10 +121,12 @@ export default function Index({ items, filters, can }: IndexProps) {
                                                 {ba.items?.[0]?.nama_aset}
                                                 {extra > 0 && <span className="font-normal text-slate-400"> +{extra} lainnya</span>}
                                             </td>
+                                            <td className="px-4 py-3 text-sm text-slate-800">{ba.items?.[0]?.category?.name ?? '—'}</td>
+                                            <td className="px-4 py-3 text-right text-sm text-slate-800">{formatRupiah(nilai)}</td>
                                             <td className="px-4 py-3 text-sm text-slate-800">{ba.creator?.name}</td>
                                             <td className="px-4 py-3 text-sm text-slate-800">{new Date(ba.tanggal_penerimaan).toLocaleDateString('id-ID')}</td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[status.key]}`}>{status.label}</span>
+                                                <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${PENERIMAAN_STATUS_STYLE[status]}`}>{PENERIMAAN_STATUS_LABEL[status]}</span>
                                             </td>
                                             <td className="px-4 py-3 text-center">
                                                 <Link href={route('penerimaan-aset.show', ba.id)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700">
@@ -124,7 +150,7 @@ export default function Index({ items, filters, can }: IndexProps) {
                                 <button
                                     type="button"
                                     disabled={items.current_page <= 1}
-                                    onClick={() => router.get(route('penerimaan-aset.index'), { search: filters.search, page: items.current_page - 1 }, { preserveState: true, preserveScroll: true })}
+                                    onClick={() => router.get(route('penerimaan-aset.index'), { ...filters, page: items.current_page - 1 }, { preserveState: true, preserveScroll: true })}
                                     className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     <ChevronLeft className="h-3.5 w-3.5" /> <span>Sebelumnya</span>
@@ -137,7 +163,7 @@ export default function Index({ items, filters, can }: IndexProps) {
                                             <button
                                                 key={page}
                                                 type="button"
-                                                onClick={() => router.get(route('penerimaan-aset.index'), { search: filters.search, page }, { preserveState: true, preserveScroll: true })}
+                                                onClick={() => router.get(route('penerimaan-aset.index'), { ...filters, page }, { preserveState: true, preserveScroll: true })}
                                                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition ${page === items.current_page ? 'bg-[#1E40AF] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100'}`}
                                             >
                                                 {page}
@@ -148,7 +174,7 @@ export default function Index({ items, filters, can }: IndexProps) {
                                 <button
                                     type="button"
                                     disabled={items.current_page >= items.last_page}
-                                    onClick={() => router.get(route('penerimaan-aset.index'), { search: filters.search, page: items.current_page + 1 }, { preserveState: true, preserveScroll: true })}
+                                    onClick={() => router.get(route('penerimaan-aset.index'), { ...filters, page: items.current_page + 1 }, { preserveState: true, preserveScroll: true })}
                                     className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     <span>Berikutnya</span> <ChevronRight className="h-3.5 w-3.5" />
