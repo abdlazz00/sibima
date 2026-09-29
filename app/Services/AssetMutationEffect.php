@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Contracts\WorkflowEffect;
 use App\Enums\AssetStatus;
 use App\Enums\MutationStatus;
-use App\Models\Asset;
 use App\Models\AssetHistory;
 use App\Models\AssetMutation;
 use Illuminate\Database\Eloquent\Model;
@@ -39,7 +38,7 @@ class AssetMutationEffect implements WorkflowEffect
                     'current_holder_id' => $item->target_holder_id,
                     'kondisi' => $asset->kondisi,
                     'user_id' => auth()->id() ?? $approvable->created_by,
-                    'keterangan' => "Mutasi {$approvable->jenis_mutasi->label()} ({$approvable->originUnit->name} -> {$approvable->destinationUnit->name}) No. {$approvable->nomor_mutasi}. " . ($item->catatan ?? ''),
+                    'keterangan' => "Mutasi {$approvable->jenis_mutasi->label()} ({$approvable->originUnit->name} -> {$approvable->destinationUnit->name}) No. {$approvable->nomor_mutasi}. ".($item->catatan ?? ''),
                 ]);
             }
 

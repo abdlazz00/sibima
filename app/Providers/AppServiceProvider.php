@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\AssetMutationRepository;
 use App\Repositories\Contracts\AssetCategoryRepositoryInterface;
+use App\Repositories\Contracts\AssetMutationRepositoryInterface;
 use App\Repositories\Contracts\AssetRepositoryInterface;
 use App\Repositories\Contracts\PegawaiRepositoryInterface;
 use App\Repositories\Contracts\UnitRepositoryInterface;
@@ -25,8 +27,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PegawaiRepositoryInterface::class, EloquentPegawaiRepository::class);
         $this->app->bind(UnitRepositoryInterface::class, EloquentUnitRepository::class);
         $this->app->bind(
-            \App\Repositories\Contracts\AssetMutationRepositoryInterface::class,
-            \App\Repositories\AssetMutationRepository::class
+            AssetMutationRepositoryInterface::class,
+            AssetMutationRepository::class
         );
     }
 

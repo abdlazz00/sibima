@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\AssetMutation;
-use App\Models\User;
 use Database\Seeders\WorkflowDefinitionSeeder;
 use Spatie\Permission\Models\Role;
 

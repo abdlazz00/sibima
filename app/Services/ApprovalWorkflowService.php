@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\HasWorkflowUnits;
 use App\Enums\ApprovalActionType;
 use App\Enums\ApprovalStatus;
 use App\Enums\UnitScope;
@@ -51,9 +52,9 @@ class ApprovalWorkflowService
         return match ($step->unit_scope) {
             UnitScope::None => true,
             UnitScope::Subject => $user->canAccessUnit($request->approvable->unit),
-            UnitScope::Origin => $request->approvable instanceof \App\Contracts\HasWorkflowUnits
+            UnitScope::Origin => $request->approvable instanceof HasWorkflowUnits
                 && $user->canAccessUnit($request->approvable->getOriginUnit()),
-            UnitScope::Destination => $request->approvable instanceof \App\Contracts\HasWorkflowUnits
+            UnitScope::Destination => $request->approvable instanceof HasWorkflowUnits
                 && $user->canAccessUnit($request->approvable->getDestinationUnit()),
         };
     }
@@ -168,11 +169,11 @@ class ApprovalWorkflowService
             return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->unit))->values();
         }
 
-        if ($step->unit_scope === UnitScope::Origin && $approvable instanceof \App\Contracts\HasWorkflowUnits) {
+        if ($step->unit_scope === UnitScope::Origin && $approvable instanceof HasWorkflowUnits) {
             return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->getOriginUnit()))->values();
         }
 
-        if ($step->unit_scope === UnitScope::Destination && $approvable instanceof \App\Contracts\HasWorkflowUnits) {
+        if ($step->unit_scope === UnitScope::Destination && $approvable instanceof HasWorkflowUnits) {
             return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->getDestinationUnit()))->values();
         }
 

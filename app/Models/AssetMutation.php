@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\HasWorkflowUnits;
+use App\Enums\AssetStatus;
 use App\Enums\MutationStatus;
 use App\Enums\MutationType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -88,6 +89,6 @@ class AssetMutation extends Model implements HasWorkflowUnits
     {
         $this->update(['status' => MutationStatus::Rejected]);
         $assetIds = $this->items()->pluck('asset_id');
-        Asset::whereIn('id', $assetIds)->update(['status' => \App\Enums\AssetStatus::Aktif]);
+        Asset::whereIn('id', $assetIds)->update(['status' => AssetStatus::Aktif]);
     }
 }

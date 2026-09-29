@@ -26,9 +26,17 @@ it('has expected cases and labels for MutationStatus', function () {
 });
 
 it('verifies HasWorkflowUnits contract interface methods', function () {
-    $instance = new class implements HasWorkflowUnits {
-        public function getOriginUnit(): Unit { return new Unit(); }
-        public function getDestinationUnit(): Unit { return new Unit(); }
+    $instance = new class implements HasWorkflowUnits
+    {
+        public function getOriginUnit(): Unit
+        {
+            return new Unit;
+        }
+
+        public function getDestinationUnit(): Unit
+        {
+            return new Unit;
+        }
     };
 
     expect($instance)->toBeInstanceOf(HasWorkflowUnits::class)

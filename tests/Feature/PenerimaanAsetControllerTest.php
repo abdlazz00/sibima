@@ -2,6 +2,7 @@
 
 use App\Models\AssetCategory;
 use App\Models\BeritaAcaraPenerimaan;
+use App\Services\ApprovalWorkflowService;
 use Database\Seeders\WorkflowDefinitionSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
@@ -138,7 +139,7 @@ it('shows the approve/reject actions only to the eligible current-step approver'
         'nama_aset' => 'Printer', 'category_id' => $this->category->id,
         'jumlah_unit' => 1, 'nilai_per_unit' => 2000000, 'kondisi_awal' => 'baik',
     ]);
-    app(\App\Services\ApprovalWorkflowService::class)->submit($ba, 'penerimaan_aset', $this->admin);
+    app(ApprovalWorkflowService::class)->submit($ba, 'penerimaan_aset', $this->admin);
 
     $this->actingAs($this->kasubag)->get("/penerimaan-aset/{$ba->id}")
         ->assertInertia(fn (Assert $page) => $page->where('can.act', true));

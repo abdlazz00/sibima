@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ApprovalStatus;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\BeritaAcaraPenerimaan;
