@@ -33,6 +33,7 @@ it('resolves the current step definition and detects the last step', function ()
         'status' => ApprovalStatus::Pending,
         'created_by' => $user->id,
     ]);
+    $request->snapshotSteps();
 
     expect($request->currentStepDefinition()->approver_role)->toBe('kasubag')
         ->and($request->isLastStep())->toBeFalse();

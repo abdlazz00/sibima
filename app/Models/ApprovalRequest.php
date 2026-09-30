@@ -40,13 +40,36 @@ class ApprovalRequest extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function currentStepDefinition(): ?WorkflowStep
+    public function steps(): HasMany
     {
-        return $this->definition->steps->firstWhere('step_order', $this->current_step);
+        return $this->hasMany(ApprovalRequestStep::class)->orderBy('step_order');
+    }
+
+    public function snapshotSteps(): void
+    {
+        $this->steps()->delete();
+
+        foreach ($this->definition->steps()->get() as $step) {
+            $this->steps()->create([
+                'step_order' => $step->step_order,
+                'label' => $step->label,
+                'approver_type' => $step->approver_type,
+                'approver_role' => $step->approver_role,
+                'unit_scope' => $step->unit_scope,
+                'approver_user_id' => $step->approver_user_id,
+            ]);
+        }
+
+        $this->unsetRelation('steps');
+    }
+
+    public function currentStepDefinition(): ?ApprovalRequestStep
+    {
+        return $this->steps->firstWhere('step_order', $this->current_step);
     }
 
     public function isLastStep(): bool
     {
-        return $this->current_step >= $this->definition->steps->max('step_order');
+        return $this->current_step >= $this->steps->max('step_order');
     }
 }

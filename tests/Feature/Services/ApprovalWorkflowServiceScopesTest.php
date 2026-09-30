@@ -62,6 +62,7 @@ it('resolves canAct correctly for Origin and Destination scopes', function () {
         'status' => ApprovalStatus::Pending,
         'created_by' => $this->lurahA->id,
     ]);
+    $request->snapshotSteps();
     $request->setRelation('approvable', $mutation);
 
     expect($this->service->canAct($this->lurahA, $request))->toBeTrue()

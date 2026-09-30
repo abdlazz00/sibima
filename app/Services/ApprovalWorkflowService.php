@@ -8,11 +8,11 @@ use App\Enums\ApprovalActionType;
 use App\Enums\ApprovalStatus;
 use App\Enums\UnitScope;
 use App\Models\ApprovalRequest;
+use App\Models\ApprovalRequestStep;
 use App\Models\AssetMutation;
 use App\Models\BeritaAcaraPenerimaan;
 use App\Models\User;
 use App\Models\WorkflowDefinition;
-use App\Models\WorkflowStep;
 use App\Notifications\ApprovalStepNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +35,7 @@ class ApprovalWorkflowService
             'created_by' => $submitter->id,
         ]);
 
+        $request->snapshotSteps();
         $request->setRelation('approvable', $approvable);
         $this->notifyApprovers($request);
 
@@ -218,7 +219,7 @@ class ApprovalWorkflowService
     }
 
     /** @return Collection<int, User> */
-    private function approversFor(WorkflowStep $step, Model $approvable): Collection
+    private function approversFor(ApprovalRequestStep $step, Model $approvable): Collection
     {
         $users = User::role($step->approver_role)->get();
 

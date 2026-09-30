@@ -7,26 +7,26 @@ use App\Enums\UnitScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class WorkflowStep extends Model
+class ApprovalRequestStep extends Model
 {
     protected $fillable = [
-        'workflow_definition_id', 'step_order', 'label', 'approver_type',
-        'approver_role', 'approver_user_id', 'unit_scope',
+        'approval_request_id', 'step_order', 'label', 'approver_type',
+        'approver_role', 'unit_scope', 'approver_user_id',
     ];
 
     protected function casts(): array
     {
         return [
-            'unit_scope' => UnitScope::class,
-            'approver_type' => ApproverType::class,
             'step_order' => 'integer',
+            'approver_type' => ApproverType::class,
+            'unit_scope' => UnitScope::class,
             'approver_user_id' => 'integer',
         ];
     }
 
-    public function definition(): BelongsTo
+    public function request(): BelongsTo
     {
-        return $this->belongsTo(WorkflowDefinition::class, 'workflow_definition_id');
+        return $this->belongsTo(ApprovalRequest::class, 'approval_request_id');
     }
 
     public function approverUser(): BelongsTo

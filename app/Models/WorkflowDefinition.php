@@ -13,4 +13,14 @@ class WorkflowDefinition extends Model
     {
         return $this->hasMany(WorkflowStep::class)->orderBy('step_order');
     }
+
+    public function requests(): HasMany
+    {
+        return $this->hasMany(ApprovalRequest::class);
+    }
+
+    public function changeLogs(): HasMany
+    {
+        return $this->hasMany(WorkflowChangeLog::class)->latest('id');
+    }
 }
