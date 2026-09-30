@@ -2,6 +2,7 @@
 
 use App\Services\AssetMutationEffect;
 use App\Services\AssetReportEffect;
+use App\Services\AssetRequestEffect;
 use App\Services\PenerimaanAsetEffect;
 
 return [
@@ -17,6 +18,8 @@ return [
         'mutasi_internal_kec' => AssetMutationEffect::class,
         'mutasi_internal_kel' => AssetMutationEffect::class,
         'lapor_rusak_hilang' => AssetReportEffect::class,
+        'permohonan_pegawai' => AssetRequestEffect::class,
+        'permohonan_unit' => AssetRequestEffect::class,
     ],
 
     /*
@@ -35,5 +38,7 @@ return [
         'mutasi_internal_kec' => 'origin_destination',
         'mutasi_internal_kel' => 'origin_destination',
         'lapor_rusak_hilang' => 'subject',
+        'permohonan_pegawai' => 'subject',
+        'permohonan_unit' => 'subject',
     ],
 ];

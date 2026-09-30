@@ -55,6 +55,14 @@ class WorkflowDefaults
                 'name' => 'Lapor Rusak/Hilang',
                 'steps' => [self::atasanUnit('Persetujuan Atasan Unit')],
             ],
+            'permohonan_pegawai' => [
+                'name' => 'Permohonan Aset Pegawai',
+                'steps' => [self::atasanUnit('Persetujuan Atasan Unit')],
+            ],
+            'permohonan_unit' => [
+                'name' => 'Permohonan Aset Unit',
+                'steps' => [self::role('Persetujuan Kasubag', 'kasubag', 'none')],
+            ],
         ];
     }
 
