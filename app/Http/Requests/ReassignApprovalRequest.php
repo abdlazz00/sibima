@@ -18,6 +18,7 @@ class ReassignApprovalRequest extends FormRequest
         return [
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'note' => ['required', 'string', 'max:1000'],
+            'step_order' => ['required', 'integer'],
         ];
     }
 

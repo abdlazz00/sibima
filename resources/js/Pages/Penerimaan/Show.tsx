@@ -247,6 +247,8 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                 <ReassignApproverModal
                     approvalRequestId={req.id}
                     candidates={reassignCandidates}
+                    stepOrder={req.current_step}
+                    stepLabel={steps.find((st) => st.step_order === req.current_step)?.label}
                     onClose={() => setShowReassign(false)}
                 />
             )}

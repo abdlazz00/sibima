@@ -43,6 +43,7 @@ it('seeds all 5 mutation workflow definitions correctly', function () {
 
 it('resolves canAct correctly for Origin and Destination scopes', function () {
     (new WorkflowDefinitionSeeder)->run();
+    $creator = userWithRole('admin_kelurahan', $this->kelA);
 
     $mutation = AssetMutation::create([
         'nomor_mutasi' => 'MUT/TEST/001',
@@ -51,7 +52,7 @@ it('resolves canAct correctly for Origin and Destination scopes', function () {
         'destination_unit_id' => $this->kelB->id,
         'tanggal_mutasi' => '2026-09-29',
         'status' => MutationStatus::Pending,
-        'created_by' => $this->lurahA->id,
+        'created_by' => $creator->id,
     ]);
 
     $request = ApprovalRequest::create([
@@ -60,7 +61,7 @@ it('resolves canAct correctly for Origin and Destination scopes', function () {
         'approvable_id' => $mutation->id,
         'current_step' => 1, // Step 1: lurah origin
         'status' => ApprovalStatus::Pending,
-        'created_by' => $this->lurahA->id,
+        'created_by' => $creator->id,
     ]);
     $request->snapshotSteps();
     $request->setRelation('approvable', $mutation);

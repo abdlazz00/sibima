@@ -5,10 +5,12 @@ import { useState } from 'react';
 interface ReassignApproverModalProps {
     approvalRequestId: number;
     candidates: ReassignCandidate[];
+    stepOrder: number;
+    stepLabel?: string;
     onClose: () => void;
 }
 
-export default function ReassignApproverModal({ approvalRequestId, candidates, onClose }: ReassignApproverModalProps) {
+export default function ReassignApproverModal({ approvalRequestId, candidates, stepOrder, stepLabel, onClose }: ReassignApproverModalProps) {
     const [userId, setUserId] = useState('');
     const [note, setNote] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -18,7 +20,7 @@ export default function ReassignApproverModal({ approvalRequestId, candidates, o
         setSubmitting(true);
         router.post(
             route('approval-requests.reassign', approvalRequestId),
-            { user_id: Number(userId), note: note.trim() },
+            { user_id: Number(userId), note: note.trim(), step_order: stepOrder },
             { preserveScroll: true, onSuccess: onClose, onFinish: () => setSubmitting(false) },
         );
     };
@@ -28,7 +30,7 @@ export default function ReassignApproverModal({ approvalRequestId, candidates, o
             <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
                 <h3 className="mb-2 text-base font-bold text-slate-900">Alihkan Approver</h3>
                 <p className="mb-4 text-xs leading-relaxed text-slate-600">
-                    Langkah yang sedang menunggu akan dialihkan ke satu user tertentu. Perubahan ini hanya berlaku untuk pengajuan ini dan tercatat di riwayat.
+                    Langkah {stepOrder}{stepLabel ? ` (${stepLabel})` : ''} yang sedang menunggu akan dialihkan ke satu user tertentu. Perubahan ini hanya berlaku untuk pengajuan ini dan tercatat di riwayat.
                 </p>
                 <label htmlFor="reassign-user" className="mb-1.5 block text-xs font-semibold text-slate-700">
                     Alihkan ke <span className="text-red-600">*</span>

@@ -78,13 +78,13 @@ it('refuses the previous approver holding a stale copy of the request', function
 it('reassigns over HTTP for a kasubag and refuses everyone else', function () {
     $url = route('approval-requests.reassign', $this->request);
 
-    $this->actingAs($this->camat)->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'x'])->assertForbidden();
-    $this->actingAs($this->admin)->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'x'])->assertForbidden();
+    $this->actingAs($this->camat)->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'x', 'step_order' => 1])->assertForbidden();
+    $this->actingAs($this->admin)->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'x', 'step_order' => 1])->assertForbidden();
 
-    $this->actingAs($this->kasubagA)->from('/x')->post($url, ['user_id' => $this->kasubagB->id])->assertSessionHasErrors('note');
-    $this->actingAs($this->kasubagA)->from('/x')->post($url, ['note' => 'x'])->assertSessionHasErrors('user_id');
+    $this->actingAs($this->kasubagA)->from('/x')->post($url, ['user_id' => $this->kasubagB->id, 'step_order' => 1])->assertSessionHasErrors('note');
+    $this->actingAs($this->kasubagA)->from('/x')->post($url, ['note' => 'x', 'step_order' => 1])->assertSessionHasErrors('user_id');
 
-    $this->actingAs($this->kasubagA)->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'Cuti'])->assertRedirect();
+    $this->actingAs($this->kasubagA)->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'Cuti', 'step_order' => 1])->assertRedirect();
     expect($this->request->fresh()->currentStepDefinition()->approver_user_id)->toBe($this->kasubagB->id);
 });
 
@@ -117,4 +117,29 @@ it('exposes the steps, can.reassign and candidates on the mutation detail page',
             ->has('reassignCandidates'));
     $this->actingAs($this->camat)->get(route('asset-mutations.show', $mutation))
         ->assertInertia(fn (Assert $p) => $p->where('can.reassign', false)->where('reassignCandidates', []));
+});
+
+it('refuses to reassign a step to the submitter of the request', function () {
+    expect(fn () => $this->service->reassign($this->request, $this->kasubagA, $this->admin, 'x'))
+        ->toThrow(InvalidArgumentException::class);
+
+    expect($this->request->fresh()->currentStepDefinition()->approver_user_id)->toBeNull();
+});
+
+it('refuses a reassignment posted from a stale page after the request moved to another step', function () {
+    $this->service->approve($this->request, $this->kasubagA);
+
+    expect(fn () => $this->service->reassign($this->request->fresh(), $this->kasubagA, $this->kasubagB, 'Cuti', 1))
+        ->toThrow(InvalidArgumentException::class);
+
+    $url = route('approval-requests.reassign', $this->request);
+    $this->actingAs($this->kasubagA)->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'Cuti', 'step_order' => 1])
+        ->assertRedirect()->assertSessionHas('error');
+    $this->actingAs($this->kasubagA)->from('/x')->post($url, ['user_id' => $this->kasubagB->id, 'note' => 'Cuti'])
+        ->assertSessionHasErrors('step_order');
+
+    $step = $this->request->fresh()->currentStepDefinition();
+    expect($step->step_order)->toBe(2)
+        ->and($step->approver_user_id)->toBeNull()
+        ->and($step->approver_role)->toBe('camat');
 });

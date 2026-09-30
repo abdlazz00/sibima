@@ -65,6 +65,7 @@ class ApprovalActionController extends Controller
                 $request->user(),
                 User::findOrFail($request->validated('user_id')),
                 $request->validated('note'),
+                (int) $request->validated('step_order'),
             );
         } catch (InvalidArgumentException $e) {
             return back()->with('error', $e->getMessage());

@@ -366,7 +366,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                 const isRejected = state === 'rejected';
 
                                 const matchingAction = req.actions?.find(
-                                    (a) => a.step_order === step.step_order
+                                    (a) => a.action === 'approve' && a.step_order === step.step_order
                                 );
 
                                 return (
@@ -811,20 +811,30 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                             {/* Approval / Rejection Actions */}
                             {req.actions?.map((action) => {
                                 const isApprove = action.action === 'approve';
+                                const isReassign = action.action === 'reassign';
+                                const isNeutral = isReassign || action.action === 'cancel';
                                 return (
                                     <li key={action.id} className="relative">
                                         <span
                                             className={`absolute -left-[31px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-white ${
                                                 isApprove
                                                     ? 'bg-emerald-600'
-                                                    : 'bg-red-600'
+                                                    : isReassign
+                                                      ? 'bg-blue-600'
+                                                      : isNeutral
+                                                        ? 'bg-slate-500'
+                                                        : 'bg-red-600'
                                             }`}
                                         />
                                         <div className="space-y-1">
                                             <p className="text-sm font-bold text-slate-900">
                                                 {isApprove
                                                     ? 'Persetujuan Diberikan'
-                                                    : 'Pengajuan Ditolak'}
+                                                    : isReassign
+                                                      ? 'Approver Dialihkan'
+                                                      : action.action === 'cancel'
+                                                        ? 'Pengajuan Dibatalkan'
+                                                        : 'Pengajuan Ditolak'}
                                             </p>
                                             <p className="text-xs text-slate-500">
                                                 Diproses oleh{' '}
@@ -838,7 +848,9 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                                     className={`mt-2 rounded-lg border p-3 text-xs ${
                                                         isApprove
                                                             ? 'border-emerald-100 bg-emerald-50/50 text-emerald-900'
-                                                            : 'border-red-100 bg-red-50/70 text-red-900'
+                                                            : isNeutral
+                                                              ? 'border-slate-200 bg-slate-50 text-slate-800'
+                                                              : 'border-red-100 bg-red-50/70 text-red-900'
                                                     }`}
                                                 >
                                                     <span className="font-semibold">
@@ -868,6 +880,8 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                 <ReassignApproverModal
                     approvalRequestId={req.id}
                     candidates={reassignCandidates}
+                    stepOrder={req.current_step}
+                    stepLabel={steps.find((st) => st.step_order === req.current_step)?.label}
                     onClose={() => setShowReassign(false)}
                 />
             )}

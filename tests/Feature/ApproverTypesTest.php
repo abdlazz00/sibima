@@ -93,3 +93,22 @@ it('lets nobody act on a user step whose approver no longer exists', function ()
     }
     expect($this->service->pendingFor($this->kasubag1))->toHaveCount(0);
 });
+
+it('never lets the submitter act on or be notified for their own request, whatever the step says', function () {
+    $otherAdmin = userWithRole('admin_kecamatan', $this->kec);
+
+    testFlow([['approver_type' => 'user', 'approver_role' => null, 'approver_user_id' => $this->admin->id, 'unit_scope' => 'none']]);
+    $userStep = $this->service->submit(baFor($this, $this->kec), 'test_flow', $this->admin);
+    expect($this->service->canAct($this->admin, $userStep))->toBeFalse()
+        ->and($this->admin->fresh()->notifications)->toHaveCount(0)
+        ->and($this->service->pendingFor($this->admin))->toHaveCount(0);
+
+    WorkflowDefinition::where('code', 'test_flow')->firstOrFail()->steps()->delete();
+    WorkflowDefinition::where('code', 'test_flow')->firstOrFail()->steps()->create([
+        'step_order' => 1, 'label' => 'Admin', 'approver_type' => 'role', 'approver_role' => 'admin_kecamatan', 'unit_scope' => 'none',
+    ]);
+    $roleStep = $this->service->submit(baFor($this, $this->kec), 'test_flow', $this->admin);
+    expect($this->service->canAct($this->admin, $roleStep))->toBeFalse()
+        ->and($this->service->canAct($otherAdmin, $roleStep))->toBeTrue()
+        ->and($this->service->approve($roleStep, $otherAdmin))->toBeNull();
+});

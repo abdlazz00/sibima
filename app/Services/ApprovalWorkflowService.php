@@ -46,7 +46,7 @@ class ApprovalWorkflowService
 
     public function canAct(User $user, ApprovalRequest $request): bool
     {
-        if ($request->status !== ApprovalStatus::Pending) {
+        if ($request->status !== ApprovalStatus::Pending || $user->id === $request->created_by) {
             return false;
         }
 
@@ -172,7 +172,7 @@ class ApprovalWorkflowService
         return $user->hasRole('kasubag') && $request->status === ApprovalStatus::Pending;
     }
 
-    public function reassign(ApprovalRequest $request, User $by, User $to, string $note): void
+    public function reassign(ApprovalRequest $request, User $by, User $to, string $note, ?int $expectedStep = null): void
     {
         if (! $this->canReassign($by, $request)) {
             throw new InvalidArgumentException('Hanya Kasubag yang dapat mengalihkan approver pengajuan yang masih pending.');
@@ -182,11 +182,19 @@ class ApprovalWorkflowService
             throw new InvalidArgumentException('Approver tujuan harus memiliki akun dengan role yang valid.');
         }
 
-        DB::transaction(function () use ($request, $by, $to, $note) {
+        if ($to->id === $request->created_by) {
+            throw new InvalidArgumentException('Approver tujuan tidak boleh pengaju pengajuan ini.');
+        }
+
+        DB::transaction(function () use ($request, $by, $to, $note, $expectedStep) {
             $locked = ApprovalRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
 
             if ($locked->status !== ApprovalStatus::Pending) {
                 throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+            }
+
+            if ($expectedStep !== null && $locked->current_step !== $expectedStep) {
+                throw new InvalidArgumentException('Pengajuan sudah berpindah langkah. Muat ulang halaman lalu coba lagi.');
             }
 
             $step = $locked->currentStepDefinition();
@@ -264,7 +272,9 @@ class ApprovalWorkflowService
             return;
         }
 
-        $this->approversFor($step, $request->approvable)->each(
+        $this->approversFor($step, $request->approvable)
+            ->reject(fn (User $u) => $u->id === $request->created_by)
+            ->each(
             fn (User $user) => $user->notify(new ApprovalStepNotification(
                 $request,
                 "Menunggu persetujuan Anda: {$request->definition->name}",
