@@ -6,11 +6,13 @@ use App\Contracts\HandlesApprovalOutcome;
 use App\Contracts\HasWorkflowUnits;
 use App\Enums\ApprovalActionType;
 use App\Enums\ApprovalStatus;
+use App\Enums\ApproverType;
 use App\Enums\UnitScope;
 use App\Models\ApprovalRequest;
 use App\Models\ApprovalRequestStep;
 use App\Models\AssetMutation;
 use App\Models\BeritaAcaraPenerimaan;
+use App\Models\Unit;
 use App\Models\User;
 use App\Models\WorkflowDefinition;
 use App\Notifications\ApprovalStepNotification;
@@ -50,18 +52,7 @@ class ApprovalWorkflowService
 
         $step = $request->currentStepDefinition();
 
-        if ($step === null || ! $user->hasRole($step->approver_role)) {
-            return false;
-        }
-
-        return match ($step->unit_scope) {
-            UnitScope::None => true,
-            UnitScope::Subject => $user->canAccessUnit($request->approvable->unit),
-            UnitScope::Origin => $request->approvable instanceof HasWorkflowUnits
-                && $user->canAccessUnit($request->approvable->getOriginUnit()),
-            UnitScope::Destination => $request->approvable instanceof HasWorkflowUnits
-                && $user->canAccessUnit($request->approvable->getDestinationUnit()),
-        };
+        return $step !== null && $this->stepAllows($user, $step, $request->approvable);
     }
 
     public function approve(ApprovalRequest $request, User $approver, ?string $note = null): void
@@ -174,6 +165,7 @@ class ApprovalWorkflowService
         return ApprovalRequest::query()
             ->with([
                 'definition',
+                'steps',
                 'creator',
                 'approvable' => fn (MorphTo $morph) => $morph->morphWith([
                     BeritaAcaraPenerimaan::class => ['unit'],
@@ -221,20 +213,51 @@ class ApprovalWorkflowService
     /** @return Collection<int, User> */
     private function approversFor(ApprovalRequestStep $step, Model $approvable): Collection
     {
-        $users = User::role($step->approver_role)->get();
+        $candidates = match ($step->approver_type) {
+            ApproverType::User => User::whereKey($step->approver_user_id)->get(),
+            ApproverType::AtasanUnit => User::role($this->atasanRole($approvable))->get(),
+            ApproverType::Role => User::role($step->approver_role)->get(),
+        };
 
-        if ($step->unit_scope === UnitScope::Subject) {
-            return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->unit))->values();
-        }
+        return $candidates->filter(fn (User $u) => $this->stepAllows($u, $step, $approvable))->values();
+    }
 
-        if ($step->unit_scope === UnitScope::Origin && $approvable instanceof HasWorkflowUnits) {
-            return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->getOriginUnit()))->values();
-        }
+    private function stepAllows(User $user, ApprovalRequestStep $step, Model $approvable): bool
+    {
+        return match ($step->approver_type) {
+            ApproverType::User => $step->approver_user_id !== null && $user->id === $step->approver_user_id,
+            ApproverType::AtasanUnit => $this->allowsAtasanUnit($user, $approvable),
+            ApproverType::Role => $step->approver_role !== null
+                && $user->hasRole($step->approver_role)
+                && $this->inUnitScope($user, $step->unit_scope, $approvable),
+        };
+    }
 
-        if ($step->unit_scope === UnitScope::Destination && $approvable instanceof HasWorkflowUnits) {
-            return $users->filter(fn (User $u) => $u->canAccessUnit($approvable->getDestinationUnit()))->values();
-        }
+    private function allowsAtasanUnit(User $user, Model $approvable): bool
+    {
+        $unit = $approvable->unit ?? null;
 
-        return $users;
+        return $unit instanceof Unit
+            && $user->hasRole($unit->isKecamatan() ? 'camat' : 'lurah')
+            && $user->canAccessUnit($unit);
+    }
+
+    private function atasanRole(Model $approvable): string
+    {
+        $unit = $approvable->unit ?? null;
+
+        return $unit instanceof Unit && $unit->isKecamatan() ? 'camat' : 'lurah';
+    }
+
+    private function inUnitScope(User $user, UnitScope $scope, Model $approvable): bool
+    {
+        return match ($scope) {
+            UnitScope::None => true,
+            UnitScope::Subject => $user->canAccessUnit($approvable->unit),
+            UnitScope::Origin => $approvable instanceof HasWorkflowUnits
+                && $user->canAccessUnit($approvable->getOriginUnit()),
+            UnitScope::Destination => $approvable instanceof HasWorkflowUnits
+                && $user->canAccessUnit($approvable->getDestinationUnit()),
+        };
     }
 }
