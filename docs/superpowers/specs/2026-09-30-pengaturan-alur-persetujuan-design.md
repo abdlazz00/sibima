@@ -1,6 +1,6 @@
 # Desain: Pengaturan Alur Persetujuan Dinamis (E1 + E2)
 
-Status: Menunggu review.
+Status: Diimplementasikan (plan 2026-09-30-pengaturan-alur-persetujuan.md).
 Tanggal: 2026-09-30
 
 ---

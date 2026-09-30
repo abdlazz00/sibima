@@ -131,6 +131,7 @@ Matriks berikut menggabungkan spesifikasi dokumen desain (`PANDUAN_DESAIN_UI_UX_
 | **Mutasi Aset (Persetujuan)** | Sesuai Alur | Sesuai Alur | Sesuai Alur (Konfirmasi) | Sesuai Alur (Konfirmasi) | Sesuai Alur | ✅ Selesai (`ApprovalWorkflowService`) |
 | **Kotak Persetujuan (`/persetujuan`)** | ✅ Tugas Kasubag | ✅ Tugas Camat | ✅ Langkah verifikasi retur | ✅ Langkah verifikasi mutasi masuk | ✅ Tugas Lurah | ✅ Selesai (`PersetujuanController`) |
 | **Batalkan Pengajuan** | ❌ | ❌ | ✅ Hanya pengaju, selama pending | ✅ Hanya pengaju, selama pending | ❌ | ✅ Selesai (`ApprovalWorkflowService::cancel`) |
+| **Pengaturan Alur Persetujuan** | ✅ Penuh (ubah langkah, alihkan approver) | ❌ | ❌ | ❌ | ❌ | ✅ Selesai (`WorkflowDefinitionPolicy`, `WorkflowSettingsController`) |
 | **Draft Berita Acara (lihat/edit/hapus)** | ❌ Tidak terlihat | ❌ Tidak terlihat | ✅ Admin unit yang sama | ❌ | ❌ | ✅ Selesai (`BeritaAcaraPenerimaanPolicy`) |
 | **Permohonan Kebutuhan Aset** | Approve Req Unit | Approve Peg. Kec. | Input Form | Input Form | Approve Peg. Kel. | ⏳ *Next Roadmap* |
 | **Pelaporan Rusak / Hilang** | Monitor Laporan | Approve Peg. Kec. | Input Form | Input Form | Approve Peg. Kel. | ⏳ *Next Roadmap* |
@@ -295,6 +296,18 @@ public function canAct(User $user, ApprovalRequest $request): bool
 6. Mutasi Internal Kelurahan (`mutasi_internal_kel`)
    Step 1: Lurah           [Scope: Origin] (Pengalihan Ruangan/Pegawai di Kelurahan)
 ```
+
+
+### Tipe Approver & Snapshot Langkah
+
+Setiap langkah (`workflow_steps`) kini punya `label` dan `approver_type`:
+- `role`: role + cakupan unit (`none/subject/origin/destination`), seperti sebelumnya.
+- `user`: eksklusif untuk satu user; Kasubag dapat mengalihkan approver langkah yang sedang pending ke user lain.
+- `atasan_unit`: otomatis Camat (unit kecamatan) atau Lurah (unit kelurahan).
+
+Langkah disalin ke `approval_request_steps` saat pengajuan dibuat, sehingga mengubah alur dari menu Pengaturan Alur hanya berlaku untuk pengajuan baru. Semua perubahan tercatat di `workflow_change_logs`.
+
+Catatan operasional setelah pull: `php artisan migrate` lalu `php artisan db:seed --class=WorkflowDefinitionSeeder` (seeder tidak menimpa alur yang sudah diubah admin).
 
 ---
 
