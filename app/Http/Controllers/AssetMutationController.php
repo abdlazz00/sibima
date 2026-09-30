@@ -97,18 +97,25 @@ class AssetMutationController extends Controller
             'items.asset.currentHolder',
             'items.targetHolder',
             'approvalRequest.definition.steps',
+            'approvalRequest.steps',
             'approvalRequest.actions.user',
             'photos',
         ]);
 
         $approvalRequest = $assetMutation->approvalRequest;
 
+        $workflow = app(ApprovalWorkflowService::class);
+        $user = $request->user();
+        $canReassign = $approvalRequest !== null && $workflow->canReassign($user, $approvalRequest);
+
         return Inertia::render('AssetMutations/Show', [
             'mutation' => $assetMutation,
             'can' => [
-                'act' => $approvalRequest !== null && app(ApprovalWorkflowService::class)->canAct($request->user(), $approvalRequest),
-                'cancel' => $approvalRequest !== null && app(ApprovalWorkflowService::class)->canCancel($request->user(), $approvalRequest),
+                'act' => $approvalRequest !== null && $workflow->canAct($user, $approvalRequest),
+                'cancel' => $approvalRequest !== null && $workflow->canCancel($user, $approvalRequest),
+                'reassign' => $canReassign,
             ],
+            'reassignCandidates' => $canReassign ? $workflow->reassignCandidates() : [],
         ]);
     }
 }

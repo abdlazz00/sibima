@@ -68,6 +68,10 @@ class ApprovalWorkflowService
                 throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
             }
 
+            if (! $this->canAct($approver, $locked)) {
+                throw new InvalidArgumentException('Anda tidak lagi berwenang pada langkah ini.');
+            }
+
             $locked->actions()->create([
                 'step_order' => $locked->current_step,
                 'user_id' => $approver->id,
@@ -103,6 +107,10 @@ class ApprovalWorkflowService
 
             if ($locked->status !== ApprovalStatus::Pending || $locked->current_step !== $request->current_step) {
                 throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+            }
+
+            if (! $this->canAct($approver, $locked)) {
+                throw new InvalidArgumentException('Anda tidak lagi berwenang pada langkah ini.');
             }
 
             $locked->actions()->create([
@@ -157,6 +165,65 @@ class ApprovalWorkflowService
 
             $request->setRawAttributes($locked->getAttributes());
         });
+    }
+
+    public function canReassign(User $user, ApprovalRequest $request): bool
+    {
+        return $user->hasRole('kasubag') && $request->status === ApprovalStatus::Pending;
+    }
+
+    public function reassign(ApprovalRequest $request, User $by, User $to, string $note): void
+    {
+        if (! $this->canReassign($by, $request)) {
+            throw new InvalidArgumentException('Hanya Kasubag yang dapat mengalihkan approver pengajuan yang masih pending.');
+        }
+
+        if ($to->getRoleNames()->isEmpty()) {
+            throw new InvalidArgumentException('Approver tujuan harus memiliki akun dengan role yang valid.');
+        }
+
+        DB::transaction(function () use ($request, $by, $to, $note) {
+            $locked = ApprovalRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->status !== ApprovalStatus::Pending) {
+                throw new InvalidArgumentException('Pengajuan ini sudah tidak menunggu persetujuan.');
+            }
+
+            $step = $locked->currentStepDefinition();
+
+            if ($step === null) {
+                throw new InvalidArgumentException('Langkah pengajuan tidak ditemukan.');
+            }
+
+            $step->update([
+                'approver_type' => ApproverType::User,
+                'approver_role' => null,
+                'approver_user_id' => $to->id,
+                'unit_scope' => UnitScope::None,
+            ]);
+
+            $locked->actions()->create([
+                'step_order' => $locked->current_step,
+                'user_id' => $by->id,
+                'action' => ApprovalActionType::Reassign,
+                'note' => "Dialihkan dari {$step->label} ke {$to->name}: {$note}",
+            ]);
+        });
+
+        $request->unsetRelation('steps');
+        $this->notifyApprovers($request->fresh());
+    }
+
+    /** @return list<array{id: int, name: string, role: ?string, unit: ?string}> */
+    public function reassignCandidates(): array
+    {
+        return User::whereHas('roles')->with(['roles', 'unit'])->orderBy('name')->get()
+            ->map(fn (User $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'role' => $u->getRoleNames()->first(),
+                'unit' => $u->unit?->name,
+            ])->all();
     }
 
     /** @return Collection<int, ApprovalRequest> */

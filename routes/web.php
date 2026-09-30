@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/approval-requests/{approvalRequest}/approve', [ApprovalActionController::class, 'approve'])->name('approval-requests.approve');
     Route::post('/approval-requests/{approvalRequest}/reject', [ApprovalActionController::class, 'reject'])->name('approval-requests.reject');
     Route::post('/approval-requests/{approvalRequest}/cancel', [ApprovalActionController::class, 'cancel'])->name('approval-requests.cancel');
+    Route::post('/approval-requests/{approvalRequest}/reassign', [ApprovalActionController::class, 'reassign'])->name('approval-requests.reassign');
 
     Route::get('/persetujuan', [PersetujuanController::class, 'index'])->name('persetujuan.index');
 

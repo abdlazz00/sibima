@@ -127,7 +127,7 @@ class PenerimaanAsetController extends Controller
 
         $beritaAcara->load([
             'unit', 'creator', 'items.category',
-            'approvalRequest.definition.steps', 'approvalRequest.actions.user',
+            'approvalRequest.definition.steps', 'approvalRequest.steps', 'approvalRequest.actions.user',
         ]);
 
         $approvalRequest = $beritaAcara->approvalRequest;
@@ -140,7 +140,11 @@ class PenerimaanAsetController extends Controller
                 'cancel' => $approvalRequest !== null && $this->workflow->canCancel($user, $approvalRequest),
                 'edit' => $user->can('update', $beritaAcara),
                 'delete' => $user->can('delete', $beritaAcara),
+                'reassign' => $approvalRequest !== null && $this->workflow->canReassign($user, $approvalRequest),
             ],
+            'reassignCandidates' => $approvalRequest !== null && $this->workflow->canReassign($user, $approvalRequest)
+                ? $this->workflow->reassignCandidates()
+                : [],
         ]);
     }
 
