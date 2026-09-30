@@ -215,3 +215,25 @@ export type PageProps<
         items: NotificationItem[];
     };
 };
+
+export type AssetReportStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
+export type AssetReportType = 'rusak' | 'hilang';
+
+export interface AssetReport {
+    id: number;
+    nomor_laporan: string;
+    asset_id: number;
+    unit_id: number;
+    pegawai_id: number | null;
+    jenis: AssetReportType;
+    kondisi_baru: 'baik' | 'rusak_ringan' | 'rusak_berat' | 'hilang';
+    tanggal_kejadian: string;
+    kronologi: string;
+    status: AssetReportStatus;
+    asset?: Asset;
+    unit?: { id: number; name: string; type: 'kecamatan' | 'kelurahan' };
+    pegawai?: Pegawai | null;
+    creator?: { id: number; name: string };
+    photos?: AssetPhoto[];
+    approval_request?: ApprovalRequestSummary | null;
+}

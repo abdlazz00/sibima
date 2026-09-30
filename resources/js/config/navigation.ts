@@ -60,9 +60,8 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
             },
             {
                 label: 'Lapor Rusak/Hilang',
-                href: '#',
+                href: '/asset-reports',
                 icon: 'alert-triangle',
-                disabled: true,
             },
         ],
     },
