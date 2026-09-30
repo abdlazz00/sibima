@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenerimaanAsetController;
 use App\Http\Controllers\PersetujuanController;
+use App\Http\Controllers\WorkflowSettingsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/approval-requests/{approvalRequest}/reassign', [ApprovalActionController::class, 'reassign'])->name('approval-requests.reassign');
 
     Route::get('/persetujuan', [PersetujuanController::class, 'index'])->name('persetujuan.index');
+
+    Route::get('/pengaturan/alur', [WorkflowSettingsController::class, 'index'])->name('workflow-settings.index');
+    Route::get('/pengaturan/alur/{workflow}', [WorkflowSettingsController::class, 'edit'])->name('workflow-settings.edit');
+    Route::put('/pengaturan/alur/{workflow}', [WorkflowSettingsController::class, 'update'])->name('workflow-settings.update');
+    Route::post('/pengaturan/alur/{workflow}/reset', [WorkflowSettingsController::class, 'reset'])->name('workflow-settings.reset');
 
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::get('/asset-categories/create', [AssetCategoryController::class, 'create'])->name('asset-categories.create');
