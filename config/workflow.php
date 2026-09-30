@@ -16,4 +16,21 @@ return [
         'mutasi_internal_kec' => AssetMutationEffect::class,
         'mutasi_internal_kel' => AssetMutationEffect::class,
     ],
+
+    /*
+     * What each workflow's subject offers, used to validate steps edited from the UI:
+     *  - subject:            the approvable has a single unit (`->unit`); allows the
+     *                        "subject" unit scope and the "atasan_unit" approver type.
+     *  - origin_destination: the approvable implements HasWorkflowUnits; allows the
+     *                        "origin"/"destination" unit scopes.
+     *  - none:               only role steps without a unit scope.
+     */
+    'capabilities' => [
+        'penerimaan_aset' => 'subject',
+        'mutasi_kec_ke_kel' => 'origin_destination',
+        'mutasi_antar_kel' => 'origin_destination',
+        'retur_kel_ke_kec' => 'origin_destination',
+        'mutasi_internal_kec' => 'origin_destination',
+        'mutasi_internal_kel' => 'origin_destination',
+    ],
 ];
