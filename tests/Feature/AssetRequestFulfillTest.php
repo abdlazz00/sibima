@@ -234,3 +234,15 @@ it('refuses to close a request that is pending, fulfilled, has a running mutatio
     $this->service->fulfillPegawai($fulfilled, reqAsset($this, $this->kel)->id, $this->adminKel);
     expect(fn () => $this->service->close($fulfilled->fresh(), 'x', $this->adminKel))->toThrow(InvalidArgumentException::class);
 });
+
+it('refuses to hand over when the pegawai was deleted or moved to another unit after approval', function () {
+    $deleted = reqPegawaiApproved($this);
+    $deleted->pegawai->delete();
+    $moved = reqPegawaiApproved($this);
+    $moved->pegawai->update(['unit_id' => $this->kel2->id]);
+    $asset = reqAsset($this, $this->kel);
+
+    expect(fn () => $this->service->fulfillPegawai($deleted->fresh(), $asset->id, $this->adminKel))->toThrow(InvalidArgumentException::class)
+        ->and(fn () => $this->service->fulfillPegawai($moved->fresh(), $asset->id, $this->adminKel))->toThrow(InvalidArgumentException::class);
+    expect($asset->fresh()->current_holder_id)->toBeNull();
+});

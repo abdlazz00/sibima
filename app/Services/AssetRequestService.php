@@ -124,6 +124,10 @@ class AssetRequestService
             $locked = AssetRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
             $this->assertFulfillable($locked, $actor, AssetRequestType::Pegawai);
 
+            if ($locked->pegawai === null || $locked->pegawai->unit_id !== $locked->unit_id) {
+                throw new InvalidArgumentException('Pegawai pemohon sudah dihapus atau pindah unit. Tutup permohonan ini dan ajukan ulang.');
+            }
+
             $asset = Asset::whereKey($assetId)->lockForUpdate()->first();
             $this->assertAssetEligible($asset, $locked);
 
