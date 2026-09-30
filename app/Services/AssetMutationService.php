@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\AssetStatus;
+use App\Enums\Kondisi;
 use App\Enums\MutationStatus;
 use App\Enums\MutationType;
 use App\Models\Asset;
@@ -63,6 +64,9 @@ class AssetMutationService
             foreach ($assets as $asset) {
                 if ($asset->unit_id !== $originUnit->id) {
                     throw new InvalidArgumentException("Aset \"{$asset->nama_aset}\" bukan milik unit asal.");
+                }
+                if ($asset->kondisi === Kondisi::Hilang) {
+                    throw new InvalidArgumentException("Aset \"{$asset->nama_aset}\" berkondisi hilang dan tidak dapat dimutasi.");
                 }
                 if ($asset->status !== AssetStatus::Aktif) {
                     throw new InvalidArgumentException("Aset \"{$asset->nama_aset}\" sedang tidak aktif atau dalam proses mutasi lain.");

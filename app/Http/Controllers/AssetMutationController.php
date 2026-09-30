@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AssetStatus;
+use App\Enums\Kondisi;
 use App\Http\Requests\StoreAssetMutationRequest;
 use App\Models\Asset;
 use App\Models\AssetMutation;
@@ -54,6 +55,7 @@ class AssetMutationController extends Controller
 
         $assets = Asset::query()
             ->where('status', AssetStatus::Aktif)
+            ->where('kondisi', '!=', Kondisi::Hilang)
             ->when($accessibleUnitIds !== null, fn ($q) => $q->whereIn('unit_id', $accessibleUnitIds))
             ->with(['category', 'currentHolder'])
             ->get();
