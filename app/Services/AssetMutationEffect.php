@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Contracts\WorkflowEffect;
+use App\Enums\AssetRequestStatus;
 use App\Enums\AssetStatus;
 use App\Enums\Kondisi;
 use App\Enums\MutationStatus;
 use App\Models\Asset;
 use App\Models\AssetHistory;
 use App\Models\AssetMutation;
+use App\Models\AssetRequest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -60,6 +62,14 @@ class AssetMutationEffect implements WorkflowEffect
             }
 
             $approvable->update(['status' => MutationStatus::Approved]);
+
+            AssetRequest::where('mutation_id', $approvable->id)
+                ->where('status', AssetRequestStatus::Approved)
+                ->update([
+                    'status' => AssetRequestStatus::Fulfilled,
+                    'fulfilled_by' => auth()->id() ?? $approvable->created_by,
+                    'fulfilled_at' => now(),
+                ]);
         });
     }
 }

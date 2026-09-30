@@ -106,5 +106,10 @@ class AssetMutation extends Model implements Approvable, HandlesApprovalOutcome,
     {
         $this->update(['status' => $status]);
         Asset::whereIn('id', $this->items()->pluck('asset_id'))->update(['status' => AssetStatus::Aktif]);
+
+        AssetRequest::where('mutation_id', $this->id)->get()->each(function (AssetRequest $request) {
+            $request->assets()->detach();
+            $request->update(['mutation_id' => null]);
+        });
     }
 }
