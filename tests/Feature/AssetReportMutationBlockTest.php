@@ -36,3 +36,23 @@ it('does not offer lost assets on the mutation form', function () {
     $this->actingAs($this->adminKec)->get(route('asset-mutations.create'))
         ->assertInertia(fn (Assert $p) => $p->where('assets', fn ($a) => collect($a)->pluck('id')->all() === [$this->ok->id]));
 });
+
+it('does not move an asset that was reported lost while its mutation was already pending', function () {
+    $camat = userWithRole('camat', $this->kec);
+    $pegawai = App\Models\Pegawai::factory()->create(['unit_id' => $this->kec->id]);
+
+    $this->actingAs($this->adminKec)->post(route('asset-mutations.store'), [
+        'nomor_mutasi' => 'M/PENDING/1', 'jenis_mutasi' => 'internal',
+        'origin_unit_id' => $this->kec->id, 'destination_unit_id' => $this->kec->id,
+        'tanggal_mutasi' => '2026-10-01', 'items' => [['asset_id' => $this->ok->id, 'target_holder_id' => $pegawai->id]],
+    ])->assertRedirect();
+    $mutation = AssetMutation::where('nomor_mutasi', 'M/PENDING/1')->firstOrFail();
+
+    $this->ok->update(['kondisi' => Kondisi::Hilang]);
+
+    $this->actingAs($camat)->post(route('approval-requests.approve', $mutation->approvalRequest))
+        ->assertRedirect()->assertSessionHas('error');
+
+    expect($this->ok->fresh()->current_holder_id)->toBeNull()
+        ->and($mutation->fresh()->status->value)->toBe('pending');
+});

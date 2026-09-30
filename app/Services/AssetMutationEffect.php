@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\WorkflowEffect;
 use App\Enums\AssetStatus;
+use App\Enums\Kondisi;
 use App\Enums\MutationStatus;
 use App\Models\Asset;
 use App\Models\AssetHistory;
@@ -27,6 +28,10 @@ class AssetMutationEffect implements WorkflowEffect
 
             foreach ($approvable->items as $item) {
                 $asset = $assets->get($item->asset_id);
+
+                if ($asset !== null && $asset->kondisi === Kondisi::Hilang) {
+                    throw new InvalidArgumentException("Aset \"{$asset->nama_aset}\" sudah dilaporkan hilang dan tidak dapat dimutasi.");
+                }
 
                 if ($asset === null || $asset->unit_id !== $approvable->origin_unit_id || $asset->status !== AssetStatus::DalamProses) {
                     $name = $asset?->nama_aset ?? "#{$item->asset_id}";

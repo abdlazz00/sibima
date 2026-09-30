@@ -108,3 +108,13 @@ it('leaves the asset untouched on reject and cancel', function () {
         ->and($rejected->asset->fresh()->kondisi)->toBe(Kondisi::Baik)
         ->and($cancelled->asset->fresh()->kondisi)->toBe(Kondisi::Baik);
 });
+
+it('fails clearly when the asset moved to another unit after the report was filed', function () {
+    $report = submitReport($this, $this->kec, $this->adminKec, ['kondisi_baru' => 'rusak_ringan']);
+    $report->asset->update(['unit_id' => $this->kel->id]);
+
+    expect(fn () => $this->service->approve($report->approvalRequest, $this->camat))->toThrow(InvalidArgumentException::class);
+
+    expect($report->asset->fresh()->kondisi)->toBe(Kondisi::Baik)
+        ->and($report->fresh()->status)->toBe(AssetReportStatus::Pending);
+});

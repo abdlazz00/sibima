@@ -26,6 +26,10 @@ class AssetReportEffect implements WorkflowEffect
                 throw new InvalidArgumentException('Aset pada laporan ini sudah tidak ditemukan.');
             }
 
+            if ($asset->unit_id !== $approvable->unit_id) {
+                throw new InvalidArgumentException('Aset sudah berpindah unit; ajukan laporan baru dari unit pemilik.');
+            }
+
             if ($asset->kondisi === Kondisi::Hilang) {
                 throw new InvalidArgumentException('Aset ini sudah berkondisi hilang, laporan tidak dapat diterapkan.');
             }
