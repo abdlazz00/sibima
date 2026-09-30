@@ -81,6 +81,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('asset-mutations', AssetMutationController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('asset-reports', AssetReportController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('asset-requests', AssetRequestController::class)->only(['index', 'create', 'store', 'show']);
+    Route::post('/asset-requests/{assetRequest}/fulfill', [AssetRequestController::class, 'fulfill'])->name('asset-requests.fulfill');
+    Route::post('/asset-requests/{assetRequest}/close', [AssetRequestController::class, 'close'])->name('asset-requests.close');
 });
 
 require __DIR__.'/auth.php';
