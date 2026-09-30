@@ -19,6 +19,16 @@ enum Kondisi: string
         };
     }
 
+    public function severity(): int
+    {
+        return match ($this) {
+            self::Baik => 0,
+            self::RusakRingan => 1,
+            self::RusakBerat => 2,
+            self::Hilang => 3,
+        };
+    }
+
     /** @return list<array{value: string, label: string}> */
     public static function options(): array
     {

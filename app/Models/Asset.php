@@ -84,6 +84,11 @@ class Asset extends Model
         return $this->morphMany(AssetPhoto::class, 'photoable');
     }
 
+    public function reports(): HasMany
+    {
+        return $this->hasMany(AssetReport::class);
+    }
+
     public function histories(): HasMany
     {
         return $this->hasMany(AssetHistory::class)->latest()->latest('id');
