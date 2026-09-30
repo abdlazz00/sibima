@@ -134,7 +134,7 @@ Matriks berikut menggabungkan spesifikasi dokumen desain (`PANDUAN_DESAIN_UI_UX_
 | **Pengaturan Alur Persetujuan** | ✅ Penuh (ubah langkah, alihkan approver) | ❌ | ❌ | ❌ | ❌ | ✅ Selesai (`WorkflowDefinitionPolicy`, `WorkflowSettingsController`) |
 | **Draft Berita Acara (lihat/edit/hapus)** | ❌ Tidak terlihat | ❌ Tidak terlihat | ✅ Admin unit yang sama | ❌ | ❌ | ✅ Selesai (`BeritaAcaraPenerimaanPolicy`) |
 | **Permohonan Kebutuhan Aset** | Approve Req Unit | Approve Peg. Kec. | Input Form | Input Form | Approve Peg. Kel. | ⏳ *Next Roadmap* |
-| **Pelaporan Rusak / Hilang** | Monitor Laporan | Approve Peg. Kec. | Input Form | Input Form | Approve Peg. Kel. | ⏳ *Next Roadmap* |
+| **Pelaporan Rusak / Hilang** | Lihat semua (alihkan approver) | Approve aset kecamatan | Input laporan | Input laporan | Approve aset kelurahan | ✅ Selesai (`AssetReportPolicy`, workflow `lapor_rusak_hilang`) |
 | **Pindai QR Code Kamera** | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ⏳ *Next Roadmap* |
 | **Laporan & Rekapitulasi Excel** | Cetak Seluruhnya | Cetak Seluruhnya | Cetak Unit Kec. | Cetak Unit Kel. | Cetak Unit Kel. | ⏳ *Next Roadmap* |
 
@@ -295,6 +295,9 @@ public function canAct(User $user, ApprovalRequest $request): bool
 
 6. Mutasi Internal Kelurahan (`mutasi_internal_kel`)
    Step 1: Lurah           [Scope: Origin] (Pengalihan Ruangan/Pegawai di Kelurahan)
+
+7. Lapor Rusak/Hilang (`lapor_rusak_hilang`)
+   Step 1: Atasan Unit     [Scope: Subject] (Camat untuk aset kecamatan, Lurah untuk aset kelurahan)
 ```
 
 

@@ -1,6 +1,6 @@
 # Desain: Lapor Rusak/Hilang (asset_reports)
 
-Status: Menunggu review.
+Status: Diimplementasikan (plan 2026-10-01-lapor-rusak-hilang.md).
 Tanggal: 2026-10-01
 
 Menggantikan `docs/superpowers/plans/2026-09-26-asset-report.md` (plan lama, dibuat sebelum workflow engine dinamis).
