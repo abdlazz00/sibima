@@ -113,7 +113,7 @@ export interface BeritaAcaraItem {
 export interface ApprovalActionEntry {
     id: number;
     step_order: number;
-    action: 'approve' | 'reject' | 'cancel';
+    action: 'approve' | 'reject' | 'cancel' | 'reassign';
     note: string | null;
     created_at: string;
     user?: { id: number; name: string };
@@ -121,15 +121,26 @@ export interface ApprovalActionEntry {
 
 export interface ApprovalStep {
     step_order: number;
-    approver_role: string;
+    label: string;
+    approver_type: 'role' | 'user' | 'atasan_unit';
+    approver_role: string | null;
+    approver_user_id?: number | null;
     unit_scope?: string;
+}
+
+export interface ReassignCandidate {
+    id: number;
+    name: string;
+    role: string | null;
+    unit: string | null;
 }
 
 export interface ApprovalRequestSummary {
     id: number;
     current_step: number;
     status: 'pending' | 'approved' | 'rejected' | 'cancelled';
-    definition?: { name: string; steps?: ApprovalStep[] };
+    definition?: { name: string };
+    steps?: ApprovalStep[];
     actions?: ApprovalActionEntry[];
 }
 

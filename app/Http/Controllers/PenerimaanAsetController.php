@@ -127,7 +127,7 @@ class PenerimaanAsetController extends Controller
 
         $beritaAcara->load([
             'unit', 'creator', 'items.category',
-            'approvalRequest.definition.steps', 'approvalRequest.steps', 'approvalRequest.actions.user',
+            'approvalRequest.definition', 'approvalRequest.steps', 'approvalRequest.actions.user',
         ]);
 
         $approvalRequest = $beritaAcara->approvalRequest;

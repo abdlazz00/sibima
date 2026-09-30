@@ -1,14 +1,16 @@
 import CancelRequestModal from '@/Components/CancelRequestModal';
+import ReassignApproverModal from '@/Components/ReassignApproverModal';
 import { CheckCircleIcon as Check, ChevronRightIcon as ChevronRight } from '@/Components/Icons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PENERIMAAN_STATUS_LABEL, PENERIMAAN_STATUS_STYLE, penerimaanStatus } from '@/lib/penerimaanStatus';
-import { BeritaAcaraPenerimaan, PageProps } from '@/types';
+import { BeritaAcaraPenerimaan, PageProps, ReassignCandidate } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 interface ShowProps extends PageProps {
     beritaAcara: BeritaAcaraPenerimaan;
-    can: { act: boolean; cancel: boolean; edit: boolean; delete: boolean };
+    can: { act: boolean; cancel: boolean; edit: boolean; delete: boolean; reassign: boolean };
+    reassignCandidates: ReassignCandidate[];
 }
 
 type StepState = 'done' | 'current' | 'upcoming' | 'rejected' | 'cancelled';
@@ -29,24 +31,21 @@ const STEP_TEXT: Record<StepState, string> = {
     cancelled: 'Dibatalkan',
 };
 
-const ACTION_LABEL = { approve: 'Disetujui', reject: 'Ditolak', cancel: 'Dibatalkan' } as const;
-const ACTION_DOT = { approve: 'bg-emerald-600', reject: 'bg-red-600', cancel: 'bg-slate-500' } as const;
+const ACTION_LABEL = { approve: 'Disetujui', reject: 'Ditolak', cancel: 'Dibatalkan', reassign: 'Dialihkan' } as const;
+const ACTION_DOT = { approve: 'bg-emerald-600', reject: 'bg-red-600', cancel: 'bg-slate-500', reassign: 'bg-blue-600' } as const;
 
 function formatRupiah(value: string | number): string {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value));
 }
 
-function stepLabel(role: string): string {
-    return role === 'kasubag' ? 'Verifikasi Kasubag' : 'Persetujuan Camat';
-}
-
-export default function Show({ beritaAcara, can }: ShowProps) {
+export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps) {
     const [showReject, setShowReject] = useState(false);
     const [showCancel, setShowCancel] = useState(false);
+    const [showReassign, setShowReassign] = useState(false);
     const [note, setNote] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const req = beritaAcara.approval_request;
-    const steps = req?.definition?.steps ?? [];
+    const steps = req?.steps ?? [];
     const total = (beritaAcara.items ?? []).reduce((sum, i) => sum + Number(i.nilai_per_unit) * i.jumlah_unit, 0);
     const status = penerimaanStatus(beritaAcara);
 
@@ -123,6 +122,11 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                                 Batalkan Pengajuan
                             </button>
                         )}
+                        {can.reassign && (
+                            <button onClick={() => setShowReassign(true)} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                Alihkan Approver
+                            </button>
+                        )}
                         {can.act && (
                             <>
                                 <button onClick={() => setShowReject(true)} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
@@ -157,7 +161,7 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                                             {idx < steps.length - 1 && <div className="h-px flex-1 bg-slate-200" />}
                                         </div>
                                         <div>
-                                            <p className="text-xs font-semibold text-slate-900">Step {step.step_order}: {stepLabel(step.approver_role)}</p>
+                                            <p className="text-xs font-semibold text-slate-900">Step {step.step_order}: {step.label}</p>
                                             <p className="text-[11px] text-slate-500">{STEP_TEXT[state]}</p>
                                         </div>
                                     </div>
@@ -236,6 +240,14 @@ export default function Show({ beritaAcara, can }: ShowProps) {
                     approvalRequestId={req.id}
                     onClose={() => setShowCancel(false)}
                     description="Pengajuan akan dihentikan dan tidak lagi muncul di kotak persetujuan. Persetujuan yang sudah diberikan ikut hangus."
+                />
+            )}
+
+            {showReassign && req && (
+                <ReassignApproverModal
+                    approvalRequestId={req.id}
+                    candidates={reassignCandidates}
+                    onClose={() => setShowReassign(false)}
                 />
             )}
 

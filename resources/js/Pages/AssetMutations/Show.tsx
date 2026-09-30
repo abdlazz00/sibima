@@ -15,14 +15,18 @@ import {
     MutationType,
     PageProps,
     Pegawai,
+    ReassignCandidate,
+    ApprovalStep,
 } from '@/types';
 import CancelRequestModal from '@/Components/CancelRequestModal';
+import ReassignApproverModal from '@/Components/ReassignApproverModal';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 interface ShowProps extends PageProps {
     mutation: AssetMutation;
-    can: { act: boolean; cancel: boolean };
+    can: { act: boolean; cancel: boolean; reassign: boolean };
+    reassignCandidates: ReassignCandidate[];
 }
 
 const STATUS_STYLE: Record<MutationStatus, string> = {
@@ -105,43 +109,22 @@ function formatDateTime(dateStr: string): string {
     }
 }
 
-function getStepRoleTitle(
-    role: string,
-    unitScope?: string,
-    originName?: string,
-    destName?: string
-): string {
-    switch (role) {
-        case 'kasubag':
-            return 'Verifikasi Kasubag';
-        case 'camat':
-            return 'Persetujuan Camat';
-        case 'lurah':
-            if (unitScope === 'origin') {
-                return `Persetujuan Lurah Asal (${originName ?? 'Pengirim'})`;
-            }
-            if (unitScope === 'destination') {
-                return `Persetujuan Lurah Penerima (${destName ?? 'Penerima'})`;
-            }
-            return 'Persetujuan Lurah';
-        case 'admin_kelurahan':
-            return `Konfirmasi Admin (${destName ?? 'Kelurahan Penerima'})`;
-        case 'admin_kecamatan':
-            return `Konfirmasi Admin (${destName ?? 'Kecamatan'})`;
-        default:
-            return role.replace(/_/g, ' ').toUpperCase();
-    }
+function stepTitle(step: ApprovalStep, originName?: string, destName?: string): string {
+    if (step.unit_scope === 'origin' && originName) return `${step.label} (${originName})`;
+    if (step.unit_scope === 'destination' && destName) return `${step.label} (${destName})`;
+    return step.label;
 }
 
-export default function Show({ mutation, can }: ShowProps) {
+export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
     const [showReject, setShowReject] = useState(false);
     const [showCancel, setShowCancel] = useState(false);
+    const [showReassign, setShowReassign] = useState(false);
     const [note, setNote] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [activePhoto, setActivePhoto] = useState<AssetPhoto | null>(null);
 
     const req = mutation.approval_request;
-    const steps = req?.definition?.steps ?? [];
+    const steps = req?.steps ?? [];
     const items = mutation.items ?? [];
 
     const totalNilaiPerolehan = items.reduce(
@@ -260,6 +243,16 @@ export default function Show({ mutation, can }: ShowProps) {
                                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
                             >
                                 Batalkan Pengajuan
+                            </button>
+                        )}
+
+                        {can.reassign && mutation.status === 'pending' && (
+                            <button
+                                type="button"
+                                onClick={() => setShowReassign(true)}
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                            >
+                                Alihkan Approver
                             </button>
                         )}
 
@@ -415,12 +408,7 @@ export default function Show({ mutation, can }: ShowProps) {
 
                                         <div className="mt-1">
                                             <p className="text-xs font-semibold text-slate-900">
-                                                {getStepRoleTitle(
-                                                    step.approver_role,
-                                                    step.unit_scope,
-                                                    mutation.origin_unit?.name,
-                                                    mutation.destination_unit?.name
-                                                )}
+                                                {stepTitle(step, mutation.origin_unit?.name, mutation.destination_unit?.name)}
                                             </p>
                                             <p className="mt-0.5 text-[11px] text-slate-500">
                                                 {isDone ? (
@@ -873,6 +861,14 @@ export default function Show({ mutation, can }: ShowProps) {
                     approvalRequestId={req.id}
                     onClose={() => setShowCancel(false)}
                     description="Pengajuan dihentikan dan aset yang diajukan dikembalikan ke status Aktif di unit asal. Persetujuan yang sudah diberikan ikut hangus."
+                />
+            )}
+
+            {showReassign && req && (
+                <ReassignApproverModal
+                    approvalRequestId={req.id}
+                    candidates={reassignCandidates}
+                    onClose={() => setShowReassign(false)}
                 />
             )}
 
