@@ -67,6 +67,17 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
         ],
     },
     {
+        title: 'PENGATURAN',
+        items: [
+            {
+                label: 'Pengaturan Alur',
+                href: '/pengaturan/alur',
+                icon: 'settings',
+                roles: ['kasubag'],
+            },
+        ],
+    },
+    {
         title: 'ALAT BANTU',
         items: [
             {
