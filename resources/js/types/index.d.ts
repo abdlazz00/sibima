@@ -237,3 +237,30 @@ export interface AssetReport {
     photos?: AssetPhoto[];
     approval_request?: ApprovalRequestSummary | null;
 }
+
+export type AssetRequestStatus = 'pending' | 'approved' | 'fulfilled' | 'rejected' | 'cancelled';
+export type AssetRequestType = 'pegawai' | 'unit';
+
+export interface AssetRequest {
+    id: number;
+    nomor_permohonan: string;
+    jenis: AssetRequestType;
+    pegawai_id: number | null;
+    unit_id: number;
+    category_id: number;
+    jumlah: number;
+    keterangan: string;
+    status: AssetRequestStatus;
+    mutation_id: number | null;
+    fulfilled_at: string | null;
+    catatan_penutupan: string | null;
+    created_at: string;
+    pegawai?: Pegawai | null;
+    unit?: { id: number; name: string; type: 'kecamatan' | 'kelurahan' };
+    category?: { id: number; name: string };
+    creator?: { id: number; name: string };
+    fulfiller?: { id: number; name: string } | null;
+    mutation?: { id: number; nomor_mutasi: string; status: string } | null;
+    assets?: Asset[];
+    approval_request?: ApprovalRequestSummary | null;
+}

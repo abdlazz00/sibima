@@ -54,9 +54,8 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
             },
             {
                 label: 'Permohonan Aset',
-                href: '#',
+                href: '/asset-requests',
                 icon: 'file-text',
-                disabled: true,
             },
             {
                 label: 'Lapor Rusak/Hilang',
