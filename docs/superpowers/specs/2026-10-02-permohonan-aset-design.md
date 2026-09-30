@@ -1,6 +1,6 @@
 # Desain: Permohonan Aset (asset_requests)
 
-Status: Menunggu review.
+Status: Diimplementasikan (plan 2026-10-02-permohonan-aset.md).
 Tanggal: 2026-10-02
 
 Menggantikan `docs/superpowers/plans/2026-09-26-asset-request.md` (plan lama, dibuat sebelum workflow engine dinamis dan modul Mutasi).
