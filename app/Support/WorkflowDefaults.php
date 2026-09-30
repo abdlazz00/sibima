@@ -51,6 +51,10 @@ class WorkflowDefaults
                 'name' => 'Mutasi Internal Kelurahan',
                 'steps' => [self::role('Persetujuan Lurah', 'lurah', 'origin')],
             ],
+            'lapor_rusak_hilang' => [
+                'name' => 'Lapor Rusak/Hilang',
+                'steps' => [self::atasanUnit('Persetujuan Atasan Unit')],
+            ],
         ];
     }
 
@@ -69,6 +73,12 @@ class WorkflowDefaults
         }
 
         $definition->unsetRelation('steps');
+    }
+
+    /** @return array<string, string|null> */
+    private static function atasanUnit(string $label): array
+    {
+        return ['label' => $label, 'approver_type' => 'atasan_unit', 'approver_role' => null, 'unit_scope' => 'subject'];
     }
 
     /** @return array<string, string> */

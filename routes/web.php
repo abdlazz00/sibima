@@ -6,6 +6,7 @@ use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetLabelController;
 use App\Http\Controllers\AssetMutationController;
 use App\Http\Controllers\AssetPhotoController;
+use App\Http\Controllers\AssetReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenerimaanAsetController;
@@ -77,6 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/pegawais/{pegawai}', [PegawaiController::class, 'destroy'])->name('pegawais.destroy');
     Route::post('/pegawais/{pegawai}/user', [PegawaiController::class, 'createUser'])->name('pegawais.create-user');
     Route::resource('asset-mutations', AssetMutationController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('asset-reports', AssetReportController::class)->only(['index', 'create', 'store', 'show']);
 });
 
 require __DIR__.'/auth.php';

@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\AssetMutationEffect;
+use App\Services\AssetReportEffect;
 use App\Services\PenerimaanAsetEffect;
 
 return [
@@ -15,6 +16,7 @@ return [
         'retur_kel_ke_kec' => AssetMutationEffect::class,
         'mutasi_internal_kec' => AssetMutationEffect::class,
         'mutasi_internal_kel' => AssetMutationEffect::class,
+        'lapor_rusak_hilang' => AssetReportEffect::class,
     ],
 
     /*
@@ -32,5 +34,6 @@ return [
         'retur_kel_ke_kec' => 'origin_destination',
         'mutasi_internal_kec' => 'origin_destination',
         'mutasi_internal_kel' => 'origin_destination',
+        'lapor_rusak_hilang' => 'subject',
     ],
 ];
