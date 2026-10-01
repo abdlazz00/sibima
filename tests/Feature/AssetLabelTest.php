@@ -76,3 +76,18 @@ it('returns a guest scanning the QR straight back to the asset after login', fun
         'password' => 'password',
     ])->assertRedirect("/assets/{$this->own->id}");
 });
+
+it('encodes the scan summary url in the label QR', function () {
+    expect(app(QrCodeService::class)->urlForAsset($this->own))
+        ->toBe(route('scan.show', ['id' => $this->own->id]))
+        ->and(app(QrCodeService::class)->forAsset($this->own))->toStartWith('data:image/png;base64,');
+});
+
+it('returns a guest scanning the new QR straight back to the summary after login', function () {
+    $this->get("/scan/{$this->own->id}")->assertRedirect('/login');
+
+    $this->post('/login', [
+        'email' => $this->admin->email,
+        'password' => 'password',
+    ])->assertRedirect("/scan/{$this->own->id}");
+});

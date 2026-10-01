@@ -21,8 +21,13 @@ class QrCodeService
         return 'data:image/png;base64,'.base64_encode($png);
     }
 
+    public function urlForAsset(Asset $asset): string
+    {
+        return route('scan.show', ['id' => $asset->id]);
+    }
+
     public function forAsset(Asset $asset): string
     {
-        return $this->pngDataUri(route('assets.show', $asset));
+        return $this->pngDataUri($this->urlForAsset($asset));
     }
 }
