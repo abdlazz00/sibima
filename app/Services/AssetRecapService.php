@@ -9,6 +9,8 @@ use App\Models\User;
 
 class AssetRecapService
 {
+    private const MAX_FILLED_SPAN = 60;
+
     private const SUMS = 'COUNT(*) as jumlah, COALESCE(SUM(nilai_perolehan), 0) as nilai_perolehan, COALESCE(SUM(nilai_buku), 0) as nilai_buku';
 
     /**
@@ -84,6 +86,14 @@ class AssetRecapService
 
         if ($years === []) {
             return [];
+        }
+
+        // ponytail: a mistyped year (e.g. 0202) would zero-fill ~1,800 rows and blank the chart,
+        // so gaps are only filled when the whole span stays plausible; add input validation to tighten.
+        if (max(array_keys($years)) - min(array_keys($years)) > self::MAX_FILLED_SPAN) {
+            ksort($years);
+
+            return array_map(fn (int $year) => ['tahun' => $year] + $years[$year], array_keys($years));
         }
 
         $result = [];

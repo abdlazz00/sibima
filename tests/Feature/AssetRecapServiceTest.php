@@ -130,3 +130,12 @@ it('returns zeros and empty lists when nothing matches', function () {
         ->and($recap['rekap_kategori'])->toBe(['grup' => [], 'total' => ['jumlah' => 0, 'nilai_perolehan' => 0.0, 'nilai_buku' => 0.0]])
         ->and($recap['rekap_unit'])->toBeNull();
 });
+
+it('does not zero-fill an absurd span of years caused by a mistyped acquisition year', function () {
+    recapAsset($this, $this->kelA, $this->meja, 'baik', 100, 50, '0202-05-05');
+
+    $tren = $this->service->for($this->camat, [])['tren'];
+
+    expect(collect($tren)->pluck('tahun')->all())->toBe([202, 2022, 2024])
+        ->and(collect($tren)->sum('jumlah'))->toBe(6);
+});
