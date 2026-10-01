@@ -8,6 +8,7 @@ use App\Http\Controllers\AssetMutationController;
 use App\Http\Controllers\AssetPhotoController;
 use App\Http\Controllers\AssetReportController;
 use App\Http\Controllers\AssetRequestController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
@@ -28,9 +29,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/assets/labels', [AssetLabelController::class, 'show'])->name('assets.labels');
