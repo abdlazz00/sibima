@@ -264,3 +264,17 @@ export interface AssetRequest {
     assets?: Asset[];
     approval_request?: ApprovalRequestSummary | null;
 }
+
+export interface AssetScanSummary {
+    id: number;
+    nama_aset: string;
+    kode_barang: string;
+    nomor_register: string;
+    merk_type: string | null;
+    kategori: string | null;
+    unit: string | null;
+    kondisi: 'baik' | 'rusak_ringan' | 'rusak_berat' | 'hilang';
+    status: 'aktif' | 'dalam_proses';
+    pemegang: string | null;
+    foto: string | null;
+}

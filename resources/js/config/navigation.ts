@@ -24,6 +24,7 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
         title: 'DATA MASTER',
         items: [
             { label: 'Data Aset', href: '/assets', icon: 'package' },
+            { label: 'Scan QR', href: '/scan', icon: 'qr-code' },
             {
                 label: 'Kategori Aset',
                 href: '/asset-categories',
