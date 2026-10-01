@@ -9,6 +9,7 @@ use App\Http\Controllers\AssetPhotoController;
 use App\Http\Controllers\AssetReportController;
 use App\Http\Controllers\AssetRequestController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
@@ -80,6 +81,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/pegawais/{pegawai}/user', [PegawaiController::class, 'createUser'])->name('pegawais.create-user');
     Route::resource('asset-mutations', AssetMutationController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('asset-reports', AssetReportController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
+    Route::get('/laporan/{laporan}/unduh', [ReportController::class, 'download'])
+        ->where('laporan', 'aset|mutasi|rusak-hilang')
+        ->name('report.download');
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
     Route::get('/scan/{id}', [ScanController::class, 'show'])->where('id', '[0-9]{1,15}')->name('scan.show');
     Route::resource('asset-requests', AssetRequestController::class)->only(['index', 'create', 'store', 'show']);
