@@ -5,13 +5,14 @@ namespace App\Http\Requests;
 use App\Enums\AssetReportType;
 use App\Enums\Kondisi;
 use App\Models\Unit;
-use App\Services\ReportQuery;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class ReportRequest extends FormRequest
 {
+    public const PAGE_KINDS = ['mutasi', 'rusak-hilang'];
+
     public const SORTABLE = ['kode_barang', 'nomor_register', 'nama_aset', 'tanggal_perolehan', 'kondisi', 'nilai_perolehan', 'nilai_buku'];
 
     private const FILTER_KEYS = ['unit_id', 'category_id', 'kondisi', 'dari', 'sampai', 'status', 'jenis'];
@@ -25,7 +26,7 @@ class ReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'laporan' => ['nullable', Rule::in(ReportQuery::KINDS)],
+            'laporan' => ['nullable', Rule::in(self::PAGE_KINDS)],
             'unit_id' => ['nullable', 'integer', 'exists:units,id'],
             'category_id' => ['nullable', 'integer', 'exists:asset_categories,id'],
             'kondisi' => ['nullable', Rule::enum(Kondisi::class)],

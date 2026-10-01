@@ -29,49 +29,8 @@ beforeEach(function () {
     $this->alat = AssetCategory::create(['name' => 'ALAT KANTOR']);
     $this->meja = AssetCategory::create(['name' => 'MEJA', 'parent_id' => $this->alat->id]);
 
-    $this->a1 = Asset::factory()->create([
-        'unit_id' => $this->kelA->id, 'category_id' => $this->meja->id, 'nomor_register' => 7,
-        'nama_aset' => '=SUM(1+1)', 'kode_barang' => '1.3.2.05.02.04.004', 'nilai_perolehan' => 2000, 'nilai_buku' => 1500,
-    ]);
-    $this->a2 = Asset::factory()->create(['unit_id' => $this->kelA->id, 'category_id' => $this->meja->id, 'nama_aset' => 'Kursi', 'nilai_perolehan' => 1000, 'nilai_buku' => 500]);
-    $this->aB = Asset::factory()->create(['unit_id' => $this->kelB->id, 'category_id' => $this->meja->id, 'nama_aset' => 'Meja B', 'nilai_perolehan' => 3000, 'nilai_buku' => 2500]);
-});
-
-it('downloads the asset list as an xlsx limited to scope, with text kept as text', function () {
-    $response = $this->actingAs($this->adminA)->get('/laporan/aset/unduh');
-
-    $response->assertOk();
-    expect($response->headers->get('content-disposition'))->toContain('laporan-aset-'.now()->format('Y-m-d').'.xlsx');
-
-    $rows = xlsxRows($response);
-    expect($rows[0][0])->toBe('Laporan Daftar Aset')
-        ->and($rows[1][0])->toBe('Cakupan: Kelurahan A')
-        ->and($rows[2][0])->toBe('Filter: Tanpa filter')
-        ->and($rows[3][0])->toStartWith('Dicetak: ')
-        ->and($rows[5])->toContain('Kode Barang', 'No. Register', 'Nama Aset', 'Nilai Buku');
-
-    $data = array_slice($rows, 6);
-    expect($data)->toHaveCount(2);
-
-    $heading = array_flip($rows[5]);
-    $byName = collect($data)->keyBy(fn ($r) => $r[$heading['Nama Aset']]);
-    expect($byName->has('=SUM(1+1)'))->toBeTrue()
-        ->and($byName['=SUM(1+1)'][$heading['No. Register']])->toBe('0007')
-        ->and($byName['=SUM(1+1)'][$heading['Kode Barang']])->toBe('1.3.2.05.02.04.004')
-        ->and((float) $byName['=SUM(1+1)'][$heading['Nilai Buku']])->toBe(1500.0)
-        ->and($byName['=SUM(1+1)'][$heading['Unit']])->toBe('Kelurahan A')
-        ->and($byName->has('Meja B'))->toBeFalse();
-});
-
-it('labels the whole scope for kasubag and applies filters', function () {
-    $rows = xlsxRows($this->actingAs($this->kasubag)->get('/laporan/aset/unduh?unit_id='.$this->kelB->id));
-
-    expect($rows[1][0])->toBe('Cakupan: Kelurahan B')
-        ->and(array_slice($rows, 6))->toHaveCount(1);
-
-    $all = xlsxRows($this->actingAs($this->kasubag)->get('/laporan/aset/unduh'));
-    expect($all[1][0])->toBe('Cakupan: Seluruh unit')
-        ->and(array_slice($all, 6))->toHaveCount(3);
+    $this->a2 = Asset::factory()->create(['unit_id' => $this->kelA->id, 'category_id' => $this->meja->id, 'nama_aset' => 'Kursi']);
+    $this->aB = Asset::factory()->create(['unit_id' => $this->kelB->id, 'category_id' => $this->meja->id, 'nama_aset' => 'Meja B']);
 });
 
 it('downloads the mutation history with its asset list and the damaged/lost report', function () {
@@ -83,9 +42,14 @@ it('downloads the mutation history with its asset list and the damaged/lost repo
     AssetMutationItem::create(['asset_mutation_id' => $mutation->id, 'asset_id' => $this->a2->id]);
     AssetReport::factory()->create(['asset_id' => $this->a2->id, 'unit_id' => $this->kelA->id, 'nomor_laporan' => 'LP/2026/0001', 'kronologi' => 'Patah kaki']);
 
-    $mut = xlsxRows($this->actingAs($this->adminA)->get('/laporan/mutasi/unduh'));
+    $response = $this->actingAs($this->adminA)->get('/laporan/mutasi/unduh');
+    expect($response->headers->get('content-disposition'))->toContain('laporan-mutasi-'.now()->format('Y-m-d').'.xlsx');
+
+    $mut = xlsxRows($response);
     $heading = array_flip($mut[5]);
     expect($mut[0][0])->toBe('Laporan Riwayat Mutasi')
+        ->and($mut[1][0])->toBe('Cakupan: Kelurahan A')
+        ->and($mut[2][0])->toBe('Filter: Tanpa filter')
         ->and(array_slice($mut, 6))->toHaveCount(1)
         ->and($mut[6][$heading['Nomor Mutasi']])->toBe('MUT/2026/0001')
         ->and($mut[6][$heading['Unit Tujuan']])->toBe('Kelurahan A')
@@ -100,43 +64,55 @@ it('downloads the mutation history with its asset list and the damaged/lost repo
         ->and($rep[6][$heading['Kronologi']])->toBe('Patah kaki');
 });
 
-it('refuses a unit out of scope, an unknown report and an empty result', function () {
-    $this->actingAs($this->adminA)->getJson('/laporan/aset/unduh?unit_id='.$this->kelB->id)->assertUnprocessable();
+it('labels filters with their readable names in the file header', function () {
+    AssetReport::factory()->create(['asset_id' => $this->a2->id, 'unit_id' => $this->kelA->id, 'jenis' => 'hilang', 'kondisi_baru' => 'hilang', 'status' => 'approved']);
+
+    $rows = xlsxRows($this->actingAs($this->adminA)->get('/laporan/rusak-hilang/unduh?jenis=hilang&status=approved'));
+
+    expect($rows[2][0])->toBe('Filter: Jenis: Hilang; Status: Disetujui');
+});
+
+it('refuses a unit out of scope, an unknown report, the retired aset report and an empty result', function () {
+    $this->actingAs($this->adminA)->getJson('/laporan/rusak-hilang/unduh?unit_id='.$this->kelB->id)->assertUnprocessable();
     $this->actingAs($this->adminA)->get('/laporan/lain/unduh')->assertNotFound();
+    $this->actingAs($this->adminA)->get('/laporan/aset/unduh')->assertNotFound();
     $this->actingAs($this->adminA)->getJson('/laporan/mutasi/unduh')->assertUnprocessable();
-    $this->actingAs($this->adminA)->getJson('/laporan/aset/unduh?kondisi=hilang')->assertUnprocessable();
 });
 
 it('validates report filters and refuses a unit out of scope', function () {
     $this->actingAs($this->adminA)->getJson('/laporan?unit_id='.$this->kelB->id)->assertUnprocessable()->assertJsonValidationErrors('unit_id');
     $this->actingAs($this->camat)->getJson('/laporan?unit_id='.$this->kelB->id)->assertOk();
-    $this->actingAs($this->camat)->getJson('/laporan?kondisi=bukan')->assertUnprocessable();
+    $this->actingAs($this->camat)->getJson('/laporan?jenis=bukan')->assertUnprocessable();
     $this->actingAs($this->camat)->getJson('/laporan?dari=2026-10-05&sampai=2026-10-01')->assertUnprocessable();
     $this->actingAs($this->camat)->getJson('/laporan?laporan=lain')->assertUnprocessable();
+    $this->actingAs($this->camat)->getJson('/laporan?laporan=aset')->assertUnprocessable();
 });
 
 it('sends a guest to login', function () {
     $this->get('/laporan')->assertRedirect('/login');
-    $this->get('/laporan/aset/unduh')->assertRedirect('/login');
+    $this->get('/laporan/mutasi/unduh')->assertRedirect('/login');
 });
 
-it('shows the row count on the page and it equals the rows in the file', function () {
-    $this->actingAs($this->camat)->get('/laporan?laporan=aset&category_id='.$this->alat->id)
+it('defaults to the mutation report, shows the row count and it equals the rows in the file', function () {
+    AssetReport::factory()->create(['asset_id' => $this->a2->id, 'unit_id' => $this->kelA->id, 'nomor_laporan' => 'LP/1']);
+    AssetReport::factory()->create(['asset_id' => $this->aB->id, 'unit_id' => $this->kelB->id, 'nomor_laporan' => 'LP/2']);
+
+    $this->actingAs($this->camat)->get('/laporan')
         ->assertOk()
         ->assertInertia(fn (Assert $p) => $p
             ->component('Report/Index')
-            ->where('laporan', 'aset')
-            ->where('rowCount', 3)
+            ->where('laporan', 'mutasi')
+            ->where('rowCount', 0)
             ->has('units', 3)
-            ->has('categories', 1)
-            ->has('kondisiOptions', 4));
+            ->missing('categories')
+            ->missing('kondisiOptions'));
 
-    $file = xlsxRows($this->actingAs($this->camat)->get('/laporan/aset/unduh?category_id='.$this->alat->id));
-    expect(array_slice($file, 6))->toHaveCount(3);
+    $this->actingAs($this->camat)->get('/laporan?laporan=rusak-hilang')
+        ->assertInertia(fn (Assert $p) => $p->where('laporan', 'rusak-hilang')->where('rowCount', 2));
 
-    $this->actingAs($this->adminA)->get('/laporan')
-        ->assertInertia(fn (Assert $p) => $p->where('rowCount', 2)->where('units', []));
+    $file = xlsxRows($this->actingAs($this->camat)->get('/laporan/rusak-hilang/unduh'));
+    expect(array_slice($file, 6))->toHaveCount(2);
 
-    $this->actingAs($this->adminA)->get('/laporan?laporan=mutasi')
-        ->assertInertia(fn (Assert $p) => $p->where('laporan', 'mutasi')->where('rowCount', 0));
+    $this->actingAs($this->adminA)->get('/laporan?laporan=rusak-hilang')
+        ->assertInertia(fn (Assert $p) => $p->where('rowCount', 1)->where('units', []));
 });

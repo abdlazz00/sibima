@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Kondisi;
 use App\Http\Requests\ReportRequest;
-use App\Models\AssetCategory;
 use App\Models\Unit;
 use App\Services\ReportExporter;
 use App\Services\ReportQuery;
@@ -17,7 +15,7 @@ class ReportController extends Controller
     public function index(ReportRequest $request): Response
     {
         $user = $request->user();
-        $kind = $request->input('laporan') ?: 'aset';
+        $kind = $request->input('laporan') ?: 'mutasi';
         $filters = $request->filters();
         $ids = $user->accessibleUnitIds();
 
@@ -31,8 +29,6 @@ class ReportController extends Controller
             'filters' => $filters,
             'rowCount' => (new ReportQuery($user))->build($kind, $filters)->count(),
             'units' => $units->count() > 1 ? $units : [],
-            'categories' => AssetCategory::whereNull('parent_id')->orderBy('name')->get(['id', 'name']),
-            'kondisiOptions' => Kondisi::options(),
         ]);
     }
 

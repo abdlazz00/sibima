@@ -2,11 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Asset;
-use App\Models\AssetCategory;
 use App\Models\AssetMutation;
 use App\Models\AssetReport;
-use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -21,10 +18,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportExporter
 {
+    public function __construct(private readonly ReportSheetWriter $writer) {}
+
     private const HEADER_ROW = 6;
 
     private const TITLES = [
-        'aset' => 'Laporan Daftar Aset',
         'mutasi' => 'Laporan Riwayat Mutasi',
         'rusak-hilang' => 'Laporan Aset Rusak dan Hilang',
     ];
@@ -54,8 +52,8 @@ class ReportExporter
         $sheet->setTitle('Laporan');
 
         $sheet->setCellValueExplicit('A1', self::TITLES[$kind], DataType::TYPE_STRING);
-        $sheet->setCellValueExplicit('A2', 'Cakupan: '.$this->scopeLabel($user, $filters), DataType::TYPE_STRING);
-        $sheet->setCellValueExplicit('A3', 'Filter: '.$this->filterLabel($filters), DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit('A2', 'Cakupan: '.$this->writer->scopeLabel($user, $filters), DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit('A3', 'Filter: '.$this->writer->filterLabel($filters), DataType::TYPE_STRING);
         $sheet->setCellValueExplicit('A4', 'Dicetak: '.now()->format('d/m/Y H:i'), DataType::TYPE_STRING);
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
@@ -124,25 +122,6 @@ class ReportExporter
     private function columns(string $kind): array
     {
         return match ($kind) {
-            'aset' => [
-                ['No', fn (Asset $a, int $i) => $i + 1, 'number'],
-                ['Kode Barang', fn (Asset $a) => $a->kode_barang],
-                ['No. Register', fn (Asset $a) => $a->registerLabel()],
-                ['Nama Aset', fn (Asset $a) => $a->nama_aset],
-                ['Kategori', fn (Asset $a) => $a->category?->parent?->name ?? $a->category?->name],
-                ['Subkategori', fn (Asset $a) => $a->category?->parent_id !== null ? $a->category->name : null],
-                ['Merk/Tipe', fn (Asset $a) => $a->merk_type],
-                ['Unit', fn (Asset $a) => $a->unit?->name],
-                ['Pemegang', fn (Asset $a) => $a->currentHolder?->nama],
-                ['Kondisi', fn (Asset $a) => $a->kondisi->label()],
-                ['Status', fn (Asset $a) => $a->status->label()],
-                ['Tanggal Perolehan', fn (Asset $a) => $a->tanggal_perolehan, 'date'],
-                ['Sumber Perolehan', fn (Asset $a) => $a->sumber_perolehan],
-                ['Nilai Perolehan', fn (Asset $a) => (float) $a->nilai_perolehan, 'money'],
-                ['Nilai Buku', fn (Asset $a) => (float) $a->nilai_buku, 'money'],
-                ['No. Dokumen', fn (Asset $a) => $a->no_dokumen],
-                ['Keterangan', fn (Asset $a) => $a->keterangan, 'wrap'],
-            ],
             'mutasi' => [
                 ['No', fn (AssetMutation $m, int $i) => $i + 1, 'number'],
                 ['Nomor Mutasi', fn (AssetMutation $m) => $m->nomor_mutasi],
@@ -171,37 +150,5 @@ class ReportExporter
                 ['Kronologi', fn (AssetReport $r) => $r->kronologi, 'wrap'],
             ],
         };
-    }
-
-    /** @param  array<string, mixed>  $filters */
-    private function scopeLabel(User $user, array $filters): string
-    {
-        if (! empty($filters['unit_id'])) {
-            return Unit::find($filters['unit_id'])?->name ?? '-';
-        }
-
-        $ids = $user->accessibleUnitIds();
-
-        return $ids === null
-            ? 'Seluruh unit'
-            : Unit::whereIn('id', $ids)->orderBy('type')->orderBy('name')->pluck('name')->implode(', ');
-    }
-
-    /** @param  array<string, mixed>  $filters */
-    private function filterLabel(array $filters): string
-    {
-        $parts = [];
-
-        if (! empty($filters['category_id'])) {
-            $parts[] = 'Kategori: '.(AssetCategory::find($filters['category_id'])?->name ?? $filters['category_id']);
-        }
-
-        foreach (['kondisi' => 'Kondisi', 'status' => 'Status', 'jenis' => 'Jenis', 'dari' => 'Dari', 'sampai' => 'Sampai'] as $key => $label) {
-            if (! empty($filters[$key])) {
-                $parts[] = "{$label}: {$filters[$key]}";
-            }
-        }
-
-        return $parts === [] ? 'Tanpa filter' : implode('; ', $parts);
     }
 }

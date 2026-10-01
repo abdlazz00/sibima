@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan-aset/unduh', [LaporanAsetController::class, 'unduh'])->name('laporan-aset.download');
     Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
     Route::get('/laporan/{laporan}/unduh', [ReportController::class, 'download'])
-        ->where('laporan', 'aset|mutasi|rusak-hilang')
+        ->where('laporan', 'mutasi|rusak-hilang')
         ->name('report.download');
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
     Route::get('/scan/{id}', [ScanController::class, 'show'])->where('id', '[0-9]{1,15}')->name('scan.show');
