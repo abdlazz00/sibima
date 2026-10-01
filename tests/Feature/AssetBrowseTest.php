@@ -93,3 +93,13 @@ it('returns 403 for an out-of-scope asset opened by URL', function () {
         ->get("/assets/{$this->acKec->id}")
         ->assertForbidden();
 });
+
+it('includes the asset photos in the index so the Foto column can render them', function () {
+    $this->papan->photos()->create(['path' => 'assets/papan.jpg']);
+
+    $this->actingAs(userWithRole('camat', $this->kec))
+        ->get('/assets?search=Papan')
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('assets.data', 1)
+            ->where('assets.data.0.photos.0.url', fn (string $url) => str_ends_with($url, 'assets/papan.jpg')));
+});

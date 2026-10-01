@@ -16,7 +16,7 @@ class EloquentAssetRepository implements AssetRepositoryInterface
     {
         return Asset::query()
             ->visibleTo($user)
-            ->with(['category.parent', 'unit'])
+            ->with(['category.parent', 'unit', 'photos'])
             ->when($filters['search'] ?? null, function (Builder $query, string $search) {
                 $query->where(function (Builder $query) use ($search) {
                     $query->where('nama_aset', 'like', "%{$search}%")
