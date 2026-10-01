@@ -25,7 +25,7 @@ it('renders the dashboard for every role with scope-limited figures', function (
             ->where('dashboard.totals.jumlah_aset', $expected)
             ->has('dashboard.per_kondisi')
             ->has('dashboard.antrean')
-            ->has('dashboard.aktivitas'));
+            ->has('dashboard.transaksi'));
 })->with([
     'kasubag' => ['kasubag', null, 3],
     'camat' => ['camat', 'kec', 3],

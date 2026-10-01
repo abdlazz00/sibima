@@ -4,12 +4,13 @@ namespace App\Services;
 
 use App\Enums\AssetReportStatus;
 use App\Enums\AssetRequestStatus;
+use App\Enums\BeritaAcaraStatus;
 use App\Enums\Kondisi;
 use App\Enums\MutationStatus;
-use App\Models\AssetHistory;
 use App\Models\AssetMutation;
 use App\Models\AssetReport;
 use App\Models\AssetRequest;
+use App\Models\BeritaAcaraPenerimaan;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,7 +41,7 @@ class DashboardService
             ...$this->recap($scope, $scopeIds, $ids, $multi),
             'per_kategori' => $this->perKategori($ids),
             'antrean' => $this->antrean($user, $scopeIds),
-            'aktivitas' => $this->aktivitas($scopeIds),
+            'transaksi' => $this->transaksi($scopeIds),
             'units' => $multi ? $scope->map(fn (Unit $u) => ['id' => $u->id, 'name' => $u->name])->all() : [],
             'selected_unit_id' => $selected,
         ];
@@ -137,24 +138,56 @@ class DashboardService
     }
 
     /**
+     * The five newest mutations and submitted penerimaan in scope, merged.
+     *
      * @param  list<int>  $scopeIds
-     * @return list<array<string, mixed>>
+     * @return list<array<string, string>>
      */
-    private function aktivitas(array $scopeIds): array
+    private function transaksi(array $scopeIds): array
     {
-        return AssetHistory::with(['asset:id,nama_aset', 'user:id,name'])
+        $mutations = AssetMutation::with(['originUnit', 'destinationUnit'])
+            ->where(fn (Builder $q) => $q->whereIn('origin_unit_id', $scopeIds)->orWhereIn('destination_unit_id', $scopeIds))
+            ->latest()->latest('id')->limit(5)->get()
+            ->map(fn (AssetMutation $m) => [
+                'at' => $m->created_at,
+                'jenis' => 'mutasi',
+                'nomor' => $m->nomor_mutasi,
+                'ringkasan' => $m->originUnit?->name.' → '.$m->destinationUnit?->name,
+                'tanggal' => $m->tanggal_mutasi?->format('Y-m-d'),
+                'status' => $this->statusLabel($m->status->value),
+                'url' => route('asset-mutations.show', $m),
+            ]);
+
+        $penerimaan = BeritaAcaraPenerimaan::with(['unit', 'approvalRequest'])
+            ->where('status', BeritaAcaraStatus::Submitted)
             ->whereIn('unit_id', $scopeIds)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->limit(10)
-            ->get()
-            ->map(fn (AssetHistory $h) => [
-                'id' => $h->id,
-                'aset' => $h->asset?->nama_aset,
-                'event' => $h->event,
-                'pelaku' => $h->user?->name,
-                'waktu' => $h->created_at?->toIso8601String(),
-            ])
+            ->whereHas('approvalRequest')
+            ->latest()->latest('id')->limit(5)->get()
+            ->map(fn (BeritaAcaraPenerimaan $b) => [
+                'at' => $b->created_at,
+                'jenis' => 'penerimaan',
+                'nomor' => $b->no_berita_acara,
+                'ringkasan' => $b->unit?->name,
+                'tanggal' => $b->tanggal_penerimaan?->format('Y-m-d'),
+                'status' => $this->statusLabel($b->approvalRequest->status->value),
+                'url' => route('penerimaan-aset.show', $b),
+            ]);
+
+        return $mutations->concat($penerimaan)
+            ->sortByDesc('at')
+            ->take(5)
+            ->map(fn (array $row) => collect($row)->except('at')->all())
+            ->values()
             ->all();
+    }
+
+    private function statusLabel(string $status): string
+    {
+        return match ($status) {
+            'approved' => 'selesai',
+            'rejected' => 'ditolak',
+            'cancelled' => 'dibatalkan',
+            default => 'berjalan',
+        };
     }
 }

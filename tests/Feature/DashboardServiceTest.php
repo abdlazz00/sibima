@@ -2,12 +2,15 @@
 
 use App\Models\Asset;
 use App\Models\AssetCategory;
-use App\Models\AssetHistory;
 use App\Models\AssetMutation;
 use App\Models\AssetReport;
 use App\Models\AssetRequest;
+use App\Models\BeritaAcaraPenerimaan;
 use App\Models\Pegawai;
+use App\Services\ApprovalWorkflowService;
 use App\Services\DashboardService;
+use Database\Seeders\WorkflowDefinitionSeeder;
+use Spatie\Permission\Models\Role;
 
 function dashAsset(object $t, $unit, $category, string $kondisi, float $buku): Asset
 {
@@ -17,17 +20,6 @@ function dashAsset(object $t, $unit, $category, string $kondisi, float $buku): A
         'kondisi' => $kondisi,
         'nilai_buku' => $buku,
         'nilai_perolehan' => $buku * 2,
-    ]);
-}
-
-function dashHistory(Asset $asset, string $event, int $minutesAgo): AssetHistory
-{
-    return AssetHistory::create([
-        'asset_id' => $asset->id,
-        'event' => $event,
-        'unit_id' => $asset->unit_id,
-        'kondisi' => 'baik',
-        'created_at' => now()->subMinutes($minutesAgo),
     ]);
 }
 
@@ -102,27 +94,72 @@ it('shows a single-unit user only their unit, with no per-unit table or unit lis
         ->and($adminKec['per_unit'])->toBeNull();
 });
 
-it('lists the newest activity within scope only', function () {
-    dashHistory($this->kursiA, 'dibuat', 3);
-    dashHistory($this->kursiA, 'mutasi', 2);
-    dashHistory($this->laptopA, 'laporan_rusak', 1);
-    dashHistory($this->laptopB, 'dibuat', 5);
-    dashHistory($this->mejaOther, 'dibuat', 4);
+function dashMutation(object $t, string $no, $origin, $dest, string $status, int $minutesAgo): AssetMutation
+{
+    $m = AssetMutation::create([
+        'nomor_mutasi' => $no, 'jenis_mutasi' => $origin->id === $dest->id ? 'internal' : 'kec_ke_kel',
+        'origin_unit_id' => $origin->id, 'destination_unit_id' => $dest->id,
+        'tanggal_mutasi' => '2026-10-01', 'status' => $status, 'created_by' => userWithRole('admin_kecamatan', $t->kec)->id,
+    ]);
+    $m->forceFill(['created_at' => now()->subMinutes($minutesAgo)])->save();
 
-    $adminA = $this->service->for(userWithRole('admin_kelurahan', $this->kelA));
-    expect(collect($adminA['aktivitas'])->pluck('event')->all())->toBe(['laporan_rusak', 'mutasi', 'dibuat'])
-        ->and($adminA['aktivitas'][0]['aset'])->toBe($this->laptopA->nama_aset);
+    return $m;
+}
 
-    expect($this->service->for(userWithRole('camat', $this->kec))['aktivitas'])->toHaveCount(4)
-        ->and($this->service->for(userWithRole('kasubag'))['aktivitas'])->toHaveCount(5);
-});
+function dashBa(object $t, string $no, $unit, string $status, ?string $approval, int $minutesAgo): BeritaAcaraPenerimaan
+{
+    $creator = userWithRole('admin_kecamatan', $t->kec);
+    $ba = BeritaAcaraPenerimaan::create([
+        'no_berita_acara' => $no, 'tanggal_penerimaan' => '2026-10-02', 'no_kontrak_spk' => 'SPK-1',
+        'unit_id' => $unit->id, 'created_by' => $creator->id, 'status' => $status,
+    ]);
+    $ba->forceFill(['created_at' => now()->subMinutes($minutesAgo)])->save();
 
-it('caps the activity feed at ten entries', function () {
-    foreach (range(1, 12) as $i) {
-        dashHistory($this->kursiA, 'mutasi', $i);
+    if ($approval !== null) {
+        app(ApprovalWorkflowService::class)->submit($ba, 'penerimaan_aset', $creator);
+        $ba->approvalRequest->update(['status' => $approval]);
     }
 
-    expect($this->service->for(userWithRole('admin_kelurahan', $this->kelA))['aktivitas'])->toHaveCount(10);
+    return $ba;
+}
+
+it('lists the five newest submitted transactions in scope with a status label and detail link', function () {
+    foreach (['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah'] as $role) {
+        Role::findOrCreate($role);
+    }
+    (new WorkflowDefinitionSeeder)->run();
+
+    $mutA = dashMutation($this, 'M-A', $this->kec, $this->kelA, 'pending', 1);
+    $baA = dashBa($this, 'BA-A', $this->kelA, 'submitted', 'approved', 2);
+    dashMutation($this, 'M-B', $this->kec, $this->kelB, 'approved', 3);
+    dashBa($this, 'BA-B', $this->kelB, 'submitted', 'pending', 4);
+    dashMutation($this, 'M-OTHER', $this->otherKec, $this->otherKec, 'pending', 5);
+    dashBa($this, 'BA-DRAFT', $this->kelA, 'draft', null, 0);
+    dashMutation($this, 'M-REJ', $this->kec, $this->kelA, 'rejected', 10);
+    dashMutation($this, 'M-CAN', $this->kec, $this->kelA, 'cancelled', 11);
+
+    $adminA = $this->service->for(userWithRole('admin_kelurahan', $this->kelA))['transaksi'];
+    expect(collect($adminA)->pluck('nomor')->all())->toBe(['M-A', 'BA-A', 'M-REJ', 'M-CAN'])
+        ->and(collect($adminA)->pluck('status')->all())->toBe(['berjalan', 'selesai', 'ditolak', 'dibatalkan'])
+        ->and($adminA[0])->toBe([
+            'jenis' => 'mutasi', 'nomor' => 'M-A', 'ringkasan' => $this->kec->name.' → Kelurahan A',
+            'tanggal' => '2026-10-01', 'status' => 'berjalan', 'url' => route('asset-mutations.show', $mutA),
+        ])
+        ->and($adminA[1])->toBe([
+            'jenis' => 'penerimaan', 'nomor' => 'BA-A', 'ringkasan' => 'Kelurahan A',
+            'tanggal' => '2026-10-02', 'status' => 'selesai', 'url' => route('penerimaan-aset.show', $baA),
+        ]);
+
+    $camat = $this->service->for(userWithRole('camat', $this->kec))['transaksi'];
+    expect(collect($camat)->pluck('nomor')->all())->toBe(['M-A', 'BA-A', 'M-B', 'BA-B', 'M-REJ']);
+
+    $kasubag = $this->service->for(userWithRole('kasubag'))['transaksi'];
+    expect($kasubag)->toHaveCount(5)
+        ->and(collect($kasubag)->pluck('nomor')->all())->toContain('M-OTHER');
+});
+
+it('has no activity feed any more', function () {
+    expect($this->service->for(userWithRole('kasubag')))->not->toHaveKey('aktivitas');
 });
 
 it('counts the work queue within scope', function () {
