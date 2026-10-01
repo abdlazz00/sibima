@@ -1,6 +1,6 @@
 # Desain: Scan QR Aset
 
-Status: Menunggu review.
+Status: Diimplementasikan (plan 2026-10-03-scan-qr.md).
 Tanggal: 2026-10-03
 
 ---
