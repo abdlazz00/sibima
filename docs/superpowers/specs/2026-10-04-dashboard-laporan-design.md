@@ -1,6 +1,6 @@
 # Desain: Dashboard Rekap & Laporan Excel
 
-Status: Menunggu review.
+Status: Diimplementasikan (plan 2026-10-04-dashboard-laporan.md).
 Tanggal: 2026-10-04
 
 ---
@@ -42,13 +42,13 @@ Keluaran:
 
 ### 3.2 Route dan halaman
 - `GET /dashboard` (route `dashboard` yang ada) memanggil `DashboardController`, mengirim hasil service ke `Pages/Dashboard.tsx`. Query `?unit_id=`.
-- Halaman: kartu total, kondisi dan nilai di atas; batang kondisi dan kategori; tabel per unit; kartu antrean dengan tautan (`/persetujuan`, `/asset-requests?menunggu_pemenuhan=1`, `/asset-reports?status=pending`, `/asset-mutations?status=pending`); daftar aktivitas. Mobile-first, `lg` dua kolom. Sapaan nama/role tetap ada di header.
+- Halaman: kartu total, kondisi dan nilai di atas; batang kondisi dan kategori; tabel per unit; kartu antrean dengan tautan (`/persetujuan`, `/asset-requests?menunggu_pemenuhan=1`, `/asset-reports?status=pending`, `/asset-mutations` (indeks mutasi belum punya filter status)); daftar aktivitas. Mobile-first, `lg` dua kolom. Sapaan nama/role tetap ada di header.
 
 ## 4. Laporan Excel
 
 ### 4.1 Route
-- `GET /laporan` -> `report.index`: halaman filter dengan parameter `jenis` (`aset`|`mutasi`|`rusak-hilang`, default `aset`) dan filter jenis tersebut di query string; prop `rowCount` dihitung server dari filter.
-- `GET /laporan/{jenis}/unduh` -> `report.download`: mengunduh xlsx; 404 untuk jenis tak dikenal; 422 bila `rowCount = 0`.
+- `GET /laporan` -> `report.index`: halaman filter dengan parameter `laporan` (`aset`|`mutasi`|`rusak-hilang`, default `aset`; bukan `jenis`, yang sudah menjadi filter laporan rusak-hilang) dan filter jenis tersebut di query string; prop `rowCount` dihitung server dari filter.
+- `GET /laporan/{laporan}/unduh` -> `report.download`: mengunduh xlsx; 404 untuk jenis tak dikenal; 422 bila `rowCount = 0`.
 
 ### 4.2 Filter (divalidasi `ReportRequest`)
 | Jenis | Filter |

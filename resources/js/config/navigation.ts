@@ -18,7 +18,10 @@ export interface NavGroup {
 export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
     {
         title: 'UTAMA',
-        items: [{ label: 'Dashboard', href: '/dashboard', icon: 'grid' }],
+        items: [
+            { label: 'Dashboard', href: '/dashboard', icon: 'grid' },
+            { label: 'Laporan', href: '/laporan', icon: 'bar-chart' },
+        ],
     },
     {
         title: 'DATA MASTER',

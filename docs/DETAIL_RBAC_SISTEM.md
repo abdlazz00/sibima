@@ -119,7 +119,7 @@ Matriks berikut menggabungkan spesifikasi dokumen desain (`PANDUAN_DESAIN_UI_UX_
 
 | Fitur / Modul | Kasubag | Camat | Admin Kec. | Admin Kel. | Lurah | Status Implementasi Kode |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Dashboard Eksekutif** | Global | Supervisi | Unit Kec. | Unit Kel. | Unit Kel. | ✅ Selesai (`Dashboard.tsx`) |
+| **Dashboard Eksekutif** | Global | Supervisi | Unit Kec. | Unit Kel. | Unit Kel. | ✅ Selesai (`DashboardService`, `Dashboard.tsx`) |
 | **Katalog Aset (Read)** | Semua Unit | Semua Unit | Unit Kec. | Unit Kel. | Unit Kel. | ✅ Selesai (`AssetPolicy::view`) |
 | **Katalog Aset (Create/Edit)** | ❌ Read Only | ❌ Read Only | ✅ Unit Kec. | ✅ Unit Kel. | ❌ Read Only | ✅ Selesai (`AssetPolicy::create, update`) |
 | **Master Kategori Aset** | ✅ Penuh (CRUD) | ❌ Tidak Ada | ❌ Tidak Ada | ❌ Tidak Ada | ❌ Tidak Ada | ✅ Selesai (`AssetCategoryPolicy`) |
@@ -136,7 +136,7 @@ Matriks berikut menggabungkan spesifikasi dokumen desain (`PANDUAN_DESAIN_UI_UX_
 | **Permohonan Kebutuhan Aset** | Approve permohonan unit | Approve pegawai kecamatan | Input + penuhi | Input + penuhi | Approve pegawai kelurahan | ✅ Selesai (`AssetRequestPolicy`, workflow `permohonan_pegawai`/`permohonan_unit`) |
 | **Pelaporan Rusak / Hilang** | Lihat semua (alihkan approver) | Approve aset kecamatan | Input laporan | Input laporan | Approve aset kelurahan | ✅ Selesai (`AssetReportPolicy`, workflow `lapor_rusak_hilang`) |
 | **Pindai QR Code Kamera** | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ⏳ *Next Roadmap* |
-| **Laporan & Rekapitulasi Excel** | Cetak Seluruhnya | Cetak Seluruhnya | Cetak Unit Kec. | Cetak Unit Kel. | Cetak Unit Kel. | ⏳ *Next Roadmap* |
+| **Laporan & Rekapitulasi Excel** | Cetak Seluruhnya | Cetak Seluruhnya | Cetak Unit Kec. | Cetak Unit Kel. | Cetak Unit Kel. | ✅ Selesai (`ReportQuery`, `/laporan`) |
 
 ---
 
