@@ -1,7 +1,7 @@
 import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 type Kind = 'aset' | 'mutasi' | 'rusak-hilang';
@@ -34,12 +34,18 @@ const FIELD = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 te
 const clean = (data: Filters) =>
     Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined && v !== ''));
 
+const signature = (data: Filters) =>
+    JSON.stringify(Object.entries(clean(data)).map(([k, v]) => [k, String(v)]).sort());
+
 export default function Index({ laporan, filters, rowCount, units, categories, kondisiOptions }: ReportProps) {
     const [form, setForm] = useState<Filters>(filters);
+    const { errors } = usePage<PageProps & { errors: Record<string, string> }>().props;
+    const errorMessages = Object.values(errors ?? {});
+    const dirty = signature(form) !== signature(filters);
 
     const set = (key: string, value: string) => setForm((cur) => ({ ...cur, [key]: value }));
     const apply = (kind: Kind, data: Filters) =>
-        router.get(route('report.index'), clean({ ...data, laporan: kind }), { preserveScroll: true, replace: true });
+        router.get(route('report.index'), clean({ ...data, laporan: kind }), { preserveScroll: true, preserveState: 'errors', replace: true });
 
     const switchKind = (kind: Kind) => {
         setForm({});
@@ -98,6 +104,12 @@ export default function Index({ laporan, filters, rowCount, units, categories, k
                     ))}
                 </div>
 
+                {errorMessages.length > 0 && (
+                    <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                        {errorMessages.map((m) => <p key={m}>{m}</p>)}
+                    </div>
+                )}
+
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
@@ -137,8 +149,11 @@ export default function Index({ laporan, filters, rowCount, units, categories, k
                             Terapkan filter
                         </button>
                         <div className="flex items-center gap-4">
-                            <p className="text-sm text-slate-600"><span className="font-semibold text-slate-900">{rowCount}</span> baris akan diunduh</p>
-                            {rowCount > 0 ? (
+                            <p className={`text-sm text-slate-600 ${dirty ? 'opacity-50' : ''}`}>
+                                <span className="font-semibold text-slate-900">{rowCount}</span> baris akan diunduh
+                                {dirty && <span className="ml-2 text-amber-700">(terapkan filter dulu)</span>}
+                            </p>
+                            {rowCount > 0 && !dirty ? (
                                 <a href={downloadUrl} className="rounded-lg bg-[#1E40AF] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
                                     Unduh Excel
                                 </a>
