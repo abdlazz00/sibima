@@ -900,6 +900,7 @@ it('shows nothing to a user without a unit or role', function () {
         ->and(rq($this, $nobody, 'mutasi'))->toBe([])
         ->and(rq($this, $nobody, 'rusak-hilang'))->toBe([]);
 });
+```
 
 - [ ] **Step 3: Run test to verify it fails**
 
