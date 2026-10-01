@@ -15,3 +15,7 @@ assert.equal(assetIdFromQr('REG-0001'), null);
 assert.equal(assetIdFromQr(''), null);
 
 console.log('qr.ts OK');
+
+assert.equal(assetIdFromQr('https://sibima.test/assets/99999999999999999999'), null);
+assert.equal(assetIdFromQr('https://sibima.test/scan/123456789012345'), 123456789012345);
+console.log('qr.ts oversize OK');

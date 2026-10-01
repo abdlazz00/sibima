@@ -82,7 +82,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('asset-mutations', AssetMutationController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('asset-reports', AssetReportController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
-    Route::get('/scan/{id}', [ScanController::class, 'show'])->whereNumber('id')->name('scan.show');
+    Route::get('/scan/{id}', [ScanController::class, 'show'])->where('id', '[0-9]{1,15}')->name('scan.show');
     Route::resource('asset-requests', AssetRequestController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/asset-requests/{assetRequest}/fulfill', [AssetRequestController::class, 'fulfill'])->name('asset-requests.fulfill');
     Route::post('/asset-requests/{assetRequest}/close', [AssetRequestController::class, 'close'])->name('asset-requests.close');

@@ -7,7 +7,7 @@ export function assetIdFromQr(text: string): number | null {
         return null;
     }
 
-    const match = path.match(/^\/(?:scan|assets)\/(\d+)\/?$/);
+    const match = path.match(/^\/(?:scan|assets)\/(\d{1,15})\/?$/);
 
     return match ? Number(match[1]) : null;
 }

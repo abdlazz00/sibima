@@ -101,3 +101,7 @@ it('renders a not-found scan page with status 404 for an unknown id', function (
         ->and($props['summary'])->toBeNull()
         ->and($props['canViewDetail'])->toBeFalse();
 });
+
+it('answers 404 instead of crashing for an oversized numeric id', function () {
+    $this->actingAs($this->adminA)->get('/scan/99999999999999999999')->assertNotFound();
+});
