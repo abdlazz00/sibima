@@ -20,7 +20,6 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
         title: 'UTAMA',
         items: [
             { label: 'Dashboard', href: '/dashboard', icon: 'grid' },
-            { label: 'Laporan', href: '/laporan', icon: 'bar-chart' },
         ],
     },
     {
@@ -69,6 +68,14 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
         ],
     },
     {
+        title: 'LAPORAN',
+        items: [
+            { label: 'Laporan Aset', href: '/laporan-aset', icon: 'bar-chart' },
+            { label: 'Laporan Mutasi', href: '/laporan?laporan=mutasi', icon: 'shuffle' },
+            { label: 'Laporan Rusak & Hilang', href: '/laporan?laporan=rusak-hilang', icon: 'alert-triangle' },
+        ],
+    },
+    {
         title: 'PENGATURAN',
         items: [
             {
@@ -76,23 +83,6 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
                 href: '/pengaturan/alur',
                 icon: 'settings',
                 roles: ['kasubag'],
-            },
-        ],
-    },
-    {
-        title: 'ALAT BANTU',
-        items: [
-            {
-                label: 'Pindai QR Code',
-                href: '#',
-                icon: 'aperture',
-                disabled: true,
-            },
-            {
-                label: 'Laporan & Ekspor',
-                href: '#',
-                icon: 'printer',
-                disabled: true,
             },
         ],
     },

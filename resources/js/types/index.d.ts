@@ -301,3 +301,48 @@ export interface DashboardData {
     units: { id: number; name: string }[];
     selected_unit_id: number | null;
 }
+
+export interface RekapTotals {
+    jumlah: number;
+    nilai_perolehan: number;
+    nilai_buku: number;
+}
+
+export interface LaporanAsetRow {
+    id: number;
+    kode_barang: string;
+    nomor_register: string;
+    nama_aset: string;
+    merk_type: string | null;
+    kategori: string | null;
+    subkategori: string | null;
+    unit: string | null;
+    tahun_perolehan: string | null;
+    kondisi: 'baik' | 'rusak_ringan' | 'rusak_berat' | 'hilang';
+    nilai_perolehan: number;
+    nilai_buku: number;
+    detail: {
+        pemegang: string | null;
+        status: 'aktif' | 'dalam_proses';
+        sumber_perolehan: string | null;
+        no_dokumen: string | null;
+        keterangan: string | null;
+    };
+}
+
+export interface LaporanAsetData {
+    filters: Record<string, string | number>;
+    sort: { urut: string; arah: 'asc' | 'desc' };
+    ringkasan: RekapTotals;
+    kondisi: { kondisi: 'baik' | 'rusak_ringan' | 'rusak_berat' | 'hilang'; label: string; jumlah: number; persen: number }[];
+    tren: { tahun: number; jumlah: number; nilai_perolehan: number; nilai_buku: number }[];
+    rekap_kategori: {
+        grup: (RekapTotals & { id: number; nama: string; anak: (RekapTotals & { id: number; nama: string })[] })[];
+        total: RekapTotals;
+    };
+    rekap_unit: { baris: (RekapTotals & { id: number; nama: string })[]; total: RekapTotals } | null;
+    asets: Paginated<LaporanAsetRow>;
+    units: { id: number; name: string; type: string }[];
+    categories: { id: number; name: string }[];
+    kondisiOptions: { value: string; label: string }[];
+}

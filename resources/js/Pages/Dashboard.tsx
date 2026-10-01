@@ -97,7 +97,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
               { label: 'Kotak Persetujuan', href: route('persetujuan.index') },
               { label: 'Scan QR', href: route('scan.index') },
               { label: 'Data Aset', href: route('assets.index') },
-              { label: 'Laporan', href: route('report.index') },
+              { label: 'Laporan', href: route('laporan-aset.index') },
           ]
         : [
               { label: 'Catat Aset', href: route('assets.create') },

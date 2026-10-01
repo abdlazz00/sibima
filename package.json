@@ -40,7 +40,10 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "chart.js": "^4.5.1",
+        "chartjs-plugin-datalabels": "^2.2.0",
         "jsqr": "^1.4.0",
-        "preline": "^2.7.0"
+        "preline": "^2.7.0",
+        "react-chartjs-2": "^5.3.1"
     }
 }
