@@ -136,7 +136,7 @@ Matriks berikut menggabungkan spesifikasi dokumen desain (`PANDUAN_DESAIN_UI_UX_
 | **Permohonan Kebutuhan Aset** | Approve permohonan unit | Approve pegawai kecamatan | Input + penuhi | Input + penuhi | Approve pegawai kelurahan | ✅ Selesai (`AssetRequestPolicy`, workflow `permohonan_pegawai`/`permohonan_unit`) |
 | **Pelaporan Rusak / Hilang** | Lihat semua (alihkan approver) | Approve aset kecamatan | Input laporan | Input laporan | Approve aset kelurahan | ✅ Selesai (`AssetReportPolicy`, workflow `lapor_rusak_hilang`) |
 | **Pindai QR Code Kamera** | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ✅ Akses | ⏳ *Next Roadmap* |
-| **Laporan & Rekapitulasi Excel** | Cetak Seluruhnya | Cetak Seluruhnya | Cetak Unit Kec. | Cetak Unit Kel. | Cetak Unit Kel. | ✅ Selesai (`ReportQuery`, `/laporan`) |
+| **Laporan & Rekapitulasi Excel** | Cetak Seluruhnya | Cetak Seluruhnya | Cetak Unit Kec. | Cetak Unit Kel. | Cetak Unit Kel. | ✅ Selesai: Laporan Aset (`/laporan-aset`, `AssetRecapService`); Mutasi dan Rusak & Hilang menyusul |
 
 ---
 

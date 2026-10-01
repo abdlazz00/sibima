@@ -1,6 +1,6 @@
 # Desain: Laporan Aset (grup menu Laporan)
 
-Status: Menunggu review.
+Status: Diimplementasikan (plan 2026-10-05-laporan-aset.md).
 Tanggal: 2026-10-05
 
 Bagian pertama dari restrukturisasi menu Laporan. Laporan Mutasi dan Laporan Aset Rusak & Hilang dibahas dan dikerjakan dalam siklus spec terpisah.
@@ -42,6 +42,8 @@ Nama memakai "rekap" karena `AssetReport` sudah dipakai untuk laporan rusak/hila
 - `tren`: per tahun perolehan `tahun`, `jumlah`, `nilai_perolehan`, `nilai_buku`, urut menaik dari tahun pertama sampai terakhir; tahun tanpa aset di antaranya diisi nol. Pengelompokan tahun dilakukan di PHP dari hasil `GROUP BY tanggal_perolehan` agar portabel antara SQLite dan MySQL.
 - `rekap_kategori`: kategori utama (induk dari subkategori; kategori tanpa induk dianggap kategori utama) berisi `id`, `nama`, `jumlah`, `nilai_perolehan`, `nilai_buku`, dan `anak` (subkategori dengan angka yang sama), diurutkan menurut jumlah menurun lalu nama; plus `total`.
 - `rekap_unit`: baris per unit dalam cakupan yang punya aset (`id`, `nama`, `jumlah`, `nilai_perolehan`, `nilai_buku`) plus `total`; `null` bila cakupan user hanya satu unit.
+
+Kunci keluaran bersarang: `rekap_kategori.grup/total` dan `rekap_unit.baris/total`. Persen dibulatkan satu desimal sehingga jumlahnya bisa menyimpang hingga 0,2 dari 100.
 
 Seluruh total (ringkasan, total rekap kategori, total rekap unit, total tren, jumlah persen kondisi) harus saling sama untuk filter yang sama.
 
