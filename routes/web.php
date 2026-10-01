@@ -8,6 +8,7 @@ use App\Http\Controllers\AssetMutationController;
 use App\Http\Controllers\AssetPhotoController;
 use App\Http\Controllers\AssetReportController;
 use App\Http\Controllers\AssetRequestController;
+use App\Http\Controllers\ScanController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenerimaanAsetController;
@@ -80,6 +81,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/pegawais/{pegawai}/user', [PegawaiController::class, 'createUser'])->name('pegawais.create-user');
     Route::resource('asset-mutations', AssetMutationController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('asset-reports', AssetReportController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
+    Route::get('/scan/{id}', [ScanController::class, 'show'])->whereNumber('id')->name('scan.show');
     Route::resource('asset-requests', AssetRequestController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/asset-requests/{assetRequest}/fulfill', [AssetRequestController::class, 'fulfill'])->name('asset-requests.fulfill');
     Route::post('/asset-requests/{assetRequest}/close', [AssetRequestController::class, 'close'])->name('asset-requests.close');
