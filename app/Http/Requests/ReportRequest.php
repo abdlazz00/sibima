@@ -12,6 +12,8 @@ use Illuminate\Validation\Validator;
 
 class ReportRequest extends FormRequest
 {
+    public const SORTABLE = ['kode_barang', 'nomor_register', 'nama_aset', 'tanggal_perolehan', 'kondisi', 'nilai_perolehan', 'nilai_buku'];
+
     private const FILTER_KEYS = ['unit_id', 'category_id', 'kondisi', 'dari', 'sampai', 'status', 'jenis'];
 
     public function authorize(): bool
@@ -31,6 +33,8 @@ class ReportRequest extends FormRequest
             'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
             'status' => ['nullable', Rule::in(['pending', 'approved', 'rejected', 'cancelled'])],
             'jenis' => ['nullable', Rule::enum(AssetReportType::class)],
+            'urut' => ['nullable', Rule::in(self::SORTABLE)],
+            'arah' => ['nullable', Rule::in(['asc', 'desc'])],
         ];
     }
 
@@ -59,5 +63,14 @@ class ReportRequest extends FormRequest
             $this->safe()->only(self::FILTER_KEYS),
             fn ($value) => $value !== null && $value !== '',
         );
+    }
+
+    /** @return array{urut: string, arah: string} */
+    public function sorting(): array
+    {
+        return [
+            'urut' => $this->validated('urut') ?: 'kode_barang',
+            'arah' => $this->validated('arah') ?: 'asc',
+        ];
     }
 }
