@@ -290,7 +290,14 @@ export interface DashboardData {
         laporan_pending: number;
         mutasi_pending: number;
     };
-    aktivitas: { id: number; aset: string | null; event: string; pelaku: string | null; waktu: string | null }[];
+    transaksi: {
+        jenis: 'mutasi' | 'penerimaan';
+        nomor: string;
+        ringkasan: string | null;
+        tanggal: string | null;
+        status: 'berjalan' | 'selesai' | 'ditolak' | 'dibatalkan';
+        url: string;
+    }[];
     units: { id: number; name: string }[];
     selected_unit_id: number | null;
 }
