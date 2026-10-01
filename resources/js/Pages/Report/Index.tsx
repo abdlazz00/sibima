@@ -4,7 +4,7 @@ import { PageProps } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
-type Kind = 'aset' | 'mutasi' | 'rusak-hilang';
+type Kind = 'mutasi' | 'rusak-hilang';
 type Filters = Record<string, string | number | undefined>;
 
 interface ReportProps extends PageProps {
@@ -12,12 +12,9 @@ interface ReportProps extends PageProps {
     filters: Filters;
     rowCount: number;
     units: { id: number; name: string; type: string }[];
-    categories: { id: number; name: string }[];
-    kondisiOptions: { value: string; label: string }[];
 }
 
 const KINDS: { key: Kind; label: string }[] = [
-    { key: 'aset', label: 'Daftar Aset' },
     { key: 'mutasi', label: 'Riwayat Mutasi' },
     { key: 'rusak-hilang', label: 'Aset Rusak & Hilang' },
 ];
@@ -37,7 +34,7 @@ const clean = (data: Filters) =>
 const signature = (data: Filters) =>
     JSON.stringify(Object.entries(clean(data)).map(([k, v]) => [k, String(v)]).sort());
 
-export default function Index({ laporan, filters, rowCount, units, categories, kondisiOptions }: ReportProps) {
+export default function Index({ laporan, filters, rowCount, units }: ReportProps) {
     const [form, setForm] = useState<Filters>(filters);
     const { errors } = usePage<PageProps & { errors: Record<string, string> }>().props;
     const errorMessages = Object.values(errors ?? {});
@@ -117,13 +114,6 @@ export default function Index({ laporan, filters, rowCount, units, categories, k
                     className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {laporan === 'aset' && (
-                            <>
-                                {unitSelect}
-                                {select('category_id', 'Kategori', categories.map((c) => ({ value: c.id, label: c.name })), 'Semua kategori')}
-                                {select('kondisi', 'Kondisi', kondisiOptions, 'Semua kondisi')}
-                            </>
-                        )}
                         {laporan === 'mutasi' && (
                             <>
                                 {date('dari', 'Dari tanggal')}
