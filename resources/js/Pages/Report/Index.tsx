@@ -89,13 +89,12 @@ export default function Index({ laporan, filters, rowCount, units, categories, k
                     <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Laporan</h1>
                 </div>
 
-                <div className="flex flex-wrap gap-2" role="tablist">
+                <div className="flex flex-wrap gap-2" role="group" aria-label="Jenis laporan">
                     {KINDS.map((k) => (
                         <button
                             key={k.key}
                             type="button"
-                            role="tab"
-                            aria-selected={laporan === k.key}
+                            aria-pressed={laporan === k.key}
                             onClick={() => switchKind(k.key)}
                             className={`rounded-lg border px-4 py-2 text-sm font-semibold ${laporan === k.key ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
                         >
