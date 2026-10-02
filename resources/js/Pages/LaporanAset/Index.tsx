@@ -1,8 +1,9 @@
-import KondisiChart, { KONDISI_COLOR } from '@/Components/Charts/KondisiChart';
+import DonutChart from '@/Components/Charts/DonutChart';
 import TrenAsetChart from '@/Components/Charts/TrenAsetChart';
 import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { KONDISI_LABEL } from '@/lib/assetReport';
+import { KONDISI_COLOR } from '@/lib/chartColors';
 import { rupiah } from '@/lib/format';
 import { pageNumbersWithGaps } from '@/lib/pagination';
 import { LaporanAsetData, PageProps, RekapTotals } from '@/types';
@@ -175,7 +176,10 @@ export default function Index(props: PageProps & LaporanAsetData) {
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     <div className={CARD}>
                         <p className="mb-4 text-lg font-semibold text-slate-900">Persentase per Kondisi</p>
-                        <KondisiChart data={kondisi} />
+                        <DonutChart
+                            ariaLabel="Grafik persentase aset menurut kondisi"
+                            data={kondisi.map((k) => ({ label: k.label, jumlah: k.jumlah, persen: k.persen, color: KONDISI_COLOR[k.kondisi] }))}
+                        />
                         <ul className="mt-4 space-y-2 text-sm">
                             {kondisi.map((k) => (
                                 <li key={k.kondisi} className="flex items-center justify-between gap-3">

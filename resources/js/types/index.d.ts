@@ -346,3 +346,72 @@ export interface LaporanAsetData {
     categories: { id: number; name: string }[];
     kondisiOptions: { value: string; label: string }[];
 }
+
+export interface LaporanMutasiRow {
+    id: number;
+    nomor_mutasi: string;
+    tanggal_mutasi: string;
+    jenis: MutationType;
+    jenis_label: string;
+    asal: string | null;
+    tujuan: string | null;
+    jumlah_aset: number;
+    nilai: number;
+    status: MutationStatus;
+    pengaju: string | null;
+    detail: {
+        keterangan: string | null;
+        aset: {
+            kode_barang: string | null;
+            nama_aset: string | null;
+            kategori: string | null;
+            kondisi: 'baik' | 'rusak_ringan' | 'rusak_berat' | 'hilang' | null;
+            nilai_perolehan: number;
+            pemegang_tujuan: string | null;
+            catatan: string | null;
+        }[];
+        persetujuan: {
+            langkah: string | null;
+            aksi: 'approve' | 'reject' | 'cancel' | 'reassign';
+            oleh: string | null;
+            waktu: string | null;
+            catatan: string | null;
+        }[];
+    };
+}
+
+export interface LaporanMutasiData {
+    filters: Record<string, string | number>;
+    sort: { urut: string; arah: 'asc' | 'desc' };
+    ringkasan: {
+        jumlah_mutasi: number;
+        disetujui: number;
+        aset_berpindah: number;
+        nilai_perolehan: number;
+        rata_lama_proses: number | null;
+        terlama_proses: number | null;
+    };
+    status: { status: MutationStatus; label: string; jumlah: number; persen: number }[];
+    jenis: { jenis: MutationType; label: string; jumlah: number; persen: number }[];
+    tren: { bulan: string; jumlah_mutasi: number; aset_berpindah: number }[];
+    arus: {
+        baris: { asal_id: number; asal: string; tujuan_id: number; tujuan: string; jumlah_mutasi: number; aset: number; nilai: number }[];
+        total: { jumlah_mutasi: number; aset: number; nilai: number };
+    };
+    masih_berjalan: {
+        id: number;
+        nomor: string;
+        jenis: string;
+        asal: string | null;
+        tujuan: string | null;
+        langkah: string | null;
+        menunggu: string | null;
+        umur_hari: number;
+        url: string;
+    }[];
+    jumlah_masih_berjalan: number;
+    mutasis: Paginated<LaporanMutasiRow>;
+    unitOptions: { id: number; name: string; type: string }[];
+    jenisOptions: { value: string; label: string }[];
+    statusOptions: { value: string; label: string }[];
+}
