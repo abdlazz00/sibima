@@ -77,9 +77,12 @@ it('returns a guest scanning the QR straight back to the asset after login', fun
     ])->assertRedirect("/assets/{$this->own->id}");
 });
 
-it('encodes the scan summary url in the label QR', function () {
+it('encodes the scan summary url in the label QR from APP_URL, not the request host', function () {
+    config(['app.url' => 'https://sibima.example.go.id']);
+    $this->get('http://localhost/login');
+
     expect(app(QrCodeService::class)->urlForAsset($this->own))
-        ->toBe(route('scan.show', ['id' => $this->own->id]))
+        ->toBe("https://sibima.example.go.id/scan/{$this->own->id}")
         ->and(app(QrCodeService::class)->forAsset($this->own))->toStartWith('data:image/png;base64,');
 });
 

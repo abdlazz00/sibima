@@ -80,8 +80,8 @@ class AssetService
 
     public function deletePhoto(AssetPhoto $photo): void
     {
-        Storage::disk('public')->delete($photo->path);
         $photo->delete();
+        Storage::disk('public')->delete($photo->path);
     }
 
     /** @param list<UploadedFile> $photos */
