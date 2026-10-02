@@ -8,6 +8,7 @@ export interface NavItem {
     badge?: string | number;
     disabled?: boolean;
     roles?: Role[];
+    permission?: string;
 }
 
 export interface NavGroup {
@@ -19,74 +20,53 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
     {
         title: 'UTAMA',
         items: [
-            { label: 'Dashboard', href: '/dashboard', icon: 'grid' },
+            { label: 'Dashboard', href: '/dashboard', icon: 'grid', permission: 'dashboard.view' },
         ],
     },
     {
         title: 'DATA MASTER',
         items: [
-            { label: 'Data Aset', href: '/assets', icon: 'package' },
-            { label: 'Scan QR', href: '/scan', icon: 'qr-code' },
-            {
-                label: 'Kategori Aset',
-                href: '/asset-categories',
-                icon: 'layers',
-                roles: ['kasubag'],
-            },
-            { label: 'Data Pegawai', href: '/pegawais', icon: 'users' },
+            { label: 'Data Aset', href: '/assets', icon: 'package', permission: 'aset.view' },
+            { label: 'Scan QR', href: '/scan', icon: 'qr-code', permission: 'scan.view' },
+            { label: 'Kategori Aset', href: '/asset-categories', icon: 'layers', permission: 'kategori.view' },
+            { label: 'Data Pegawai', href: '/pegawais', icon: 'users', permission: 'pegawai.view' },
         ],
     },
     {
         title: 'TRANSAKSI',
         items: [
-            {
-                label: 'Penerimaan Aset',
-                href: '/penerimaan-aset',
-                icon: 'download',
-                roles: ['kasubag', 'camat', 'admin_kecamatan'],
-            },
-            {
-                label: 'Mutasi Aset',
-                href: '/asset-mutations',
-                icon: 'shuffle',
-            },
-            {
-                label: 'Kotak Persetujuan',
-                href: '/persetujuan',
-                icon: 'check-square',
-            },
-            {
-                label: 'Permohonan Aset',
-                href: '/asset-requests',
-                icon: 'file-text',
-            },
-            {
-                label: 'Lapor Rusak/Hilang',
-                href: '/asset-reports',
-                icon: 'alert-triangle',
-            },
+            { label: 'Penerimaan Aset', href: '/penerimaan-aset', icon: 'download', permission: 'penerimaan.view' },
+            { label: 'Mutasi Aset', href: '/asset-mutations', icon: 'shuffle', permission: 'mutasi.view' },
+            { label: 'Kotak Persetujuan', href: '/persetujuan', icon: 'check-square', permission: 'persetujuan.view' },
+            { label: 'Permohonan Aset', href: '/asset-requests', icon: 'file-text', permission: 'permohonan.view' },
+            { label: 'Lapor Rusak/Hilang', href: '/asset-reports', icon: 'alert-triangle', permission: 'laporan-insiden.view' },
         ],
     },
     {
         title: 'LAPORAN',
         items: [
-            { label: 'Laporan Aset', href: '/laporan-aset', icon: 'bar-chart' },
-            { label: 'Laporan Mutasi', href: '/laporan-mutasi', icon: 'shuffle' },
-            { label: 'Laporan Rusak & Hilang', href: '/laporan-rusak-hilang', icon: 'alert-triangle' },
+            { label: 'Laporan Aset', href: '/laporan-aset', icon: 'bar-chart', permission: 'laporan.aset' },
+            { label: 'Laporan Mutasi', href: '/laporan-mutasi', icon: 'shuffle', permission: 'laporan.mutasi' },
+            { label: 'Laporan Rusak & Hilang', href: '/laporan-rusak-hilang', icon: 'alert-triangle', permission: 'laporan.rusak-hilang' },
         ],
     },
     {
         title: 'PENGATURAN',
         items: [
-            {
-                label: 'Pengaturan Alur',
-                href: '/pengaturan/alur',
-                icon: 'settings',
-                roles: ['kasubag'],
-            },
+            { label: 'Pengaturan Alur', href: '/pengaturan/alur', icon: 'settings', permission: 'pengaturan.alur' },
+            { label: 'Pengaturan Role', href: '/pengaturan/roles', icon: 'shield', permission: 'pengaturan.role' },
         ],
     },
 ];
+
+export function navGroupsForPermissions(permissions: string[] = []): NavGroup[] {
+    return SIDEBAR_NAV_GROUPS.map((group) => ({
+        ...group,
+        items: group.items.filter(
+            (item) => !item.permission || permissions.includes(item.permission),
+        ),
+    })).filter((group) => group.items.length > 0);
+}
 
 export function navGroupsForRole(role?: Role): NavGroup[] {
     return SIDEBAR_NAV_GROUPS.map((group) => ({

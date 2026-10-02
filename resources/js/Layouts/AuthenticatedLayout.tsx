@@ -3,7 +3,7 @@ import NavIcon from '@/Components/NavIcon';
 import {
     formatRole,
     getInitials,
-    navGroupsForRole,
+    navGroupsForPermissions,
     Role,
 } from '@/config/navigation';
 import { PageProps } from '@/types';
@@ -24,7 +24,7 @@ export default function AuthenticatedLayout({
         usePage<PageProps>().props;
     const { url } = usePage();
     const role = auth.user?.roles?.[0] as Role | undefined;
-    const navGroups = navGroupsForRole(role);
+    const navGroups = navGroupsForPermissions(auth.user?.permissions ?? []);
 
     const badgeFor = (item: { href: string; badge?: string | number }) =>
         item.href === '/persetujuan' ? pending_approvals || undefined : item.badge;
