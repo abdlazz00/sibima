@@ -9,6 +9,7 @@ use App\Http\Controllers\AssetPhotoController;
 use App\Http\Controllers\AssetReportController;
 use App\Http\Controllers\AssetRequestController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LaporanAsetController;
 use App\Http\Controllers\LaporanMutasiController;
@@ -81,6 +82,8 @@ Route::middleware('auth')->group(function () {
         Route::post('batches/{batch}/confirm', [ImportController::class, 'confirm'])->name('import.confirm');
         Route::get('batches/{batch}/errors', [ImportController::class, 'errors'])->name('import.errors');
     });
+
+    Route::get('/export/{modul}', ExportController::class)->where('modul', 'kategori|pegawai|aset')->name('export');
     Route::resource('asset-mutations', AssetMutationController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('asset-reports', AssetReportController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('/laporan-aset', [LaporanAsetController::class, 'index'])->name('laporan-aset.index');
