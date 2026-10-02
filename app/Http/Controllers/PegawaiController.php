@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreatePegawaiUserRequest;
 use App\Http\Requests\PegawaiRequest;
+use App\Http\Requests\UpdateUserAccessRequest;
 use App\Models\Pegawai;
 use App\Models\Unit;
 use App\Repositories\Contracts\PegawaiRepositoryInterface;
@@ -109,5 +110,19 @@ class PegawaiController extends Controller
         );
 
         return back()->with('success', 'Akun login berhasil dibuat untuk pegawai ini.');
+    }
+
+    public function updateUserAccess(UpdateUserAccessRequest $request, Pegawai $pegawai): RedirectResponse
+    {
+        abort_unless($pegawai->user !== null, 404, 'Pegawai ini belum memiliki akun.');
+
+        $this->service->updateUserAccess(
+            $pegawai->user,
+            $request->validated('role'),
+            $request->validated('direct_permissions', []),
+            $request->validated('unit_scope_override'),
+        );
+
+        return back()->with('success', "Akses akun {$pegawai->nama} berhasil diperbarui.");
     }
 }

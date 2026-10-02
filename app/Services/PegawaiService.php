@@ -64,6 +64,15 @@ class PegawaiService
         });
     }
 
+    public function updateUserAccess(User $user, string $role, array $directPermissions = [], ?string $scopeOverride = null): void
+    {
+        DB::transaction(function () use ($user, $role, $directPermissions, $scopeOverride) {
+            $user->syncRoles([$role]);
+            $user->syncPermissions($directPermissions);
+            $user->update(['unit_scope_override' => $scopeOverride]);
+        });
+    }
+
     private function attachPhoto(Pegawai $pegawai, ?UploadedFile $foto): Pegawai
     {
         if ($foto === null) {

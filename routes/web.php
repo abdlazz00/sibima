@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/pegawais/{pegawai}', [PegawaiController::class, 'update'])->name('pegawais.update');
     Route::delete('/pegawais/{pegawai}', [PegawaiController::class, 'destroy'])->name('pegawais.destroy');
     Route::post('/pegawais/{pegawai}/user', [PegawaiController::class, 'createUser'])->name('pegawais.create-user');
+    Route::post('/pegawais/{pegawai}/user-access', [PegawaiController::class, 'updateUserAccess'])->name('pegawais.user-access');
 
     Route::prefix('import/{modul}')->where(['modul' => 'kategori|pegawai|aset'])->group(function () {
         Route::get('/', [ImportController::class, 'show'])->name('import.show');
