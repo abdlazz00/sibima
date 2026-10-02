@@ -11,6 +11,7 @@ use App\Http\Controllers\AssetRequestController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanAsetController;
 use App\Http\Controllers\LaporanMutasiController;
+use App\Http\Controllers\LaporanRusakHilangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\NotificationController;
@@ -87,6 +88,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan-aset/unduh', [LaporanAsetController::class, 'unduh'])->name('laporan-aset.download');
     Route::get('/laporan-mutasi', [LaporanMutasiController::class, 'index'])->name('laporan-mutasi.index');
     Route::get('/laporan-mutasi/unduh', [LaporanMutasiController::class, 'unduh'])->name('laporan-mutasi.download');
+    Route::get('/laporan-rusak-hilang', [LaporanRusakHilangController::class, 'index'])->name('laporan-rusak-hilang.index');
+    Route::get('/laporan-rusak-hilang/unduh', [LaporanRusakHilangController::class, 'unduh'])->name('laporan-rusak-hilang.download');
     Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
     Route::get('/laporan/{laporan}/unduh', [ReportController::class, 'download'])
         ->where('laporan', 'rusak-hilang')
