@@ -21,6 +21,7 @@ use App\Http\Controllers\PenerimaanAsetController;
 use App\Http\Controllers\PersetujuanController;
 use App\Http\Controllers\WorkflowSettingsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -58,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengaturan/alur/{workflow}', [WorkflowSettingsController::class, 'edit'])->name('workflow-settings.edit');
     Route::put('/pengaturan/alur/{workflow}', [WorkflowSettingsController::class, 'update'])->name('workflow-settings.update');
     Route::post('/pengaturan/alur/{workflow}/reset', [WorkflowSettingsController::class, 'reset'])->name('workflow-settings.reset');
+    Route::resource('pengaturan/roles', RoleController::class)->except(['create', 'edit', 'show'])->names('roles');
 
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::get('/asset-categories/create', [AssetCategoryController::class, 'create'])->name('asset-categories.create');
