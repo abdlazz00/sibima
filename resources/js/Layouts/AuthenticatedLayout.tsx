@@ -333,9 +333,17 @@ export default function AuthenticatedLayout({
                                 aria-expanded={isProfileOpen}
                                 aria-haspopup="true"
                             >
-                                <div className="shadow-xs flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-[#1E40AF] text-xs font-bold text-white">
-                                    {userInitials}
-                                </div>
+                                {auth.user?.foto_profile_url ? (
+                                    <img
+                                        src={auth.user.foto_profile_url}
+                                        alt={auth.user.name}
+                                        className="shadow-xs h-8 w-8 shrink-0 rounded-full object-cover border border-gray-200"
+                                    />
+                                ) : (
+                                    <div className="shadow-xs flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-[#1E40AF] text-xs font-bold text-white">
+                                        {userInitials}
+                                    </div>
+                                )}
                                 <div className="hidden flex-col text-left sm:flex">
                                     <span className="max-w-[140px] truncate text-sm font-semibold leading-tight text-gray-900">
                                         {auth.user?.name ?? 'Pengguna'}

@@ -53,6 +53,7 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
     {
         title: 'PENGATURAN',
         items: [
+            { label: 'Pengaturan Pengguna', href: '/pengaturan/users', icon: 'users', permission: 'user.view' },
             { label: 'Pengaturan Alur', href: '/pengaturan/alur', icon: 'settings', permission: 'pengaturan.alur' },
             { label: 'Pengaturan Role', href: '/pengaturan/roles', icon: 'shield', permission: 'pengaturan.role' },
         ],

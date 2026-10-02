@@ -2,6 +2,8 @@ export interface AuthUser {
     id: number;
     name: string;
     email: string;
+    is_active?: boolean;
+    foto_profile_url?: string | null;
     roles: string[];
     permissions: string[];
     unit: { id: number; name: string; type: 'kecamatan' | 'kelurahan' } | null;
