@@ -415,3 +415,95 @@ export interface LaporanMutasiData {
     jenisOptions: { value: string; label: string }[];
     statusOptions: { value: string; label: string }[];
 }
+
+export interface LaporanRusakHilangRow {
+    id: number;
+    nomor_laporan: string;
+    tanggal_kejadian: string | null;
+    nama_aset: string | null;
+    kode_barang: string | null;
+    merk_type: string | null;
+    kategori: string | null;
+    unit: string | null;
+    pemegang: string | null;
+    jenis: AssetReportType | null;
+    jenis_label: string | null;
+    kondisi_baru: 'rusak_ringan' | 'rusak_berat' | 'hilang' | null;
+    kondisi_label: string | null;
+    nilai_perolehan: number;
+    nilai_buku: number;
+    status: AssetReportStatus | null;
+    status_label: string | null;
+    pengaju: string | null;
+    detail: {
+        kronologi: string | null;
+        photos: { id: number; url: string }[];
+        alur_persetujuan: {
+            step_order: number;
+            label: string;
+            role: string | null;
+            tipe: string | null;
+        }[];
+        riwayat_persetujuan: {
+            id: number;
+            langkah?: string | null;
+            step_order: number;
+            user: string | null;
+            action: string;
+            action_label: string;
+            note: string | null;
+            created_at: string | null;
+        }[];
+    };
+}
+
+export interface LaporanRusakHilangData {
+    filters: Record<string, string | number>;
+    sort: { urut: string; arah: 'asc' | 'desc' };
+    ringkasan: {
+        jumlah_laporan: number;
+        disetujui: number;
+        nilai_perolehan: number;
+        nilai_buku: number;
+        rata_lama_proses: number | null;
+        terlama_proses: number | null;
+    };
+    status: { status: AssetReportStatus; label: string; jumlah: number; persen: number }[];
+    kondisi: { kondisi: 'rusak_ringan' | 'rusak_berat' | 'hilang'; label: string; jumlah: number; persen: number }[];
+    tren: { bulan: string; jumlah: number; nilai_perolehan: number }[];
+    sebaran_unit: {
+        baris: {
+            id: number;
+            name: string;
+            jumlah_rusak: number;
+            jumlah_hilang: number;
+            total: number;
+            nilai_buku: number;
+        }[];
+        total: {
+            jumlah_rusak: number;
+            jumlah_hilang: number;
+            total: number;
+            nilai_buku: number;
+        };
+    } | null;
+    masih_berjalan: {
+        id: number;
+        nomor: string;
+        kondisi_label: string;
+        nama_aset: string | null;
+        unit: string | null;
+        pemegang: string | null;
+        langkah: string | null;
+        menunggu: string | null;
+        umur_hari: number;
+        url: string;
+    }[];
+    jumlah_masih_berjalan: number;
+    reports: Paginated<LaporanRusakHilangRow>;
+    unitOptions: { id: number; name: string; type: string }[];
+    categoryOptions: { id: number; name: string }[];
+    kondisiOptions: { value: string; label: string }[];
+    statusOptions: { value: string; label: string }[];
+}
+
