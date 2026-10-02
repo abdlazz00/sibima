@@ -14,9 +14,16 @@ class EloquentAssetRepository implements AssetRepositoryInterface
 {
     public function paginateVisibleTo(User $user, array $filters, int $perPage = 15): LengthAwarePaginator
     {
+        return $this->queryVisibleTo($user, $filters)
+            ->with(['category.parent', 'unit', 'photos'])
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function queryVisibleTo(User $user, array $filters): Builder
+    {
         return Asset::query()
             ->visibleTo($user)
-            ->with(['category.parent', 'unit', 'photos'])
             ->when($filters['search'] ?? null, function (Builder $query, string $search) {
                 $query->where(function (Builder $query) use ($search) {
                     $query->where('nama_aset', 'like', "%{$search}%")
@@ -34,9 +41,7 @@ class EloquentAssetRepository implements AssetRepositoryInterface
             ->when($filters['kondisi'] ?? null, fn (Builder $query, $kondisi) => $query->where('kondisi', $kondisi))
             ->orderBy('nama_aset')
             ->orderBy('kode_barang')
-            ->orderBy('nomor_register')
-            ->paginate($perPage)
-            ->withQueryString();
+            ->orderBy('nomor_register');
     }
 
     public function maxRegisterNumber(string $kodeBarang): int
