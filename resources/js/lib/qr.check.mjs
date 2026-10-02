@@ -1,21 +1,24 @@
 // Run: node resources/js/lib/qr.check.mjs
 import assert from 'node:assert/strict';
 
-const { assetIdFromQr } = await import('./qr.ts');
+const { qrTokenFromScan } = await import('./qr.ts');
 
-assert.equal(assetIdFromQr('https://sibima.test/scan/12'), 12);
-assert.equal(assetIdFromQr('https://sibima.test/scan/12/'), 12);
-assert.equal(assetIdFromQr('http://localhost:8000/assets/345'), 345);
-assert.equal(assetIdFromQr('  https://x.id/assets/7  '), 7);
-assert.equal(assetIdFromQr('https://sibima.test/assets/labels'), null);
-assert.equal(assetIdFromQr('https://sibima.test/assets/5/edit'), null);
-assert.equal(assetIdFromQr('https://sibima.test/scan/abc'), null);
-assert.equal(assetIdFromQr('https://example.com/other'), null);
-assert.equal(assetIdFromQr('REG-0001'), null);
-assert.equal(assetIdFromQr(''), null);
+assert.equal(qrTokenFromScan('https://sibima.test/scan/OrRzzbS8OJcRMODS'), 'OrRzzbS8OJcRMODS');
+assert.equal(qrTokenFromScan('https://sibima.test/scan/OrRzzbS8OJcRMODS/'), 'OrRzzbS8OJcRMODS');
+assert.equal(qrTokenFromScan('http://localhost:8000/scan/1234567890abcdef'), '1234567890abcdef');
+assert.equal(qrTokenFromScan('  https://x.id/scan/AbCdEfGhIjKlMnOp  '), 'AbCdEfGhIjKlMnOp');
+assert.equal(qrTokenFromScan('OrRzzbS8OJcRMODS'), 'OrRzzbS8OJcRMODS');
+assert.equal(qrTokenFromScan('  OrRzzbS8OJcRMODS  '), 'OrRzzbS8OJcRMODS');
 
-console.log('qr.ts OK');
+// Legacy and invalid cases should return null
+assert.equal(qrTokenFromScan('https://sibima.test/scan/12'), null);
+assert.equal(qrTokenFromScan('http://localhost:8000/assets/345'), null);
+assert.equal(qrTokenFromScan('https://sibima.test/scan/OrRzzbS8OJcRMOD'), null);
+assert.equal(qrTokenFromScan('https://sibima.test/scan/OrRzzbS8OJcRMODSZ'), null);
+assert.equal(qrTokenFromScan('https://sibima.test/scan/OrRzzbS8OJcRMO-S'), null);
+assert.equal(qrTokenFromScan('https://sibima.test/assets/labels'), null);
+assert.equal(qrTokenFromScan('https://example.com/other'), null);
+assert.equal(qrTokenFromScan('REG-0001'), null);
+assert.equal(qrTokenFromScan(''), null);
 
-assert.equal(assetIdFromQr('https://sibima.test/assets/99999999999999999999'), null);
-assert.equal(assetIdFromQr('https://sibima.test/scan/123456789012345'), 123456789012345);
-console.log('qr.ts oversize OK');
+console.log('qr.ts qrTokenFromScan OK');

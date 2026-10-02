@@ -2,7 +2,7 @@ import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
 import QrScanner, { ScanError } from '@/Components/QrScanner';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { KONDISI_LABEL } from '@/lib/assetReport';
-import { assetIdFromQr } from '@/lib/qr';
+import { qrTokenFromScan } from '@/lib/qr';
 import { AssetScanSummary, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -44,16 +44,16 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
     };
 
     const handleDetect = (text: string) => {
-        const id = assetIdFromQr(text);
+        const token = qrTokenFromScan(text);
 
-        if (id === null) {
+        if (token === null) {
             setInvalid(true);
             return;
         }
 
         setInvalid(false);
         setScanning(false);
-        router.get(route('scan.show', { id }));
+        router.get(route('scan.show', { token }));
     };
 
     const rows: [string, string][] = summary

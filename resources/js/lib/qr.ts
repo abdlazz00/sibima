@@ -1,13 +1,13 @@
-// ponytail: matches only this app's own URL shapes; the id is validated server-side by scan.show.
-export function assetIdFromQr(text: string): number | null {
+// ponytail: matches SIBIMA token scan URLs or raw 16-char tokens. Legacy numeric ID URLs return null.
+export function qrTokenFromScan(text: string): string | null {
     let path: string;
     try {
         path = new URL(text.trim()).pathname;
     } catch {
-        return null;
+        const raw = text.trim();
+        return /^[A-Za-z0-9]{16}$/.test(raw) ? raw : null;
     }
 
-    const match = path.match(/^\/(?:scan|assets)\/(\d{1,15})\/?$/);
-
-    return match ? Number(match[1]) : null;
+    const match = path.match(/^\/scan\/([A-Za-z0-9]{16})\/?$/);
+    return match ? match[1] : null;
 }
