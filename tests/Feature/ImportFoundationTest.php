@@ -18,9 +18,10 @@ it('grants import and export permissions only to roles that already manage each 
 
 it('can be seeded repeatedly without duplicating permissions', function () {
     $this->seed(PermissionSeeder::class);
+    $count = Permission::count();
     $this->seed(PermissionSeeder::class);
 
-    expect(Permission::count())->toBe(6);
+    expect(Permission::count())->toBe($count);
 });
 
 it('shares the permission names of the signed-in user with the frontend', function () {

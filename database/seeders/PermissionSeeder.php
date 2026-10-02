@@ -9,38 +9,92 @@ use Spatie\Permission\PermissionRegistrar;
 
 class PermissionSeeder extends Seeder
 {
-    /**
-     * Satu-satunya tempat pemetaan permission ke role. Saat RBAC dinamis dibangun,
-     * cukup penugasan ini yang berpindah ke UI; kode import/ekspor tidak berubah.
-     *
-     * @var array<string, array<string, list<string>>>
-     */
-    public const GRANTS = [
-        'aset' => [
-            'import' => ['kasubag', 'admin_kecamatan', 'admin_kelurahan'],
-            'export' => ['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah'],
+    public const PERMISSION_GROUPS = [
+        'Dashboard' => ['dashboard.view'],
+        'Data Aset' => [
+            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label',
+            'import-aset', 'export-aset',
         ],
-        'pegawai' => [
-            'import' => ['kasubag', 'admin_kecamatan', 'admin_kelurahan'],
-            'export' => ['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah'],
+        'Scan QR' => ['scan.view'],
+        'Kategori Aset' => [
+            'kategori.view', 'kategori.create', 'kategori.update', 'kategori.delete',
+            'import-kategori', 'export-kategori',
         ],
-        'kategori' => [
-            'import' => ['kasubag'],
-            'export' => ['kasubag'],
+        'Data Pegawai' => [
+            'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete',
+            'pegawai.create-user', 'import-pegawai', 'export-pegawai',
         ],
+        'Penerimaan Aset' => [
+            'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete', 'penerimaan.submit',
+        ],
+        'Mutasi Aset' => ['mutasi.view', 'mutasi.create'],
+        'Permohonan Aset' => ['permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close'],
+        'Lapor Insiden' => ['laporan-insiden.view', 'laporan-insiden.create'],
+        'Persetujuan' => ['persetujuan.view', 'persetujuan.act'],
+        'Laporan' => ['laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang'],
+        'Pengaturan' => ['pengaturan.alur', 'pengaturan.role', 'pengaturan.user'],
     ];
 
     public function run(): void
     {
-        foreach (self::GRANTS as $modul => $actions) {
-            foreach ($actions as $action => $roles) {
-                $permission = Permission::findOrCreate("{$action}-{$modul}");
-
-                foreach ($roles as $role) {
-                    Role::findOrCreate($role)->givePermissionTo($permission);
-                }
+        // 1. Buat semua permission
+        foreach (self::PERMISSION_GROUPS as $group => $permissions) {
+            foreach ($permissions as $perm) {
+                Permission::findOrCreate($perm);
             }
         }
+
+        // 2. Beri hak default ke role sistem
+        $kasubag = Role::findOrCreate('kasubag');
+        $kasubag->syncPermissions(Permission::all());
+
+        $camat = Role::findOrCreate('camat');
+        $camat->syncPermissions([
+            'dashboard.view', 'scan.view',
+            'aset.view', 'export-aset',
+            'pegawai.view', 'export-pegawai',
+            'penerimaan.view',
+            'mutasi.view',
+            'permohonan.view',
+            'laporan-insiden.view',
+            'persetujuan.view', 'persetujuan.act',
+            'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
+        ]);
+
+        $adminKecamatan = Role::findOrCreate('admin_kecamatan');
+        $adminKecamatan->syncPermissions([
+            'dashboard.view', 'scan.view',
+            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
+            'pegawai.view', 'export-pegawai',
+            'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete', 'penerimaan.submit',
+            'mutasi.view', 'mutasi.create',
+            'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
+            'laporan-insiden.view', 'laporan-insiden.create',
+            'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
+        ]);
+
+        $adminKelurahan = Role::findOrCreate('admin_kelurahan');
+        $adminKelurahan->syncPermissions([
+            'dashboard.view', 'scan.view',
+            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
+            'pegawai.view', 'export-pegawai',
+            'mutasi.view', 'mutasi.create',
+            'permohonan.view', 'permohonan.create',
+            'laporan-insiden.view', 'laporan-insiden.create',
+            'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
+        ]);
+
+        $lurah = Role::findOrCreate('lurah');
+        $lurah->syncPermissions([
+            'dashboard.view', 'scan.view',
+            'aset.view', 'export-aset',
+            'pegawai.view', 'export-pegawai',
+            'mutasi.view',
+            'permohonan.view',
+            'laporan-insiden.view',
+            'persetujuan.view', 'persetujuan.act',
+            'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
+        ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
