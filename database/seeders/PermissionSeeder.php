@@ -32,7 +32,16 @@ class PermissionSeeder extends Seeder
         'Lapor Insiden' => ['laporan-insiden.view', 'laporan-insiden.create'],
         'Persetujuan' => ['persetujuan.view', 'persetujuan.act'],
         'Laporan' => ['laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang'],
-        'Pengaturan' => ['pengaturan.alur', 'pengaturan.role', 'pengaturan.user'],
+        'Pengaturan' => [
+            'pengaturan.alur',
+            'pengaturan.role',
+            'pengaturan.user',
+            'user.view',
+            'user.manage-access',
+            'user.reset-password',
+            'user.toggle-status',
+            'user.delete',
+        ],
     ];
 
     public function run(): void
