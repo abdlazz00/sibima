@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\AssetReportType;
 use App\Enums\Kondisi;
+use App\Enums\MutationType;
 use App\Models\AssetCategory;
 use App\Models\Unit;
 use App\Models\User;
@@ -24,7 +25,7 @@ class ReportSheetWriter
         'pending' => 'Menunggu Persetujuan', 'approved' => 'Disetujui', 'rejected' => 'Ditolak', 'cancelled' => 'Dibatalkan',
     ];
 
-    private const FORMATS = ['int' => '#,##0', 'money' => '#,##0', 'percent' => '0.0', 'year' => '0', 'date' => 'dd/mm/yyyy'];
+    private const FORMATS = ['int' => '#,##0', 'money' => '#,##0', 'percent' => '0.0', 'decimal' => '0.0', 'year' => '0', 'date' => 'dd/mm/yyyy'];
 
     /** Writes the official letterhead and returns the first free row for the table header. */
     public function kop(Worksheet $sheet, string $title, string $scope, string $filter, int $columns): int
@@ -149,8 +150,16 @@ class ReportSheetWriter
         if (! empty($filters['jenis'])) {
             $parts[] = 'Jenis: '.(AssetReportType::tryFrom($filters['jenis'])?->label() ?? $filters['jenis']);
         }
+        if (! empty($filters['jenis_mutasi'])) {
+            $parts[] = 'Jenis Mutasi: '.(MutationType::tryFrom($filters['jenis_mutasi'])?->label() ?? $filters['jenis_mutasi']);
+        }
         if (! empty($filters['status'])) {
             $parts[] = 'Status: '.(self::STATUS[$filters['status']] ?? $filters['status']);
+        }
+        foreach (['asal_id' => 'Unit Asal', 'tujuan_id' => 'Unit Tujuan'] as $key => $label) {
+            if (! empty($filters[$key])) {
+                $parts[] = "{$label}: ".(Unit::find($filters[$key])?->name ?? $filters[$key]);
+            }
         }
         foreach (['dari' => 'Dari', 'sampai' => 'Sampai'] as $key => $label) {
             if (! empty($filters[$key])) {
@@ -177,7 +186,7 @@ class ReportSheetWriter
             $coordinate = Coordinate::stringFromColumnIndex($i + 1).$row;
 
             match ($kind) {
-                'int', 'money', 'percent', 'year' => $sheet->setCellValue($coordinate, $value),
+                'int', 'money', 'percent', 'decimal', 'year' => $sheet->setCellValue($coordinate, $value),
                 'date' => $sheet->setCellValue($coordinate, Date::PHPToExcel($value)),
                 default => $sheet->setCellValueExplicit($coordinate, (string) $value, DataType::TYPE_STRING),
             };
