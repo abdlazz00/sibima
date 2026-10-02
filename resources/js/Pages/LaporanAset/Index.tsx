@@ -122,23 +122,23 @@ export default function Index(props: PageProps & LaporanAsetData) {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {units.length > 0 && (
                             <div>
-                                <label className="mb-1.5 block text-sm font-medium text-slate-900">Unit</label>
-                                <select value={form.unit_id ?? ''} onChange={(e) => set('unit_id', e.target.value)} className={FIELD}>
+                                <label htmlFor="filter-unit_id" className="mb-1.5 block text-sm font-medium text-slate-900">Unit</label>
+                                <select id="filter-unit_id" value={form.unit_id ?? ''} onChange={(e) => set('unit_id', e.target.value)} className={FIELD}>
                                     <option value="">Semua unit</option>
                                     {units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
                                 </select>
                             </div>
                         )}
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-slate-900">Kategori</label>
-                            <select value={form.category_id ?? ''} onChange={(e) => set('category_id', e.target.value)} className={FIELD}>
+                            <label htmlFor="filter-category_id" className="mb-1.5 block text-sm font-medium text-slate-900">Kategori</label>
+                            <select id="filter-category_id" value={form.category_id ?? ''} onChange={(e) => set('category_id', e.target.value)} className={FIELD}>
                                 <option value="">Semua kategori</option>
                                 {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-slate-900">Kondisi</label>
-                            <select value={form.kondisi ?? ''} onChange={(e) => set('kondisi', e.target.value)} className={FIELD}>
+                            <label htmlFor="filter-kondisi" className="mb-1.5 block text-sm font-medium text-slate-900">Kondisi</label>
+                            <select id="filter-kondisi" value={form.kondisi ?? ''} onChange={(e) => set('kondisi', e.target.value)} className={FIELD}>
                                 <option value="">Semua kondisi</option>
                                 {kondisiOptions.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
                             </select>

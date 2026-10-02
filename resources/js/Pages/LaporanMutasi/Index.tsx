@@ -109,8 +109,8 @@ export default function Index(props: PageProps & LaporanMutasiData) {
 
     const select = (key: string, label: string, options: { value: string | number; label: string }[], placeholder: string) => (
         <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-900">{label}</label>
-            <select value={form[key] ?? ''} onChange={(e) => set(key, e.target.value)} className={FIELD}>
+            <label htmlFor={`filter-${key}`} className="mb-1.5 block text-sm font-medium text-slate-900">{label}</label>
+            <select id={`filter-${key}`} value={form[key] ?? ''} onChange={(e) => set(key, e.target.value)} className={FIELD}>
                 <option value="">{placeholder}</option>
                 {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
@@ -119,8 +119,8 @@ export default function Index(props: PageProps & LaporanMutasiData) {
 
     const date = (key: string, label: string) => (
         <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-900">{label}</label>
-            <input type="date" value={form[key] ?? ''} onChange={(e) => set(key, e.target.value)} className={FIELD} />
+            <label htmlFor={`filter-${key}`} className="mb-1.5 block text-sm font-medium text-slate-900">{label}</label>
+            <input id={`filter-${key}`} type="date" value={form[key] ?? ''} onChange={(e) => set(key, e.target.value)} className={FIELD} />
         </div>
     );
 
