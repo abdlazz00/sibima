@@ -76,14 +76,30 @@ class ReportQuery
         $ids = $this->user->accessibleUnitIds();
 
         return AssetReport::query()
-            ->with(['asset', 'unit', 'pegawai', 'creator'])
-            ->when($ids !== null, fn (Builder $q) => $q->whereIn('unit_id', $ids))
-            ->when($f['unit_id'] ?? null, fn (Builder $q, $id) => $q->where('unit_id', $id))
-            ->when($f['jenis'] ?? null, fn (Builder $q, $jenis) => $q->where('jenis', $jenis))
-            ->when($f['status'] ?? null, fn (Builder $q, $status) => $q->where('status', $status))
-            ->when($f['dari'] ?? null, fn (Builder $q, $date) => $q->whereDate('tanggal_kejadian', '>=', $date))
-            ->when($f['sampai'] ?? null, fn (Builder $q, $date) => $q->whereDate('tanggal_kejadian', '<=', $date))
-            ->orderByDesc('tanggal_kejadian')
-            ->orderByDesc('id');
+            ->with([
+                'asset.category.parent',
+                'unit',
+                'pegawai',
+                'creator',
+                'photos',
+                'approvalRequest.steps',
+                'approvalRequest.actions.user',
+            ])
+            ->when($ids !== null, fn (Builder $q) => $q->whereIn('asset_reports.unit_id', $ids))
+            ->when($f['unit_id'] ?? null, fn (Builder $q, $id) => $q->where('asset_reports.unit_id', $id))
+            ->when($f['jenis'] ?? null, fn (Builder $q, $jenis) => $q->where('asset_reports.jenis', $jenis))
+            ->when($f['kondisi'] ?? null, fn (Builder $q, $kondisi) => $q->where('asset_reports.kondisi_baru', $kondisi))
+            ->when($f['status'] ?? null, fn (Builder $q, $status) => $q->where('asset_reports.status', $status))
+            ->when($f['dari'] ?? null, fn (Builder $q, $date) => $q->whereDate('asset_reports.tanggal_kejadian', '>=', $date))
+            ->when($f['sampai'] ?? null, fn (Builder $q, $date) => $q->whereDate('asset_reports.tanggal_kejadian', '<=', $date))
+            ->when($f['category_id'] ?? null, function (Builder $q, $catId) {
+                $catId = (int) $catId;
+                $q->whereHas('asset', function (Builder $aq) use ($catId) {
+                    $aq->where('assets.category_id', $catId)
+                        ->orWhereHas('category', fn (Builder $cq) => $cq->where('parent_id', $catId));
+                });
+            })
+            ->orderByDesc('asset_reports.tanggal_kejadian')
+            ->orderByDesc('asset_reports.id');
     }
 }

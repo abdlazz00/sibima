@@ -80,9 +80,22 @@ it('limits damaged/lost reports to scope and filters by jenis, status and inclus
     expect(rq($this, $this->camat, 'rusak-hilang'))->toBe($ids($this->r1, $this->r2, $this->r3))
         ->and(rq($this, $this->adminA, 'rusak-hilang'))->toBe($ids($this->r1))
         ->and(rq($this, $this->camat, 'rusak-hilang', ['jenis' => 'hilang']))->toBe($ids($this->r2))
+        ->and(rq($this, $this->camat, 'rusak-hilang', ['kondisi' => 'hilang']))->toBe($ids($this->r2))
+        ->and(rq($this, $this->camat, 'rusak-hilang', ['category_id' => $this->elektronik->id]))->toBe($ids($this->r2))
         ->and(rq($this, $this->camat, 'rusak-hilang', ['status' => 'pending']))->toBe($ids($this->r1, $this->r3))
         ->and(rq($this, $this->camat, 'rusak-hilang', ['unit_id' => $this->kec->id]))->toBe($ids($this->r3))
         ->and(rq($this, $this->camat, 'rusak-hilang', ['dari' => '2026-10-06', 'sampai' => '2026-10-09']))->toBe($ids($this->r2, $this->r3));
+});
+
+it('can join rusak-hilang with assets without ambiguous columns', function () {
+    $count = (new ReportQuery($this->camat))
+        ->build('rusak-hilang', ['status' => 'approved', 'kondisi' => 'hilang', 'unit_id' => $this->kelB->id])
+        ->reorder()
+        ->toBase()
+        ->join('assets as a', 'a.id', '=', 'asset_reports.asset_id')
+        ->count();
+
+    expect($count)->toBe(1);
 });
 
 it('ignores filters that do not belong to the report kind', function () {
