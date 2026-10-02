@@ -27,3 +27,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Dokumen pribadi/internal: jangan masuk repo
+docs/*.xlsx
+docs/*.pdf
