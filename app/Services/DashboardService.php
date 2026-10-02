@@ -40,8 +40,9 @@ class DashboardService
         return [
             ...$this->recap($scope, $scopeIds, $ids, $multi),
             'per_kategori' => $this->perKategori($ids),
+            'tren_aktivitas' => $this->trenAktivitas($ids, 6),
             'antrean' => $this->antrean($user, $scopeIds),
-            'transaksi' => $this->transaksi($scopeIds),
+            'transaksi' => $this->transaksi($ids),
             'units' => $multi ? $scope->map(fn (Unit $u) => ['id' => $u->id, 'name' => $u->name])->all() : [],
             'selected_unit_id' => $selected,
         ];
@@ -115,6 +116,76 @@ class DashboardService
     }
 
     /**
+     * Aggregates activity counts over the last N months for the given units.
+     *
+     * @param  list<int>  $scopeIds
+     * @return list<array{bulan: string, penerimaan: int, mutasi: int, rusak_hilang: int, permohonan: int}>
+     */
+    public function trenAktivitas(array $scopeIds, int $months = 6): array
+    {
+        $start = now()->startOfMonth();
+        $timeline = [];
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $ym = $start->copy()->subMonths($i)->format('Y-m');
+            $timeline[$ym] = [
+                'bulan' => $ym,
+                'penerimaan' => 0,
+                'mutasi' => 0,
+                'rusak_hilang' => 0,
+                'permohonan' => 0,
+            ];
+        }
+
+        if (empty($scopeIds)) {
+            return array_values($timeline);
+        }
+
+        $minYm = array_key_first($timeline);
+
+        $baCounts = DB::table('berita_acara_penerimaans')
+            ->whereIn('unit_id', $scopeIds)
+            ->where('status', BeritaAcaraStatus::Submitted->value)
+            ->whereRaw('SUBSTR(COALESCE(tanggal_penerimaan, created_at), 1, 7) >= ?', [$minYm])
+            ->selectRaw('SUBSTR(COALESCE(tanggal_penerimaan, created_at), 1, 7) as ym, COUNT(*) as cnt')
+            ->groupBy('ym')
+            ->pluck('cnt', 'ym');
+
+        $mutCounts = DB::table('asset_mutations')
+            ->where(function ($q) use ($scopeIds) {
+                $q->whereIn('origin_unit_id', $scopeIds)
+                    ->orWhereIn('destination_unit_id', $scopeIds);
+            })
+            ->whereRaw('SUBSTR(COALESCE(tanggal_mutasi, created_at), 1, 7) >= ?', [$minYm])
+            ->selectRaw('SUBSTR(COALESCE(tanggal_mutasi, created_at), 1, 7) as ym, COUNT(*) as cnt')
+            ->groupBy('ym')
+            ->pluck('cnt', 'ym');
+
+        $repCounts = DB::table('asset_reports')
+            ->whereIn('unit_id', $scopeIds)
+            ->whereRaw('SUBSTR(COALESCE(tanggal_kejadian, created_at), 1, 7) >= ?', [$minYm])
+            ->selectRaw('SUBSTR(COALESCE(tanggal_kejadian, created_at), 1, 7) as ym, COUNT(*) as cnt')
+            ->groupBy('ym')
+            ->pluck('cnt', 'ym');
+
+        $reqCounts = DB::table('asset_requests')
+            ->whereIn('unit_id', $scopeIds)
+            ->whereRaw('SUBSTR(created_at, 1, 7) >= ?', [$minYm])
+            ->selectRaw('SUBSTR(created_at, 1, 7) as ym, COUNT(*) as cnt')
+            ->groupBy('ym')
+            ->pluck('cnt', 'ym');
+
+        foreach ($timeline as $ym => &$entry) {
+            $entry['penerimaan'] = (int) ($baCounts[$ym] ?? 0);
+            $entry['mutasi'] = (int) ($mutCounts[$ym] ?? 0);
+            $entry['rusak_hilang'] = (int) ($repCounts[$ym] ?? 0);
+            $entry['permohonan'] = (int) ($reqCounts[$ym] ?? 0);
+        }
+        unset($entry);
+
+        return array_values($timeline);
+    }
+
+    /**
      * @param  list<int>  $scopeIds
      * @return array<string, int>
      */
@@ -138,13 +209,17 @@ class DashboardService
     }
 
     /**
-     * The five newest mutations and submitted penerimaan in scope, merged.
+     * The newest transactions across mutations, penerimaan, reports, and requests within scope.
      *
      * @param  list<int>  $scopeIds
-     * @return list<array<string, string>>
+     * @return list<array<string, mixed>>
      */
     private function transaksi(array $scopeIds): array
     {
+        if (empty($scopeIds)) {
+            return [];
+        }
+
         $mutations = AssetMutation::with(['originUnit', 'destinationUnit'])
             ->where(fn (Builder $q) => $q->whereIn('origin_unit_id', $scopeIds)->orWhereIn('destination_unit_id', $scopeIds))
             ->latest()->latest('id')->limit(5)->get()
@@ -173,9 +248,37 @@ class DashboardService
                 'url' => route('penerimaan-aset.show', $b),
             ]);
 
-        return $mutations->concat($penerimaan)
+        $reports = AssetReport::with(['asset', 'unit'])
+            ->whereIn('unit_id', $scopeIds)
+            ->latest()->latest('id')->limit(5)->get()
+            ->map(fn (AssetReport $r) => [
+                'at' => $r->created_at,
+                'jenis' => 'rusak_hilang',
+                'nomor' => $r->nomor_laporan,
+                'ringkasan' => ($r->asset?->name ?? 'Aset').' ('.str_replace('_', ' ', $r->jenis->value ?? (string) $r->jenis).')',
+                'tanggal' => $r->tanggal_kejadian?->format('Y-m-d'),
+                'status' => $this->statusLabel($r->status->value),
+                'url' => route('asset-reports.show', $r),
+            ]);
+
+        $requests = AssetRequest::with(['category', 'unit'])
+            ->whereIn('unit_id', $scopeIds)
+            ->latest()->latest('id')->limit(5)->get()
+            ->map(fn (AssetRequest $req) => [
+                'at' => $req->created_at,
+                'jenis' => 'permohonan',
+                'nomor' => $req->nomor_permohonan,
+                'ringkasan' => ($req->unit?->name ? $req->unit->name.': ' : '').($req->category?->name ?? 'Permohonan Aset'),
+                'tanggal' => $req->created_at?->format('Y-m-d'),
+                'status' => $this->statusLabel($req->status->value),
+                'url' => route('asset-requests.show', $req),
+            ]);
+
+        return $mutations
+            ->concat($penerimaan)
+            ->concat($reports)
+            ->concat($requests)
             ->sortByDesc('at')
-            ->take(5)
             ->map(fn (array $row) => collect($row)->except('at')->all())
             ->values()
             ->all();
@@ -184,7 +287,7 @@ class DashboardService
     private function statusLabel(string $status): string
     {
         return match ($status) {
-            'approved' => 'selesai',
+            'approved', 'fulfilled' => 'selesai',
             'rejected' => 'ditolak',
             'cancelled' => 'dibatalkan',
             default => 'berjalan',

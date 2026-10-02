@@ -151,10 +151,10 @@ it('lists the five newest submitted transactions in scope with a status label an
         ]);
 
     $camat = $this->service->for(userWithRole('camat', $this->kec))['transaksi'];
-    expect(collect($camat)->pluck('nomor')->all())->toBe(['M-A', 'BA-A', 'M-B', 'BA-B', 'M-REJ']);
+    expect(collect($camat)->pluck('nomor')->all())->toBe(['M-A', 'BA-A', 'M-B', 'BA-B', 'M-REJ', 'M-CAN']);
 
     $kasubag = $this->service->for(userWithRole('kasubag'))['transaksi'];
-    expect($kasubag)->toHaveCount(5)
+    expect($kasubag)->toHaveCount(7)
         ->and(collect($kasubag)->pluck('nomor')->all())->toContain('M-OTHER');
 });
 
@@ -195,4 +195,55 @@ it('counts the work queue within scope', function () {
     expect($camat['laporan_pending'])->toBe(2)
         ->and($camat['mutasi_pending'])->toBe(2)
         ->and($camat['permohonan_menunggu_pemenuhan'])->toBe(0);
+});
+
+it('aggregates 6-month transaction trend for the scoped units', function () {
+    $data = $this->service->for(userWithRole('kasubag'));
+
+    expect($data['tren_aktivitas'])->toHaveCount(6)
+        ->and($data['tren_aktivitas'][5]['bulan'])->toBe(now()->format('Y-m'))
+        ->and($data['tren_aktivitas'][0])->toHaveKeys(['bulan', 'penerimaan', 'mutasi', 'rusak_hilang', 'permohonan']);
+});
+
+it('includes asset reports and asset requests in recent transactions', function () {
+    $report = AssetReport::create([
+        'nomor_laporan' => 'REP-01',
+        'asset_id' => $this->kursiA->id,
+        'unit_id' => $this->kelA->id,
+        'jenis' => 'rusak',
+        'kondisi_baru' => 'rusak_berat',
+        'tanggal_kejadian' => '2026-10-01',
+        'kronologi' => 'Patah kaki kursi',
+        'status' => 'pending',
+        'created_by' => userWithRole('admin_kelurahan', $this->kelA)->id,
+    ]);
+
+    $req = AssetRequest::create([
+        'nomor_permohonan' => 'REQ-01',
+        'jenis' => 'unit',
+        'unit_id' => $this->kelA->id,
+        'category_id' => $this->kursi->id,
+        'jumlah' => 2,
+        'keterangan' => 'Kebutuhan staf',
+        'status' => 'approved',
+        'created_by' => userWithRole('admin_kelurahan', $this->kelA)->id,
+    ]);
+
+    $data = $this->service->for(userWithRole('admin_kelurahan', $this->kelA))['transaksi'];
+    $types = collect($data)->pluck('jenis')->unique()->all();
+
+    expect($types)->toContain('rusak_hilang')
+        ->and($types)->toContain('permohonan')
+        ->and(collect($data)->firstWhere('nomor', 'REP-01'))->toMatchArray([
+            'jenis' => 'rusak_hilang',
+            'nomor' => 'REP-01',
+            'status' => 'berjalan',
+            'url' => route('asset-reports.show', $report),
+        ])
+        ->and(collect($data)->firstWhere('nomor', 'REQ-01'))->toMatchArray([
+            'jenis' => 'permohonan',
+            'nomor' => 'REQ-01',
+            'status' => 'selesai',
+            'url' => route('asset-requests.show', $req),
+        ]);
 });
