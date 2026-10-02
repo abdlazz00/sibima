@@ -52,18 +52,22 @@ class ReportQuery
         $ids = $this->user->accessibleUnitIds();
 
         return AssetMutation::query()
-            ->with(['originUnit', 'destinationUnit', 'creator', 'items.asset'])
+            ->with([
+                'originUnit', 'destinationUnit', 'creator',
+                'items.asset.category.parent', 'items.targetHolder',
+                'approvalRequest.steps', 'approvalRequest.actions.user',
+            ])
             ->when($ids !== null, fn (Builder $q) => $q->where(fn (Builder $w) => $w
-                ->whereIn('origin_unit_id', $ids)
-                ->orWhereIn('destination_unit_id', $ids)))
-            ->when($f['unit_id'] ?? null, fn (Builder $q, $id) => $q->where(fn (Builder $w) => $w
-                ->where('origin_unit_id', $id)
-                ->orWhere('destination_unit_id', $id)))
-            ->when($f['status'] ?? null, fn (Builder $q, $status) => $q->where('status', $status))
-            ->when($f['dari'] ?? null, fn (Builder $q, $date) => $q->whereDate('tanggal_mutasi', '>=', $date))
-            ->when($f['sampai'] ?? null, fn (Builder $q, $date) => $q->whereDate('tanggal_mutasi', '<=', $date))
-            ->orderByDesc('tanggal_mutasi')
-            ->orderByDesc('id');
+                ->whereIn('asset_mutations.origin_unit_id', $ids)
+                ->orWhereIn('asset_mutations.destination_unit_id', $ids)))
+            ->when($f['asal_id'] ?? null, fn (Builder $q, $id) => $q->where('asset_mutations.origin_unit_id', $id))
+            ->when($f['tujuan_id'] ?? null, fn (Builder $q, $id) => $q->where('asset_mutations.destination_unit_id', $id))
+            ->when($f['jenis_mutasi'] ?? null, fn (Builder $q, $jenis) => $q->where('asset_mutations.jenis_mutasi', $jenis))
+            ->when($f['status'] ?? null, fn (Builder $q, $status) => $q->where('asset_mutations.status', $status))
+            ->when($f['dari'] ?? null, fn (Builder $q, $date) => $q->whereDate('asset_mutations.tanggal_mutasi', '>=', $date))
+            ->when($f['sampai'] ?? null, fn (Builder $q, $date) => $q->whereDate('asset_mutations.tanggal_mutasi', '<=', $date))
+            ->orderByDesc('asset_mutations.tanggal_mutasi')
+            ->orderByDesc('asset_mutations.id');
     }
 
     /** @param  array<string, mixed>  $f */

@@ -64,7 +64,11 @@ it('includes a mutation when either side is in scope and filters by unit, status
 
     expect(rq($this, $this->camat, 'mutasi'))->toBe($ids($this->m1, $this->m2, $this->m3))
         ->and(rq($this, $this->adminA, 'mutasi'))->toBe($ids($this->m1))
-        ->and(rq($this, $this->camat, 'mutasi', ['unit_id' => $this->kelB->id]))->toBe($ids($this->m2, $this->m3))
+        ->and(rq($this, $this->camat, 'mutasi', ['asal_id' => $this->kec->id]))->toBe($ids($this->m1, $this->m2))
+        ->and(rq($this, $this->camat, 'mutasi', ['tujuan_id' => $this->kelB->id]))->toBe($ids($this->m2, $this->m3))
+        ->and(rq($this, $this->camat, 'mutasi', ['asal_id' => $this->kelB->id, 'tujuan_id' => $this->kelB->id]))->toBe($ids($this->m3))
+        ->and(rq($this, $this->camat, 'mutasi', ['jenis_mutasi' => 'internal']))->toBe($ids($this->m3))
+        ->and(rq($this, $this->adminA, 'mutasi', ['asal_id' => $this->kelB->id]))->toBe([])
         ->and(rq($this, $this->camat, 'mutasi', ['status' => 'approved']))->toBe($ids($this->m2))
         ->and(rq($this, $this->camat, 'mutasi', ['dari' => '2026-10-05', 'sampai' => '2026-10-05']))->toBe($ids($this->m2))
         ->and(rq($this, $this->camat, 'mutasi', ['dari' => '2026-10-02']))->toBe($ids($this->m2, $this->m3));
@@ -91,4 +95,16 @@ it('shows nothing to a user without a unit or role', function () {
     expect(rq($this, $nobody, 'aset'))->toBe([])
         ->and(rq($this, $nobody, 'mutasi'))->toBe([])
         ->and(rq($this, $nobody, 'rusak-hilang'))->toBe([]);
+});
+
+it('can be joined with assets without ambiguous columns', function () {
+    $count = (new ReportQuery($this->camat))
+        ->build('mutasi', ['status' => 'approved', 'dari' => '2026-10-01', 'asal_id' => $this->kec->id])
+        ->reorder()
+        ->toBase()
+        ->join('asset_mutation_items as mi', 'mi.asset_mutation_id', '=', 'asset_mutations.id')
+        ->join('assets as ma', 'ma.id', '=', 'mi.asset_id')
+        ->count();
+
+    expect($count)->toBe(0);
 });
