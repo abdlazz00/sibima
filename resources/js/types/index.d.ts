@@ -7,6 +7,18 @@ export interface AuthUser {
     unit: { id: number; name: string; type: 'kecamatan' | 'kelurahan' } | null;
 }
 
+export interface RoleItem {
+    id: number;
+    name: string;
+    display_name: string;
+    unit_scope: 'all' | 'binaan' | 'own';
+    is_system: boolean;
+    description: string | null;
+    users_count: number;
+    permissions_count: number;
+    permissions: string[];
+}
+
 export interface AssetCategory {
     id: number;
     name: string;
