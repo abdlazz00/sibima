@@ -31,7 +31,7 @@
   - `DashboardService::transaksi(array $scopeIds): array` returning up to 20 normalized recent transactions across 4 types with keys `id`, `jenis`, `nomor`, `ringkasan`, `tanggal`, `status`, `status_label`, `url`, `created_at`.
   - `dashboard.tren_aktivitas` and expanded `dashboard.transaksi` in Inertia props.
 
-- [ ] **Step 1: Write the failing tests in `DashboardTest.php`**
+- [x] **Step 1: Write the failing tests in `DashboardTest.php`**
 
 Extend `tests/Feature/DashboardTest.php` to verify:
 - `dashboard.tren_aktivitas` exists and has exactly 6 chronological months.
@@ -39,12 +39,12 @@ Extend `tests/Feature/DashboardTest.php` to verify:
 - `dashboard.transaksi` contains items representing all 4 transaction types when present.
 - Filter `?unit_id=...` correctly scopes `tren_aktivitas` and `transaksi`.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test tests/Feature/DashboardTest.php`
 Expected: FAIL with missing keys `tren_aktivitas`.
 
-- [ ] **Step 3: Implement `trenAktivitas` and expand `transaksi` in `DashboardService.php`**
+- [x] **Step 3: Implement `trenAktivitas` and expand `transaksi` in `DashboardService.php`**
 
 - In `DashboardService::for()`, add `'tren_aktivitas' => $this->trenAktivitas($ids, 6)`.
 - Implement `trenAktivitas(array $scopeIds, int $months = 6): array`:
@@ -63,12 +63,12 @@ Expected: FAIL with missing keys `tren_aktivitas`.
   - Normalize each to `{ id, jenis, nomor, ringkasan, tanggal, status, status_label, url, created_at }`.
   - Sort merged collection by `created_at` desc.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `php artisan test tests/Feature/DashboardTest.php`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/Services/DashboardService.php tests/Feature/DashboardTest.php
@@ -92,7 +92,7 @@ git commit -m "feat: expand DashboardService with 6-month trend and 4-way recent
   - `<SebaranUnitChart data={per_unit} perKondisi={per_kondisi} />` (stacked bar).
   - `<TrenAktivitasChart data={tren_aktivitas} />` (grouped bar).
 
-- [ ] **Step 1: Update TypeScript types in `resources/js/types/index.d.ts`**
+- [x] **Step 1: Update TypeScript types in `resources/js/types/index.d.ts`**
 
 Define:
 ```typescript
@@ -118,7 +118,7 @@ export interface DashboardTransaksiItem {
 ```
 Update `DashboardData` to include `tren_aktivitas: TrenAktivitasItem[]` and `transaksi: DashboardTransaksiItem[]`.
 
-- [ ] **Step 2: Create `KategoriAsetChart.tsx`**
+- [x] **Step 2: Create `KategoriAsetChart.tsx`**
 
 Implement horizontal bar chart (`indexAxis: 'y'`) using Chart.js `Bar`:
 - Displays top 6–8 categories.
@@ -126,7 +126,7 @@ Implement horizontal bar chart (`indexAxis: 'y'`) using Chart.js `Bar`:
 - Tooltip shows number of assets and total book value (`rupiah(nilai_buku)`).
 - Accessible hidden table fallback.
 
-- [ ] **Step 3: Create `SebaranUnitChart.tsx`**
+- [x] **Step 3: Create `SebaranUnitChart.tsx`**
 
 Implement stacked bar chart using Chart.js `Bar`:
 - Sumbu X: unit names.
@@ -136,7 +136,7 @@ Implement stacked bar chart using Chart.js `Bar`:
 - If single-unit mode, render single unit breakdown cleanly.
 - Accessible hidden table fallback.
 
-- [ ] **Step 4: Create `TrenAktivitasChart.tsx`**
+- [x] **Step 4: Create `TrenAktivitasChart.tsx`**
 
 Implement grouped bar chart using Chart.js `Bar`:
 - Sumbu X: 6 months formatted with `bulanLabel()`.
@@ -148,12 +148,12 @@ Implement grouped bar chart using Chart.js `Bar`:
 - Interactive legend for toggling datasets.
 - Accessible hidden table fallback.
 
-- [ ] **Step 5: Run TypeScript check**
+- [x] **Step 5: Run TypeScript check**
 
 Run: `npx tsc --noEmit`
 Expected: 0 errors.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add resources/js/types/index.d.ts resources/js/Components/Charts/KategoriAsetChart.tsx resources/js/Components/Charts/SebaranUnitChart.tsx resources/js/Components/Charts/TrenAktivitasChart.tsx
@@ -171,7 +171,7 @@ git commit -m "feat: add KategoriAsetChart, SebaranUnitChart, and TrenAktivitasC
 - Consumes: `DonutChart`, `KategoriAsetChart`, `SebaranUnitChart`, `TrenAktivitasChart`.
 - Produces: 2x2 interactive chart grid, 5-tab recent activity feed with client-side filtering, status badges, and direct links.
 
-- [ ] **Step 1: Refactor `Dashboard.tsx`**
+- [x] **Step 1: Refactor `Dashboard.tsx`**
 
 - Replace static HTML `<Bar>` progress bars with the 4 Chart.js components in a 2x2 grid:
   - Card 1: `DonutChart` (Kondisi Aset) + Legend.
@@ -191,17 +191,17 @@ git commit -m "feat: add KategoriAsetChart, SebaranUnitChart, and TrenAktivitasC
   - Desktop table + Mobile card list.
   - Clickable link directly navigating to document details.
 
-- [ ] **Step 2: Run TypeScript check and Vite build**
+- [x] **Step 2: Run TypeScript check and Vite build**
 
 Run: `npx tsc --noEmit && npm run build`
 Expected: 0 errors and successful bundle creation.
 
-- [ ] **Step 3: Run full Pest test suite**
+- [x] **Step 3: Run full Pest test suite**
 
 Run: `php artisan test`
 Expected: 462+ passed, 0 failures.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add resources/js/Pages/Dashboard.tsx
