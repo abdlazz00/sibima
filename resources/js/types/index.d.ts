@@ -3,6 +3,7 @@ export interface AuthUser {
     name: string;
     email: string;
     roles: string[];
+    permissions: string[];
     unit: { id: number; name: string; type: 'kecamatan' | 'kelurahan' } | null;
 }
 

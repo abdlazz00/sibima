@@ -66,3 +66,40 @@ function makeKelurahan(Unit $kecamatan, string $name): Unit
 {
     return Unit::create(['name' => $name, 'type' => 'kelurahan', 'parent_id' => $kecamatan->id]);
 }
+
+/** Membuat berkas .xlsx sungguhan: string disimpan sebagai teks, angka/null apa adanya. */
+function impXlsx(array $headers, array $rows, string $name = 'data.xlsx'): \Illuminate\Http\UploadedFile
+{
+    $book = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+    $sheet = $book->getActiveSheet();
+
+    foreach (array_merge([$headers], $rows) as $r => $row) {
+        foreach (array_values($row) as $c => $value) {
+            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c + 1).($r + 1);
+
+            if (is_string($value)) {
+                $sheet->setCellValueExplicit($cell, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            } elseif ($value !== null) {
+                $sheet->setCellValue($cell, $value);
+            }
+        }
+    }
+
+    $path = tempnam(sys_get_temp_dir(), 'imp').'.xlsx';
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($path);
+
+    return new \Illuminate\Http\UploadedFile($path, $name, null, null, true);
+}
+
+/** @param list<string> $permissions */
+function impUser(string $role, ?\App\Models\Unit $unit, array $permissions): \App\Models\User
+{
+    $user = userWithRole($role, $unit);
+
+    foreach ($permissions as $permission) {
+        \Spatie\Permission\Models\Permission::findOrCreate($permission);
+        $user->givePermissionTo($permission);
+    }
+
+    return $user;
+}
