@@ -6,9 +6,11 @@ use App\Http\Requests\CreatePegawaiUserRequest;
 use App\Http\Requests\PegawaiRequest;
 use App\Http\Requests\UpdateUserAccessRequest;
 use App\Models\Pegawai;
+use App\Models\Role;
 use App\Models\Unit;
 use App\Repositories\Contracts\PegawaiRepositoryInterface;
 use App\Services\PegawaiService;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -29,9 +31,18 @@ class PegawaiController extends Controller
         return Inertia::render('Pegawai/Index', [
             'pegawais' => $this->pegawais->listVisibleTo($request->user()),
             'units' => Unit::orderBy('name')->get(['id', 'name', 'type']),
+            'roles' => Role::with('permissions')->get()->map(fn ($r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+                'display_name' => $r->display_name ?? $r->name,
+                'unit_scope' => $r->unit_scope,
+                'permissions' => $r->permissions->pluck('name')->all(),
+            ]),
+            'permissionGroups' => PermissionSeeder::PERMISSION_GROUPS,
             'can' => [
                 'create' => $request->user()->can('create', Pegawai::class),
-                'createUser' => $request->user()->hasRole('kasubag'),
+                'createUser' => $request->user()->can('pegawai.create-user'),
+                'manageAccess' => $request->user()->can('pengaturan.user') || $request->user()->can('pegawai.create-user'),
             ],
         ]);
     }

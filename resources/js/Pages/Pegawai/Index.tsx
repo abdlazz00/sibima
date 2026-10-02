@@ -5,6 +5,7 @@ import {
     PencilIcon as Pencil,
     PlusIcon as Plus,
     SearchIcon as Search,
+    ShieldIcon,
     TrashIcon as Trash2,
     UserIcon,
     XIcon as X,
@@ -14,6 +15,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps, Pegawai } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import UserAccessModal, { RoleOption } from './UserAccessModal';
 
 interface UnitOption {
     id: number;
@@ -24,15 +26,18 @@ interface UnitOption {
 interface IndexProps extends PageProps {
     pegawais: Pegawai[];
     units: UnitOption[];
+    roles?: RoleOption[];
+    permissionGroups?: Record<string, string[]>;
     can: {
         create: boolean;
         createUser: boolean;
+        manageAccess?: boolean;
     };
 }
 
 const PAGE_SIZE_OPTIONS = [6, 12, 24, 48];
 
-export default function Index({ pegawais, units, can }: IndexProps) {
+export default function Index({ pegawais, units, roles, permissionGroups, can }: IndexProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'pns' | 'pppk'>(
         'all',
@@ -41,6 +46,8 @@ export default function Index({ pegawais, units, can }: IndexProps) {
     const [itemsPerPage, setItemsPerPage] = useState<number>(12);
     const [currentPage, setCurrentPage] = useState(1);
     const [deleteModalPegawai, setDeleteModalPegawai] =
+        useState<Pegawai | null>(null);
+    const [accessModalPegawai, setAccessModalPegawai] =
         useState<Pegawai | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -318,6 +325,19 @@ export default function Index({ pegawais, units, can }: IndexProps) {
 
                                                 {/* Action Buttons */}
                                                 <div className="flex items-center gap-1.5">
+                                                    {hasAccount && (can.manageAccess ?? can.createUser) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setAccessModalPegawai(pegawai)
+                                                            }
+                                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:border-blue-300 hover:bg-slate-50 hover:text-blue-700"
+                                                            title="Kelola hak akses & role akun"
+                                                        >
+                                                            <ShieldIcon className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    )}
+
                                                     <Link
                                                         href={route(
                                                             'pegawais.edit',
@@ -507,6 +527,15 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                     </div>
                 </div>
             )}
+
+            {/* Modal Kelola Akses Pengguna */}
+            <UserAccessModal
+                isOpen={Boolean(accessModalPegawai)}
+                pegawai={accessModalPegawai}
+                roles={roles ?? []}
+                permissionGroups={permissionGroups ?? {}}
+                onClose={() => setAccessModalPegawai(null)}
+            />
         </AuthenticatedLayout>
     );
 }

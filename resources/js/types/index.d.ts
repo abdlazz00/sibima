@@ -56,7 +56,9 @@ export interface Pegawai {
     user?: {
         id: number;
         email: string;
-        roles?: { id: number; name: string }[];
+        roles?: { id: number; name: string; display_name?: string }[];
+        permissions?: { id: number; name: string }[];
+        unit_scope_override?: 'all' | 'binaan' | 'own' | null;
     } | null;
     assets?: PegawaiAsset[];
     assets_count?: number;
