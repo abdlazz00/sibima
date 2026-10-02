@@ -182,3 +182,19 @@ Kolom identik template, mengikuti filter dan cakupan unit aktif. Hasil ekspor ya
 - Pengganti `AssetExcelSeeder`: seeder dipensiunkan setelah import aset terbukti memuat data client (tidak dihapus dalam spec ini).
 - Ekspor sinkron dibatasi 10.000 baris; penulis streaming ditunda sampai kebutuhan nyata.
 - RBAC dinamis (berikutnya) hanya perlu mengubah penugasan permission; tidak ada perubahan pada importer.
+
+---
+
+## 9. Keputusan saat implementasi
+
+Penyesuaian terhadap bagian di atas yang diputuskan saat menulis plan (`docs/superpowers/plans/2026-10-08-import-ekspor.md`):
+
+- **Laporan error tidak disimpan** (`path_error` dihapus dari §3.1): dibuat saat diminta dari berkas hasil validasi.
+- **Transaksi per baris, bukan per chunk** (§3.2): satu baris gagal tidak membatalkan baris lain; chunk hanya menentukan seberapa sering `progres` diperbarui.
+- **Tombol "Unduh template" ada di halaman Impor**, bukan di halaman modul (§5): halaman modul hanya punya "Impor" dan "Ekspor".
+- **Batch terlihat oleh pengunggahnya dan oleh akun dengan cakupan unit tanpa batas** (`accessibleUnitIds() === null`), bukan per unit batch (§3.4): batch tidak punya unit.
+- **Permission dibagikan ke frontend** sebagai `auth.user.permissions`; tombol Impor/Ekspor memeriksa nama permission, bukan role.
+- **Validasi unggahan memakai `extensions:xlsx`**, bukan `mimes`, karena deteksi MIME berkas xlsx kecil tidak konsisten; berkas yang bukan xlsx sungguhan ditolak oleh pembaca dengan pesan yang sama.
+- **Interface `Importer` tidak dibuat**: `Importer` adalah kelas abstrak (satu hierarki, tiga turunan) yang juga memuat helper bersama.
+- **Satu job `ProcessImportJob` dengan fase `validate`/`commit`**, bukan dua kelas job.
+- **Antrean:** `retry_after` database dinaikkan ke 900 detik (> timeout job 600 detik); panduan setup di `docs/ops/queue-setup.md`.
