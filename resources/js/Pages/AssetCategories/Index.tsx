@@ -1,3 +1,4 @@
+import ImportExportButtons from '@/Components/ImportExportButtons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { AssetCategory, PageProps } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -174,13 +175,16 @@ export default function Index({
                         </h1>
                     </div>
 
-                    <Link
-                        href={route('asset-categories.create')}
-                        className="shadow-xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                    >
-                        <PlusIcon className="h-4 w-4" />
-                        <span>Tambah Kategori</span>
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <ImportExportButtons modul="kategori" />
+                        <Link
+                            href={route('asset-categories.create')}
+                            className="shadow-xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                        >
+                            <PlusIcon className="h-4 w-4" />
+                            <span>Tambah Kategori</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Error Banner */}

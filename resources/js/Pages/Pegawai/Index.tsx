@@ -9,6 +9,7 @@ import {
     UserIcon,
     XIcon as X,
 } from '@/Components/Icons';
+import ImportExportButtons from '@/Components/ImportExportButtons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps, Pegawai } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -110,15 +111,18 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                         </h1>
                     </div>
 
-                    {can.create && (
-                        <Link
-                            href={route('pegawais.create')}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                        >
-                            <Plus className="h-4 w-4" />
-                            <span>Tambah Pegawai Baru</span>
-                        </Link>
-                    )}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <ImportExportButtons modul="pegawai" />
+                        {can.create && (
+                            <Link
+                                href={route('pegawais.create')}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                            >
+                                <Plus className="h-4 w-4" />
+                                <span>Tambah Pegawai Baru</span>
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
                 {/* Filter Toolbar */}

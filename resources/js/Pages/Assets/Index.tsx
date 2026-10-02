@@ -10,6 +10,7 @@ import {
     XIcon as X,
 } from '@/Components/Icons';
 import PrintLabelModal from '@/Components/PrintLabelModal';
+import ImportExportButtons from '@/Components/ImportExportButtons';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { pageNumbersWithGaps } from '@/lib/pagination';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
@@ -145,6 +146,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                 </span>
                             </button>
                         )}
+                        <ImportExportButtons modul="aset" query={filters} />
                         {can.create && (
                             <Link
                                 href={route('assets.create')}

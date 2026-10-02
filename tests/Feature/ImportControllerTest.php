@@ -12,8 +12,6 @@ function impKatUpload(array $rows)
 
 beforeEach(function () {
     Storage::fake('local');
-    // Halaman Import/Index dibangun di Task 9; hapus baris ini di sana.
-    config(['inertia.testing.ensure_pages_exist' => false]);
     $this->kasubag = impUser('kasubag', null, ['import-kategori', 'import-pegawai']);
 });
 
