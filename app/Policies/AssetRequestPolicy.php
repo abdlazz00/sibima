@@ -11,7 +11,7 @@ class AssetRequestPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->getRoleNames()->isNotEmpty();
+        return $user->can('permohonan.view') || $user->getRoleNames()->isNotEmpty();
     }
 
     public function view(User $user, AssetRequest $request): bool
@@ -21,13 +21,15 @@ class AssetRequestPolicy
         }
 
         return $request->jenis === AssetRequestType::Unit
-            && $user->hasRole('admin_kecamatan')
+            && ($user->hasRole('admin_kecamatan') || $user->can('permohonan.fulfill'))
             && $request->unit->parent_id === $user->unit_id;
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin_kecamatan', 'admin_kelurahan']) && $user->unit_id !== null;
+        $hasPermission = $user->can('permohonan.create') || $user->hasAnyRole(['admin_kecamatan', 'admin_kelurahan']);
+
+        return $hasPermission && $user->unit_id !== null;
     }
 
     public function fulfill(User $user, AssetRequest $request): bool

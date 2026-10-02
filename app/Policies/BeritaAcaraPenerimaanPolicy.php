@@ -10,7 +10,7 @@ class BeritaAcaraPenerimaanPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin_kecamatan', 'kasubag', 'camat']);
+        return $user->can('penerimaan.view') || $user->hasAnyRole(['admin_kecamatan', 'kasubag', 'camat']);
     }
 
     public function view(User $user, BeritaAcaraPenerimaan $beritaAcara): bool
@@ -19,12 +19,14 @@ class BeritaAcaraPenerimaanPolicy
             return $this->manages($user, $beritaAcara);
         }
 
-        return $user->hasRole('kasubag') || $user->canAccessUnit($beritaAcara->unit);
+        return $user->hasRole('kasubag') || $user->accessibleUnitIds() === null || $user->canAccessUnit($beritaAcara->unit);
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('admin_kecamatan') && $user->unit_id !== null;
+        $hasPermission = $user->can('penerimaan.create') || $user->hasRole('admin_kecamatan');
+
+        return $hasPermission && $user->unit_id !== null;
     }
 
     public function update(User $user, BeritaAcaraPenerimaan $beritaAcara): bool
@@ -39,6 +41,8 @@ class BeritaAcaraPenerimaanPolicy
 
     private function manages(User $user, BeritaAcaraPenerimaan $beritaAcara): bool
     {
-        return $user->hasRole('admin_kecamatan') && $user->canAccessUnit($beritaAcara->unit);
+        $hasPermission = $user->can('penerimaan.update') || $user->hasRole('admin_kecamatan');
+
+        return $hasPermission && $user->canAccessUnit($beritaAcara->unit);
     }
 }
