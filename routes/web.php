@@ -9,6 +9,7 @@ use App\Http\Controllers\AssetPhotoController;
 use App\Http\Controllers\AssetReportController;
 use App\Http\Controllers\AssetRequestController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LaporanAsetController;
 use App\Http\Controllers\LaporanMutasiController;
 use App\Http\Controllers\LaporanRusakHilangController;
@@ -72,6 +73,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/pegawais/{pegawai}', [PegawaiController::class, 'update'])->name('pegawais.update');
     Route::delete('/pegawais/{pegawai}', [PegawaiController::class, 'destroy'])->name('pegawais.destroy');
     Route::post('/pegawais/{pegawai}/user', [PegawaiController::class, 'createUser'])->name('pegawais.create-user');
+
+    Route::prefix('import/{modul}')->where(['modul' => 'kategori|pegawai|aset'])->group(function () {
+        Route::get('/', [ImportController::class, 'show'])->name('import.show');
+        Route::post('/', [ImportController::class, 'store'])->name('import.store');
+        Route::get('template', [ImportController::class, 'template'])->name('import.template');
+        Route::post('batches/{batch}/confirm', [ImportController::class, 'confirm'])->name('import.confirm');
+        Route::get('batches/{batch}/errors', [ImportController::class, 'errors'])->name('import.errors');
+    });
     Route::resource('asset-mutations', AssetMutationController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('asset-reports', AssetReportController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('/laporan-aset', [LaporanAsetController::class, 'index'])->name('laporan-aset.index');
