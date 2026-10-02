@@ -24,7 +24,7 @@ class QrCodeService
     public function urlForAsset(Asset $asset): string
     {
         // berbasis APP_URL, bukan host request, agar QR tercetak tetap valid walau dibuat lewat localhost/IP
-        return rtrim(config('app.url'), '/').route('scan.show', ['id' => $asset->id], false);
+        return rtrim(config('app.url'), '/').route('scan.show', ['token' => $asset->qr_token], false);
     }
 
     public function forAsset(Asset $asset): string

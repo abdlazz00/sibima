@@ -96,7 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan-rusak-hilang', [LaporanRusakHilangController::class, 'index'])->name('laporan-rusak-hilang.index');
     Route::get('/laporan-rusak-hilang/unduh', [LaporanRusakHilangController::class, 'unduh'])->name('laporan-rusak-hilang.download');
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
-    Route::get('/scan/{id}', [ScanController::class, 'show'])->where('id', '[0-9]{1,15}')->name('scan.show');
+    Route::get('/scan/{token}', [ScanController::class, 'show'])->where('token', '[A-Za-z0-9]{16}')->name('scan.show');
     Route::resource('asset-requests', AssetRequestController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/asset-requests/{assetRequest}/fulfill', [AssetRequestController::class, 'fulfill'])->name('asset-requests.fulfill');
     Route::post('/asset-requests/{assetRequest}/close', [AssetRequestController::class, 'close'])->name('asset-requests.close');
