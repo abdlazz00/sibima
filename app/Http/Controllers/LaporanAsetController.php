@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Kondisi;
-use App\Http\Requests\ReportRequest;
+use App\Http\Requests\LaporanAsetRequest;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\Unit;
@@ -18,7 +18,7 @@ class LaporanAsetController extends Controller
 {
     private const PER_PAGE = 25;
 
-    public function index(ReportRequest $request, AssetRecapService $recap): Response
+    public function index(LaporanAsetRequest $request, AssetRecapService $recap): Response
     {
         $user = $request->user();
         $filters = $request->filters();
@@ -48,7 +48,7 @@ class LaporanAsetController extends Controller
         ]);
     }
 
-    public function unduh(ReportRequest $request, AssetRecapService $recap, AssetRecapWorkbook $workbook): StreamedResponse
+    public function unduh(LaporanAsetRequest $request, AssetRecapService $recap, AssetRecapWorkbook $workbook): StreamedResponse
     {
         $user = $request->user();
         $filters = $request->filters();

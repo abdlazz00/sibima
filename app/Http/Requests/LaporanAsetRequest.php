@@ -2,38 +2,38 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\AssetReportType;
 use App\Enums\Kondisi;
 use App\Models\Unit;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
-class ReportRequest extends FormRequest
+class LaporanAsetRequest extends FormRequest
 {
-    public const PAGE_KINDS = ['rusak-hilang'];
+    public const SORTABLE = [
+        'kode_barang',
+        'nomor_register',
+        'nama_aset',
+        'tanggal_perolehan',
+        'kondisi',
+        'nilai_perolehan',
+        'nilai_buku',
+    ];
 
-    public const SORTABLE = ['kode_barang', 'nomor_register', 'nama_aset', 'tanggal_perolehan', 'kondisi', 'nilai_perolehan', 'nilai_buku'];
-
-    private const FILTER_KEYS = ['unit_id', 'category_id', 'kondisi', 'dari', 'sampai', 'status', 'jenis'];
+    private const FILTER_KEYS = ['unit_id', 'category_id', 'kondisi'];
 
     public function authorize(): bool
     {
-        return $this->user()->getRoleNames()->isNotEmpty();
+        return $this->user()?->getRoleNames()->isNotEmpty() ?? false;
     }
 
     /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
-            'laporan' => ['nullable', Rule::in(self::PAGE_KINDS)],
             'unit_id' => ['nullable', 'integer', 'exists:units,id'],
             'category_id' => ['nullable', 'integer', 'exists:asset_categories,id'],
             'kondisi' => ['nullable', Rule::enum(Kondisi::class)],
-            'dari' => ['nullable', 'date'],
-            'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
-            'status' => ['nullable', Rule::in(['pending', 'approved', 'rejected', 'cancelled'])],
-            'jenis' => ['nullable', Rule::enum(AssetReportType::class)],
             'urut' => ['nullable', Rule::in(self::SORTABLE)],
             'arah' => ['nullable', Rule::in(['asc', 'desc'])],
         ];
