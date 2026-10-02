@@ -72,7 +72,7 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
         items: [
             { label: 'Laporan Aset', href: '/laporan-aset', icon: 'bar-chart' },
             { label: 'Laporan Mutasi', href: '/laporan-mutasi', icon: 'shuffle' },
-            { label: 'Laporan Rusak & Hilang', href: '/laporan?laporan=rusak-hilang', icon: 'alert-triangle' },
+            { label: 'Laporan Rusak & Hilang', href: '/laporan-rusak-hilang', icon: 'alert-triangle' },
         ],
     },
     {
