@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class Asset extends Model
@@ -17,6 +18,7 @@ class Asset extends Model
     use HasFactory;
 
     protected $fillable = [
+        'qr_token',
         'kode_barang',
         'nomor_register',
         'nama_aset',
@@ -51,6 +53,16 @@ class Asset extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (Asset $asset) {
+            if (empty($asset->qr_token)) {
+                do {
+                    $token = Str::random(16);
+                } while (static::where('qr_token', $token)->exists());
+
+                $asset->qr_token = $token;
+            }
+        });
+
         static::saving(function (Asset $asset) {
             if ($asset->exists && ! $asset->isDirty('category_id')) {
                 return;
