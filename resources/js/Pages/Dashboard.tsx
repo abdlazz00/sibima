@@ -31,8 +31,6 @@ const JENIS_LABEL: Record<Transaksi['jenis'], string> = {
     permohonan: 'Permohonan',
 };
 
-const APPROVER_ROLES = ['kasubag', 'camat', 'lurah'];
-
 const CARD = 'rounded-lg border border-slate-200 bg-white p-5';
 const SELECT = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100';
 const ACTION = 'flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:border-blue-300 hover:text-blue-700';
@@ -69,7 +67,10 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<TabKey>('semua');
 
     const role = auth.user?.roles?.[0] ?? '';
-    const isApprover = APPROVER_ROLES.includes(role);
+    const permissions = auth.user?.permissions ?? [];
+    const isApprover =
+        permissions.includes('persetujuan.act') ||
+        ['kasubag', 'camat', 'lurah'].includes(role);
     const total = d.totals.jumlah_aset;
     const baik = d.per_kondisi.baik;
     const bermasalah = d.per_kondisi.rusak_ringan + d.per_kondisi.rusak_berat + d.per_kondisi.hilang;
@@ -104,26 +105,37 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
     const filterUnit = (unitId: string) =>
         router.get(route('dashboard'), unitId ? { unit_id: unitId } : {}, { preserveState: true, preserveScroll: true, replace: true });
 
-    const actions: { label: string; href: string }[] = isApprover
+    const candidateActions: { label: string; href: string; permission: string }[] = isApprover
         ? [
-              { label: 'Kotak Persetujuan', href: route('persetujuan.index') },
-              { label: 'Scan QR', href: route('scan.index') },
-              { label: 'Data Aset', href: route('assets.index') },
-              { label: 'Laporan', href: route('laporan-aset.index') },
+              { label: 'Kotak Persetujuan', href: route('persetujuan.index'), permission: 'persetujuan.view' },
+              { label: 'Scan QR', href: route('scan.index'), permission: 'scan.view' },
+              { label: 'Data Aset', href: route('assets.index'), permission: 'aset.view' },
+              { label: 'Laporan', href: route('laporan-aset.index'), permission: 'laporan.aset' },
+              { label: 'Catat Aset', href: route('assets.create'), permission: 'aset.create' },
           ]
         : [
-              { label: 'Catat Aset', href: route('assets.create') },
-              { label: 'Scan QR', href: route('scan.index') },
-              { label: 'Buat Permohonan', href: route('asset-requests.create') },
-              { label: 'Lapor Rusak/Hilang', href: route('asset-reports.create') },
+              { label: 'Catat Aset', href: route('assets.create'), permission: 'aset.create' },
+              { label: 'Scan QR', href: route('scan.index'), permission: 'scan.view' },
+              { label: 'Buat Permohonan', href: route('asset-requests.create'), permission: 'permohonan.create' },
+              { label: 'Lapor Rusak/Hilang', href: route('asset-reports.create'), permission: 'laporan-insiden.create' },
+              { label: 'Data Aset', href: route('assets.index'), permission: 'aset.view' },
+              { label: 'Laporan', href: route('laporan-aset.index'), permission: 'laporan.aset' },
           ];
 
-    const queue: { label: string; value: number; href: string }[] = [
-        { label: 'Persetujuan menunggu saya', value: d.antrean.persetujuan_menunggu, href: route('persetujuan.index') },
-        { label: 'Permohonan menunggu pemenuhan', value: d.antrean.permohonan_menunggu_pemenuhan, href: '/asset-requests?menunggu_pemenuhan=1' },
-        { label: 'Laporan rusak/hilang pending', value: d.antrean.laporan_pending, href: '/asset-reports?status=pending' },
-        { label: 'Mutasi pending', value: d.antrean.mutasi_pending, href: '/asset-mutations' },
+    const actions = candidateActions
+        .filter((a) => permissions.length === 0 || permissions.includes(a.permission))
+        .slice(0, 4);
+
+    const queueCandidates: { label: string; value: number; href: string; permission: string }[] = [
+        { label: 'Persetujuan menunggu saya', value: d.antrean.persetujuan_menunggu, href: route('persetujuan.index'), permission: 'persetujuan.view' },
+        { label: 'Permohonan menunggu pemenuhan', value: d.antrean.permohonan_menunggu_pemenuhan, href: '/asset-requests?menunggu_pemenuhan=1', permission: 'permohonan.view' },
+        { label: 'Laporan rusak/hilang pending', value: d.antrean.laporan_pending, href: '/asset-reports?status=pending', permission: 'laporan-insiden.view' },
+        { label: 'Mutasi pending', value: d.antrean.mutasi_pending, href: '/asset-mutations', permission: 'mutasi.view' },
     ];
+
+    const queue = queueCandidates.filter(
+        (q) => permissions.length === 0 || permissions.includes(q.permission),
+    );
 
     return (
         <AuthenticatedLayout>
@@ -162,11 +174,13 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    {actions.map((a) => (
-                        <Link key={a.label} href={a.href} className={ACTION}>{a.label}</Link>
-                    ))}
-                </div>
+                {actions.length > 0 && (
+                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        {actions.map((a) => (
+                            <Link key={a.label} href={a.href} className={ACTION}>{a.label}</Link>
+                        ))}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Kpi label="Total Aset" value={total.toLocaleString('id-ID')} caption={scopeLabel} />
@@ -183,14 +197,16 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {queue.map((q) => (
-                        <Link key={q.label} href={q.href} className={`${CARD} block hover:border-blue-300`}>
-                            <p className="text-3xl font-bold text-slate-900 tabular-nums">{q.value}</p>
-                            <p className="mt-1 text-sm text-slate-600">{q.label}</p>
-                        </Link>
-                    ))}
-                </div>
+                {queue.length > 0 && (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        {queue.map((q) => (
+                            <Link key={q.label} href={q.href} className={`${CARD} block hover:border-blue-300`}>
+                                <p className="text-3xl font-bold text-slate-900 tabular-nums">{q.value}</p>
+                                <p className="mt-1 text-sm text-slate-600">{q.label}</p>
+                            </Link>
+                        ))}
+                    </div>
+                )}
 
                 {/* 2x2 Interactive Charts Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
