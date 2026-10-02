@@ -112,7 +112,7 @@ export default function AuthenticatedLayout({
             </div>
 
             {/* Nav Body */}
-            <nav className="flex-1 select-none space-y-5 overflow-y-auto px-4 py-5">
+            <nav className="no-scrollbar flex-1 select-none space-y-5 overflow-y-auto px-4 py-5">
                 {navGroups.map((group) => (
                     <div key={group.title} className="space-y-1">
                         <div className="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
