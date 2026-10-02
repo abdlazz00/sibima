@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'unit_id'])]
+#[Fillable(['name', 'email', 'password', 'unit_id', 'unit_scope_override'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -44,6 +44,34 @@ class User extends Authenticatable
         return $this->hasOne(Pegawai::class);
     }
 
+    public function resolveUnitScope(): string
+    {
+        if ($this->unit_scope_override) {
+            return $this->unit_scope_override;
+        }
+
+        /** @var \Spatie\Permission\Models\Role|null $role */
+        $role = $this->roles->first();
+
+        if ($role) {
+            if ($role->unit_scope === 'all' || $role->unit_scope === 'binaan') {
+                return $role->unit_scope;
+            }
+
+            if ($role->name === 'kasubag') {
+                return 'all';
+            }
+
+            if ($role->name === 'camat') {
+                return 'binaan';
+            }
+
+            return $role->unit_scope ?? 'own';
+        }
+
+        return 'own';
+    }
+
     /**
      * Unit ids this user may see: null means every unit.
      *
@@ -51,15 +79,21 @@ class User extends Authenticatable
      */
     public function accessibleUnitIds(): ?array
     {
-        if ($this->hasRole('kasubag')) {
-            return null;
-        }
-
-        if ($this->getRoleNames()->isEmpty() || $this->unit_id === null) {
+        if ($this->getRoleNames()->isEmpty()) {
             return [];
         }
 
-        if ($this->hasRole('camat')) {
+        $scope = $this->resolveUnitScope();
+
+        if ($scope === 'all') {
+            return null;
+        }
+
+        if ($this->unit_id === null) {
+            return [];
+        }
+
+        if ($scope === 'binaan') {
             return Unit::query()
                 ->where('id', $this->unit_id)
                 ->orWhere('parent_id', $this->unit_id)
