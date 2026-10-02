@@ -49,7 +49,7 @@ it('includes the holder name and the first photo url', function () {
 });
 
 it('shows the summary with a detail link to a user entitled to the unit', function () {
-    $this->actingAs($this->adminA)->get(route('scan.show', ['id' => $this->asset->id]))
+    $this->actingAs($this->adminA)->get(route('scan.show', ['token' => $this->asset->qr_token]))
         ->assertOk()
         ->assertInertia(fn (Assert $p) => $p
             ->component('Scan/Index')
@@ -62,7 +62,7 @@ it('shows the summary with a detail link to a user entitled to the unit', functi
 it('shows the summary without a detail link for an asset of another unit and leaks no sensitive value', function () {
     $adminB = userWithRole('admin_kelurahan', $this->kelB);
 
-    $response = $this->actingAs($adminB)->get(route('scan.show', ['id' => $this->asset->id]));
+    $response = $this->actingAs($adminB)->get(route('scan.show', ['token' => $this->asset->qr_token]));
 
     $response->assertOk()->assertInertia(fn (Assert $p) => $p
         ->where('canViewDetail', false)
@@ -84,16 +84,16 @@ it('lets every logged-in role open the scan page and a summary', function (strin
 
     $this->actingAs($user)->get(route('scan.index'))->assertOk()
         ->assertInertia(fn (Assert $p) => $p->component('Scan/Index')->where('summary', null)->where('notFound', false));
-    $this->actingAs($user)->get(route('scan.show', ['id' => $this->asset->id]))->assertOk();
+    $this->actingAs($user)->get(route('scan.show', ['token' => $this->asset->qr_token]))->assertOk();
 })->with(['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah']);
 
 it('sends a guest to login', function () {
     $this->get('/scan')->assertRedirect('/login');
-    $this->get("/scan/{$this->asset->id}")->assertRedirect('/login');
+    $this->get("/scan/{$this->asset->qr_token}")->assertRedirect('/login');
 });
 
-it('renders a not-found scan page with status 404 for an unknown id', function () {
-    $response = $this->actingAs($this->adminA)->get('/scan/999999');
+it('renders a not-found scan page with status 404 for an unknown 16-character token', function () {
+    $response = $this->actingAs($this->adminA)->get('/scan/1234567890abcdef');
 
     $response->assertStatus(404);
     $props = $response->viewData('page')['props'];
@@ -102,6 +102,7 @@ it('renders a not-found scan page with status 404 for an unknown id', function (
         ->and($props['canViewDetail'])->toBeFalse();
 });
 
-it('answers 404 instead of crashing for an oversized numeric id', function () {
+it('answers 404 for non-16-character or invalid tokens', function () {
+    $this->actingAs($this->adminA)->get('/scan/123')->assertNotFound();
     $this->actingAs($this->adminA)->get('/scan/99999999999999999999')->assertNotFound();
 });

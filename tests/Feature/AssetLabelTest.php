@@ -82,15 +82,15 @@ it('encodes the scan summary url in the label QR from APP_URL, not the request h
     $this->get('http://localhost/login');
 
     expect(app(QrCodeService::class)->urlForAsset($this->own))
-        ->toBe("https://sibima.example.go.id/scan/{$this->own->id}")
+        ->toBe("https://sibima.example.go.id/scan/{$this->own->qr_token}")
         ->and(app(QrCodeService::class)->forAsset($this->own))->toStartWith('data:image/png;base64,');
 });
 
 it('returns a guest scanning the new QR straight back to the summary after login', function () {
-    $this->get("/scan/{$this->own->id}")->assertRedirect('/login');
+    $this->get("/scan/{$this->own->qr_token}")->assertRedirect('/login');
 
     $this->post('/login', [
         'email' => $this->admin->email,
         'password' => 'password',
-    ])->assertRedirect("/scan/{$this->own->id}");
+    ])->assertRedirect("/scan/{$this->own->qr_token}");
 });
