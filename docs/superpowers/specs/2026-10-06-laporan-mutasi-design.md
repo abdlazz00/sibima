@@ -1,6 +1,6 @@
 # Desain: Laporan Mutasi (grup menu Laporan)
 
-Status: Menunggu review.
+Status: Diimplementasikan (plan 2026-10-06-laporan-mutasi.md).
 Tanggal: 2026-10-06
 
 Bagian kedua dari restrukturisasi menu Laporan, setelah Laporan Aset (`2026-10-05-laporan-aset-design.md`). Laporan Aset Rusak & Hilang menyusul pada siklus terpisah. Penyederhanaan Excel Laporan Aset juga dibahas terpisah.
