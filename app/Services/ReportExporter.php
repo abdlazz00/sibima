@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\AssetMutation;
 use App\Models\AssetReport;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,7 +22,6 @@ class ReportExporter
     private const HEADER_ROW = 6;
 
     private const TITLES = [
-        'mutasi' => 'Laporan Riwayat Mutasi',
         'rusak-hilang' => 'Laporan Aset Rusak dan Hilang',
     ];
 
@@ -122,19 +120,6 @@ class ReportExporter
     private function columns(string $kind): array
     {
         return match ($kind) {
-            'mutasi' => [
-                ['No', fn (AssetMutation $m, int $i) => $i + 1, 'number'],
-                ['Nomor Mutasi', fn (AssetMutation $m) => $m->nomor_mutasi],
-                ['Jenis', fn (AssetMutation $m) => $m->jenis_mutasi->label()],
-                ['Unit Asal', fn (AssetMutation $m) => $m->originUnit?->name],
-                ['Unit Tujuan', fn (AssetMutation $m) => $m->destinationUnit?->name],
-                ['Tanggal', fn (AssetMutation $m) => $m->tanggal_mutasi, 'date'],
-                ['Status', fn (AssetMutation $m) => $m->status->label()],
-                ['Jumlah Aset', fn (AssetMutation $m) => $m->items->count(), 'number'],
-                ['Daftar Aset', fn (AssetMutation $m) => $m->items->map(fn ($item) => ($item->asset?->kode_barang ?? '-').' - '.($item->asset?->nama_aset ?? '-'))->implode("\n"), 'wrap'],
-                ['Diajukan Oleh', fn (AssetMutation $m) => $m->creator?->name],
-                ['Keterangan', fn (AssetMutation $m) => $m->keterangan, 'wrap'],
-            ],
             'rusak-hilang' => [
                 ['No', fn (AssetReport $r, int $i) => $i + 1, 'number'],
                 ['Nomor Laporan', fn (AssetReport $r) => $r->nomor_laporan],

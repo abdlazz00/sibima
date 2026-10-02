@@ -11,7 +11,7 @@ use Illuminate\Validation\Validator;
 
 class ReportRequest extends FormRequest
 {
-    public const PAGE_KINDS = ['mutasi', 'rusak-hilang'];
+    public const PAGE_KINDS = ['rusak-hilang'];
 
     public const SORTABLE = ['kode_barang', 'nomor_register', 'nama_aset', 'tanggal_perolehan', 'kondisi', 'nilai_perolehan', 'nilai_buku'];
 

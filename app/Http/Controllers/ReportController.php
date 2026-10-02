@@ -15,7 +15,7 @@ class ReportController extends Controller
     public function index(ReportRequest $request): Response
     {
         $user = $request->user();
-        $kind = $request->input('laporan') ?: 'mutasi';
+        $kind = $request->input('laporan') ?: 'rusak-hilang';
         $filters = $request->filters();
         $ids = $user->accessibleUnitIds();
 
