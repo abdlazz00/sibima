@@ -41,7 +41,7 @@ class PegawaiController extends Controller
             'permissionGroups' => PermissionSeeder::PERMISSION_GROUPS,
             'can' => [
                 'create' => $request->user()->can('create', Pegawai::class),
-                'createUser' => $request->user()->can('pegawai.create-user'),
+                'createUser' => $request->user()->hasRole('kasubag') || $request->user()->can('pegawai.create-user'),
                 'manageAccess' => $request->user()->can('pengaturan.user') || $request->user()->can('pegawai.create-user'),
             ],
         ]);
