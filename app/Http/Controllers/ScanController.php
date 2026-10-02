@@ -18,9 +18,11 @@ class ScanController extends Controller
         return Inertia::render('Scan/Index', ['summary' => null, 'canViewDetail' => false, 'notFound' => false]);
     }
 
-    public function show(Request $request, int $id): InertiaResponse|SymfonyResponse
+    public function show(Request $request, string $token): InertiaResponse|SymfonyResponse
     {
-        $asset = Asset::with(['category', 'unit', 'currentHolder', 'photos'])->find($id);
+        $asset = Asset::with(['category', 'unit', 'currentHolder', 'photos'])
+            ->where('qr_token', $token)
+            ->first();
 
         if ($asset === null) {
             return Inertia::render('Scan/Index', ['summary' => null, 'canViewDetail' => false, 'notFound' => true])
