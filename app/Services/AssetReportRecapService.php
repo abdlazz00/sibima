@@ -36,7 +36,11 @@ class AssetReportRecapService
             ->join('assets as a', 'a.id', '=', 'asset_reports.asset_id');
 
         $jumlah = $base()->count();
-        $totals = $affected()->selectRaw(self::AFFECTED)->first();
+        // nilai dihitung per aset (bukan per laporan) agar aset yang dilaporkan berulang tidak dihitung ganda
+        $totals = DB::table('assets')
+            ->whereIn('id', $approved()->select('asset_reports.asset_id'))
+            ->selectRaw('COALESCE(SUM(nilai_perolehan), 0) as nilai_perolehan, COALESCE(SUM(nilai_buku), 0) as nilai_buku')
+            ->first();
         $durations = $this->durations($approved);
 
         $pending = fn () => $query->build('rusak-hilang', $filters)->where('asset_reports.status', AssetReportStatus::Pending->value);

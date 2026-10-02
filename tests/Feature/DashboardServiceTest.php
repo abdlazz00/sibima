@@ -240,6 +240,7 @@ it('includes asset reports and asset requests in recent transactions', function 
             'status' => 'berjalan',
             'url' => route('asset-reports.show', $report),
         ])
+        ->and(collect($data)->firstWhere('nomor', 'REP-01')['ringkasan'])->toContain($this->kursiA->nama_aset)
         ->and(collect($data)->firstWhere('nomor', 'REQ-01'))->toMatchArray([
             'jenis' => 'permohonan',
             'nomor' => 'REQ-01',

@@ -174,7 +174,7 @@ class AssetRequestService
                 $this->assertAssetEligible($assets->get($id), $locked);
             }
 
-            $sequence = AssetMutation::where('nomor_mutasi', 'like', "MUT/{$locked->nomor_permohonan}%")->count() + 1;
+            $sequence = AssetMutation::where('nomor_mutasi', 'like', "MUT/{$locked->nomor_permohonan}/%")->count() + 1;
 
             $mutation = $this->mutations->submit(
                 [

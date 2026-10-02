@@ -19,6 +19,20 @@ class AssetExcelSeeder extends Seeder
     {
         ini_set('memory_limit', '1024M');
 
+        // Pengaman: seeder ini MENGHAPUS semua aset dan transaksi. Non-interaktif = batal.
+        $file = base_path('docs/Template_Database_Aset_Kecamatan_Sagulung.xlsx');
+        if (! file_exists($file)) {
+            $this->command?->error("File template tidak ditemukan di: {$file}");
+
+            return;
+        }
+
+        if (! $this->command?->confirm('Seeder ini MENGOSONGKAN semua aset dan transaksi di database. Lanjutkan?', false)) {
+            $this->command?->warn('Dibatalkan, tidak ada data yang diubah.');
+
+            return;
+        }
+
         // 1. Bersihkan tabel transaksi dan data aset lama
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
@@ -40,13 +54,6 @@ class AssetExcelSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // 2. Baca file Excel template database aset
-        $file = base_path('docs/Template_Database_Aset_Kecamatan_Sagulung.xlsx');
-        if (! file_exists($file)) {
-            $this->command?->error("File template tidak ditemukan di: {$file}");
-
-            return;
-        }
-
         $reader = IOFactory::createReaderForFile($file);
         $reader->setReadDataOnly(true);
         $reader->setLoadSheetsOnly(['MASTER_ASET']);
@@ -100,7 +107,11 @@ class AssetExcelSeeder extends Seeder
 
             // Unit Kerja
             $unitKey = strtolower($unitName);
-            $unit = $units->get($unitKey) ?? $defaultUnit;
+            $unit = $units->get($unitKey);
+            if (! $unit) {
+                $unit = $defaultUnit;
+                $this->command?->warn("Baris {$r}: unit '{$unitName}' tidak dikenal, dipakai {$defaultUnit->name}.");
+            }
 
             // Tanggal Perolehan
             $tanggalPerolehan = '2023-01-01';
@@ -108,7 +119,9 @@ class AssetExcelSeeder extends Seeder
                 try {
                     $tanggalPerolehan = Carbon::createFromFormat('d-m-Y', $rawDate)->format('Y-m-d');
                 } catch (\Throwable) {
-                    $tanggalPerolehan = date('Y-m-d', strtotime($rawDate)) ?: '2023-01-01';
+                    $parsed = strtotime($rawDate);
+                    $tanggalPerolehan = $parsed ? date('Y-m-d', $parsed) : '2023-01-01';
+                    $this->command?->warn("Baris {$r}: tanggal '{$rawDate}' tidak sesuai d-m-Y, ".($parsed ? 'ditebak' : 'dipakai 2023-01-01').'.');
                 }
             }
 

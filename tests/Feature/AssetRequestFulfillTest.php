@@ -160,6 +160,19 @@ it('creates and submits a kec_ke_kel mutation with the requested number of asset
         ->and($request->assets()->count())->toBe(2);
 });
 
+it('numbers the mutation by its own request only, not by requests sharing the number prefix', function () {
+    $request = reqUnitApproved($this, 1);
+    \App\Models\AssetMutation::create([
+        'nomor_mutasi' => "MUT/{$request->nomor_permohonan}9/1", 'jenis_mutasi' => 'kec_ke_kel',
+        'origin_unit_id' => $this->kec->id, 'destination_unit_id' => $this->kel->id,
+        'tanggal_mutasi' => '2026-10-01', 'status' => 'pending', 'created_by' => $this->adminKec->id,
+    ]);
+
+    $mutation = $this->service->fulfillUnit($request, [reqAsset($this, $this->kec)->id], $this->adminKec);
+
+    expect($mutation->nomor_mutasi)->toBe("MUT/{$request->nomor_permohonan}/1");
+});
+
 it('refuses a wrong count, duplicates, ineligible assets, a second mutation and the wrong actor for a unit request', function () {
     $request = reqUnitApproved($this, 2);
     $a = reqAsset($this, $this->kec);

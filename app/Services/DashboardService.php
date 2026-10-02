@@ -255,7 +255,7 @@ class DashboardService
                 'at' => $r->created_at,
                 'jenis' => 'rusak_hilang',
                 'nomor' => $r->nomor_laporan,
-                'ringkasan' => ($r->asset?->name ?? 'Aset').' ('.str_replace('_', ' ', $r->jenis->value ?? (string) $r->jenis).')',
+                'ringkasan' => ($r->asset?->nama_aset ?? 'Aset').' ('.str_replace('_', ' ', $r->jenis->value ?? (string) $r->jenis).')',
                 'tanggal' => $r->tanggal_kejadian?->format('Y-m-d'),
                 'status' => $this->statusLabel($r->status->value),
                 'url' => route('asset-reports.show', $r),

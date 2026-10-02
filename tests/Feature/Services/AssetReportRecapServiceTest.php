@@ -115,6 +115,16 @@ it('calculates summary metrics correctly for approved reports', function () {
         ->and($data['ringkasan']['rata_lama_proses'])->toBe(1.0);
 });
 
+it('does not count an asset twice when it has several approved reports', function () {
+    rrReport($this->a1, $this->kec, $this->camat, 'hilang', 'approved', '2026-10-09');
+
+    $data = (new AssetReportRecapService())->for($this->camat, []);
+
+    expect($data['ringkasan']['disetujui'])->toBe(3)
+        ->and($data['ringkasan']['nilai_perolehan'])->toEqual(15000000.0)
+        ->and($data['ringkasan']['nilai_buku'])->toEqual(11000000.0);
+});
+
 it('scopes reports per user role', function () {
     $service = new AssetReportRecapService();
     $data = $service->for($this->adminA, []);
