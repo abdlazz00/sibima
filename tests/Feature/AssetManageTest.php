@@ -100,6 +100,7 @@ it('validates asset fields', function (array $overrides, string $field) {
     'bad kode_barang' => [['kode_barang' => 'AC-001'], 'kode_barang'],
     'nilai_buku above perolehan' => [['nilai_buku' => 6000000], 'nilai_buku'],
     'future tanggal' => [['tanggal_perolehan' => '2999-01-01'], 'tanggal_perolehan'],
+    'typo year 0202' => [['tanggal_perolehan' => '0202-01-01'], 'tanggal_perolehan'],
     'unknown kondisi' => [['kondisi' => 'lumayan'], 'kondisi'],
     'missing nama' => [['nama_aset' => ''], 'nama_aset'],
 ]);
