@@ -311,7 +311,7 @@ it('applies the asal, tujuan, jenis, status and date filters', function () {
     $count = fn (array $f) => $this->service->for($this->camat, $f)['ringkasan']['jumlah_mutasi'];
 
     expect($count(['asal_id' => $this->kec->id]))->toBe(2)
-        ->and($count(['tujuan_id' => $this->kelB->id]))->toBe(2)
+        ->and($count(['tujuan_id' => $this->kelB->id]))->toBe(3)
         ->and($count(['jenis_mutasi' => 'internal']))->toBe(1)
         ->and($count(['status' => 'pending']))->toBe(1)
         ->and($count(['dari' => '2026-10-01', 'sampai' => '2026-10-06']))->toBe(1)
