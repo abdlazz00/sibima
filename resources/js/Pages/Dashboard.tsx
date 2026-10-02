@@ -1,23 +1,21 @@
+import DonutChart, { DonutSlice } from '@/Components/Charts/DonutChart';
+import KategoriAsetChart from '@/Components/Charts/KategoriAsetChart';
+import SebaranUnitChart from '@/Components/Charts/SebaranUnitChart';
+import TrenAktivitasChart from '@/Components/Charts/TrenAktivitasChart';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { KONDISI_LABEL } from '@/lib/assetReport';
 import { DashboardData, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 
 interface DashboardProps extends PageProps {
     dashboard: DashboardData;
 }
 
 type Transaksi = DashboardData['transaksi'][number];
+type TabKey = 'semua' | 'penerimaan' | 'mutasi' | 'rusak_hilang' | 'permohonan';
 
 const rupiah = (n: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-
-const KONDISI_BAR: Record<string, string> = {
-    baik: 'bg-emerald-600',
-    rusak_ringan: 'bg-amber-600',
-    rusak_berat: 'bg-red-600',
-    hilang: 'bg-slate-500',
-};
 
 const STATUS_BADGE: Record<Transaksi['status'], { label: string; style: string }> = {
     berjalan: { label: 'Berjalan', style: 'bg-amber-50 text-amber-700 border-amber-200' },
@@ -58,20 +56,6 @@ function Kpi({ label, value, caption, badge }: { label: string; value: string; c
     );
 }
 
-function Bar({ label, value, max, text, color = 'bg-blue-600' }: { label: string; value: number; max: number; text: string; color?: string }) {
-    return (
-        <div>
-            <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
-                <span className="truncate font-medium text-slate-800">{label}</span>
-                <span className="shrink-0 text-xs text-slate-500 tabular-nums">{text}</span>
-            </div>
-            <div className="h-2.5 overflow-hidden rounded-sm bg-slate-100">
-                <div className={`h-full rounded-sm ${color}`} style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }} />
-            </div>
-        </div>
-    );
-}
-
 function BellIcon() {
     return (
         <svg className="h-5 w-5 shrink-0 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -82,6 +66,8 @@ function BellIcon() {
 }
 
 export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
+    const [activeTab, setActiveTab] = useState<TabKey>('semua');
+
     const role = auth.user?.roles?.[0] ?? '';
     const isApprover = APPROVER_ROLES.includes(role);
     const total = d.totals.jumlah_aset;
@@ -90,9 +76,30 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
     const selectedUnit = d.units.find((u) => u.id === d.selected_unit_id);
     const scopeLabel = selectedUnit?.name ?? (d.units.length > 0 ? 'Seluruh cakupan' : (auth.user?.unit?.name ?? 'Seluruh unit'));
 
-    const kategoriMax = Math.max(1, ...d.per_kategori.map((k) => k.jumlah));
-    const kondisiMax = Math.max(1, ...Object.values(d.per_kondisi));
-    const unitMax = Math.max(1, ...(d.per_unit ?? []).map((u) => u.jumlah));
+    const kondisiSlices: DonutSlice[] = [
+        { label: 'Baik', jumlah: d.per_kondisi.baik, persen: percent(d.per_kondisi.baik, total), color: '#047857' },
+        { label: 'Rusak Ringan', jumlah: d.per_kondisi.rusak_ringan, persen: percent(d.per_kondisi.rusak_ringan, total), color: '#B45309' },
+        { label: 'Rusak Berat', jumlah: d.per_kondisi.rusak_berat, persen: percent(d.per_kondisi.rusak_berat, total), color: '#B91C1C' },
+        { label: 'Hilang', jumlah: d.per_kondisi.hilang, persen: percent(d.per_kondisi.hilang, total), color: '#4B5563' },
+    ];
+
+    const tabCounts: Record<TabKey, number> = {
+        semua: d.transaksi.length,
+        penerimaan: d.transaksi.filter((t) => t.jenis === 'penerimaan').length,
+        mutasi: d.transaksi.filter((t) => t.jenis === 'mutasi').length,
+        rusak_hilang: d.transaksi.filter((t) => t.jenis === 'rusak_hilang').length,
+        permohonan: d.transaksi.filter((t) => t.jenis === 'permohonan').length,
+    };
+
+    const tabs: { key: TabKey; label: string }[] = [
+        { key: 'semua', label: 'Semua' },
+        { key: 'penerimaan', label: 'Penerimaan' },
+        { key: 'mutasi', label: 'Mutasi' },
+        { key: 'rusak_hilang', label: 'Rusak & Hilang' },
+        { key: 'permohonan', label: 'Permohonan' },
+    ];
+
+    const filteredTransaksi = activeTab === 'semua' ? d.transaksi : d.transaksi.filter((t) => t.jenis === activeTab);
 
     const filterUnit = (unitId: string) =>
         router.get(route('dashboard'), unitId ? { unit_id: unitId } : {}, { preserveState: true, preserveScroll: true, replace: true });
@@ -185,47 +192,99 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                     ))}
                 </div>
 
+                {/* 2x2 Interactive Charts Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    {/* 1. Proporsi Kondisi Aset */}
                     <div className={CARD}>
-                        <p className="mb-4 text-lg font-semibold text-slate-900">Aset per Kategori</p>
-                        {d.per_kategori.length === 0 ? (
-                            <p className="text-sm text-slate-400">Belum ada aset.</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {d.per_kategori.map((k) => (
-                                    <Bar key={k.id} label={k.nama} value={k.jumlah} max={kategoriMax} text={`${k.jumlah} aset`} />
+                        <div className="mb-4 flex items-center justify-between">
+                            <h2 className="text-base font-semibold text-slate-900">Proporsi Kondisi Aset</h2>
+                            <span className="text-xs text-slate-500 tabular-nums">{total} total aset</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <DonutChart data={kondisiSlices} ariaLabel="Grafik proporsi kondisi fisik aset" unit="aset" />
+                            <div className="mt-4 grid w-full grid-cols-2 gap-2 text-xs">
+                                {kondisiSlices.map((s) => (
+                                    <div key={s.label} className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-2.5 py-1.5">
+                                        <div className="flex items-center gap-1.5 truncate">
+                                            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+                                            <span className="truncate font-medium text-slate-600">{s.label}</span>
+                                        </div>
+                                        <span className="ml-1 shrink-0 font-semibold tabular-nums text-slate-900">{s.jumlah} ({s.persen}%)</span>
+                                    </div>
                                 ))}
                             </div>
-                        )}
+                        </div>
                     </div>
 
+                    {/* 2. Top Kategori Aset */}
                     <div className={CARD}>
-                        {d.per_unit ? (
-                            <>
-                                <p className="mb-4 text-lg font-semibold text-slate-900">Sebaran Aset per Unit</p>
-                                <div className="space-y-3">
-                                    {d.per_unit.map((u) => (
-                                        <Bar key={u.id} label={u.name} value={u.jumlah} max={unitMax} text={`${u.jumlah} aset`} />
-                                    ))}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <p className="mb-4 text-lg font-semibold text-slate-900">Aset per Kondisi</p>
-                                <div className="space-y-3">
-                                    {Object.entries(d.per_kondisi).map(([k, n]) => (
-                                        <Bar key={k} label={KONDISI_LABEL[k] ?? k} value={n} max={kondisiMax} text={`${n} aset`} color={KONDISI_BAR[k]} />
-                                    ))}
-                                </div>
-                            </>
-                        )}
+                        <div className="mb-4 flex items-center justify-between">
+                            <h2 className="text-base font-semibold text-slate-900">Aset per Kategori</h2>
+                            <Link href={route('assets.index')} className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline">
+                                Lihat Semua &rarr;
+                            </Link>
+                        </div>
+                        <KategoriAsetChart data={d.per_kategori} />
+                    </div>
+
+                    {/* 3. Sebaran Aset per Unit */}
+                    <div className={CARD}>
+                        <div className="mb-4 flex items-center justify-between">
+                            <h2 className="text-base font-semibold text-slate-900">Sebaran Aset per Unit</h2>
+                            <span className="text-xs text-slate-500">Kondisi fisik</span>
+                        </div>
+                        <SebaranUnitChart data={d.per_unit} />
+                    </div>
+
+                    {/* 4. Tren Transaksi 6 Bulan */}
+                    <div className={CARD}>
+                        <div className="mb-4 flex items-center justify-between">
+                            <h2 className="text-base font-semibold text-slate-900">Tren Aktivitas (6 Bulan Terakhir)</h2>
+                            <span className="text-xs text-slate-500">Volume transaksi</span>
+                        </div>
+                        <TrenAktivitasChart data={d.tren_aktivitas} />
                     </div>
                 </div>
 
+                {/* Tabbed Activity Feed */}
                 <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-                    <p className="border-b border-slate-200 px-5 py-4 text-lg font-semibold text-slate-900">Transaksi Terbaru</p>
-                    {d.transaksi.length === 0 ? (
-                        <p className="px-5 py-8 text-center text-sm text-slate-400">Belum ada transaksi.</p>
+                    <div className="border-b border-slate-200 px-5 pt-4">
+                        <h2 className="text-lg font-semibold text-slate-900">Aktivitas Transaksi Terbaru</h2>
+                        <div className="mt-3 -mb-px flex flex-wrap gap-2 sm:gap-6">
+                            {tabs.map((tab) => {
+                                const isActive = activeTab === tab.key;
+                                const count = tabCounts[tab.key];
+                                return (
+                                    <button
+                                        key={tab.key}
+                                        type="button"
+                                        onClick={() => setActiveTab(tab.key)}
+                                        className={`flex items-center gap-2 border-b-2 py-2.5 text-sm transition-colors ${
+                                            isActive
+                                                ? 'border-blue-600 font-semibold text-blue-600'
+                                                : 'border-transparent font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                                        }`}
+                                    >
+                                        <span>{tab.label}</span>
+                                        <span
+                                            className={`rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
+                                                isActive ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'
+                                            }`}
+                                        >
+                                            {count}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {filteredTransaksi.length === 0 ? (
+                        <p className="px-5 py-10 text-center text-sm text-slate-400">
+                            {activeTab === 'semua'
+                                ? 'Belum ada transaksi.'
+                                : `Belum ada transaksi ${tabs.find((t) => t.key === activeTab)?.label ?? ''} terbaru.`}
+                        </p>
                     ) : (
                         <>
                             <table className="hidden w-full border-collapse text-left text-sm md:table">
@@ -236,33 +295,63 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                                         <th className="px-4 py-3">Ringkasan</th>
                                         <th className="px-4 py-3">Tanggal</th>
                                         <th className="px-4 py-3">Status</th>
+                                        <th className="px-4 py-3 text-right">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-slate-800">
-                                    {d.transaksi.map((t) => (
-                                        <tr key={`${t.jenis}-${t.nomor}`}>
-                                            <td className="px-4 py-3">{JENIS_LABEL[t.jenis]}</td>
-                                            <td className="px-4 py-3 font-medium tabular-nums">
-                                                <Link href={t.url} className="text-blue-700 hover:underline">{t.nomor}</Link>
+                                    {filteredTransaksi.map((t) => (
+                                        <tr key={`${t.jenis}-${t.nomor}`} className="hover:bg-slate-50/50">
+                                            <td className="px-4 py-3">
+                                                <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                                                    {JENIS_LABEL[t.jenis]}
+                                                </span>
                                             </td>
-                                            <td className="px-4 py-3">{t.ringkasan ?? '—'}</td>
-                                            <td className="px-4 py-3 tabular-nums">{t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '—'}</td>
-                                            <td className="px-4 py-3"><Badge {...STATUS_BADGE[t.status]} /></td>
+                                            <td className="px-4 py-3 font-medium tabular-nums">
+                                                <Link href={t.url} className="text-blue-700 hover:underline">
+                                                    {t.nomor}
+                                                </Link>
+                                            </td>
+                                            <td className="px-4 py-3 text-slate-700">{t.ringkasan ?? '—'}</td>
+                                            <td className="px-4 py-3 tabular-nums text-slate-500">
+                                                {t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '—'}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <Badge {...STATUS_BADGE[t.status]} />
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <Link
+                                                    href={t.url}
+                                                    className="inline-flex items-center text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+                                                >
+                                                    Detail &rarr;
+                                                </Link>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
 
                             <ul className="divide-y divide-slate-100 md:hidden">
-                                {d.transaksi.map((t) => (
-                                    <li key={`${t.jenis}-${t.nomor}`} className="space-y-1 px-5 py-3 text-sm">
+                                {filteredTransaksi.map((t) => (
+                                    <li key={`${t.jenis}-${t.nomor}`} className="space-y-1.5 px-5 py-3 text-sm">
                                         <div className="flex items-center justify-between gap-2">
-                                            <span className="text-xs font-semibold uppercase text-slate-500">{JENIS_LABEL[t.jenis]}</span>
+                                            <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                                                {JENIS_LABEL[t.jenis]}
+                                            </span>
                                             <Badge {...STATUS_BADGE[t.status]} />
                                         </div>
-                                        <Link href={t.url} className="block font-medium tabular-nums text-blue-700">{t.nomor}</Link>
+                                        <Link href={t.url} className="block font-semibold tabular-nums text-blue-700">
+                                            {t.nomor}
+                                        </Link>
                                         <p className="text-slate-600">{t.ringkasan ?? '—'}</p>
-                                        <p className="text-xs text-slate-500 tabular-nums">{t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '—'}</p>
+                                        <div className="flex items-center justify-between pt-1 text-xs text-slate-500">
+                                            <span className="tabular-nums">
+                                                {t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '—'}
+                                            </span>
+                                            <Link href={t.url} className="font-semibold text-blue-700 hover:underline">
+                                                Lihat Detail &rarr;
+                                            </Link>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
