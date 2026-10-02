@@ -279,25 +279,36 @@ export interface AssetScanSummary {
     foto: string | null;
 }
 
+export interface TrenAktivitasItem {
+    bulan: string;
+    penerimaan: number;
+    mutasi: number;
+    rusak_hilang: number;
+    permohonan: number;
+}
+
+export interface DashboardTransaksiItem {
+    jenis: 'mutasi' | 'penerimaan' | 'rusak_hilang' | 'permohonan';
+    nomor: string;
+    ringkasan: string | null;
+    tanggal: string | null;
+    status: 'berjalan' | 'selesai' | 'ditolak' | 'dibatalkan';
+    url: string;
+}
+
 export interface DashboardData {
     totals: { jumlah_aset: number; nilai_perolehan: number; nilai_buku: number };
     per_kondisi: Record<'baik' | 'rusak_ringan' | 'rusak_berat' | 'hilang', number>;
     per_kategori: { id: number; nama: string; jumlah: number; nilai_buku: number }[];
     per_unit: { id: number; name: string; jumlah: number; kondisi: Record<string, number>; nilai_buku: number }[] | null;
+    tren_aktivitas: TrenAktivitasItem[];
     antrean: {
         persetujuan_menunggu: number;
         permohonan_menunggu_pemenuhan: number;
         laporan_pending: number;
         mutasi_pending: number;
     };
-    transaksi: {
-        jenis: 'mutasi' | 'penerimaan';
-        nomor: string;
-        ringkasan: string | null;
-        tanggal: string | null;
-        status: 'berjalan' | 'selesai' | 'ditolak' | 'dibatalkan';
-        url: string;
-    }[];
+    transaksi: DashboardTransaksiItem[];
     units: { id: number; name: string }[];
     selected_unit_id: number | null;
 }

@@ -26,7 +26,12 @@ const STATUS_BADGE: Record<Transaksi['status'], { label: string; style: string }
     dibatalkan: { label: 'Dibatalkan', style: 'bg-gray-100 text-gray-600 border-gray-300' },
 };
 
-const JENIS_LABEL: Record<Transaksi['jenis'], string> = { mutasi: 'Mutasi', penerimaan: 'Penerimaan' };
+const JENIS_LABEL: Record<Transaksi['jenis'], string> = {
+    mutasi: 'Mutasi',
+    penerimaan: 'Penerimaan',
+    rusak_hilang: 'Rusak / Hilang',
+    permohonan: 'Permohonan',
+};
 
 const APPROVER_ROLES = ['kasubag', 'camat', 'lurah'];
 
