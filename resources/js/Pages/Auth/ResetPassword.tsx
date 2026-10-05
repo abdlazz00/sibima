@@ -26,13 +26,47 @@ export default function ResetPassword({
         });
     };
 
+    // Satu-satunya error pada kolom email datang dari tautan yang tidak valid atau kedaluwarsa.
+    if (errors.email) {
+        return (
+            <AuthSplitLayout>
+                <Head title="Tautan Tidak Berlaku - SIBIMA" />
+
+                <h1 className="mb-4 text-[28px] font-bold tracking-tight text-gray-900">
+                    Tautan Tidak Berlaku
+                </h1>
+                <div
+                    role="alert"
+                    className="mb-7 rounded-lg border border-red-200 bg-red-50 p-3.5 text-sm text-red-700"
+                >
+                    {errors.email}
+                </div>
+
+                <Link
+                    href={route('password.request')}
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark"
+                >
+                    Minta Tautan Baru
+                </Link>
+                <div className="mt-4">
+                    <Link
+                        href={route('login')}
+                        className="inline-flex min-h-11 items-center rounded text-sm font-medium text-primary hover:text-primary-hover hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                    >
+                        Kembali ke Halaman Masuk
+                    </Link>
+                </div>
+            </AuthSplitLayout>
+        );
+    }
+
     return (
         <AuthSplitLayout>
             <Head title="Atur Ulang Kata Sandi - SIBIMA" />
 
-            <h2 className="mb-2 text-[28px] font-bold tracking-tight text-gray-900">
+            <h1 className="mb-2 text-[28px] font-bold tracking-tight text-gray-900">
                 Atur Ulang Kata Sandi
-            </h2>
+            </h1>
             <p className="mb-7 text-sm text-gray-600">
                 Buat kata sandi baru untuk akun Anda.
             </p>
@@ -52,17 +86,9 @@ export default function ResetPassword({
                         value={data.email}
                         autoComplete="username"
                         readOnly
+                        aria-readonly="true"
                         className="h-11 w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3.5 text-sm text-gray-500 focus:outline-none"
                     />
-                    <InputError message={errors.email} className="mt-1.5" />
-                    {errors.email && (
-                        <Link
-                            href={route('password.request')}
-                            className="mt-1.5 inline-block rounded text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                        >
-                            Minta tautan baru
-                        </Link>
-                    )}
                 </div>
 
                 <div>
@@ -78,9 +104,11 @@ export default function ResetPassword({
                         value={data.password}
                         autoComplete="new-password"
                         autoFocus
+                        placeholder=""
+                        describedBy="password-hint"
                         onChange={(v) => setData('password', v)}
                     />
-                    <p className="mt-1.5 text-xs text-gray-500">
+                    <p id="password-hint" className="mt-1.5 text-xs text-gray-500">
                         Minimal 8 karakter.
                     </p>
                     <InputError message={errors.password} className="mt-1.5" />
@@ -98,6 +126,7 @@ export default function ResetPassword({
                         name="password_confirmation"
                         value={data.password_confirmation}
                         autoComplete="new-password"
+                        placeholder=""
                         onChange={(v) => setData('password_confirmation', v)}
                     />
                     <InputError
@@ -109,7 +138,7 @@ export default function ResetPassword({
                 <button
                     type="submit"
                     disabled={processing}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {processing ? 'Menyimpan...' : 'Simpan Kata Sandi Baru'}
                 </button>

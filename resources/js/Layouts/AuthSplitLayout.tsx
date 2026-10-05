@@ -3,7 +3,7 @@ import { PropsWithChildren } from 'react';
 /** Tata letak dua panel untuk halaman guest (Masuk, Lupa & Atur Ulang Kata Sandi). */
 export default function AuthSplitLayout({ children }: PropsWithChildren) {
     return (
-        <div className="flex min-h-screen flex-col bg-white selection:bg-blue-600 selection:text-white md:flex-row">
+        <div className="flex min-h-screen flex-col bg-white selection:bg-primary selection:text-white md:flex-row">
             {/* Left Panel - Visual Branding (Desktop) */}
             <div
                 role="img"
@@ -21,9 +21,9 @@ export default function AuthSplitLayout({ children }: PropsWithChildren) {
                         alt="Lambang Kota Batam"
                         className="mb-3 h-16 w-auto object-contain"
                     />
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                    <p className="text-2xl font-bold tracking-tight text-gray-900">
                         SIBIMA
-                    </h1>
+                    </p>
                     <p className="mt-1 text-xs text-gray-500">
                         Sistem Informasi Barang Milik Daerah &bull; Kecamatan
                         Sagulung

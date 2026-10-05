@@ -13,6 +13,10 @@ export default {
     ],
     theme: {
         extend: {
+            colors: {
+                // Sapphire (PANDUAN_DESAIN_UI_UX_SIBIMA.md 2.1)
+                primary: { DEFAULT: '#1E40AF', hover: '#1D4ED8', dark: '#172554' },
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },

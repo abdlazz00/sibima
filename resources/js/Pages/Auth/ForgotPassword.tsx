@@ -1,15 +1,21 @@
 import InputError from '@/Components/InputError';
 import AuthSplitLayout from '@/Layouts/AuthSplitLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect, useRef } from 'react';
 
 const backLink =
-    'inline-flex items-center gap-1.5 rounded text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1';
+    'inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-medium text-primary hover:text-primary-hover hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1';
 
 export default function ForgotPassword({ status }: { status?: string }) {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
     });
+
+    const successHeading = useRef<HTMLHeadingElement>(null);
+
+    useEffect(() => {
+        if (status) successHeading.current?.focus();
+    }, [status]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -41,10 +47,14 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     </svg>
                 </div>
 
-                <h2 className="mb-2 text-[28px] font-bold tracking-tight text-gray-900">
+                <h1
+                    ref={successHeading}
+                    tabIndex={-1}
+                    className="mb-2 text-[28px] font-bold tracking-tight text-gray-900 focus:outline-none"
+                >
                     Periksa Email Anda
-                </h2>
-                <p role="status" className="mb-2 text-sm text-gray-600">
+                </h1>
+                <p className="mb-2 text-sm text-gray-600">
                     {status}
                 </p>
                 <p className="mb-7 text-sm text-gray-600">
@@ -68,9 +78,9 @@ export default function ForgotPassword({ status }: { status?: string }) {
         <AuthSplitLayout>
             <Head title="Lupa Kata Sandi - SIBIMA" />
 
-            <h2 className="mb-2 text-[28px] font-bold tracking-tight text-gray-900">
+            <h1 className="mb-2 text-[28px] font-bold tracking-tight text-gray-900">
                 Lupa Kata Sandi
-            </h2>
+            </h1>
             <p className="mb-7 text-sm text-gray-600">
                 Masukkan email kedinasan Anda yang terdaftar untuk menerima
                 tautan pemulihan kata sandi.
@@ -93,7 +103,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                         autoFocus
                         placeholder="Masukkan email kedinasan"
                         onChange={(e) => setData('email', e.target.value)}
-                        className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                         required
                     />
                     <InputError message={errors.email} className="mt-1.5" />
@@ -102,17 +112,21 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 <button
                     type="submit"
                     disabled={processing}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {processing ? 'Mengirim...' : 'Kirim Tautan Pemulihan'}
                 </button>
             </form>
 
-            <div className="mt-6">
+            <div className="mt-4 flex flex-col items-start gap-1">
                 <Link href={route('login')} className={backLink}>
                     <span aria-hidden="true">&larr;</span> Kembali ke Halaman
                     Masuk
                 </Link>
+                <p className="text-sm text-gray-500">
+                    Tidak punya akses ke email tersebut? Hubungi admin
+                    Kecamatan.
+                </p>
             </div>
         </AuthSplitLayout>
     );

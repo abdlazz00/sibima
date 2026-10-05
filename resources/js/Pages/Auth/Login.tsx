@@ -29,9 +29,9 @@ export default function Login({
         <AuthSplitLayout>
             <Head title="Masuk - SIBIMA" />
 
-            <h2 className="mb-7 text-[28px] font-bold tracking-tight text-gray-900">
+            <h1 className="mb-7 text-[28px] font-bold tracking-tight text-gray-900">
                 Masuk
-            </h2>
+            </h1>
 
             {status && (
                 <div className="mb-5 rounded-lg border border-green-200 bg-green-50 p-3.5 text-sm font-medium text-green-700">
@@ -57,7 +57,7 @@ export default function Login({
                         autoFocus
                         placeholder="Masukkan email atau NIP"
                         onChange={(e) => setData('email', e.target.value)}
-                        className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                         required
                     />
                     <InputError message={errors.email} className="mt-1.5" />
@@ -91,7 +91,7 @@ export default function Login({
                             onChange={(e) =>
                                 setData('remember', e.target.checked as boolean)
                             }
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                         />
                         <span className="ml-2 text-sm text-gray-600">
                             Ingat saya
@@ -101,7 +101,7 @@ export default function Login({
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="rounded text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                            className="rounded text-sm font-medium text-primary hover:text-primary-hover hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
                         >
                             Lupa kata sandi?
                         </Link>
@@ -113,7 +113,7 @@ export default function Login({
                     <button
                         type="submit"
                         disabled={processing}
-                        className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {processing ? 'Memproses...' : 'Masuk'}
                     </button>
