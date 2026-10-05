@@ -78,7 +78,7 @@ class RoleController extends Controller
 
     public function destroy(Request $request, Role $role): RedirectResponse
     {
-        abort_unless($request->user()->can('pengaturan.role'), 403);
+        abort_unless($request->user()->can('pengaturan.role') && $request->user()->canManageRole($role), 403);
 
         if ($role->is_system) {
             return back()->with('error', 'Role sistem tidak boleh dihapus.');

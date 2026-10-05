@@ -10,10 +10,8 @@ class UpdateRoleRequest extends FormRequest
     public function authorize(): bool
     {
         $actor = $this->user();
-        $role = $this->route('role');
 
-        return ($actor?->can('pengaturan.role') ?? false)
-            && $actor->covers($role->permissions->pluck('name')->all(), $role->unit_scope);
+        return ($actor?->can('pengaturan.role') ?? false) && $actor->canManageRole($this->route('role'));
     }
 
     public function rules(): array

@@ -134,6 +134,15 @@ class User extends Authenticatable
             && $this->covers($target->getAllPermissions()->pluck('name')->all(), $target->resolveUnitScope());
     }
 
+    /** Role dipakai lintas unit: user bercakupan sempit tidak boleh mengubahnya bila ada pemegang di luar cakupannya. */
+    public function canManageRole(Role $role): bool
+    {
+        $ids = $this->accessibleUnitIds();
+
+        return $this->covers($role->permissions->pluck('name')->all(), $role->unit_scope)
+            && ($ids === null || ! $role->users()->where(fn ($q) => $q->whereNull('users.unit_id')->orWhereNotIn('users.unit_id', $ids))->exists());
+    }
+
     public function canAccessUnit(Unit $unit): bool
     {
         $ids = $this->accessibleUnitIds();

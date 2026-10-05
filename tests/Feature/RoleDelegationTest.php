@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Role;
+use App\Models\Unit;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -53,6 +54,29 @@ it('refuses to edit a role that is more powerful than the manager or to add perm
         ->assertRedirect(route('roles.index'));
 
     expect($own->fresh()->hasPermissionTo('aset.create'))->toBeTrue();
+});
+
+it('forbids a unit-scoped manager from editing a role that users outside its scope also hold', function () {
+    $kelB = makeKelurahan(Unit::find($this->manager->unit->parent_id), 'Kelurahan B');
+    userWithRole('admin_kelurahan', $kelB);
+
+    $this->actingAs($this->manager)
+        ->put(route('roles.update', Role::where('name', 'admin_kelurahan')->first()), rdPayload(['name' => null, 'permissions' => ['aset.view']]))
+        ->assertForbidden();
+
+    $own = Role::create(['name' => 'operator_baru', 'display_name' => 'Operator', 'unit_scope' => 'own', 'is_system' => false]);
+    $own->givePermissionTo('aset.view');
+    $holder = User::factory()->create(['unit_id' => $this->manager->unit_id]);
+    $holder->assignRole($own);
+
+    $this->actingAs($this->manager)->put(route('roles.update', $own), rdPayload(['permissions' => ['aset.view']]))
+        ->assertRedirect(route('roles.index'));
+
+    $outsider = User::factory()->create(['unit_id' => $kelB->id]);
+    $outsider->assignRole($own);
+
+    $this->actingAs($this->manager)->put(route('roles.update', $own), rdPayload(['permissions' => ['aset.view']]))
+        ->assertForbidden();
 });
 
 it('lets kasubag create and edit any role', function () {
