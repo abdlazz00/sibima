@@ -7,6 +7,7 @@ use App\Enums\AssetRequestStatus;
 use App\Enums\AssetStatus;
 use App\Enums\Kondisi;
 use App\Enums\MutationStatus;
+use App\Enums\MutationType;
 use App\Models\Asset;
 use App\Models\AssetHistory;
 use App\Models\AssetMutation;
@@ -43,6 +44,8 @@ class AssetMutationEffect implements WorkflowEffect
 
             foreach ($approvable->items as $item) {
                 $asset = $assets->get($item->asset_id);
+                $returned = $approvable->jenis_mutasi === MutationType::Pengembalian;
+                $previousHolder = $asset->currentHolder?->nama;
 
                 $asset->update([
                     'unit_id' => $approvable->destination_unit_id,
@@ -52,12 +55,14 @@ class AssetMutationEffect implements WorkflowEffect
 
                 AssetHistory::create([
                     'asset_id' => $asset->id,
-                    'event' => 'mutasi',
+                    'event' => $returned ? 'pengembalian' : 'mutasi',
                     'unit_id' => $approvable->destination_unit_id,
                     'current_holder_id' => $item->target_holder_id,
                     'kondisi' => $asset->kondisi,
                     'user_id' => auth()->id() ?? $approvable->created_by,
-                    'keterangan' => "Mutasi {$approvable->jenis_mutasi->label()} ({$approvable->originUnit->name} -> {$approvable->destinationUnit->name}) No. {$approvable->nomor_mutasi}. ".($item->catatan ?? ''),
+                    'keterangan' => $returned
+                        ? "Dikembalikan oleh {$previousHolder} ke inventaris {$approvable->destinationUnit->name}, No. {$approvable->nomor_mutasi}. ".($item->catatan ?? '')
+                        : "Mutasi {$approvable->jenis_mutasi->label()} ({$approvable->originUnit->name} -> {$approvable->destinationUnit->name}) No. {$approvable->nomor_mutasi}. ".($item->catatan ?? ''),
                 ]);
             }
 

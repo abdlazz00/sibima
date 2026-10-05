@@ -25,10 +25,10 @@ class StoreAssetMutationRequest extends FormRequest
             'origin_unit_id' => ['required', 'integer', 'exists:units,id'],
             'destination_unit_id' => ['required', 'integer', 'exists:units,id'],
             'tanggal_mutasi' => ['required', 'date'],
-            'keterangan' => ['nullable', 'string', 'max:1000'],
+            'keterangan' => [Rule::requiredIf(fn () => $this->input('jenis_mutasi') === MutationType::Pengembalian->value), 'nullable', 'string', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.asset_id' => ['required', 'integer', 'exists:assets,id'],
-            'items.*.target_holder_id' => ['nullable', 'integer', 'exists:pegawais,id'],
+            'items.*.target_holder_id' => ['nullable', 'integer', 'exists:pegawais,id', Rule::prohibitedIf(fn () => $this->input('jenis_mutasi') === MutationType::Pengembalian->value)],
             'items.*.catatan' => ['nullable', 'string', 'max:255'],
         ];
     }

@@ -35,11 +35,15 @@ class AssetMutationService
         $originUnit = Unit::findOrFail($data['origin_unit_id']);
         $destUnit = Unit::findOrFail($data['destination_unit_id']);
 
-        if ($type === MutationType::Internal && $originUnit->id !== $destUnit->id) {
-            throw new InvalidArgumentException('Mutasi internal harus berada di unit yang sama.');
+        $sameUnit = in_array($type, [MutationType::Internal, MutationType::Pengembalian], true);
+
+        if ($sameUnit && $originUnit->id !== $destUnit->id) {
+            throw new InvalidArgumentException($type === MutationType::Pengembalian
+                ? 'Pengembalian ke inventaris harus berada di unit yang sama.'
+                : 'Mutasi internal harus berada di unit yang sama.');
         }
 
-        if ($type !== MutationType::Internal && $originUnit->id === $destUnit->id) {
+        if (! $sameUnit && $originUnit->id === $destUnit->id) {
             throw new InvalidArgumentException('Mutasi antar unit harus memiliki unit asal dan tujuan yang berbeda.');
         }
 
@@ -71,9 +75,16 @@ class AssetMutationService
                 if ($asset->status !== AssetStatus::Aktif) {
                     throw new InvalidArgumentException("Aset \"{$asset->nama_aset}\" sedang tidak aktif atau dalam proses mutasi lain.");
                 }
+                if ($type === MutationType::Pengembalian && $asset->current_holder_id === null) {
+                    throw new InvalidArgumentException("Aset \"{$asset->nama_aset}\" sudah berada di inventaris unit, tidak ada yang perlu dikembalikan.");
+                }
             }
 
             foreach ($items as $item) {
+                if ($type === MutationType::Pengembalian && ! empty($item['target_holder_id'])) {
+                    throw new InvalidArgumentException('Pengembalian ke inventaris tidak boleh menentukan pemegang baru.');
+                }
+
                 if ($type === MutationType::Internal && empty($item['target_holder_id'])) {
                     throw new InvalidArgumentException('Mutasi internal wajib menentukan pegawai pemegang baru.');
                 }
@@ -101,6 +112,7 @@ class AssetMutationService
             MutationType::Internal => $originUnit->isKecamatan()
                 ? 'mutasi_internal_kec'
                 : 'mutasi_internal_kel',
+            MutationType::Pengembalian => 'pengembalian_aset',
         };
     }
 
@@ -110,7 +122,7 @@ class AssetMutationService
             MutationType::KecKeKel => $origin->isKecamatan() && $dest->isKelurahan(),
             MutationType::AntarKel => $origin->isKelurahan() && $dest->isKelurahan(),
             MutationType::ReturKelKeKec => $origin->isKelurahan() && $dest->isKecamatan(),
-            MutationType::Internal => true,
+            MutationType::Internal, MutationType::Pengembalian => true,
         };
 
         if (! $valid) {

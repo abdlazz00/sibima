@@ -106,9 +106,9 @@ it('composes by status and by type in enum order with percentages', function () 
         ->and(collect($recap['status'])->pluck('jumlah')->all())->toBe([1, 2, 1, 0])
         ->and(collect($recap['status'])->pluck('persen')->all())->toBe([25.0, 50.0, 25.0, 0.0])
         ->and($recap['status'][1]['label'])->toBe('Disetujui')
-        ->and(collect($recap['jenis'])->pluck('jenis')->all())->toBe(['kec_ke_kel', 'antar_kel', 'retur_kel_ke_kec', 'internal'])
-        ->and(collect($recap['jenis'])->pluck('jumlah')->all())->toBe([2, 1, 0, 1])
-        ->and(collect($recap['jenis'])->pluck('persen')->all())->toBe([50.0, 25.0, 0.0, 25.0]);
+        ->and(collect($recap['jenis'])->pluck('jenis')->all())->toBe(['kec_ke_kel', 'antar_kel', 'retur_kel_ke_kec', 'internal', 'pengembalian'])
+        ->and(collect($recap['jenis'])->pluck('jumlah')->all())->toBe([2, 1, 0, 1, 0])
+        ->and(collect($recap['jenis'])->pluck('persen')->all())->toBe([50.0, 25.0, 0.0, 25.0, 0.0]);
 });
 
 it('builds the monthly trend from approved mutations with zero-filled gaps', function () {

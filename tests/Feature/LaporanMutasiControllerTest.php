@@ -63,12 +63,12 @@ it('renders the page with recap, list rows and option lists for the camat', func
             ->where('ringkasan.jumlah_mutasi', 4)
             ->where('mutasis.total', 4)
             ->has('status', 4)
-            ->has('jenis', 4)
+            ->has('jenis', 5)
             ->has('tren')
             ->where('arus.total.jumlah_mutasi', 2)
             ->where('jumlah_masih_berjalan', 1)
             ->has('masih_berjalan', 1)
-            ->has('jenisOptions', 4)
+            ->has('jenisOptions', 5)
             ->has('statusOptions', 4)
             ->where('sort', ['urut' => 'tanggal_mutasi', 'arah' => 'desc']));
 });

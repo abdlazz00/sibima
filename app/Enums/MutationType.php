@@ -8,6 +8,7 @@ enum MutationType: string
     case AntarKel = 'antar_kel';
     case ReturKelKeKec = 'retur_kel_ke_kec';
     case Internal = 'internal';
+    case Pengembalian = 'pengembalian';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum MutationType: string
             self::AntarKel => 'Mutasi Antar Kelurahan',
             self::ReturKelKeKec => 'Retur Kelurahan ke Kecamatan',
             self::Internal => 'Mutasi Internal',
+            self::Pengembalian => 'Pengembalian ke Inventaris',
         };
     }
 }
