@@ -65,6 +65,17 @@ class EloquentAssetRepository implements AssetRepositoryInterface
             ->max() ?? 0;
     }
 
+    public function findExistingKodeBarang(int $categoryId, string $namaAset): ?string
+    {
+        $cleanName = strtolower(trim($namaAset));
+
+        return Asset::query()
+            ->where('category_id', $categoryId)
+            ->whereRaw('LOWER(TRIM(nama_aset)) = ?', [$cleanName])
+            ->lockForUpdate()
+            ->value('kode_barang');
+    }
+
     public function create(array $attributes): Asset
     {
         return Asset::create($attributes);

@@ -47,32 +47,102 @@ function makeBeritaAcaraForEffectTest(object $test, int $jumlahUnit = 3): Berita
     return $ba;
 }
 
-it('creates one Asset per unit with sequential kode_barang on final approval', function () {
-    $ba = makeBeritaAcaraForEffectTest($this);
+it('creates one Asset per unit with the same kode_barang and sequential nomor_register on final approval', function () {
+    $ba = makeBeritaAcaraForEffectTest($this, jumlahUnit: 3);
     $request = $this->service->submit($ba, 'penerimaan_aset', $this->admin);
 
     $this->service->approve($request, $this->kasubag);
     $this->service->approve($request, $this->camat);
 
-    $codes = Asset::where('category_id', $this->category->id)->orderBy('kode_barang')->pluck('kode_barang');
+    $assets = Asset::where('category_id', $this->category->id)->orderBy('nomor_register')->get();
 
-    expect($codes->all())->toBe([
-        '1.3.2.05.02.04.001',
-        '1.3.2.05.02.04.002',
-        '1.3.2.05.02.04.003',
-    ]);
+    expect($assets)->toHaveCount(3)
+        ->and($assets->pluck('kode_barang')->unique()->all())->toBe(['1.3.2.05.02.04.001'])
+        ->and($assets->pluck('nomor_register')->all())->toBe([1, 2, 3])
+        ->and($assets[0]->no_dokumen)->toBe('BA/042/VIII/2025-001')
+        ->and($assets[1]->no_dokumen)->toBe('BA/042/VIII/2025-002')
+        ->and($assets[2]->no_dokumen)->toBe('BA/042/VIII/2025-003');
 
-    $asset = Asset::where('kode_barang', '1.3.2.05.02.04.001')->firstOrFail();
-    expect($asset->nama_aset)->toBe('AC Split Daikin 1.5PK')
-        ->and($asset->unit_id)->toBe($this->kec->id)
-        ->and($asset->no_dokumen)->toBe('BA/042/VIII/2025-001')
-        ->and($asset->histories()->where('event', 'diterima')->exists())->toBeTrue();
-
-    expect($ba->items->first()->fresh()->asset_ids)->toHaveCount(3);
+    expect($ba->items->first()->fresh()->asset_ids)->toBe($assets->pluck('id')->all());
 });
 
-it('continues the sequence from existing assets under the same category code', function () {
-    Asset::factory()->create(['category_id' => $this->category->id, 'kode_barang' => '1.3.2.05.02.04.005']);
+it('reuses existing kode_barang and continues nomor_register sequence for matching asset name in same category', function () {
+    Asset::factory()->create([
+        'category_id' => $this->category->id,
+        'kode_barang' => '1.3.2.05.02.04.001',
+        'nomor_register' => 1,
+        'nama_aset' => 'AC Split Daikin 1.5PK',
+    ]);
+    Asset::factory()->create([
+        'category_id' => $this->category->id,
+        'kode_barang' => '1.3.2.05.02.04.001',
+        'nomor_register' => 2,
+        'nama_aset' => 'AC Split Daikin 1.5PK',
+    ]);
+
+    $ba = makeBeritaAcaraForEffectTest($this, jumlahUnit: 2);
+    $request = $this->service->submit($ba, 'penerimaan_aset', $this->admin);
+    $this->service->approve($request, $this->kasubag);
+    $this->service->approve($request, $this->camat);
+
+    $newAssets = Asset::where('category_id', $this->category->id)
+        ->whereNotIn('nomor_register', [1, 2])
+        ->orderBy('nomor_register')
+        ->get();
+
+    expect($newAssets)->toHaveCount(2)
+        ->and($newAssets->pluck('kode_barang')->all())->toBe(['1.3.2.05.02.04.001', '1.3.2.05.02.04.001'])
+        ->and($newAssets->pluck('nomor_register')->all())->toBe([3, 4]);
+});
+
+it('generates distinct kode_barang for different asset items in the same category', function () {
+    $ba = BeritaAcaraPenerimaan::create([
+        'no_berita_acara' => 'BA/042/MULTI/2025',
+        'tanggal_penerimaan' => '2025-08-05',
+        'sumber_perolehan' => 'APBD',
+        'no_kontrak_spk' => 'SPK/042/MULTI/2025',
+        'vendor' => 'PT. Vendor',
+        'unit_id' => $this->kec->id,
+        'created_by' => $this->admin->id,
+        'status' => 'submitted',
+    ]);
+
+    $ba->items()->create([
+        'nama_aset' => 'AC Split Daikin',
+        'merk_type' => 'FTXM35',
+        'category_id' => $this->category->id,
+        'jumlah_unit' => 2,
+        'nilai_per_unit' => 5000000,
+        'kondisi_awal' => 'baik',
+    ]);
+
+    $ba->items()->create([
+        'nama_aset' => 'Kulkas Showcase',
+        'merk_type' => 'Polytron',
+        'category_id' => $this->category->id,
+        'jumlah_unit' => 2,
+        'nilai_per_unit' => 3000000,
+        'kondisi_awal' => 'baik',
+    ]);
+
+    $request = $this->service->submit($ba, 'penerimaan_aset', $this->admin);
+    $this->service->approve($request, $this->kasubag);
+    $this->service->approve($request, $this->camat);
+
+    $acAssets = Asset::where('nama_aset', 'AC Split Daikin')->orderBy('nomor_register')->get();
+    $kulkasAssets = Asset::where('nama_aset', 'Kulkas Showcase')->orderBy('nomor_register')->get();
+
+    expect($acAssets)->toHaveCount(2)
+        ->and($acAssets->pluck('kode_barang')->unique()->all())->toBe(['1.3.2.05.02.04.001'])
+        ->and($acAssets->pluck('nomor_register')->all())->toBe([1, 2]);
+
+    expect($kulkasAssets)->toHaveCount(2)
+        ->and($kulkasAssets->pluck('kode_barang')->unique()->all())->toBe(['1.3.2.05.02.04.002'])
+        ->and($kulkasAssets->pluck('nomor_register')->all())->toBe([1, 2]);
+});
+
+it('continues the sequence from existing assets under the same category code for new item', function () {
+    Asset::factory()->create(['category_id' => $this->category->id, 'kode_barang' => '1.3.2.05.02.04.005', 'nama_aset' => 'Barang Lama']);
 
     $ba = makeBeritaAcaraForEffectTest($this, jumlahUnit: 1);
     $request = $this->service->submit($ba, 'penerimaan_aset', $this->admin);

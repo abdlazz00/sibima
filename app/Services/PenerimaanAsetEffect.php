@@ -32,17 +32,27 @@ class PenerimaanAsetEffect implements WorkflowEffect
                     );
                 }
 
-                $assetIds = [];
-                $suffix = $this->assets->maxKodeBarangSuffix($category->code);
+                // 1. Resolve single kode_barang for this entire item line
+                $kodeBarang = $this->assets->findExistingKodeBarang($item->category_id, $item->nama_aset);
 
-                for ($i = 0; $i < $item->jumlah_unit; $i++) {
-                    $suffix++;
+                if ($kodeBarang === null) {
+                    $suffix = $this->assets->maxKodeBarangSuffix($category->code) + 1;
                     $kodeBarang = $category->code.'.'.str_pad((string) $suffix, 3, '0', STR_PAD_LEFT);
+                }
+
+                // 2. Resolve starting register number
+                $baseRegister = $this->assets->maxRegisterNumber($kodeBarang);
+
+                $assetIds = [];
+
+                // 3. Create each physical unit with SAME kode_barang and INCREMENTAL nomor_register
+                for ($i = 0; $i < $item->jumlah_unit; $i++) {
                     $noDokumenSeq++;
+                    $nomorRegister = $baseRegister + $i + 1;
 
                     $asset = $this->assets->create([
                         'kode_barang' => $kodeBarang,
-                        'nomor_register' => $this->assets->maxRegisterNumber($kodeBarang) + 1,
+                        'nomor_register' => $nomorRegister,
                         'nama_aset' => $item->nama_aset,
                         'merk_type' => $item->merk_type,
                         'category_id' => $item->category_id,

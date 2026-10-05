@@ -26,6 +26,8 @@ interface AssetRepositoryInterface
 
     public function maxKodeBarangSuffix(string $prefix): int;
 
+    public function findExistingKodeBarang(int $categoryId, string $namaAset): ?string;
+
     /**
      * @param  list<int>  $ids
      * @return Collection<int, Asset>
