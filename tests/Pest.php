@@ -49,6 +49,12 @@ expect()->extend('toBeOne', function () {
 
 function userWithRole(string $role, ?Unit $unit = null): User
 {
+    // RBAC bawaan (role sistem + permission default) disiapkan sekali per test.
+    if (! \Spatie\Permission\Models\Permission::query()->exists()) {
+        (new \Database\Seeders\RoleSeeder)->run();
+        (new \Database\Seeders\PermissionSeeder)->run();
+    }
+
     Role::findOrCreate($role);
 
     $user = User::factory()->create(['unit_id' => $unit?->id]);

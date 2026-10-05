@@ -26,7 +26,7 @@ beforeEach(function () {
 });
 
 it('forbids exporting without the permission and returns 404 for unknown modules', function () {
-    $this->actingAs(userWithRole('lurah', $this->kelA))->get(route('export', 'aset'))->assertForbidden();
+    $this->actingAs(userWithRole('lurah', $this->kelA))->get(route('export', 'kategori'))->assertForbidden();
     $this->actingAs($this->kasubag)->get('/export/lainnya')->assertNotFound();
 });
 

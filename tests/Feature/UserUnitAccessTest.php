@@ -2,12 +2,10 @@
 
 use App\Models\Unit;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use Database\Seeders\RoleSeeder;
 
 beforeEach(function () {
-    foreach (['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah'] as $role) {
-        Role::findOrCreate($role);
-    }
+    $this->seed(RoleSeeder::class);
 
     $this->kecamatan = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
     $this->kelurahanA = Unit::create(['name' => 'Kelurahan A', 'type' => 'kelurahan', 'parent_id' => $this->kecamatan->id]);

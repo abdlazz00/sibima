@@ -77,18 +77,6 @@ class User extends Authenticatable
         $role = $this->roles->first();
 
         if ($role) {
-            if ($role->unit_scope === 'all' || $role->unit_scope === 'binaan') {
-                return $role->unit_scope;
-            }
-
-            if ($role->name === 'kasubag') {
-                return 'all';
-            }
-
-            if ($role->name === 'camat') {
-                return 'binaan';
-            }
-
             return $role->unit_scope ?? 'own';
         }
 

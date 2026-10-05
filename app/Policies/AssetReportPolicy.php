@@ -10,7 +10,7 @@ class AssetReportPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('laporan-insiden.view') || $user->getRoleNames()->isNotEmpty();
+        return $user->can('laporan-insiden.view');
     }
 
     public function view(User $user, AssetReport $report): bool
@@ -20,9 +20,7 @@ class AssetReportPolicy
 
     public function create(User $user, ?Asset $asset = null): bool
     {
-        $hasPermission = $user->can('laporan-insiden.create') || $user->hasAnyRole(['admin_kecamatan', 'admin_kelurahan']);
-
-        if (! $hasPermission || $user->unit_id === null) {
+        if (! $user->can('laporan-insiden.create') || $user->unit_id === null) {
             return false;
         }
 

@@ -10,7 +10,7 @@ class BeritaAcaraPenerimaanPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('penerimaan.view') || $user->hasAnyRole(['admin_kecamatan', 'kasubag', 'camat']);
+        return $user->can('penerimaan.view');
     }
 
     public function view(User $user, BeritaAcaraPenerimaan $beritaAcara): bool
@@ -19,14 +19,12 @@ class BeritaAcaraPenerimaanPolicy
             return $this->manages($user, $beritaAcara);
         }
 
-        return $user->hasRole('kasubag') || $user->accessibleUnitIds() === null || $user->canAccessUnit($beritaAcara->unit);
+        return $user->canAccessUnit($beritaAcara->unit);
     }
 
     public function create(User $user): bool
     {
-        $hasPermission = $user->can('penerimaan.create') || $user->hasRole('admin_kecamatan');
-
-        return $hasPermission && $user->unit_id !== null;
+        return $user->can('penerimaan.create') && $user->unit_id !== null;
     }
 
     public function update(User $user, BeritaAcaraPenerimaan $beritaAcara): bool
@@ -41,8 +39,7 @@ class BeritaAcaraPenerimaanPolicy
 
     private function manages(User $user, BeritaAcaraPenerimaan $beritaAcara): bool
     {
-        $hasPermission = $user->can('penerimaan.update') || $user->hasRole('admin_kecamatan');
-
-        return $hasPermission && $user->canAccessUnit($beritaAcara->unit);
+        // Draft hanya milik unit pembuatnya; cakupan luas (kasubag/camat) tidak otomatis boleh mengelola draft.
+        return $user->can('penerimaan.update') && $user->unit_id === $beritaAcara->unit_id;
     }
 }

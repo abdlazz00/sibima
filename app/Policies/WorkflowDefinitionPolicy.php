@@ -9,11 +9,11 @@ class WorkflowDefinitionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('pengaturan.alur') || $user->hasRole('kasubag');
+        return $user->can('pengaturan.alur');
     }
 
     public function update(User $user, WorkflowDefinition $workflow): bool
     {
-        return $user->can('pengaturan.alur') || $user->hasRole('kasubag');
+        return $user->can('pengaturan.alur');
     }
 }

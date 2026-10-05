@@ -10,7 +10,7 @@ class AssetMutationPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('mutasi.view') || true;
+        return $user->can('mutasi.view');
     }
 
     public function view(User $user, AssetMutation $mutation): bool
@@ -27,9 +27,7 @@ class AssetMutationPolicy
 
     public function create(User $user, ?Unit $originUnit = null): bool
     {
-        $hasPermission = $user->can('mutasi.create') || $user->hasRole(['admin_kecamatan', 'admin_kelurahan']);
-
-        if (! $hasPermission) {
+        if (! $user->can('mutasi.create')) {
             return false;
         }
 

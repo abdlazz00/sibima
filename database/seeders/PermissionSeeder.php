@@ -74,7 +74,7 @@ class PermissionSeeder extends Seeder
         $adminKecamatan->syncPermissions([
             'dashboard.view', 'scan.view',
             'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
-            'pegawai.view', 'export-pegawai',
+            'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
             'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete', 'penerimaan.submit',
             'mutasi.view', 'mutasi.create',
             'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
@@ -86,7 +86,7 @@ class PermissionSeeder extends Seeder
         $adminKelurahan->syncPermissions([
             'dashboard.view', 'scan.view',
             'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
-            'pegawai.view', 'export-pegawai',
+            'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
             'mutasi.view', 'mutasi.create',
             'permohonan.view', 'permohonan.create',
             'laporan-insiden.view', 'laporan-insiden.create',
