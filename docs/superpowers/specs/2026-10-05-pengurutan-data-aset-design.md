@@ -79,7 +79,7 @@ Tidak ada `FormRequest` baru. `urut` hanya dicocokkan terhadap daftar kunci di d
 - `Assets/Index.tsx`: tipe `Filters` bertambah `urut?: string`; props bertambah `sortOptions: { value: string; label: string }[]`.
 - Satu `<select>` baru di bar filter dengan gaya yang sama seperti ketiga filter lain, `aria-label="Urutkan"`, nilai awal `filters.urut ?? 'nama_asc'`, opsi berlabel "Urutkan: {label}".
 - Mengubah pilihan memanggil fungsi filter yang sudah ada, sehingga kembali ke halaman 1 dan filter lain tetap. Pagination yang ada (`{ ...filters, page }`) sudah membawa `urut`.
-- Bar filter diubah ke grid yang menampung empat kontrol di layar lebar dan menumpuk di layar sempit.
+- Grup filter sudah memakai `flex-wrap`, sehingga kontrol keempat otomatis turun ke baris berikutnya di layar sempit; tidak ada perubahan tata letak lain.
 - `ImportExportButtons` menerima `filters` yang kini memuat `urut`, sehingga ekspor mengikuti urutan layar.
 
 ---
