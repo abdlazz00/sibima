@@ -14,6 +14,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "phpoffice/phpspreadsheet": "^5.10",
+        "resend/resend-php": "^1.16",
         "spatie/laravel-permission": "^8.3",
         "tightenco/ziggy": "^2.0"
     },

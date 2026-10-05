@@ -45,6 +45,28 @@ stdout_logfile=/var/www/sibima/storage/logs/queue-worker.log
 5. Batas unggahan: Nginx `client_max_body_size 8m;`, `php.ini` (FPM) `upload_max_filesize=8M` dan `post_max_size=8M`. Batas aplikasi 5 MB dan 10.000 baris ada di `config/import.php`.
 6. Memori: worker memakai `memory_limit` CLI; `--memory=512` membuat worker restart bila melewati 512 MB. Pembacaan Excel per chunk 500 baris sehingga kebutuhan nyata jauh di bawah itu.
 
+## Email (reset password)
+
+Email reset password dikirim lewat antrean, jadi worker di atas wajib hidup. Dev memakai `MAIL_MAILER=log` (isi email ada di `storage/logs/laravel.log`).
+
+Produksi memakai Resend:
+
+1. Daftar di resend.com, tambahkan domain, lalu pasang record DNS (SPF dan DKIM) yang diminta sampai statusnya *Verified*. Tanpa domain terverifikasi, Resend hanya mau mengirim ke email pemilik akun.
+2. Buat API key, lalu isi `.env` produksi:
+
+```
+MAIL_MAILER=resend
+RESEND_API_KEY=re_xxxxxxxx
+MAIL_FROM_ADDRESS="noreply@domain-anda"
+MAIL_FROM_NAME="SIBIMA"
+APP_URL=https://alamat-produksi
+```
+
+3. `php artisan config:cache` lalu `php artisan queue:restart`.
+4. Coba dari halaman Lupa Password dengan email pegawai yang nyata. Status pengiriman terlihat di dashboard Resend; email gagal terlihat di tabel `failed_jobs`.
+
+Alamat email akun harus benar-benar bisa menerima surat (akun demo `*@simaset.test` tidak akan menerima apa pun).
+
 ## Setiap deploy
 
 ```
