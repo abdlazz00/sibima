@@ -1,4 +1,5 @@
-import { ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight, EyeIcon as Eye, PlusIcon as Plus, SearchIcon as Search } from '@/Components/Icons';
+import { ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight, EyeIcon as Eye, PlusIcon as Plus } from '@/Components/Icons';
+import { FilterCard, FilterSelect, TableSearch } from '@/Components/ListFilters';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { pageNumbersWithGaps } from '@/lib/pagination';
 import { PENERIMAAN_STATUS_LABEL, PENERIMAAN_STATUS_STYLE, PenerimaanStatusKey, penerimaanStatus } from '@/lib/penerimaanStatus';
@@ -8,7 +9,8 @@ import { FormEvent, useState } from 'react';
 
 interface IndexProps extends PageProps {
     items: Paginated<BeritaAcaraPenerimaan>;
-    filters: { search?: string; status?: string; dari?: string; sampai?: string };
+    filters: { search?: string; status?: string; dari?: string; sampai?: string; urut?: string };
+    sortOptions: { value: string; label: string }[];
     can: { create: boolean };
 }
 
@@ -16,7 +18,10 @@ function formatRupiah(value: string | number): string {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value));
 }
 
-export default function Index({ items, filters, can }: IndexProps) {
+const DATE_INPUT = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100';
+const DATE_LABEL = 'mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500';
+
+export default function Index({ items, filters, sortOptions, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
     const pages = pageNumbersWithGaps(items.current_page, items.last_page);
 
@@ -52,47 +57,49 @@ export default function Index({ items, filters, can }: IndexProps) {
                     )}
                 </div>
 
-                <form onSubmit={submitSearch} className="relative max-w-md">
-                    <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Cari no. berita acara atau nama aset..."
-                        className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-                    />
-                </form>
-
-                <div className="flex flex-wrap items-end gap-3">
+                <FilterCard
+                    action={
+                        (filters.status || filters.dari || filters.sampai) && (
+                            <button
+                                type="button"
+                                onClick={() => goTo({ status: undefined, dari: undefined, sampai: undefined, page: undefined })}
+                                className="text-sm font-medium text-blue-700 hover:underline"
+                            >
+                                Reset filter
+                            </button>
+                        )
+                    }
+                >
+                    <FilterSelect ariaLabel="Status" value={filters.status ?? ''} onChange={(v) => goTo({ status: v || undefined, page: undefined })}>
+                        <option value="">Semua status</option>
+                        {(Object.keys(PENERIMAAN_STATUS_LABEL) as PenerimaanStatusKey[]).map((key) => (
+                            <option key={key} value={key}>{PENERIMAAN_STATUS_LABEL[key]}</option>
+                        ))}
+                    </FilterSelect>
                     <div>
-                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</label>
-                        <select
-                            value={filters.status ?? ''}
-                            onChange={(e) => goTo({ status: e.target.value || undefined, page: undefined })}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                        >
-                            <option value="">Semua status</option>
-                            {(Object.keys(PENERIMAAN_STATUS_LABEL) as PenerimaanStatusKey[]).map((key) => (
-                                <option key={key} value={key}>{PENERIMAAN_STATUS_LABEL[key]}</option>
-                            ))}
-                        </select>
+                        <label htmlFor="filter-dari" className={DATE_LABEL}>Dari tanggal</label>
+                        <input id="filter-dari" type="date" value={filters.dari ?? ''} onChange={(e) => goTo({ dari: e.target.value || undefined, page: undefined })} className={DATE_INPUT} />
                     </div>
                     <div>
-                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Dari tanggal</label>
-                        <input type="date" value={filters.dari ?? ''} onChange={(e) => goTo({ dari: e.target.value || undefined, page: undefined })} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                        <label htmlFor="filter-sampai" className={DATE_LABEL}>Sampai tanggal</label>
+                        <input id="filter-sampai" type="date" value={filters.sampai ?? ''} onChange={(e) => goTo({ sampai: e.target.value || undefined, page: undefined })} className={DATE_INPUT} />
                     </div>
-                    <div>
-                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">Sampai tanggal</label>
-                        <input type="date" value={filters.sampai ?? ''} onChange={(e) => goTo({ sampai: e.target.value || undefined, page: undefined })} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100" />
-                    </div>
-                    {(filters.status || filters.dari || filters.sampai) && (
-                        <button type="button" onClick={() => goTo({ status: undefined, dari: undefined, sampai: undefined, page: undefined })} className="pb-2 text-sm font-medium text-blue-700 hover:underline">
-                            Reset filter
-                        </button>
-                    )}
-                </div>
+                    <FilterSelect ariaLabel="Urutkan" value={filters.urut ?? 'terbaru'} onChange={(v) => goTo({ urut: v === 'terbaru' ? undefined : v, page: undefined })}>
+                        {sortOptions.map((o) => <option key={o.value} value={o.value}>Urutkan: {o.label}</option>)}
+                    </FilterSelect>
+                </FilterCard>
 
                 <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    <TableSearch
+                        value={search}
+                        onChange={setSearch}
+                        onSubmit={submitSearch}
+                        onClear={() => {
+                            setSearch('');
+                            goTo({ search: undefined, page: undefined });
+                        }}
+                        placeholder="Cari no. berita acara atau nama aset..."
+                    />
                     <table className="w-full border-collapse text-left">
                         <thead>
                             <tr className="border-b border-slate-200 bg-slate-50">

@@ -11,6 +11,7 @@ use App\Models\BeritaAcaraPenerimaan;
 use App\Services\ApprovalWorkflowService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -21,6 +22,11 @@ use Inertia\Response;
 class PenerimaanAsetController extends Controller
 {
     public function __construct(private readonly ApprovalWorkflowService $workflow) {}
+
+    private const SORTS = [
+        'terbaru' => ['label' => 'Terbaru', 'order' => [['tanggal_penerimaan', 'desc'], ['id', 'desc']]],
+        'terlama' => ['label' => 'Terlama', 'order' => [['tanggal_penerimaan', 'asc'], ['id', 'asc']]],
+    ];
 
     public function index(Request $request): Response
     {
@@ -37,13 +43,14 @@ class PenerimaanAsetController extends Controller
             ))
             ->when($request->status, fn (Builder $q, string $status) => $this->filterByStatus($q, $status))
             ->when($request->dari, fn (Builder $q, $dari) => $q->whereDate('tanggal_penerimaan', '>=', $dari))
-            ->when($request->sampai, fn (Builder $q, $sampai) => $q->whereDate('tanggal_penerimaan', '<=', $sampai))
-            ->latest('tanggal_penerimaan')
-            ->latest('id');
+            ->when($request->sampai, fn (Builder $q, $sampai) => $q->whereDate('tanggal_penerimaan', '<=', $sampai));
+
+        ListSort::apply($query, self::SORTS, $request->input('urut'));
 
         return Inertia::render('Penerimaan/Index', [
             'items' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only('search', 'status', 'dari', 'sampai'),
+            'filters' => $request->only('search', 'status', 'dari', 'sampai', 'urut'),
+            'sortOptions' => ListSort::options(self::SORTS),
             'can' => ['create' => $user->can('create', BeritaAcaraPenerimaan::class)],
         ]);
     }
