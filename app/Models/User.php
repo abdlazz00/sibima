@@ -128,6 +128,24 @@ class User extends Authenticatable
         return [$this->unit_id];
     }
 
+    /** Apakah seluruh permission dan cakupan ini tidak melebihi milik user ini (batas delegasi). */
+    public function covers(array $permissions, string $scope = 'own'): bool
+    {
+        $rank = ['own' => 1, 'binaan' => 2, 'all' => 3];
+
+        return array_diff($permissions, $this->getAllPermissions()->pluck('name')->all()) === []
+            && $rank[$scope] <= $rank[$this->resolveUnitScope()];
+    }
+
+    /** Boleh mengelola akun lain: unitnya dalam cakupan dan akun itu tidak lebih berkuasa dari user ini. */
+    public function canManage(self $target): bool
+    {
+        $ids = $this->accessibleUnitIds();
+
+        return ($ids === null || in_array($target->unit_id, $ids, true))
+            && $this->covers($target->getAllPermissions()->pluck('name')->all(), $target->resolveUnitScope());
+    }
+
     public function canAccessUnit(Unit $unit): bool
     {
         $ids = $this->accessibleUnitIds();

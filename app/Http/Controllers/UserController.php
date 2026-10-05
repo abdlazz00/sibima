@@ -157,14 +157,9 @@ class UserController extends Controller
 
     public function edit(User $user, Request $request): Response
     {
-        abort_unless($request->user()->can('user.manage-access'), 403);
+        abort_unless($request->user()->can('user.manage-access') && $request->user()->canManage($user), 403);
 
-        $accessibleUnitIds = $request->user()->accessibleUnitIds();
-        if ($accessibleUnitIds !== null && ! in_array($user->unit_id, $accessibleUnitIds, true)) {
-            abort(403);
-        }
-
-        $user->load(['pegawai.unit', 'roles.permissions', 'permissions', 'unit']);
+        $user->load(['pegawai.unit', 'permissions', 'unit']);
 
         $roles = Role::with('permissions')
             ->get()
@@ -238,7 +233,7 @@ class UserController extends Controller
 
     public function toggleStatus(Request $request, User $user): RedirectResponse
     {
-        abort_unless($request->user()->can('user.toggle-status'), 403);
+        abort_unless($request->user()->can('user.toggle-status') && $request->user()->canManage($user), 403);
 
         if ($user->id === $request->user()->id) {
             return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
@@ -257,7 +252,7 @@ class UserController extends Controller
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
-        abort_unless($request->user()->can('user.delete'), 403);
+        abort_unless($request->user()->can('user.delete') && $request->user()->canManage($user), 403);
 
         if ($user->id === $request->user()->id) {
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');

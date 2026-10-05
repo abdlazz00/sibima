@@ -21,35 +21,28 @@ beforeEach(function () {
     $this->operator->assignRole('admin_kelurahan');
 });
 
-it('shares roles, permissionGroups, and manageAccess flag to pegawai index inertia page', function () {
+it('only exposes the manageAccess flag, not roles or the permission catalog, on the pegawai index', function () {
     $pegawaiUser = User::factory()->create(['unit_id' => $this->kelurahan->id]);
     $pegawaiUser->assignRole('admin_kelurahan');
-    $pegawaiUser->givePermissionTo('import-kategori');
-
-    $pegawai = Pegawai::factory()->create([
-        'unit_id' => $this->kelurahan->id,
-        'user_id' => $pegawaiUser->id,
-    ]);
+    $pegawai = Pegawai::factory()->create(['unit_id' => $this->kelurahan->id, 'user_id' => $pegawaiUser->id]);
 
     $this->actingAs($this->kasubag)
         ->get(route('pegawais.index'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('Pegawai/Index')
-            ->has('roles')
-            ->has('permissionGroups')
+            ->missing('roles')
+            ->missing('permissionGroups')
             ->where('can.manageAccess', true)
             ->has('pegawais', fn (AssertableInertia $p) => $p
                 ->where('0.id', $pegawai->id)
                 ->where('0.user.id', $pegawaiUser->id)
-                ->has('0.user.roles')
-                ->has('0.user.permissions')
                 ->etc()
             )
         );
 });
 
-it('disables manageAccess for users without pegawai.create-user or pengaturan.user', function () {
+it('disables manageAccess for users without user.manage-access', function () {
     $this->actingAs($this->operator)
         ->get(route('pegawais.index'))
         ->assertOk()

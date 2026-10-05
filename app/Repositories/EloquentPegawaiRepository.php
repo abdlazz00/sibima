@@ -13,7 +13,7 @@ class EloquentPegawaiRepository implements PegawaiRepositoryInterface
     {
         return Pegawai::query()
             ->visibleTo($user)
-            ->with(['unit', 'user.roles', 'user.permissions'])
+            ->with(['unit', 'user'])
             ->orderBy('nama')
             ->get();
     }

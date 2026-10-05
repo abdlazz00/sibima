@@ -27,7 +27,9 @@ it('allows kasubag to grant direct permissions to a specific user on top of base
     expect($user->can('import-kategori'))->toBeFalse();
 
     $this->actingAs($this->kasubag)
-        ->post(route('pegawais.user-access', $this->pegawai), [
+        ->put(route('users.update', $user), [
+            'email' => $user->email,
+            'is_active' => true,
             'role' => 'admin_kelurahan',
             'direct_permissions' => ['import-kategori'],
             'unit_scope_override' => null,

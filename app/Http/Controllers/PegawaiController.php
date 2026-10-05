@@ -4,13 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreatePegawaiUserRequest;
 use App\Http\Requests\PegawaiRequest;
-use App\Http\Requests\UpdateUserAccessRequest;
 use App\Models\Pegawai;
-use App\Models\Role;
 use App\Models\Unit;
 use App\Repositories\Contracts\PegawaiRepositoryInterface;
 use App\Services\PegawaiService;
-use Database\Seeders\PermissionSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -31,18 +28,10 @@ class PegawaiController extends Controller
         return Inertia::render('Pegawai/Index', [
             'pegawais' => $this->pegawais->listVisibleTo($request->user()),
             'units' => Unit::orderBy('name')->get(['id', 'name', 'type']),
-            'roles' => Role::with('permissions')->get()->map(fn ($r) => [
-                'id' => $r->id,
-                'name' => $r->name,
-                'display_name' => $r->display_name ?? $r->name,
-                'unit_scope' => $r->unit_scope,
-                'permissions' => $r->permissions->pluck('name')->all(),
-            ]),
-            'permissionGroups' => PermissionSeeder::PERMISSION_GROUPS,
             'can' => [
                 'create' => $request->user()->can('create', Pegawai::class),
                 'createUser' => $request->user()->hasRole('kasubag') || $request->user()->can('pegawai.create-user'),
-                'manageAccess' => $request->user()->can('pengaturan.user') || $request->user()->can('pegawai.create-user'),
+                'manageAccess' => $request->user()->can('user.manage-access'),
             ],
         ]);
     }
@@ -121,19 +110,5 @@ class PegawaiController extends Controller
         );
 
         return back()->with('success', 'Akun login berhasil dibuat untuk pegawai ini.');
-    }
-
-    public function updateUserAccess(UpdateUserAccessRequest $request, Pegawai $pegawai): RedirectResponse
-    {
-        abort_unless($pegawai->user !== null, 404, 'Pegawai ini belum memiliki akun.');
-
-        $this->service->updateUserAccess(
-            $pegawai->user,
-            $request->validated('role'),
-            $request->validated('direct_permissions', []),
-            $request->validated('unit_scope_override'),
-        );
-
-        return back()->with('success', "Akses akun {$pegawai->nama} berhasil diperbarui.");
     }
 }
