@@ -15,7 +15,7 @@ return new class extends Migration
         });
 
         // Backfill data eksisting yang belum memiliki qr_token
-        DB::table('assets')->whereNull('qr_token')->orderBy('id')->chunk(100, function ($assets) {
+        DB::table('assets')->whereNull('qr_token')->orderBy('id')->chunkById(100, function ($assets) {
             foreach ($assets as $asset) {
                 do {
                     $token = Str::random(16);
