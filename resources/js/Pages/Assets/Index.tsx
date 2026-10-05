@@ -162,32 +162,9 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                 </div>
 
                 {/* Filter Toolbar */}
-                <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center">
-                    <form onSubmit={submitSearch} className="relative flex-1">
-                        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Cari nama barang, kode BMD, atau dokumen..."
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-                        />
-                        {search && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setSearch('');
-                                    applyFilters({ search: undefined });
-                                }}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        )}
-                    </form>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        <div className="relative min-w-[170px]">
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="relative">
                             <select
                                 value={filters.category_id ?? ''}
                                 onChange={(e) => applyFilters({ category_id: e.target.value || undefined })}
@@ -207,7 +184,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         </div>
 
-                        <div className="relative min-w-[160px]">
+                        <div className="relative">
                             <select
                                 value={filters.unit_id ?? ''}
                                 onChange={(e) => applyFilters({ unit_id: e.target.value || undefined })}
@@ -223,7 +200,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         </div>
 
-                        <div className="relative min-w-[150px]">
+                        <div className="relative">
                             <select
                                 value={filters.kondisi ?? ''}
                                 onChange={(e) => applyFilters({ kondisi: e.target.value || undefined })}
@@ -239,7 +216,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         </div>
 
-                        <div className="relative min-w-[210px]">
+                        <div className="relative">
                             <select
                                 aria-label="Urutkan"
                                 value={filters.urut ?? 'nama_asc'}
@@ -259,6 +236,31 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
 
                 {/* Data Table */}
                 <div className="shadow-xs overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    <div className="border-b border-slate-200 p-4">
+                        <form onSubmit={submitSearch} className="relative max-w-sm">
+                            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                aria-label="Cari aset"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Cari nama barang, kode BMD, atau dokumen..."
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            />
+                            {search && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSearch('');
+                                        applyFilters({ search: undefined });
+                                    }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            )}
+                        </form>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left">
                             <thead>
