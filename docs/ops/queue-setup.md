@@ -50,10 +50,11 @@ stdout_logfile=/var/www/sibima/storage/logs/queue-worker.log
 ```
 php artisan migrate --force
 php artisan db:seed --class=PermissionSeeder --force
+php artisan db:seed --class=WorkflowDefinitionSeeder --force
 php artisan queue:restart
 ```
 
-`queue:restart` membuat worker memuat kode baru setelah job berjalan selesai. `PermissionSeeder` idempotent (aman diulang) dan menugaskan permission import/ekspor ke role.
+`queue:restart` membuat worker memuat kode baru setelah job berjalan selesai. `PermissionSeeder` menugaskan permission default ke role sistem (menimpa permission role sistem, cek dulu bila sudah dikustom). `WorkflowDefinitionSeeder` non-destruktif: hanya membuat alur yang belum ada (tanpa ini, mengajukan permohonan/penerimaan gagal dengan 404 karena definisi alurnya tidak ditemukan).
 
 ## Pemecahan masalah
 
