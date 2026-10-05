@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class WorkflowSettingsService
 {
-    public const ROLES = ['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah'];
-
     /** @param  list<array<string, mixed>>  $steps */
     public function update(WorkflowDefinition $workflow, array $steps, User $by): void
     {

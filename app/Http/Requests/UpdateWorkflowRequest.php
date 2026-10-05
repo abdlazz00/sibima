@@ -4,8 +4,8 @@ namespace App\Http\Requests;
 
 use App\Enums\ApproverType;
 use App\Enums\UnitScope;
+use App\Models\Role;
 use App\Models\User;
-use App\Services\WorkflowSettingsService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -68,7 +68,7 @@ class UpdateWorkflowRequest extends FormRequest
     {
         $role = $step['approver_role'] ?? null;
 
-        if (! in_array($role, WorkflowSettingsService::ROLES, true)) {
+        if (! is_string($role) || ! Role::where('name', $role)->exists()) {
             $validator->errors()->add("steps.$i.approver_role", 'Pilih role approver yang valid.');
 
             return;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ApproverType;
 use App\Http\Requests\UpdateWorkflowRequest;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkflowDefinition;
 use App\Services\WorkflowSettingsService;
@@ -15,11 +16,6 @@ use Inertia\Response;
 
 class WorkflowSettingsController extends Controller
 {
-    private const ROLE_LABELS = [
-        'kasubag' => 'Kasubag', 'camat' => 'Camat', 'admin_kecamatan' => 'Admin Kecamatan',
-        'admin_kelurahan' => 'Admin Kelurahan', 'lurah' => 'Lurah',
-    ];
-
     private const SCOPE_LABELS = [
         'none' => 'Tidak dibatasi unit', 'subject' => 'Unit pengaju',
         'origin' => 'Unit asal', 'destination' => 'Unit tujuan',
@@ -75,7 +71,7 @@ class WorkflowSettingsController extends Controller
                 ])->values(),
             ],
             'options' => [
-                'roles' => collect(WorkflowSettingsService::ROLES)->map(fn ($r) => ['value' => $r, 'label' => self::ROLE_LABELS[$r]])->values(),
+                'roles' => Role::orderBy('name')->get()->map(fn ($r) => ['value' => $r->name, 'label' => $r->display_name ?? $r->name])->values(),
                 'types' => collect(ApproverType::cases())
                     ->filter(fn ($t) => $t !== ApproverType::AtasanUnit || $capability === 'subject')
                     ->map(fn ($t) => ['value' => $t->value, 'label' => $t->label()])->values(),

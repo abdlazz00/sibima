@@ -178,3 +178,27 @@ it('resets a workflow to its defaults and logs the reset', function () {
         ->and($steps->pluck('label')->all())->toBe(['Verifikasi Kasubag', 'Persetujuan Camat'])
         ->and(WorkflowChangeLog::orderBy('id')->pluck('event')->all())->toBe(['update', 'reset']);
 });
+
+it('offers every role, including custom ones, as an approver and accepts a step for it', function () {
+    $verifikator = Role::findOrCreate('verifikator');
+    $verifikator->update(['display_name' => 'Verifikator Aset']);
+    $user = userWithRole('verifikator', $this->kec);
+
+    $this->actingAs($this->kasubag)->get(route('workflow-settings.edit', $this->penerimaan))
+        ->assertInertia(fn (Assert $p) => $p->where('options.roles', fn ($roles) => collect($roles)->contains(
+            fn ($r) => $r['value'] === 'verifikator' && $r['label'] === 'Verifikator Aset',
+        )));
+
+    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $this->penerimaan), [
+        'steps' => [stepPayload(['label' => 'Verifikasi', 'approver_role' => 'verifikator', 'unit_scope' => 'none'])],
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    expect($this->penerimaan->steps()->first()->approver_role)->toBe('verifikator')
+        ->and($user->hasRole('verifikator'))->toBeTrue();
+});
+
+it('still rejects an approver role that does not exist', function () {
+    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $this->penerimaan), [
+        'steps' => [stepPayload(['approver_role' => 'tidak_ada', 'unit_scope' => 'none'])],
+    ])->assertSessionHasErrors('steps.0.approver_role');
+});
