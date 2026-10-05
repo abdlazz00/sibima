@@ -182,3 +182,14 @@ it('includes the new type in the Laporan Mutasi filter and recap', function () {
 
     expect($row['jumlah'])->toBe(1);
 });
+
+it('remembers who held the asset at submission so the detail still shows the returner after approval', function () {
+    $asset = pgHeld($this);
+    $mutation = $this->service->submit(pgData($this->kec), pgItems([$asset]), $this->adminKec);
+    $this->engine->approve($mutation->approvalRequest, $this->camat);
+
+    expect($mutation->items()->sole()->origin_holder_id)->toBe($this->pak->id);
+
+    $this->actingAs($this->camat)->get(route('asset-mutations.show', $mutation))
+        ->assertInertia(fn ($page) => $page->where('mutation.items.0.origin_holder.nama', 'Pak Camat'));
+});

@@ -13,6 +13,7 @@ class AssetMutationItem extends Model
     protected $fillable = [
         'asset_mutation_id',
         'asset_id',
+        'origin_holder_id',
         'target_holder_id',
         'catatan',
     ];
@@ -22,6 +23,7 @@ class AssetMutationItem extends Model
         return [
             'asset_mutation_id' => 'integer',
             'asset_id' => 'integer',
+            'origin_holder_id' => 'integer',
             'target_holder_id' => 'integer',
         ];
     }
@@ -34,6 +36,12 @@ class AssetMutationItem extends Model
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class);
+    }
+
+    /** Pemegang aset saat diajukan (pemegang aset sekarang bisa sudah berubah setelah disetujui). */
+    public function originHolder(): BelongsTo
+    {
+        return $this->belongsTo(Pegawai::class, 'origin_holder_id');
     }
 
     public function targetHolder(): BelongsTo

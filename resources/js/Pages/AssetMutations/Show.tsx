@@ -625,6 +625,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                     items.map((item, index) => {
                                         const asset = item.asset;
                                         const oldHolder =
+                                            item.origin_holder ??
                                             asset?.current_holder ??
                                             (
                                                 asset as unknown as {

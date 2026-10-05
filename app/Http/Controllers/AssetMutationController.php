@@ -98,6 +98,7 @@ class AssetMutationController extends Controller
             'items.asset.category',
             'items.asset.currentHolder',
             'items.targetHolder',
+            'items.originHolder',
             'approvalRequest.definition',
             'approvalRequest.steps',
             'approvalRequest.actions.user',

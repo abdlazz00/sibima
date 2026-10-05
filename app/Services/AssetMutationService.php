@@ -90,6 +90,9 @@ class AssetMutationService
                 }
             }
 
+            $holders = $assets->pluck('current_holder_id', 'id');
+            $items = array_map(fn ($item) => $item + ['origin_holder_id' => $holders[$item['asset_id']]], $items);
+
             // Lock assets
             Asset::whereIn('id', $assetIds)->update(['status' => AssetStatus::DalamProses]);
 

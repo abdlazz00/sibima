@@ -126,7 +126,14 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                 jenis_mutasi: newType,
                 destination_unit_id: nextDest,
                 // reset holders on type change
-                items: data.items.map((i) => ({ ...i, target_holder_id: '' })),
+                items: data.items.map((i) => {
+                    const held = assets.find((a) => a.id === Number(i.asset_id))?.current_holder != null;
+                    return {
+                        ...i,
+                        target_holder_id: '',
+                        asset_id: newType === 'pengembalian' && !held ? '' : i.asset_id,
+                    };
+                }),
             };
         });
     };

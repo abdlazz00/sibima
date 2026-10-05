@@ -188,6 +188,7 @@ export interface AssetMutationItem {
     catatan: string | null;
     asset?: Asset;
     target_holder?: Pegawai | null;
+    origin_holder?: Pegawai | null;
 }
 
 export interface AssetMutation {
