@@ -11,6 +11,7 @@ use App\Services\ApprovalWorkflowService;
 use App\Services\AssetReportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -24,6 +25,11 @@ class AssetReportController extends Controller
         private readonly ApprovalWorkflowService $workflow,
     ) {}
 
+    private const SORTS = [
+        'terbaru' => ['label' => 'Terbaru', 'order' => [['tanggal_kejadian', 'desc'], ['id', 'desc']]],
+        'terlama' => ['label' => 'Terlama', 'order' => [['tanggal_kejadian', 'asc'], ['id', 'asc']]],
+    ];
+
     public function index(Request $request): Response
     {
         Gate::authorize('viewAny', AssetReport::class);
@@ -31,22 +37,21 @@ class AssetReportController extends Controller
         $user = $request->user();
         $unitIds = $user->accessibleUnitIds();
 
-        $items = AssetReport::with(['asset', 'unit', 'creator', 'approvalRequest'])
+        $query = AssetReport::with(['asset', 'unit', 'creator', 'approvalRequest'])
             ->when($unitIds !== null, fn (Builder $q) => $q->whereIn('unit_id', $unitIds))
             ->when($request->status, fn (Builder $q, string $status) => $q->where('status', $status))
             ->when($request->jenis, fn (Builder $q, string $jenis) => $q->where('jenis', $jenis))
             ->when($request->search, fn (Builder $q, string $search) => $q->where(fn (Builder $q2) => $q2
                 ->where('nomor_laporan', 'like', "%{$search}%")
                 ->orWhereHas('asset', fn (Builder $q3) => $q3->where('nama_aset', 'like', "%{$search}%"))
-            ))
-            ->latest('tanggal_kejadian')
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+            ));
+
+        $items = ListSort::apply($query, self::SORTS, $request->input('urut'))->paginate(15)->withQueryString();
 
         return Inertia::render('AssetReports/Index', [
             'items' => $items,
-            'filters' => $request->only('search', 'status', 'jenis'),
+            'filters' => $request->only('search', 'status', 'jenis', 'urut'),
+            'sortOptions' => ListSort::options(self::SORTS),
             'can' => ['create' => $user->can('create', AssetReport::class)],
         ]);
     }
