@@ -26,7 +26,8 @@ class ApprovalWorkflowService
 {
     public function submit(Model $approvable, string $workflowCode, User $submitter): ApprovalRequest
     {
-        $definition = WorkflowDefinition::where('code', $workflowCode)->firstOrFail();
+        $definition = WorkflowDefinition::where('code', $workflowCode)->first()
+            ?? throw new InvalidArgumentException("Alur persetujuan '{$workflowCode}' belum dikonfigurasi. Jalankan WorkflowDefinitionSeeder.");
 
         $request = ApprovalRequest::create([
             'workflow_definition_id' => $definition->id,

@@ -52,6 +52,12 @@ class AssetMutation extends Model implements Approvable, HandlesApprovalOutcome,
         return $this->belongsTo(Unit::class, 'destination_unit_id');
     }
 
+    /** Unit pengaju bagi langkah "Atasan Unit": unit asal (pada pengembalian, asal = tujuan). */
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'origin_unit_id');
+    }
+
     public function getOriginUnit(): Unit
     {
         return $this->originUnit;

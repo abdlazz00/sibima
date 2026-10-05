@@ -38,7 +38,7 @@ function stepPayload(array $override = []): array
 it('shows the workflow list and editor only to a kasubag', function () {
     $this->actingAs($this->kasubag)->get(route('workflow-settings.index'))
         ->assertOk()
-        ->assertInertia(fn (Assert $p) => $p->component('WorkflowSettings/Index')->has('workflows', 9));
+        ->assertInertia(fn (Assert $p) => $p->component('WorkflowSettings/Index')->has('workflows', 10));
 
     $this->actingAs($this->kasubag)->get(route('workflow-settings.edit', $this->penerimaan))
         ->assertOk()

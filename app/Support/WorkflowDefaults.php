@@ -43,6 +43,10 @@ class WorkflowDefaults
                     self::role('Persetujuan Camat', 'camat', 'destination'),
                 ],
             ],
+            'pengembalian_aset' => [
+                'name' => 'Pengembalian Aset ke Inventaris',
+                'steps' => [self::atasanUnit('Persetujuan Atasan Unit')],
+            ],
             'mutasi_internal_kec' => [
                 'name' => 'Mutasi Internal Kecamatan',
                 'steps' => [self::role('Persetujuan Camat', 'camat', 'origin')],
