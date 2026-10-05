@@ -15,6 +15,7 @@ use App\Services\ApprovalWorkflowService;
 use App\Services\AssetRequestService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -28,6 +29,11 @@ class AssetRequestController extends Controller
         private readonly ApprovalWorkflowService $workflow,
     ) {}
 
+    private const SORTS = [
+        'terbaru' => ['label' => 'Terbaru', 'order' => [['id', 'desc']]],
+        'terlama' => ['label' => 'Terlama', 'order' => [['id', 'asc']]],
+    ];
+
     public function index(Request $request): Response
     {
         Gate::authorize('viewAny', AssetRequest::class);
@@ -36,7 +42,7 @@ class AssetRequestController extends Controller
         $unitIds = $user->accessibleUnitIds();
         $binaanIds = $user->hasRole('admin_kecamatan') ? Unit::where('parent_id', $user->unit_id)->pluck('id')->all() : [];
 
-        $items = AssetRequest::with(['pegawai', 'unit', 'category', 'creator', 'approvalRequest'])
+        $query = AssetRequest::with(['pegawai', 'unit', 'category', 'creator', 'approvalRequest'])
             ->when($unitIds !== null, fn (Builder $q) => $q->where(fn (Builder $w) => $w
                 ->whereIn('unit_id', $unitIds)
                 ->orWhere(fn (Builder $x) => $x->where('jenis', AssetRequestType::Unit)->whereIn('unit_id', $binaanIds))
@@ -47,14 +53,14 @@ class AssetRequestController extends Controller
             ->when($request->search, fn (Builder $q, string $search) => $q->where(fn (Builder $q2) => $q2
                 ->where('nomor_permohonan', 'like', "%{$search}%")
                 ->orWhere('keterangan', 'like', "%{$search}%")
-            ))
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+            ));
+
+        $items = ListSort::apply($query, self::SORTS, $request->input('urut'))->paginate(15)->withQueryString();
 
         return Inertia::render('AssetRequests/Index', [
             'items' => $items,
-            'filters' => $request->only('search', 'status', 'jenis', 'menunggu_pemenuhan'),
+            'filters' => $request->only('search', 'status', 'jenis', 'menunggu_pemenuhan', 'urut'),
+            'sortOptions' => ListSort::options(self::SORTS),
             'can' => ['create' => $user->can('create', AssetRequest::class)],
         ]);
     }

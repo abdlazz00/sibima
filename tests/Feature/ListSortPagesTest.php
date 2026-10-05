@@ -2,6 +2,8 @@
 
 use App\Models\Asset;
 use App\Models\AssetReport;
+use App\Models\AssetRequest;
+use App\Models\Pegawai;
 
 beforeEach(function () {
     $this->kec = makeKecamatan();
@@ -54,4 +56,29 @@ it('keeps urut on the next page of Lapor Rusak/Hilang and sends the sort options
             ->where('items.next_page_url', fn ($url) => str_contains($url, 'urut=terlama')));
 
     expect(lsIds($this, '/asset-reports?urut=terlama&page=2'))->toHaveCount(1);
+});
+
+it('sorts Permohonan Aset by id, newest first by default and oldest first on request', function () {
+    $pegawai = Pegawai::factory()->create(['unit_id' => $this->kec->id]);
+    $ids = [];
+    foreach (range(1, 3) as $i) {
+        $ids[] = AssetRequest::factory()->create(['pegawai_id' => $pegawai->id, 'unit_id' => $this->kec->id])->id;
+    }
+
+    expect(lsIds($this, '/asset-requests'))->toBe(array_reverse($ids))
+        ->and(lsIds($this, '/asset-requests?urut=terlama'))->toBe($ids)
+        ->and(lsIds($this, '/asset-requests?urut=ngawur'))->toBe(array_reverse($ids));
+});
+
+it('keeps urut on the next page of Permohonan Aset and sends the sort options', function () {
+    $pegawai = Pegawai::factory()->create(['unit_id' => $this->kec->id]);
+    foreach (range(1, 16) as $i) {
+        AssetRequest::factory()->create(['pegawai_id' => $pegawai->id, 'unit_id' => $this->kec->id]);
+    }
+
+    $this->actingAs($this->kasubag)->get('/asset-requests?urut=terlama')
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.urut', 'terlama')
+            ->has('sortOptions', 2)
+            ->where('items.next_page_url', fn ($url) => str_contains($url, 'urut=terlama')));
 });

@@ -1,4 +1,5 @@
-import { ChevronRightIcon as ChevronRight, EyeIcon as Eye, PlusIcon as Plus, SearchIcon as Search } from '@/Components/Icons';
+import { ChevronRightIcon as ChevronRight, EyeIcon as Eye, PlusIcon as Plus } from '@/Components/Icons';
+import { FilterCard, FilterSelect, TableSearch } from '@/Components/ListFilters';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { REQUEST_STATUS_LABEL, REQUEST_STATUS_STYLE, REQUEST_TYPE_LABEL } from '@/lib/assetRequest';
 import { pageNumbersWithGaps } from '@/lib/pagination';
@@ -8,13 +9,12 @@ import { FormEvent, useState } from 'react';
 
 interface IndexProps extends PageProps {
     items: Paginated<AssetRequest>;
-    filters: { search?: string; status?: string; jenis?: string; menunggu_pemenuhan?: string };
+    filters: { search?: string; status?: string; jenis?: string; menunggu_pemenuhan?: string; urut?: string };
+    sortOptions: { value: string; label: string }[];
     can: { create: boolean };
 }
 
-const SELECT = 'rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100';
-
-export default function Index({ items, filters, can }: IndexProps) {
+export default function Index({ items, filters, sortOptions, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
     const pages = pageNumbersWithGaps(items.current_page, items.last_page);
     const waiting = filters.menunggu_pemenuhan === '1';
@@ -51,35 +51,39 @@ export default function Index({ items, filters, can }: IndexProps) {
                     )}
                 </div>
 
-                <div className="flex flex-wrap items-end gap-3">
-                    <form onSubmit={submitSearch} className="relative w-full max-w-sm">
-                        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Cari nomor permohonan atau keterangan..."
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-                        />
-                    </form>
-                    <select value={filters.status ?? ''} onChange={(e) => go({ status: e.target.value || undefined, page: undefined })} className={SELECT}>
+                <FilterCard>
+                    <FilterSelect ariaLabel="Status" value={filters.status ?? ''} onChange={(v) => go({ status: v || undefined, page: undefined })}>
                         <option value="">Semua status</option>
                         {Object.entries(REQUEST_STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
-                    <select value={filters.jenis ?? ''} onChange={(e) => go({ jenis: e.target.value || undefined, page: undefined })} className={SELECT}>
+                    </FilterSelect>
+                    <FilterSelect ariaLabel="Jenis" value={filters.jenis ?? ''} onChange={(v) => go({ jenis: v || undefined, page: undefined })}>
                         <option value="">Semua jenis</option>
                         {Object.entries(REQUEST_TYPE_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
+                    </FilterSelect>
+                    <FilterSelect ariaLabel="Urutkan" value={filters.urut ?? 'terbaru'} onChange={(v) => go({ urut: v === 'terbaru' ? undefined : v, page: undefined })}>
+                        {sortOptions.map((o) => <option key={o.value} value={o.value}>Urutkan: {o.label}</option>)}
+                    </FilterSelect>
                     <button
                         type="button"
+                        aria-pressed={waiting}
                         onClick={() => go({ menunggu_pemenuhan: waiting ? undefined : '1', page: undefined })}
-                        className={`rounded-lg border px-3 py-2 text-sm font-medium ${waiting ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
+                        className={`rounded-lg border px-3.5 py-2.5 text-sm font-medium shadow-sm ${waiting ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
                     >
                         Menunggu Pemenuhan
                     </button>
-                </div>
+                </FilterCard>
 
                 <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    <TableSearch
+                        value={search}
+                        onChange={setSearch}
+                        onSubmit={submitSearch}
+                        onClear={() => {
+                            setSearch('');
+                            go({ search: undefined, page: undefined });
+                        }}
+                        placeholder="Cari nomor permohonan atau keterangan..."
+                    />
                     <table className="w-full border-collapse text-left">
                         <thead>
                             <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
