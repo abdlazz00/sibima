@@ -9,7 +9,11 @@ class UpdateRoleRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('pengaturan.role') ?? false;
+        $actor = $this->user();
+        $role = $this->route('role');
+
+        return ($actor?->can('pengaturan.role') ?? false)
+            && $actor->covers($role->permissions->pluck('name')->all(), $role->unit_scope);
     }
 
     public function rules(): array
@@ -35,7 +39,15 @@ class UpdateRoleRequest extends FormRequest
         return [function (Validator $validator) {
             $role = $this->route('role');
 
-            if ($role->name !== 'kasubag' || $validator->errors()->isNotEmpty()) {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            if (! $this->user()->covers($this->input('permissions', []), $this->input('unit_scope'))) {
+                $validator->errors()->add('permissions', 'Izin atau cakupan unit melebihi milik Anda.');
+            }
+
+            if ($role->name !== 'kasubag') {
                 return;
             }
 
