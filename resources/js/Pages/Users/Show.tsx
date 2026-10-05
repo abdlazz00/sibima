@@ -19,7 +19,7 @@ interface UserDetail {
         nama: string;
         nip: string | null;
         jabatan: string;
-        telepon: string | null;
+        no_hp: string | null;
         unit_nama?: string;
     } | null;
     roles: {
@@ -263,7 +263,7 @@ export default function Show({ auth, user, effectivePermissions, can }: ShowProp
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">No. Telepon / HP</span>
-                                    <span className="font-medium text-slate-800">{user.pegawai.telepon || '-'}</span>
+                                    <span className="font-medium text-slate-800">{user.pegawai.no_hp || '-'}</span>
                                 </div>
                             </div>
                         ) : (

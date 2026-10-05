@@ -11,7 +11,6 @@ use Database\Seeders\PermissionSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -24,7 +23,7 @@ class UserController extends Controller
 
         $accessibleUnitIds = $request->user()->accessibleUnitIds();
 
-        $query = User::with(['pegawai.unit', 'roles.permissions', 'permissions', 'unit'])
+        $query = User::with(['pegawai.unit', 'roles', 'permissions', 'unit'])
             ->when($accessibleUnitIds !== null, fn ($q) => $q->whereIn('unit_id', $accessibleUnitIds));
 
         if ($search = $request->input('search')) {
@@ -81,7 +80,9 @@ class UserController extends Controller
         return Inertia::render('Users/Index', [
             'users' => $users,
             'roles' => Role::orderBy('name')->get(['id', 'name', 'display_name']),
-            'units' => Unit::orderBy('name')->get(['id', 'name', 'type']),
+            'units' => Unit::orderBy('name')
+                ->when($accessibleUnitIds !== null, fn ($q) => $q->whereIn('id', $accessibleUnitIds))
+                ->get(['id', 'name', 'type']),
             'filters' => $request->only(['search', 'role', 'unit_id', 'status']),
             'can' => [
                 'manageAccess' => $request->user()->can('user.manage-access'),
@@ -100,12 +101,11 @@ class UserController extends Controller
             abort(403);
         }
 
-        $user->load(['pegawai.unit', 'roles.permissions', 'permissions', 'unit']);
+        $user->load(['pegawai.unit', 'roles', 'permissions', 'unit']);
 
         // Kelompokkan izin efektif per modul
-        $rolePermissions = $user->roles->flatMap->permissions->pluck('name')->all();
         $directPermissions = $user->permissions->pluck('name')->all();
-        $effectivePermissions = array_values(array_unique(array_merge($rolePermissions, $directPermissions)));
+        $effectivePermissions = $user->getAllPermissions()->pluck('name')->all();
 
         $groupedPermissions = [];
         foreach (PermissionSeeder::PERMISSION_GROUPS as $groupName => $groupPerms) {
@@ -117,22 +117,12 @@ class UserController extends Controller
 
         return Inertia::render('Users/Show', [
             'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
+                ...$user->only(['id', 'name', 'email', 'unit_id']),
                 'is_active' => (bool) $user->is_active,
                 'foto_profile_url' => $user->foto_profile_url,
-                'unit_id' => $user->unit_id,
-                'unit' => $user->unit ? [
-                    'id' => $user->unit->id,
-                    'name' => $user->unit->name,
-                ] : null,
+                'unit' => $user->unit?->only(['id', 'name']),
                 'pegawai' => $user->pegawai ? [
-                    'id' => $user->pegawai->id,
-                    'nama' => $user->pegawai->nama,
-                    'nip' => $user->pegawai->nip,
-                    'jabatan' => $user->pegawai->jabatan,
-                    'telepon' => $user->pegawai->telepon,
+                    ...$user->pegawai->only(['id', 'nama', 'nip', 'jabatan', 'no_hp']),
                     'unit_nama' => $user->pegawai->unit?->name,
                 ] : null,
                 'roles' => $user->roles->map(fn ($r) => [
@@ -216,7 +206,7 @@ class UserController extends Controller
         ];
 
         if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->validated('password'));
+            $updateData['password'] = $request->validated('password');
         }
 
         $user->update($updateData);

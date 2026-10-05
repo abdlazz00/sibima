@@ -7,7 +7,6 @@ export interface NavItem {
     icon: string;
     badge?: string | number;
     disabled?: boolean;
-    roles?: Role[];
     permission?: string;
 }
 
@@ -68,27 +67,6 @@ export function navGroupsForPermissions(permissions: string[] = []): NavGroup[] 
         ),
     })).filter((group) => group.items.length > 0);
 }
-
-export function navGroupsForRole(role?: Role): NavGroup[] {
-    return SIDEBAR_NAV_GROUPS.map((group) => ({
-        ...group,
-        items: group.items.filter(
-            (item) => !item.roles || (role !== undefined && item.roles.includes(role)),
-        ),
-    })).filter((group) => group.items.length > 0);
-}
-
-export function navItemsForRole(role: Role | undefined): NavItem[] {
-    return navGroupsForRole(role).flatMap((group) => group.items);
-}
-
-export const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
-    kasubag: navItemsForRole('kasubag'),
-    camat: navItemsForRole('camat'),
-    admin_kecamatan: navItemsForRole('admin_kecamatan'),
-    admin_kelurahan: navItemsForRole('admin_kelurahan'),
-    lurah: navItemsForRole('lurah'),
-};
 
 export function formatRole(role?: string): string {
     switch (role) {
