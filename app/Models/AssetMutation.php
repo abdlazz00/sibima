@@ -52,6 +52,12 @@ class AssetMutation extends Model implements Approvable, HandlesApprovalOutcome,
         return $this->belongsTo(Unit::class, 'destination_unit_id');
     }
 
+    /** Urutan daftar Mutasi Aset (dipakai repositori). */
+    public const SORTS = [
+        'terbaru' => ['label' => 'Terbaru', 'order' => [['tanggal_mutasi', 'desc'], ['id', 'desc']]],
+        'terlama' => ['label' => 'Terlama', 'order' => [['tanggal_mutasi', 'asc'], ['id', 'asc']]],
+    ];
+
     /** Unit pengaju bagi langkah "Atasan Unit": unit asal (pada pengembalian, asal = tujuan). */
     public function unit(): BelongsTo
     {

@@ -13,6 +13,7 @@ use App\Repositories\Contracts\AssetMutationRepositoryInterface;
 use App\Services\ApprovalWorkflowService;
 use App\Services\AssetMutationService;
 use Illuminate\Http\RedirectResponse;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -30,10 +31,13 @@ class AssetMutationController extends Controller
     {
         Gate::authorize('viewAny', AssetMutation::class);
 
-        $mutations = $this->repository->paginateForUser($request->user(), 15);
+        $filters = $request->only('search', 'jenis', 'urut');
+        $mutations = $this->repository->paginateForUser($request->user(), $filters, 15);
 
         return Inertia::render('AssetMutations/Index', [
             'mutations' => $mutations,
+            'filters' => $filters,
+            'sortOptions' => ListSort::options(AssetMutation::SORTS),
             'can' => [
                 'create' => $request->user()->can('create', AssetMutation::class),
             ],

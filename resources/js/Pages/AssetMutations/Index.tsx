@@ -5,6 +5,7 @@ import {
     PlusIcon as Plus,
     SearchIcon as Search,
 } from '@/Components/Icons';
+import { FilterCard, FilterSelect, TableSearch } from '@/Components/ListFilters';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { pageNumbersWithGaps } from '@/lib/pagination';
 import { AssetMutation, MutationType, Paginated, PageProps } from '@/types';
@@ -13,7 +14,8 @@ import { FormEvent, useState } from 'react';
 
 interface IndexProps extends PageProps {
     mutations: Paginated<AssetMutation>;
-    filters?: { search?: string; jenis?: string };
+    filters?: { search?: string; jenis?: string; urut?: string };
+    sortOptions: { value: string; label: string }[];
     can: { create: boolean };
 }
 
@@ -47,30 +49,19 @@ const MUTATION_TYPE_LABEL: Record<MutationType, string> = {
     pengembalian: 'Pengembalian ke Inventaris',
 };
 
-export default function Index({ mutations, filters = {}, can }: IndexProps) {
+export default function Index({ mutations, filters = {}, sortOptions, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
-    const [selectedType, setSelectedType] = useState(filters.jenis ?? '');
     const pages = pageNumbersWithGaps(mutations.current_page, mutations.last_page);
 
-    const applyFilter = (newSearch: string, newType: string) => {
-        router.get(
-            route('asset-mutations.index'),
-            {
-                search: newSearch || undefined,
-                jenis: newType || undefined,
-            },
-            { preserveState: true, preserveScroll: true, replace: true }
-        );
+    const go = (changes: Record<string, string | number | undefined>) => {
+        const params = { ...filters, search: search || undefined, ...changes };
+        const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== ''));
+        router.get(route('asset-mutations.index'), clean, { preserveState: true, preserveScroll: true, replace: true });
     };
 
     const submitSearch = (e: FormEvent) => {
         e.preventDefault();
-        applyFilter(search, selectedType);
-    };
-
-    const handleTypeChange = (type: string) => {
-        setSelectedType(type);
-        applyFilter(search, type);
+        go({ page: undefined });
     };
 
     return (
@@ -102,51 +93,30 @@ export default function Index({ mutations, filters = {}, can }: IndexProps) {
                     )}
                 </div>
 
-                {/* Filters & Search */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <form onSubmit={submitSearch} className="relative w-full max-w-md">
-                        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Cari no. mutasi, nama aset, atau unit..."
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-                        />
-                    </form>
-
-                    {/* Filter Tabs by Type */}
-                    <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                        <button
-                            type="button"
-                            onClick={() => handleTypeChange('')}
-                            className={`rounded-lg px-3 py-1.5 font-medium transition ${
-                                selectedType === ''
-                                    ? 'bg-slate-900 text-white shadow-xs'
-                                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                            }`}
-                        >
-                            Semua Alur
-                        </button>
+                <FilterCard>
+                    <FilterSelect ariaLabel="Jenis alur" value={filters.jenis ?? ''} onChange={(v) => go({ jenis: v || undefined, page: undefined })}>
+                        <option value="">Semua Alur</option>
                         {(Object.keys(MUTATION_TYPE_LABEL) as MutationType[]).map((type) => (
-                            <button
-                                key={type}
-                                type="button"
-                                onClick={() => handleTypeChange(type)}
-                                className={`rounded-lg px-3 py-1.5 font-medium transition ${
-                                    selectedType === type
-                                        ? 'bg-blue-700 text-white shadow-xs'
-                                        : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                                }`}
-                            >
-                                {MUTATION_TYPE_LABEL[type]}
-                            </button>
+                            <option key={type} value={type}>{MUTATION_TYPE_LABEL[type]}</option>
                         ))}
-                    </div>
-                </div>
+                    </FilterSelect>
+                    <FilterSelect ariaLabel="Urutkan" value={filters.urut ?? 'terbaru'} onChange={(v) => go({ urut: v === 'terbaru' ? undefined : v, page: undefined })}>
+                        {sortOptions.map((o) => <option key={o.value} value={o.value}>Urutkan: {o.label}</option>)}
+                    </FilterSelect>
+                </FilterCard>
 
                 {/* Table Section */}
                 <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                    <TableSearch
+                        value={search}
+                        onChange={setSearch}
+                        onSubmit={submitSearch}
+                        onClear={() => {
+                            setSearch('');
+                            go({ search: undefined, page: undefined });
+                        }}
+                        placeholder="Cari no. mutasi, nama aset, atau unit..."
+                    />
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left text-sm">
                             <thead>
@@ -300,6 +270,7 @@ export default function Index({ mutations, filters = {}, can }: IndexProps) {
                                             page: mutations.current_page - 1,
                                             search: filters.search,
                                             jenis: filters.jenis,
+                                            urut: filters.urut,
                                         })}
                                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
                                     >
@@ -318,6 +289,7 @@ export default function Index({ mutations, filters = {}, can }: IndexProps) {
                                                 page: p,
                                                 search: filters.search,
                                                 jenis: filters.jenis,
+                                                urut: filters.urut,
                                             })}
                                             className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold ${
                                                 p === mutations.current_page
@@ -335,6 +307,7 @@ export default function Index({ mutations, filters = {}, can }: IndexProps) {
                                             page: mutations.current_page + 1,
                                             search: filters.search,
                                             jenis: filters.jenis,
+                                            urut: filters.urut,
                                         })}
                                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
                                     >

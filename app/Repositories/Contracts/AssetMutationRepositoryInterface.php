@@ -12,5 +12,5 @@ interface AssetMutationRepositoryInterface
 
     public function findById(int $id): ?AssetMutation;
 
-    public function paginateForUser(User $user, int $perPage = 15): LengthAwarePaginator;
+    public function paginateForUser(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator;
 }
