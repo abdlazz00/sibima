@@ -55,6 +55,9 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
         items: [{ ...EMPTY_ITEM }] as ItemForm[],
     });
 
+    const isReturn = form.data.jenis_mutasi === 'pengembalian';
+    const sameUnit = form.data.jenis_mutasi === 'internal' || isReturn;
+
     const originUnit = useMemo(
         () => allUnits.find((u) => u.id === Number(form.data.origin_unit_id)),
         [allUnits, form.data.origin_unit_id]
@@ -64,7 +67,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
     const destinationOptions = useMemo(() => {
         const originId = Number(form.data.origin_unit_id);
 
-        if (form.data.jenis_mutasi === 'internal') {
+        if (sameUnit) {
             const origin = allUnits.find((u) => u.id === originId);
             return origin ? [origin] : [];
         }
@@ -87,13 +90,15 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
     // Available assets from selected origin unit
     const availableAssets = useMemo(() => {
         const originId = Number(form.data.origin_unit_id);
-        return assets.filter((a) => a.unit_id === originId && a.status === 'aktif');
-    }, [assets, form.data.origin_unit_id]);
+        return assets.filter(
+            (a) => a.unit_id === originId && a.status === 'aktif' && (!isReturn || a.current_holder != null),
+        );
+    }, [assets, form.data.origin_unit_id, isReturn]);
 
     // Eligible pegawais for target holder dropdown
     const targetPegawaiOptions = useMemo(() => {
         const destId =
-            form.data.jenis_mutasi === 'internal'
+            sameUnit
                 ? Number(form.data.origin_unit_id)
                 : Number(form.data.destination_unit_id);
 
@@ -107,7 +112,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
             let nextDest = data.destination_unit_id;
             const originId = Number(data.origin_unit_id);
 
-            if (newType === 'internal') {
+            if (newType === 'internal' || newType === 'pengembalian') {
                 nextDest = originId;
             } else if (newType === 'retur_kel_ke_kec') {
                 const kec = allUnits.find((u) => u.type === 'kecamatan');
@@ -152,12 +157,13 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
             ...data,
             origin_unit_id: Number(data.origin_unit_id),
             destination_unit_id:
-                data.jenis_mutasi === 'internal'
+                data.jenis_mutasi === 'internal' || data.jenis_mutasi === 'pengembalian'
                     ? Number(data.origin_unit_id)
                     : Number(data.destination_unit_id),
             items: data.items.map((item) => ({
                 asset_id: Number(item.asset_id),
-                target_holder_id: item.target_holder_id ? Number(item.target_holder_id) : null,
+                target_holder_id:
+                    data.jenis_mutasi !== 'pengembalian' && item.target_holder_id ? Number(item.target_holder_id) : null,
                 catatan: item.catatan || null,
             })),
         }));
@@ -256,17 +262,25 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                         <>
                                             <option value="kec_ke_kel">Mutasi Kecamatan ke Kelurahan</option>
                                             <option value="internal">Mutasi Internal Kecamatan</option>
+                                            <option value="pengembalian">Pengembalian ke Inventaris</option>
                                         </>
                                     ) : (
                                         <>
                                             <option value="antar_kel">Mutasi Antar Kelurahan</option>
                                             <option value="retur_kel_ke_kec">Retur Kelurahan ke Kecamatan</option>
                                             <option value="internal">Mutasi Internal Kelurahan</option>
+                                            <option value="pengembalian">Pengembalian ke Inventaris</option>
                                         </>
                                     )}
                                 </select>
                                 {form.errors.jenis_mutasi && (
                                     <p className="mt-1 text-xs text-red-600">{form.errors.jenis_mutasi}</p>
+                                )}
+                                {isReturn && (
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Aset kembali menjadi stok unit setelah disetujui. Untuk memindahkan langsung ke pegawai lain
+                                        gunakan Mutasi Internal.
+                                    </p>
                                 )}
                             </div>
 
@@ -282,7 +296,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                             ...d,
                                             origin_unit_id: newOriginId,
                                             destination_unit_id:
-                                                d.jenis_mutasi === 'internal' ? newOriginId : '',
+                                                d.jenis_mutasi === 'internal' || d.jenis_mutasi === 'pengembalian' ? newOriginId : '',
                                             items: [{ ...EMPTY_ITEM }],
                                         }));
                                     }}
@@ -297,7 +311,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                 </select>
                             </div>
 
-                            {form.data.jenis_mutasi !== 'internal' && (
+                            {!sameUnit && (
                                 <div className="md:col-span-2">
                                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
                                         Unit Tujuan <span className="text-red-500">*</span>
@@ -325,10 +339,12 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
 
                             <div className="md:col-span-2">
                                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    Keterangan / Alasan Mutasi
+                                    Keterangan / Alasan {isReturn ? 'Pengembalian' : 'Mutasi'}
+                                    {isReturn && <span className="text-red-500"> *</span>}
                                 </label>
                                 <textarea
                                     rows={2}
+                                    required={isReturn}
                                     value={form.data.keterangan}
                                     onChange={(e) => form.setData('keterangan', e.target.value)}
                                     placeholder="Tuliskan catatan atau latar belakang pengalihan aset ini..."
@@ -397,7 +413,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
 
                                         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
                                             {/* Pilih Aset */}
-                                            <div className="lg:col-span-5">
+                                            <div className={isReturn ? 'lg:col-span-9' : 'lg:col-span-5'}>
                                                 <label className="mb-1 block text-xs font-medium text-slate-700">
                                                     Pilih Barang / Aset <span className="text-red-500">*</span>
                                                 </label>
@@ -419,6 +435,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                                                 disabled={isSelectedElsewhere}
                                                             >
                                                                 {a.kode_barang} - {a.nama_aset}
+                                                                {isReturn && a.current_holder ? ` (dipegang: ${a.current_holder.nama})` : ''}
                                                                 {isSelectedElsewhere ? ' (sudah dipilih)' : ''}
                                                             </option>
                                                         );
@@ -442,6 +459,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                             </div>
 
                                             {/* Pemegang Baru */}
+                                            {!isReturn && (
                                             <div className="lg:col-span-4">
                                                 <label className="mb-1 block text-xs font-medium text-slate-700">
                                                     Pegawai Pemegang Baru{' '}
@@ -476,6 +494,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                                     <p className="mt-1 text-xs text-red-600">{itemHolderError}</p>
                                                 )}
                                             </div>
+                                            )}
 
                                             {/* Catatan Item */}
                                             <div className="lg:col-span-3">

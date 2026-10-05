@@ -177,7 +177,7 @@ export interface BeritaAcaraPenerimaan {
     approval_request?: ApprovalRequestSummary | null;
 }
 
-export type MutationType = 'kec_ke_kel' | 'antar_kel' | 'retur_kel_ke_kec' | 'internal';
+export type MutationType = 'kec_ke_kel' | 'antar_kel' | 'retur_kel_ke_kec' | 'internal' | 'pengembalian';
 export type MutationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
 export interface AssetMutationItem {

@@ -48,6 +48,7 @@ const MUTATION_TYPE_STYLE: Record<MutationType, string> = {
     antar_kel: 'bg-sky-50 text-sky-700 border-sky-200/60',
     retur_kel_ke_kec: 'bg-purple-50 text-purple-700 border-purple-200/60',
     internal: 'bg-teal-50 text-teal-700 border-teal-200/60',
+    pengembalian: 'bg-amber-50 text-amber-700 border-amber-200/60',
 };
 
 const MUTATION_TYPE_LABEL: Record<MutationType, string> = {
@@ -55,6 +56,7 @@ const MUTATION_TYPE_LABEL: Record<MutationType, string> = {
     antar_kel: 'Antar Kelurahan',
     retur_kel_ke_kec: 'Retur ke Kecamatan',
     internal: 'Mutasi Internal',
+    pengembalian: 'Pengembalian ke Inventaris',
 };
 
 const KONDISI_STYLE: Record<string, string> = {
@@ -698,8 +700,9 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                                             }`}
                                                         >
                                                             {newHolder?.nama ??
-                                                                mutation.destination_unit?.name ??
-                                                                'Unit Penerima'}
+                                                                (mutation.jenis_mutasi === 'pengembalian'
+                                                                    ? 'Inventaris unit'
+                                                                    : (mutation.destination_unit?.name ?? 'Unit Penerima'))}
                                                         </span>
                                                     </div>
                                                 </td>

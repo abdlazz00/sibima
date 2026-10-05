@@ -17,4 +17,5 @@ export const JENIS_COLOR: Record<string, string> = {
     antar_kel: '#60A5FA',
     retur_kel_ke_kec: '#94A3B8',
     internal: '#334155',
+    pengembalian: '#B45309',
 };
