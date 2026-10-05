@@ -6,6 +6,7 @@ use App\Enums\BeritaAcaraStatus;
 use App\Enums\Kondisi;
 use App\Http\Requests\StoreBeritaAcaraRequest;
 use App\Http\Requests\UpdateBeritaAcaraRequest;
+use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\BeritaAcaraPenerimaan;
 use App\Services\ApprovalWorkflowService;
@@ -158,9 +159,19 @@ class PenerimaanAsetController extends Controller
     /** @return array<string, mixed> */
     private function formOptions(): array
     {
+        $existingAssetNames = Asset::query()
+            ->select('category_id', 'nama_aset')
+            ->distinct()
+            ->orderBy('nama_aset')
+            ->get()
+            ->groupBy('category_id')
+            ->map(fn ($group) => $group->pluck('nama_aset')->values()->all())
+            ->all();
+
         return [
             'categories' => AssetCategory::whereNotNull('parent_id')->orderBy('name')->get(['id', 'name']),
             'kondisiOptions' => Kondisi::options(),
+            'existingAssetNames' => $existingAssetNames,
         ];
     }
 

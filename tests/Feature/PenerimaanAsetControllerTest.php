@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\BeritaAcaraPenerimaan;
 use App\Services\ApprovalWorkflowService;
@@ -148,3 +149,19 @@ it('shows the approve/reject actions only to the eligible current-step approver'
     $this->actingAs($camat)->get("/penerimaan-aset/{$ba->id}")
         ->assertInertia(fn (Assert $page) => $page->where('can.act', false));
 });
+
+it('passes existingAssetNames grouped by category to create and edit views', function () {
+    Asset::factory()->create([
+        'category_id' => $this->category->id,
+        'nama_aset' => 'Lap Top',
+    ]);
+
+    $this->actingAs($this->admin)
+        ->get(route('penerimaan-aset.create'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Penerimaan/Create')
+            ->where('existingAssetNames', fn ($names) => in_array('Lap Top', $names[$this->category->id] ?? []))
+        );
+});
+

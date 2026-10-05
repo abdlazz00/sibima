@@ -8,6 +8,7 @@ export interface PenerimaanFormProps extends PageProps {
     categories: AssetCategory[];
     kondisiOptions: { value: string; label: string }[];
     beritaAcara?: BeritaAcaraPenerimaan;
+    existingAssetNames?: Record<number, string[]>;
 }
 
 interface ItemForm {
@@ -28,7 +29,7 @@ const EMPTY_ITEM: ItemForm = {
     kondisi_awal: 'baik',
 };
 
-export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara }: PenerimaanFormProps) {
+export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara, existingAssetNames = {} }: PenerimaanFormProps) {
     const isEdit = beritaAcara !== undefined;
     const form = useForm({
         no_berita_acara: beritaAcara?.no_berita_acara ?? '',
@@ -167,10 +168,15 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                         <label className="mb-1 block text-xs font-medium text-slate-900">Nama Barang *</label>
                                         <input
                                             type="text"
+                                            list={item.category_id ? `asset-suggestions-${item.category_id}` : undefined}
                                             value={item.nama_aset}
                                             onChange={(e) => updateItem(index, 'nama_aset', e.target.value)}
+                                            placeholder="Contoh: Lap Top, P.C Unit, Printer"
                                             className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
                                         />
+                                        <p className="mt-1 text-[11px] text-slate-400">
+                                            Ketik nama baru atau pilih saran dari aset yang sudah ada agar terstandar.
+                                        </p>
                                         {itemError(index, 'nama_aset') && <p className="mt-1 text-xs text-red-600">{itemError(index, 'nama_aset')}</p>}
                                     </div>
                                     <div>
@@ -179,6 +185,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                             type="text"
                                             value={item.merk_type}
                                             onChange={(e) => updateItem(index, 'merk_type', e.target.value)}
+                                            placeholder="Contoh: Asus Vivobook 14, Epson L3210"
                                             className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
                                         />
                                     </div>
@@ -240,6 +247,14 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                         <button type="button" onClick={addItem} className="flex items-center gap-1.5 text-sm font-semibold text-blue-700">
                             <Plus className="h-3.5 w-3.5" /> Tambah Barang Lain
                         </button>
+
+                        {Object.entries(existingAssetNames).map(([catId, names]) => (
+                            <datalist key={catId} id={`asset-suggestions-${catId}`}>
+                                {names.map((name) => (
+                                    <option key={name} value={name} />
+                                ))}
+                            </datalist>
+                        ))}
                     </section>
 
                     <hr className="border-slate-200" />
