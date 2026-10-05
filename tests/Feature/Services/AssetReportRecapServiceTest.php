@@ -125,6 +125,17 @@ it('does not count an asset twice when it has several approved reports', functio
         ->and($data['ringkasan']['nilai_buku'])->toEqual(11000000.0);
 });
 
+it('counts the value of an asset once across the trend and the unit breakdown', function () {
+    rrReport($this->a1, $this->kec, $this->camat, 'hilang', 'approved', '2026-11-02');
+
+    $data = (new AssetReportRecapService())->for($this->camat, []);
+
+    expect(array_sum(array_column($data['tren'], 'jumlah')))->toBe(3)
+        ->and(array_sum(array_column($data['tren'], 'nilai_perolehan')))->toEqual(15000000.0)
+        ->and($data['sebaran_unit']['total']['total'])->toBe(3)
+        ->and($data['sebaran_unit']['total']['nilai_buku'])->toEqual(11000000.0);
+});
+
 it('scopes reports per user role', function () {
     $service = new AssetReportRecapService();
     $data = $service->for($this->adminA, []);

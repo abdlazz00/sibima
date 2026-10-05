@@ -21,7 +21,7 @@ class AssetReportRecapService
 
     private const PENDING_LIMIT = 20;
 
-    private const AFFECTED = 'COUNT(asset_reports.id) as laporan, COALESCE(SUM(a.nilai_perolehan), 0) as nilai_perolehan, COALESCE(SUM(a.nilai_buku), 0) as nilai_buku';
+    private const AFFECTED = 'COUNT(asset_reports.id) as laporan, COALESCE(SUM(CASE WHEN f.first_id = asset_reports.id THEN a.nilai_perolehan ELSE 0 END), 0) as nilai_perolehan, COALESCE(SUM(CASE WHEN f.first_id = asset_reports.id THEN a.nilai_buku ELSE 0 END), 0) as nilai_buku';
 
     /**
      * @param  array<string, mixed>  $filters
@@ -32,8 +32,12 @@ class AssetReportRecapService
         $query = new ReportQuery($user);
         $base = fn (): QueryBuilder => $query->build('rusak-hilang', $filters)->reorder()->toBase();
         $approved = fn (): QueryBuilder => $base()->where('asset_reports.status', AssetReportStatus::Approved->value);
+        // Laporan pertama tiap aset dalam filter: hanya itu yang membawa nilai aset, agar nilai tidak terhitung ganda.
+        $firstPerAsset = fn (): QueryBuilder => $approved()
+            ->selectRaw('asset_reports.asset_id, MIN(asset_reports.id) as first_id')->groupBy('asset_reports.asset_id');
         $affected = fn (): QueryBuilder => $approved()
-            ->join('assets as a', 'a.id', '=', 'asset_reports.asset_id');
+            ->join('assets as a', 'a.id', '=', 'asset_reports.asset_id')
+            ->joinSub($firstPerAsset(), 'f', 'f.asset_id', '=', 'asset_reports.asset_id');
 
         $jumlah = $base()->count();
         // nilai dihitung per aset (bukan per laporan) agar aset yang dilaporkan berulang tidak dihitung ganda
@@ -154,7 +158,7 @@ class AssetReportRecapService
             ->get(['id', 'name']);
 
         $rows = (clone $affected)
-            ->selectRaw('asset_reports.unit_id as unit_id, asset_reports.kondisi_baru, COUNT(asset_reports.id) as n, COALESCE(SUM(a.nilai_buku), 0) as nb')
+            ->selectRaw('asset_reports.unit_id as unit_id, asset_reports.kondisi_baru, COUNT(asset_reports.id) as n, COALESCE(SUM(CASE WHEN f.first_id = asset_reports.id THEN a.nilai_buku ELSE 0 END), 0) as nb')
             ->groupBy('asset_reports.unit_id', 'asset_reports.kondisi_baru')
             ->get();
 
