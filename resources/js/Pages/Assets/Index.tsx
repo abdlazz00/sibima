@@ -33,6 +33,7 @@ interface Filters {
     category_id?: string;
     unit_id?: string;
     kondisi?: string;
+    urut?: string;
 }
 
 interface IndexProps extends PageProps {
@@ -41,6 +42,7 @@ interface IndexProps extends PageProps {
     categories: AssetCategory[];
     units: UnitOption[];
     kondisiOptions: Option[];
+    sortOptions: Option[];
     can: { create: boolean };
 }
 
@@ -63,7 +65,7 @@ function registerLabel(nomor: number): string {
     return String(nomor).padStart(4, '0');
 }
 
-export default function Index({ assets, filters, categories, units, kondisiOptions, can }: IndexProps) {
+export default function Index({ assets, filters, categories, units, kondisiOptions, sortOptions, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [printIds, setPrintIds] = useState<number[] | null>(null);
@@ -231,6 +233,22 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                 {kondisiOptions.map((o) => (
                                     <option key={o.value} value={o.value}>
                                         {o.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        </div>
+
+                        <div className="relative min-w-[210px]">
+                            <select
+                                aria-label="Urutkan"
+                                value={filters.urut ?? 'nama_asc'}
+                                onChange={(e) => applyFilters({ urut: e.target.value === 'nama_asc' ? undefined : e.target.value })}
+                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            >
+                                {sortOptions.map((o) => (
+                                    <option key={o.value} value={o.value}>
+                                        Urutkan: {o.label}
                                     </option>
                                 ))}
                             </select>
