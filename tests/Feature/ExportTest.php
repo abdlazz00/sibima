@@ -109,3 +109,15 @@ it('round-trips: exported kategori, pegawai and aset import back into an empty d
         ->and(AssetCategory::count())->toBe(2)
         ->and(ImportBatch::where('status', ImportBatch::SELESAI)->count())->toBe(3);
 });
+
+it('exports assets in the order chosen on the list', function () {
+    foreach (['Meja Tengah' => '2026-03-01 08:00:00', 'Meja Lama' => '2026-01-01 08:00:00', 'Meja Baru' => '2026-05-01 08:00:00'] as $nama => $dibuat) {
+        Asset::factory()->create(['unit_id' => $this->kec->id, 'category_id' => $this->meja->id, 'nama_aset' => $nama, 'created_at' => $dibuat]);
+    }
+
+    $default = impSheetRows($this->actingAs($this->kasubag)->get(route('export', 'aset')));
+    $terbaru = impSheetRows($this->actingAs($this->kasubag)->get(route('export', ['modul' => 'aset', 'urut' => 'terbaru'])));
+
+    expect(array_column($default, 2))->toBe(['Nama Aset', 'Meja Baru', 'Meja Lama', 'Meja Tengah'])
+        ->and(array_column($terbaru, 2))->toBe(['Nama Aset', 'Meja Baru', 'Meja Tengah', 'Meja Lama']);
+});

@@ -22,7 +22,7 @@ class EloquentAssetRepository implements AssetRepositoryInterface
 
     public function queryVisibleTo(User $user, array $filters): Builder
     {
-        return Asset::query()
+        $query = Asset::query()
             ->visibleTo($user)
             ->when($filters['search'] ?? null, function (Builder $query, string $search) {
                 $query->where(function (Builder $query) use ($search) {
@@ -38,10 +38,13 @@ class EloquentAssetRepository implements AssetRepositoryInterface
                     ->pluck('id'));
             })
             ->when($filters['unit_id'] ?? null, fn (Builder $query, $unitId) => $query->where('unit_id', $unitId))
-            ->when($filters['kondisi'] ?? null, fn (Builder $query, $kondisi) => $query->where('kondisi', $kondisi))
-            ->orderBy('nama_aset')
-            ->orderBy('kode_barang')
-            ->orderBy('nomor_register');
+            ->when($filters['kondisi'] ?? null, fn (Builder $query, $kondisi) => $query->where('kondisi', $kondisi));
+
+        foreach (Asset::sortOrder($filters['urut'] ?? null) as [$column, $direction]) {
+            $query->orderBy($column, $direction);
+        }
+
+        return $query;
     }
 
     public function maxRegisterNumber(string $kodeBarang): int

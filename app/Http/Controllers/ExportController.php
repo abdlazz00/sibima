@@ -16,7 +16,7 @@ class ExportController extends Controller
 
         $importer = ImportService::importer($modul);
         $importer->begin($request->user());
-        $filters = $request->only(['search', 'category_id', 'unit_id', 'kondisi']);
+        $filters = $request->only(['search', 'category_id', 'unit_id', 'kondisi', 'urut']);
 
         if ($importer->exportCount($filters) > config('import.export_max')) {
             return back()->with('error', 'Data melebihi '.number_format(config('import.export_max'), 0, ',', '.').' baris. Persempit dengan filter lalu ekspor lagi.');

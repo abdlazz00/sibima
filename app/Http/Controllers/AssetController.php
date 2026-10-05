@@ -31,13 +31,14 @@ class AssetController extends Controller
     {
         Gate::authorize('viewAny', Asset::class);
 
-        $filters = $request->only(['search', 'category_id', 'unit_id', 'kondisi']);
+        $filters = $request->only(['search', 'category_id', 'unit_id', 'kondisi', 'urut']);
 
         return Inertia::render('Assets/Index', [
             'assets' => $this->assets->paginateVisibleTo($request->user(), $filters),
             'filters' => $filters,
             'categories' => $this->categories->tree(),
             'units' => $this->units->accessibleBy($request->user()),
+            'sortOptions' => Asset::sortOptions(),
             'kondisiOptions' => Kondisi::options(),
             'can' => ['create' => $request->user()->can('create', Asset::class)],
         ]);

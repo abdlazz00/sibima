@@ -36,6 +36,34 @@ class Asset extends Model
         'keterangan',
     ];
 
+    /** Urutan Data Aset: kunci => label dan urutan kolom. `id` menjadi pembeda terakhir agar hasil stabil. */
+    public const SORTS = [
+        'nama_asc' => ['label' => 'Nama A-Z', 'order' => [['nama_aset', 'asc'], ['kode_barang', 'asc'], ['nomor_register', 'asc']]],
+        'nama_desc' => ['label' => 'Nama Z-A', 'order' => [['nama_aset', 'desc'], ['kode_barang', 'asc'], ['nomor_register', 'asc']]],
+        'terbaru' => ['label' => 'Terbaru ditambahkan', 'order' => [['created_at', 'desc'], ['id', 'desc']]],
+        'terlama' => ['label' => 'Terlama ditambahkan', 'order' => [['created_at', 'asc'], ['id', 'asc']]],
+        'tahun_desc' => ['label' => 'Tahun perolehan terbaru', 'order' => [['tanggal_perolehan', 'desc'], ['id', 'desc']]],
+        'tahun_asc' => ['label' => 'Tahun perolehan terlama', 'order' => [['tanggal_perolehan', 'asc'], ['id', 'asc']]],
+        'nilai_desc' => ['label' => 'Nilai perolehan tertinggi', 'order' => [['nilai_perolehan', 'desc'], ['id', 'desc']]],
+        'nilai_asc' => ['label' => 'Nilai perolehan terendah', 'order' => [['nilai_perolehan', 'asc'], ['id', 'asc']]],
+        'kode' => ['label' => 'Kode BMD', 'order' => [['kode_barang', 'asc'], ['nomor_register', 'asc']]],
+    ];
+
+    /** @return list<array{0: string, 1: string}> */
+    public static function sortOrder(?string $key): array
+    {
+        return (self::SORTS[$key ?? ''] ?? self::SORTS['nama_asc'])['order'];
+    }
+
+    /** @return list<array{value: string, label: string}> */
+    public static function sortOptions(): array
+    {
+        return array_map(
+            fn (string $key) => ['value' => $key, 'label' => self::SORTS[$key]['label']],
+            array_keys(self::SORTS),
+        );
+    }
+
     protected function casts(): array
     {
         return [
