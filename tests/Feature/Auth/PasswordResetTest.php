@@ -112,3 +112,12 @@ test('requesting a reset link is throttled per client', function () {
 
     $this->post('/forgot-password', ['email' => 'x7@example.com'])->assertStatus(429);
 });
+
+test('an invalid or expired reset token shows a clear Indonesian message', function () {
+    $user = User::factory()->create();
+
+    $this->post('/reset-password', [
+        'token' => 'token-salah', 'email' => $user->email,
+        'password' => 'password-baru-123', 'password_confirmation' => 'password-baru-123',
+    ])->assertSessionHasErrors(['email' => 'Tautan reset tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.']);
+});

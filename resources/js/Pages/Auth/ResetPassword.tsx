@@ -1,9 +1,7 @@
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import PasswordInput from '@/Components/PasswordInput';
+import AuthSplitLayout from '@/Layouts/AuthSplitLayout';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 export default function ResetPassword({
@@ -29,72 +27,93 @@ export default function ResetPassword({
     };
 
     return (
-        <GuestLayout>
-            <Head title="Reset Password" />
+        <AuthSplitLayout>
+            <Head title="Atur Ulang Kata Sandi - SIBIMA" />
 
-            <form onSubmit={submit}>
+            <h2 className="mb-2 text-[28px] font-bold tracking-tight text-gray-900">
+                Atur Ulang Kata Sandi
+            </h2>
+            <p className="mb-7 text-sm text-gray-600">
+                Buat kata sandi baru untuk akun Anda.
+            </p>
+
+            <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
+                    <label
+                        htmlFor="email"
+                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                    >
+                        Email
+                    </label>
+                    <input
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
                         autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
+                        readOnly
+                        className="h-11 w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3.5 text-sm text-gray-500 focus:outline-none"
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
+                    {errors.email && (
+                        <Link
+                            href={route('password.request')}
+                            className="mt-1.5 inline-block rounded text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                        >
+                            Minta tautan baru
+                        </Link>
+                    )}
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
+                <div>
+                    <label
+                        htmlFor="password"
+                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                    >
+                        Kata Sandi Baru
+                    </label>
+                    <PasswordInput
                         id="password"
-                        type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
                         autoComplete="new-password"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
+                        autoFocus
+                        onChange={(v) => setData('password', v)}
                     />
-
-                    <InputError message={errors.password} className="mt-2" />
+                    <p className="mt-1.5 text-xs text-gray-500">
+                        Minimal 8 karakter.
+                    </p>
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
+                <div>
+                    <label
                         htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
-                        type="password"
+                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                    >
+                        Konfirmasi Kata Sandi Baru
+                    </label>
+                    <PasswordInput
+                        id="password_confirmation"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        className="mt-1 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
+                        onChange={(v) => setData('password_confirmation', v)}
                     />
-
                     <InputError
                         message={errors.password_confirmation}
-                        className="mt-2"
+                        className="mt-1.5"
                     />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Reset Password
-                    </PrimaryButton>
-                </div>
+                <button
+                    type="submit"
+                    disabled={processing}
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    {processing ? 'Menyimpan...' : 'Simpan Kata Sandi Baru'}
+                </button>
             </form>
-        </GuestLayout>
+        </AuthSplitLayout>
     );
 }
