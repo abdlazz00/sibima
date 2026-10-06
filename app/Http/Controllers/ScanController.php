@@ -13,13 +13,17 @@ class ScanController extends Controller
 {
     public function __construct(private readonly AssetScanSummary $summary) {}
 
-    public function index(): InertiaResponse
+    public function index(Request $request): InertiaResponse
     {
+        abort_unless($request->user()->can('scan.view'), 403);
+
         return Inertia::render('Scan/Index', ['summary' => null, 'canViewDetail' => false, 'notFound' => false]);
     }
 
     public function show(Request $request, string $token): InertiaResponse|SymfonyResponse
     {
+        abort_unless($request->user()->can('scan.view'), 403);
+
         $asset = Asset::with(['category', 'unit', 'currentHolder', 'photos'])
             ->where('qr_token', $token)
             ->first();

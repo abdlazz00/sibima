@@ -14,6 +14,8 @@ class PersetujuanController extends Controller
 
     public function index(Request $request): Response
     {
+        abort_unless($request->user()->can('persetujuan.view'), 403);
+
         $user = $request->user();
 
         $pending = $this->workflow->pendingFor($user);
