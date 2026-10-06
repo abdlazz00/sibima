@@ -166,13 +166,10 @@ Ubah baris 38-42 di `app/Http/Controllers/PenerimaanAsetController.php`:
         $query = BeritaAcaraPenerimaan::with(['unit', 'creator', 'items.category', 'approvalRequest'])
             ->when($user->accessibleUnitIds() !== null, fn (Builder $q) => $q->whereIn('unit_id', $user->accessibleUnitIds()))
             ->when($user->resolveUnitScope() !== 'all', function (Builder $q) use ($user) {
-                $canManageDraft = $user->can('penerimaan.update') || $user->can('penerimaan.create');
-                $q->where(function (Builder $sub) use ($user, $canManageDraft) {
-                    $sub->where('status', '!=', BeritaAcaraStatus::Draft);
-                    if ($canManageDraft && $user->unit_id !== null) {
-                        $sub->orWhere(fn (Builder $d) => $d->where('status', BeritaAcaraStatus::Draft)->where('unit_id', $user->unit_id));
-                    }
-                });
+                $q->where(fn (Builder $sub) => $sub
+                    ->where('status', '!=', BeritaAcaraStatus::Draft)
+                    ->orWhere(fn (Builder $d) => $d->where('status', BeritaAcaraStatus::Draft)->where('unit_id', $user->unit_id))
+                );
             })
 ```
 
@@ -369,14 +366,21 @@ Di baris 26:
 
 1. Tambahkan `roles: { value: string; label: string }[]` ke `ShowProps`.
 2. Di `createAccountForm`, defaultkan `role` ke `roles[0]?.value || ''`.
-3. Ganti hardcoded `<option>` di modal Create Account dengan:
+3. Ganti hardcoded `<option>` di modal Create Account dengan mapping dinamis `roles`:
    ```tsx
-   {roles.map((r) => (
-       <option key={r.value} value={r.value}>
-           {r.label}
+   {roles.length > 0 ? (
+       roles.map((r) => (
+           <option key={r.value} value={r.value}>
+               {r.label}
+           </option>
+       ))
+   ) : (
+       <option value="" disabled>
+           Tidak ada role yang dapat Anda delegasikan
        </option>
-   ))}
+   )}
    ```
+4. Nonaktifkan submit button jika `roles.length === 0`.
 
 - [ ] **Step 6: Verify TypeScript & Pest**
 
@@ -399,7 +403,7 @@ git commit -m "feat(pegawai): support dynamic roles when creating employee login
 - Modify: `app/Http/Controllers/AssetController.php:40-47`
 - Modify: `resources/js/Pages/Assets/Index.tsx:130-165,370-395`
 - Modify: `app/Http/Controllers/AssetCategoryController.php:20-30`
-- Modify: `resources/js/Pages/AssetCategories/Index.tsx:180-190,355-380`
+- Modify: `resources/js/Pages/AssetCategories/Index.tsx:180-190,285-309,355-380`
 - Modify: `resources/js/Pages/Pegawai/Index.tsx:320-360`
 - Modify: `resources/js/Pages/Dashboard.tsx:70-75`
 
@@ -421,7 +425,7 @@ git commit -m "feat(pegawai): support dynamic roles when creating employee login
    - Tambahkan `printLabel: boolean; update: boolean;` ke interface `can`.
    - Bungkus tombol toolbar "Cetak Label": `{selectedIds.length > 0 && can.printLabel && ( ... )}`.
    - Di baris tabel:
-     - Render tombol Pencil (Edit) hanya jika `can.update && (asset.unit_id === auth.user?.unit_id || auth.user?.roles?.[0] === 'kasubag')`.
+     - Render tombol Pencil (Edit) hanya jika `can.update`.
      - Render tombol Printer hanya jika `can.printLabel`.
 
 - [ ] **Step 2: Update `AssetCategoryController.php` & `AssetCategories/Index.tsx`**
@@ -439,9 +443,9 @@ git commit -m "feat(pegawai): support dynamic roles when creating employee login
    ```
 2. Di `AssetCategories/Index.tsx`:
    - Tambahkan `can: { create: boolean; update: boolean; delete: boolean }` ke props.
-   - Bungkus tombol "Tambah Kategori" dengan `{can.create && ( ... )}`.
-   - Bungkus tombol Edit dengan `{can.update && ( ... )}`.
-   - Bungkus tombol Delete dengan `{can.delete && ( ... )}`.
+   - Bungkus tombol top-bar "Tambah Kategori" dengan `{can.create && ( ... )}`.
+   - Pada baris kategori induk (parent): bungkus Edit dengan `{can.update && ( ... )}` dan Delete dengan `{can.delete && ( ... )}`.
+   - Pada baris subkategori (child): bungkus Edit dengan `{can.update && ( ... )}` dan Delete dengan `{can.delete && ( ... )}`.
 
 - [ ] **Step 3: Update `Pegawai/Index.tsx`**
 
