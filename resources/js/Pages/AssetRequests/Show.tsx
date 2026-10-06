@@ -1,15 +1,17 @@
+import AssetSelectModal, { SelectableAsset } from '@/Components/AssetSelectModal';
 import CancelRequestModal from '@/Components/CancelRequestModal';
-import { CheckCircleIcon as Check, ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import { CheckCircleIcon as Check, ChevronRightIcon as ChevronRight, XIcon as X } from '@/Components/Icons';
 import ReassignApproverModal from '@/Components/ReassignApproverModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { REQUEST_STATUS_LABEL, REQUEST_STATUS_STYLE, REQUEST_TYPE_LABEL } from '@/lib/assetRequest';
 import { AssetRequest, PageProps, ReassignCandidate } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface EligibleAsset {
     id: number;
     kode_barang: string;
+    nomor_register: number | string;
     nama_aset: string;
     merk_type: string | null;
     kondisi: string;
@@ -51,13 +53,27 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
     const [note, setNote] = useState('');
     const [selected, setSelected] = useState<number[]>([]);
     const [submitting, setSubmitting] = useState(false);
+    const [isFulfillModalOpen, setIsFulfillModalOpen] = useState(false);
 
     const req = r.approval_request;
     const steps = req?.steps ?? [];
     const single = r.jenis === 'pegawai';
 
-    const toggle = (id: number) =>
-        setSelected((cur) => (single ? [id] : cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+    const selectableEligibleAssets: SelectableAsset[] = useMemo(() => {
+        return eligibleAssets.map((a) => ({
+            id: a.id,
+            kode_barang: a.kode_barang,
+            nomor_register: a.nomor_register,
+            nama_aset: a.nama_aset,
+            merk_type: a.merk_type,
+            kondisi: a.kondisi,
+            holder: null,
+        }));
+    }, [eligibleAssets]);
+
+    const selectedAssetsDetails = useMemo(() => {
+        return eligibleAssets.filter((a) => selected.includes(a.id));
+    }, [eligibleAssets, selected]);
 
     const post = (name: string, id: number, data: Parameters<typeof router.post>[1], onSuccess?: () => void) => {
         if (submitting) return;
@@ -191,32 +207,96 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
 
                         {can.fulfill ? (
                             <div className="space-y-3">
-                                <p className="text-xs text-slate-600">
-                                    Pilih {single ? '1 aset' : `tepat ${r.jumlah} aset`} yang memenuhi syarat ({selected.length} dipilih).
-                                </p>
                                 {eligibleAssets.length === 0 ? (
-                                    <p className="text-sm text-amber-700">Belum ada aset yang memenuhi syarat. Anda dapat menutup permohonan ini.</p>
+                                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800">
+                                        Belum ada aset yang memenuhi syarat di unit Anda. Anda dapat menutup permohonan ini.
+                                    </div>
+                                ) : selected.length === 0 ? (
+                                    <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-5 text-center">
+                                        <p className="text-sm font-semibold text-slate-800">
+                                            Pilih {single ? '1 aset' : `tepat ${r.jumlah} aset`} untuk dipenuhi
+                                        </p>
+                                        <p className="mt-1 text-xs text-slate-500">
+                                            Tersedia {eligibleAssets.length} aset yang memenuhi syarat
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsFulfillModalOpen(true)}
+                                            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#1E40AF] px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-800"
+                                        >
+                                            Buka Daftar Aset untuk Dipenuhi
+                                        </button>
+                                    </div>
                                 ) : (
-                                    <ul className="max-h-64 space-y-1.5 overflow-y-auto text-sm">
-                                        {eligibleAssets.map((a) => (
-                                            <li key={a.id}>
-                                                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50">
-                                                    <input type={single ? 'radio' : 'checkbox'} name="asset" checked={selected.includes(a.id)} onChange={() => toggle(a.id)} />
-                                                    <span className="font-medium text-slate-900">{a.nama_aset}</span>
-                                                    <span className="text-xs text-slate-500">{a.kode_barang}{a.merk_type ? ` · ${a.merk_type}` : ''}</span>
-                                                </label>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                                    Aset Terpilih ({selected.length}{!single ? ` / ${r.jumlah}` : ''})
+                                                </p>
+                                                {!single && selected.length !== r.jumlah && (
+                                                    <p className="text-xs font-semibold text-amber-600">
+                                                        Harus memilih tepat {r.jumlah} aset
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsFulfillModalOpen(true)}
+                                                className="text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+                                            >
+                                                Ubah Pilihan
+                                            </button>
+                                        </div>
+
+                                        <div className="overflow-hidden rounded-xl border border-slate-200">
+                                            <table className="w-full border-collapse text-left text-sm">
+                                                <thead className="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                                    <tr>
+                                                        <th className="py-2 px-3">Nama Barang</th>
+                                                        <th className="py-2 px-3">Kode & Reg</th>
+                                                        <th className="py-2 px-3 w-10 text-center">Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100 bg-white">
+                                                    {selectedAssetsDetails.map((asset) => (
+                                                        <tr key={asset.id}>
+                                                            <td className="py-2.5 px-3">
+                                                                <div className="font-semibold text-slate-900">{asset.nama_aset}</div>
+                                                                <div className="text-xs text-slate-500">{asset.merk_type || '—'}</div>
+                                                            </td>
+                                                            <td className="py-2.5 px-3 whitespace-nowrap">
+                                                                <div className="font-mono text-xs text-slate-700">{asset.kode_barang}</div>
+                                                                <div className="text-[11px] font-semibold text-slate-500">
+                                                                    Reg. #{String(asset.nomor_register).padStart(4, '0')}
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-2.5 px-3 text-center">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setSelected((cur) => cur.filter((id) => id !== asset.id))}
+                                                                    className="rounded-lg p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                                                                    title="Hapus pilihan"
+                                                                >
+                                                                    <X className="h-4 w-4" />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => post('asset-requests.fulfill', r.id, { asset_ids: selected }, () => setSelected([]))}
+                                            disabled={submitting || selected.length === 0 || (!single && selected.length !== r.jumlah)}
+                                            className="w-full rounded-xl bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-blue-800 disabled:opacity-50"
+                                        >
+                                            {single ? 'Serahkan ke Pegawai' : 'Ajukan Mutasi Pemenuhan'}
+                                        </button>
+                                    </div>
                                 )}
-                                <button
-                                    type="button"
-                                    onClick={() => post('asset-requests.fulfill', r.id, { asset_ids: selected }, () => setSelected([]))}
-                                    disabled={submitting || selected.length === 0 || (!single && selected.length !== r.jumlah)}
-                                    className="rounded-lg bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
-                                >
-                                    {single ? 'Serahkan ke Pegawai' : 'Ajukan Mutasi Pemenuhan'}
-                                </button>
                             </div>
                         ) : (
                             r.status === 'approved' && !r.mutation && <p className="text-sm text-slate-500">Menunggu pemenuhan oleh admin unit terkait.</p>
@@ -283,6 +363,27 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
                         </div>
                     </div>
                 </div>
+            )}
+
+            {can.fulfill && (
+                <AssetSelectModal
+                    isOpen={isFulfillModalOpen}
+                    onClose={() => setIsFulfillModalOpen(false)}
+                    assets={selectableEligibleAssets}
+                    selectedIds={selected}
+                    onConfirm={(confirmed) => {
+                        setSelected(confirmed.map((a) => a.id));
+                        setIsFulfillModalOpen(false);
+                    }}
+                    mode={single ? 'single' : 'multiple'}
+                    maxSelection={single ? 1 : r.jumlah}
+                    title="Pilih Aset untuk Dipenuhi"
+                    description={
+                        single
+                            ? 'Pilih 1 aset dari daftar di bawah ini untuk diserahkan kepada pegawai pemohon.'
+                            : `Pilih tepat ${r.jumlah} aset dari daftar di bawah ini untuk dimutasi ke unit pemohon.`
+                    }
+                />
             )}
         </AuthenticatedLayout>
     );
