@@ -119,8 +119,12 @@ class AssetRequestController extends Controller
             'reassignCandidates' => $canReassign ? $this->workflow->reassignCandidates() : [],
             'eligibleAssets' => $canFulfill
                 ? $this->requests->eligibleAssets($assetRequest)->map(fn ($a) => [
-                    'id' => $a->id, 'kode_barang' => $a->kode_barang, 'nama_aset' => $a->nama_aset,
-                    'merk_type' => $a->merk_type, 'kondisi' => $a->kondisi->value,
+                    'id' => $a->id,
+                    'kode_barang' => $a->kode_barang,
+                    'nomor_register' => $a->nomor_register,
+                    'nama_aset' => $a->nama_aset,
+                    'merk_type' => $a->merk_type,
+                    'kondisi' => $a->kondisi->value,
                 ])->values()
                 : [],
         ]);

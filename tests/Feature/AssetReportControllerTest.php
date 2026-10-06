@@ -137,3 +137,19 @@ it('exposes the tracker and action flags on the detail page and completes throug
     expect($this->assetKelA->fresh()->kondisi)->toBe(Kondisi::RusakBerat)
         ->and($report->fresh()->status->value)->toBe('approved');
 });
+
+it('passes nomor_register in assets prop to create view', function () {
+    $asset = Asset::factory()->create([
+        'unit_id' => $this->kec->id,
+        'nomor_register' => 42,
+    ]);
+
+    $this->actingAs($this->adminKec)
+        ->get(route('asset-reports.create'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('AssetReports/Create')
+            ->where('assets', fn ($assets) => collect($assets)->contains(fn ($a) => $a['id'] === $asset->id && ($a['nomor_register'] ?? null) === 42))
+        );
+});
+

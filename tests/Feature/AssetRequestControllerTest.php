@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\AssetRequestStatus;
+use App\Enums\AssetStatus;
+use App\Enums\Kondisi;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\AssetRequest;
@@ -168,3 +170,30 @@ it('closes an approved request over HTTP with a required reason', function () {
 
     expect($request->fresh()->status)->toBe(AssetRequestStatus::Cancelled);
 });
+
+it('passes nomor_register in eligibleAssets prop to show view when can fulfill', function () {
+    $asset = Asset::factory()->create([
+        'unit_id' => $this->kelA->id,
+        'category_id' => $this->category->id,
+        'nomor_register' => 17,
+        'status' => AssetStatus::Aktif,
+        'kondisi' => Kondisi::Baik,
+    ]);
+
+    $request = AssetRequest::factory()->create([
+        'unit_id' => $this->kelA->id,
+        'category_id' => $this->category->id,
+        'status' => AssetRequestStatus::Approved,
+        'jenis' => 'pegawai',
+        'pegawai_id' => Pegawai::factory()->create(['unit_id' => $this->kelA->id])->id,
+    ]);
+
+    $this->actingAs($this->adminKelA)
+        ->get(route('asset-requests.show', $request))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('AssetRequests/Show')
+            ->where('eligibleAssets', fn ($assets) => collect($assets)->contains(fn ($a) => $a['id'] === $asset->id && ($a['nomor_register'] ?? null) === 17))
+        );
+});
+

@@ -72,6 +72,7 @@ class AssetReportController extends Controller
             ->map(fn (Asset $a) => [
                 'id' => $a->id,
                 'kode_barang' => $a->kode_barang,
+                'nomor_register' => $a->nomor_register,
                 'nama_aset' => $a->nama_aset,
                 'merk_type' => $a->merk_type,
                 'kondisi' => $a->kondisi->value,
