@@ -40,7 +40,11 @@ class AssetController extends Controller
             'units' => $this->units->accessibleBy($request->user()),
             'sortOptions' => Asset::sortOptions(),
             'kondisiOptions' => Kondisi::options(),
-            'can' => ['create' => $request->user()->can('create', Asset::class)],
+            'can' => [
+                'create' => $request->user()->can('create', Asset::class),
+                'printLabel' => $request->user()->can('aset.print-label'),
+                'update' => $request->user()->can('aset.update'),
+            ],
         ]);
     }
 

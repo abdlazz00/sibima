@@ -68,9 +68,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
 
     const role = auth.user?.roles?.[0] ?? '';
     const permissions = auth.user?.permissions ?? [];
-    const isApprover =
-        permissions.includes('persetujuan.act') ||
-        ['kasubag', 'camat', 'lurah'].includes(role);
+    const isApprover = permissions.includes('persetujuan.act');
     const total = d.totals.jumlah_aset;
     const baik = d.per_kondisi.baik;
     const bermasalah = d.per_kondisi.rusak_ringan + d.per_kondisi.rusak_berat + d.per_kondisi.hilang;

@@ -95,7 +95,11 @@ function ChevronDownIcon({ className = 'h-4 w-4' }: { className?: string }) {
 
 export default function Index({
     categories,
-}: PageProps<{ categories: AssetCategory[] }>) {
+    can = { create: true, update: true, delete: true },
+}: PageProps<{
+    categories: AssetCategory[];
+    can?: { create: boolean; update: boolean; delete: boolean };
+}>) {
     const { errors } =
         usePage<PageProps<{ errors: Record<string, string> }>>().props;
 
@@ -177,13 +181,15 @@ export default function Index({
 
                     <div className="flex flex-wrap items-center gap-2">
                         <ImportExportButtons modul="kategori" />
-                        <Link
-                            href={route('asset-categories.create')}
-                            className="shadow-xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                        >
-                            <PlusIcon className="h-4 w-4" />
-                            <span>Tambah Kategori</span>
-                        </Link>
+                        {can.create && (
+                            <Link
+                                href={route('asset-categories.create')}
+                                className="shadow-xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                            >
+                                <PlusIcon className="h-4 w-4" />
+                                <span>Tambah Kategori</span>
+                            </Link>
+                        )}
                     </div>
                 </div>
 
@@ -283,28 +289,32 @@ export default function Index({
                                                     </td>
                                                     <td className="py-4 pl-4 pr-6 text-right">
                                                         <div className="flex items-center justify-end gap-2">
-                                                            <Link
-                                                                href={route(
-                                                                    'asset-categories.edit',
-                                                                    category.id,
-                                                                )}
-                                                                title="Ubah kategori"
-                                                                className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                            >
-                                                                <PencilIcon className="h-3.5 w-3.5" />
-                                                            </Link>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    setDeletingCategory(
-                                                                        category,
-                                                                    )
-                                                                }
-                                                                title="Hapus kategori"
-                                                                className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-1 focus:ring-red-500"
-                                                            >
-                                                                <TrashIcon className="h-3.5 w-3.5" />
-                                                            </button>
+                                                            {can.update && (
+                                                                <Link
+                                                                    href={route(
+                                                                        'asset-categories.edit',
+                                                                        category.id,
+                                                                    )}
+                                                                    title="Ubah kategori"
+                                                                    className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                >
+                                                                    <PencilIcon className="h-3.5 w-3.5" />
+                                                                </Link>
+                                                            )}
+                                                            {can.delete && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setDeletingCategory(
+                                                                            category,
+                                                                        )
+                                                                    }
+                                                                    title="Hapus kategori"
+                                                                    className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-1 focus:ring-red-500"
+                                                                >
+                                                                    <TrashIcon className="h-3.5 w-3.5" />
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -353,28 +363,32 @@ export default function Index({
                                                                 </td>
                                                                 <td className="py-3.5 pl-4 pr-6 text-right">
                                                                     <div className="flex items-center justify-end gap-2">
-                                                                        <Link
-                                                                            href={route(
-                                                                                'asset-categories.edit',
-                                                                                child.id,
-                                                                            )}
-                                                                            title="Ubah subkategori"
-                                                                            className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                                        >
-                                                                            <PencilIcon className="h-3.5 w-3.5" />
-                                                                        </Link>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() =>
-                                                                                setDeletingCategory(
-                                                                                    child,
-                                                                                )
-                                                                            }
-                                                                            title="Hapus subkategori"
-                                                                            className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-1 focus:ring-red-500"
-                                                                        >
-                                                                            <TrashIcon className="h-3.5 w-3.5" />
-                                                                        </button>
+                                                                        {can.update && (
+                                                                            <Link
+                                                                                href={route(
+                                                                                    'asset-categories.edit',
+                                                                                    child.id,
+                                                                                )}
+                                                                                title="Ubah subkategori"
+                                                                                className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                            >
+                                                                                <PencilIcon className="h-3.5 w-3.5" />
+                                                                            </Link>
+                                                                        )}
+                                                                        {can.delete && (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() =>
+                                                                                    setDeletingCategory(
+                                                                                        child,
+                                                                                    )
+                                                                                }
+                                                                                title="Hapus subkategori"
+                                                                                className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-1 focus:ring-red-500"
+                                                                            >
+                                                                                <TrashIcon className="h-3.5 w-3.5" />
+                                                                            </button>
+                                                                        )}
                                                                     </div>
                                                                 </td>
                                                             </tr>

@@ -24,6 +24,11 @@ class AssetCategoryController extends Controller
 
         return Inertia::render('AssetCategories/Index', [
             'categories' => $this->categories->tree(),
+            'can' => [
+                'create' => Gate::allows('create', AssetCategory::class),
+                'update' => Gate::allows('update', new AssetCategory),
+                'delete' => Gate::allows('delete', new AssetCategory),
+            ],
         ]);
     }
 

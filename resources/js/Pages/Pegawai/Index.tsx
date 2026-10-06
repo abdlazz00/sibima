@@ -29,6 +29,7 @@ interface IndexProps extends PageProps {
         create: boolean;
         createUser: boolean;
         manageAccess?: boolean;
+        delete?: boolean;
     };
 }
 
@@ -341,7 +342,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                                         <Pencil className="h-3.5 w-3.5" />
                                                     </Link>
 
-                                                    {can.create && (
+                                                    {can.delete && (
                                                         <button
                                                             type="button"
                                                             onClick={() =>

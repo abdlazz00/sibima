@@ -43,7 +43,11 @@ interface IndexProps extends PageProps {
     units: UnitOption[];
     kondisiOptions: Option[];
     sortOptions: Option[];
-    can: { create: boolean };
+    can: {
+        create: boolean;
+        printLabel?: boolean;
+        update?: boolean;
+    };
 }
 
 const KONDISI_STYLE: Record<string, string> = {
@@ -131,7 +135,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                     </div>
 
                     <div className="flex items-center gap-3">
-                        {selectedIds.length > 0 && (
+                        {selectedIds.length > 0 && Boolean(can.printLabel) && (
                             <button
                                 type="button"
                                 onClick={() => setPrintIds(selectedIds)}
@@ -373,21 +377,25 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </Link>
-                                                    <Link
-                                                        href={route('assets.edit', asset.id)}
-                                                        title="Ubah aset"
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Link>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setPrintIds([asset.id])}
-                                                        title="Cetak label QR"
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
-                                                    >
-                                                        <Printer className="h-4 w-4" />
-                                                    </button>
+                                                    {can.update && (
+                                                        <Link
+                                                            href={route('assets.edit', asset.id)}
+                                                            title="Ubah aset"
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Link>
+                                                    )}
+                                                    {can.printLabel && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setPrintIds([asset.id])}
+                                                            title="Cetak label QR"
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
+                                                        >
+                                                            <Printer className="h-4 w-4" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
