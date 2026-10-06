@@ -31,8 +31,8 @@ class AssetRequestService
         $type = AssetRequestType::from($data['jenis']);
 
         return DB::transaction(function () use ($data, $actor, $type) {
-            if (! $actor->hasAnyRole(['admin_kecamatan', 'admin_kelurahan']) || $actor->unit_id === null) {
-                throw new InvalidArgumentException('Hanya admin unit yang dapat membuat permohonan.');
+            if (! $actor->can('permohonan.create') || $actor->unit_id === null) {
+                throw new InvalidArgumentException('Hanya pengguna berwenang yang dapat membuat permohonan.');
             }
 
             $category = AssetCategory::find($data['category_id'] ?? null);
@@ -56,8 +56,8 @@ class AssetRequestService
                 $unitId = $pegawai->unit_id;
                 $jumlah = 1;
             } else {
-                if (! $actor->hasRole('admin_kelurahan')) {
-                    throw new InvalidArgumentException('Hanya admin kelurahan yang dapat mengajukan permohonan unit.');
+                if (! $actor->unit?->isKelurahan()) {
+                    throw new InvalidArgumentException('Permohonan unit hanya dapat diajukan oleh unit tingkat kelurahan.');
                 }
 
                 $jumlah = (int) ($data['jumlah'] ?? 0);
@@ -94,13 +94,13 @@ class AssetRequestService
 
     public function canFulfill(User $user, AssetRequest $request): bool
     {
-        if (! $user->hasAnyRole(['admin_kecamatan', 'admin_kelurahan'])) {
+        if (! $user->can('permohonan.fulfill')) {
             return false;
         }
 
         return match ($request->jenis) {
             AssetRequestType::Pegawai => $user->canAccessUnit($request->unit),
-            AssetRequestType::Unit => $user->hasRole('admin_kecamatan') && $request->unit->parent_id === $user->unit_id,
+            AssetRequestType::Unit => $request->unit->parent_id === $user->unit_id && $user->unit_id !== null,
         };
     }
 

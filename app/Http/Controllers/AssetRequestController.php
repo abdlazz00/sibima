@@ -40,7 +40,10 @@ class AssetRequestController extends Controller
 
         $user = $request->user();
         $unitIds = $user->accessibleUnitIds();
-        $binaanIds = $user->hasRole('admin_kecamatan') ? Unit::where('parent_id', $user->unit_id)->pluck('id')->all() : [];
+        $canSeeBinaan = $user->unit?->isKecamatan() || in_array($user->resolveUnitScope(), ['binaan', 'all'], true);
+        $binaanIds = $canSeeBinaan && $user->unit_id !== null
+            ? Unit::where('parent_id', $user->unit_id)->pluck('id')->all()
+            : [];
 
         $query = AssetRequest::with(['pegawai', 'unit', 'category', 'creator', 'approvalRequest'])
             ->when($unitIds !== null, fn (Builder $q) => $q->where(fn (Builder $w) => $w
@@ -75,7 +78,7 @@ class AssetRequestController extends Controller
             'pegawais' => Pegawai::whereIn('unit_id', $user->accessibleUnitIds() ?? [])
                 ->orderBy('nama')->get(['id', 'nama', 'jabatan']),
             'categories' => AssetCategory::whereNotNull('parent_id')->orderBy('name')->get(['id', 'name']),
-            'canUnit' => $user->hasRole('admin_kelurahan'),
+            'canUnit' => $user->can('permohonan.create') && ($user->unit?->isKelurahan() ?? false),
         ]);
     }
 

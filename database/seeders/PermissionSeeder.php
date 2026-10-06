@@ -88,7 +88,7 @@ class PermissionSeeder extends Seeder
             'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
             'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
             'mutasi.view', 'mutasi.create',
-            'permohonan.view', 'permohonan.create',
+            'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
             'laporan-insiden.view', 'laporan-insiden.create',
             'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
         ]);

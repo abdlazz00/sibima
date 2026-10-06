@@ -197,3 +197,21 @@ it('passes nomor_register in eligibleAssets prop to show view when can fulfill',
         );
 });
 
+test('user dengan role kustom dan permission permohonan.create dapat membuat permohonan unit', function () {
+    $unit = makeKelurahan($this->kec, 'Kelurahan Custom');
+    $role = Role::create(['name' => 'pengurus_kelurahan', 'guard_name' => 'web']);
+    $role->givePermissionTo(['permohonan.create', 'permohonan.view']);
+
+    $user = userWithRole('pengurus_kelurahan', $unit);
+
+    $response = $this->actingAs($user)->post(route('asset-requests.store'), [
+        'jenis' => 'unit',
+        'category_id' => $this->category->id,
+        'jumlah' => 2,
+        'keterangan' => 'Kebutuhan mendesak inventaris kelurahan',
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('asset_requests', ['unit_id' => $unit->id, 'jumlah' => 2]);
+});
+
