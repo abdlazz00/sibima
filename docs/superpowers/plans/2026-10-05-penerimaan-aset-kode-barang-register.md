@@ -33,7 +33,7 @@
 - Produces: `AssetRepositoryInterface::findExistingKodeBarang(int $categoryId, string $namaAset): ?string`
 - Consumes: `AssetRepositoryInterface::maxKodeBarangSuffix(string $prefix): int`, `AssetRepositoryInterface::maxRegisterNumber(string $kodeBarang): int`
 
-- [ ] **Step 1: Write failing tests in `tests/Feature/PenerimaanAsetEffectTest.php`**
+- [x] **Step 1: Write failing tests in `tests/Feature/PenerimaanAsetEffectTest.php`**
 
 Perbarui dan tambahkan skenario pengujian:
 1. `it('creates one Asset per unit with the same kode_barang and sequential nomor_register on final approval')`:
@@ -93,12 +93,12 @@ it('reuses existing kode_barang and continues nomor_register sequence for matchi
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `php artisan test --filter=PenerimaanAsetEffectTest`
 Expected: FAIL (assertion fails karena saat ini kode barang terpecah dan nomor register kembar).
 
-- [ ] **Step 3: Implement `findExistingKodeBarang` in Repository**
+- [x] **Step 3: Implement `findExistingKodeBarang` in Repository**
 
 In `app/Repositories/Contracts/AssetRepositoryInterface.php`:
 ```php
@@ -119,7 +119,7 @@ public function findExistingKodeBarang(int $categoryId, string $namaAset): ?stri
 }
 ```
 
-- [ ] **Step 4: Update `PenerimaanAsetEffect.php`**
+- [x] **Step 4: Update `PenerimaanAsetEffect.php`**
 
 Ubah loop di `apply()`:
 ```php
@@ -185,12 +185,12 @@ DB::transaction(function () use ($approvable) {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `php artisan test --filter=PenerimaanAsetEffectTest`
 Expected: PASS (all tests green).
 
-- [ ] **Step 6: Commit Task 1**
+- [x] **Step 6: Commit Task 1**
 
 ```bash
 git add app/Repositories/Contracts/AssetRepositoryInterface.php app/Repositories/EloquentAssetRepository.php app/Services/PenerimaanAsetEffect.php tests/Feature/PenerimaanAsetEffectTest.php
@@ -208,7 +208,7 @@ git commit -m "fix(penerimaan): assign single kode_barang and sequential nomor_r
 **Interfaces:**
 - Produces: Database state correction for assets ID 332 s.d. 336 (`kode_barang = 1.3.2.10.02.03.005`, `nomor_register = 1..5`, unified `nama_aset = Laptop asus #1`).
 
-- [ ] **Step 1: Write test in `tests/Feature/FixLaptopAsusDataPatchTest.php`**
+- [x] **Step 1: Write test in `tests/Feature/FixLaptopAsusDataPatchTest.php`**
 
 ```php
 it('patches corrupted historical laptop assets into unified kode_barang and sequential register', function () {
@@ -231,7 +231,7 @@ it('patches corrupted historical laptop assets into unified kode_barang and sequ
 });
 ```
 
-- [ ] **Step 2: Create migration file `database/migrations/2026_10_05_100000_fix_laptop_asus_register_and_codes.php`**
+- [x] **Step 2: Create migration file `database/migrations/2026_10_05_100000_fix_laptop_asus_register_and_codes.php`**
 
 ```php
 <?php
@@ -267,17 +267,17 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 3: Run migration test and run artisan migrate**
+- [x] **Step 3: Run migration test and run artisan migrate**
 
 Run: `php artisan test --filter=FixLaptopAsusDataPatchTest`
 Run: `php artisan migrate`
 
-- [ ] **Step 4: Verify in local database**
+- [x] **Step 4: Verify in local database**
 
 Run: `php artisan tinker --execute="echo json_encode(App\Models\Asset::whereIn('id', [332,333,334,335,336])->get(['id', 'nama_aset', 'kode_barang', 'nomor_register']));"`
 Expected: Kode barang `1.3.2.10.02.03.005`, nomor_register: `1, 2, 3, 4, 5`.
 
-- [ ] **Step 5: Commit Task 2**
+- [x] **Step 5: Commit Task 2**
 
 ```bash
 git add database/migrations/2026_10_05_100000_fix_laptop_asus_register_and_codes.php tests/Feature/FixLaptopAsusDataPatchTest.php
@@ -297,7 +297,7 @@ git commit -m "fix(assets): patch historical laptop asus records to unified code
 - Produces: `existingAssetNames: Record<number, string[]>` passed as Inertia prop to `Penerimaan/Create` and `Penerimaan/Edit`.
 - Consumes: `<datalist id={`suggestions-${category_id}`}>` in `PenerimaanForm.tsx`.
 
-- [ ] **Step 1: Write test in `tests/Feature/PenerimaanAsetControllerTest.php`**
+- [x] **Step 1: Write test in `tests/Feature/PenerimaanAsetControllerTest.php`**
 
 ```php
 it('passes existingAssetNames grouped by category to create and edit views', function () {
@@ -316,7 +316,7 @@ it('passes existingAssetNames grouped by category to create and edit views', fun
 });
 ```
 
-- [ ] **Step 2: Update `PenerimaanAsetController.php`**
+- [x] **Step 2: Update `PenerimaanAsetController.php`**
 
 Di method `create()` dan `edit()`:
 ```php
@@ -336,7 +336,7 @@ return Inertia::render('Penerimaan/Create', [
 ]);
 ```
 
-- [ ] **Step 3: Update `PenerimaanForm.tsx`**
+- [x] **Step 3: Update `PenerimaanForm.tsx`**
 
 1. Tambahkan `existingAssetNames?: Record<number, string[]>` ke interface `PenerimaanFormProps`.
 2. Di kolom `nama_aset`:
@@ -346,12 +346,12 @@ return Inertia::render('Penerimaan/Create', [
    - Perjelas placeholder input `merk_type`: `"Contoh: Asus Vivobook 14, Epson L3210"`.
    - Tambahkan helper text halus di bawah input: `"Ketik nama baru atau pilih saran dari aset yang sudah ada agar terstandar."`
 
-- [ ] **Step 4: Verify with TypeScript and Pest**
+- [x] **Step 4: Verify with TypeScript and Pest**
 
 Run: `npx tsc --noEmit`
 Run: `php artisan test --filter=PenerimaanAsetControllerTest`
 
-- [ ] **Step 5: Commit Task 3**
+- [x] **Step 5: Commit Task 3**
 
 ```bash
 git add app/Http/Controllers/PenerimaanAsetController.php resources/js/Pages/Penerimaan/PenerimaanForm.tsx tests/Feature/PenerimaanAsetControllerTest.php
@@ -366,12 +366,12 @@ git commit -m "feat(penerimaan): add existing asset name suggestions via datalis
 - Test all: `tests/`
 - Build: `npm run build`
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `php artisan test`
 Expected: 580+ tests passed, 0 failures.
 
-- [ ] **Step 2: Run frontend production build**
+- [x] **Step 2: Run frontend production build**
 
 Run: `npm run build`
 Expected: Vite build succeeds in < 4s with 0 errors.
