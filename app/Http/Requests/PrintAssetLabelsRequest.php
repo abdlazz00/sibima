@@ -13,7 +13,7 @@ class PrintAssetLabelsRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->can('viewAny', Asset::class);
+        return $this->user()?->can('aset.print-label') ?? false;
     }
 
     /** @return array<string, mixed> */

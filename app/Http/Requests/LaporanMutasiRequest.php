@@ -14,7 +14,7 @@ class LaporanMutasiRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->getRoleNames()->isNotEmpty();
+        return $this->user()?->can('laporan.mutasi') ?? false;
     }
 
     /** @return array<string, mixed> */

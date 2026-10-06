@@ -23,7 +23,7 @@ class LaporanRusakHilangRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()?->getRoleNames()->isNotEmpty() ?? false;
+        return $this->user()?->can('laporan.rusak-hilang') ?? false;
     }
 
     /** @return array<string, mixed> */

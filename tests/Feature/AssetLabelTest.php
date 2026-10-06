@@ -94,3 +94,14 @@ it('returns a guest scanning the new QR straight back to the summary after login
         'password' => 'password',
     ])->assertRedirect("/scan/{$this->own->qr_token}");
 });
+
+it('forbids a user without aset.print-label permission from printing labels', function () {
+    $role = \Spatie\Permission\Models\Role::create(['name' => 'pegawai_tanpa_cetak', 'guard_name' => 'web']);
+    $role->givePermissionTo('aset.view');
+    $user = userWithRole('pegawai_tanpa_cetak', $this->kel);
+
+    $this->actingAs($user)
+        ->get('/assets/labels?'.http_build_query(['ids' => [$this->own->id], 'size' => 'kecil']))
+        ->assertForbidden();
+});
+

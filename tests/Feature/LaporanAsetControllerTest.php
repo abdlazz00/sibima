@@ -125,3 +125,12 @@ it('sends a guest to login', function () {
     $this->get('/laporan-aset')->assertRedirect('/login');
     $this->get('/laporan-aset/unduh')->assertRedirect('/login');
 });
+
+it('forbids a user without laporan.aset permission from accessing laporan aset', function () {
+    $role = \Spatie\Permission\Models\Role::create(['name' => 'pegawai_tanpa_laporan', 'guard_name' => 'web']);
+    $user = userWithRole('pegawai_tanpa_laporan', $this->kelA);
+
+    $this->actingAs($user)->get('/laporan-aset')->assertForbidden();
+    $this->actingAs($user)->get('/laporan-aset/unduh')->assertForbidden();
+});
+
