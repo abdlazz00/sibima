@@ -55,3 +55,22 @@ it('forbids admin_kelurahan from creating a login account', function () {
         ])
         ->assertForbidden();
 });
+
+it('lets user create a login account with a custom role if permitted', function () {
+    $kasubag = userWithRole('kasubag');
+    $roleCustom = Role::create(['name' => 'operator_bmd', 'guard_name' => 'web']);
+    $roleCustom->givePermissionTo('aset.view');
+
+    $this->actingAs($kasubag)
+        ->post("/pegawais/{$this->pegawai->id}/user", [
+            'email' => 'operator@simaset.test',
+            'password' => 'password123',
+            'role' => 'operator_bmd',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $user = User::where('email', 'operator@simaset.test')->firstOrFail();
+    expect($user->hasRole('operator_bmd'))->toBeTrue();
+});
+

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Role;
 
 class PegawaiController extends Controller
 {
@@ -30,8 +31,9 @@ class PegawaiController extends Controller
             'units' => Unit::orderBy('name')->get(['id', 'name', 'type']),
             'can' => [
                 'create' => $request->user()->can('create', Pegawai::class),
-                'createUser' => $request->user()->hasRole('kasubag') || $request->user()->can('pegawai.create-user'),
+                'createUser' => $request->user()->can('pegawai.create-user'),
                 'manageAccess' => $request->user()->can('user.manage-access'),
+                'delete' => $request->user()->can('pegawai.delete'),
             ],
         ]);
     }
@@ -62,8 +64,15 @@ class PegawaiController extends Controller
             'assets' => fn ($query) => $query->with('category')->latest(),
         ]);
 
+        $assignableRoles = Role::query()
+            ->get()
+            ->filter(fn (Role $r) => $request->user()->canManageRole($r))
+            ->map(fn (Role $r) => ['value' => $r->name, 'label' => $r->display_name ?? $r->name])
+            ->values();
+
         return Inertia::render('Pegawai/Show', [
             'pegawai' => $pegawai,
+            'roles' => $assignableRoles,
             'can' => [
                 'update' => $request->user()->can('update', $pegawai),
                 'delete' => $request->user()->can('delete', $pegawai),

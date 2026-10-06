@@ -21,9 +21,13 @@ class PegawaiService
     /** @param array<string, mixed> $data */
     public function create(array $data, ?UploadedFile $foto, User $actor): Pegawai
     {
+        $unitId = ($actor->resolveUnitScope() === 'all' && ! empty($data['unit_id']))
+            ? $data['unit_id']
+            : ($actor->unit_id ?? ($data['unit_id'] ?? null));
+
         $pegawai = $this->pegawais->create([
             ...Arr::only($data, self::FIELDS),
-            'unit_id' => $actor->hasRole('kasubag') ? $data['unit_id'] : $actor->unit_id,
+            'unit_id' => $unitId,
         ]);
 
         return $this->attachPhoto($pegawai, $foto);

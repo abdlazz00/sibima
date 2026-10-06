@@ -141,7 +141,7 @@ class User extends Authenticatable
     }
 
     /** Role dipakai lintas unit: user bercakupan sempit tidak boleh mengubahnya bila ada pemegang di luar cakupannya. */
-    public function canManageRole(Role $role): bool
+    public function canManageRole(Role|\Spatie\Permission\Contracts\Role|\Spatie\Permission\Models\Role $role): bool
     {
         $ids = $this->accessibleUnitIds();
 

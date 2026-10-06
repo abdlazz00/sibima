@@ -17,6 +17,7 @@ import { FormEvent, useState } from 'react';
 
 interface ShowProps extends PageProps {
     pegawai: Pegawai;
+    roles?: { value: string; label: string }[];
     can: {
         update: boolean;
         delete: boolean;
@@ -53,22 +54,14 @@ function getInitials(name: string): string {
     return name.slice(0, 2).toUpperCase();
 }
 
-export default function Show({ pegawai, can }: ShowProps) {
+export default function Show({ pegawai, roles = [], can }: ShowProps) {
     const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Form for Creating Login Account
     const createAccountForm = useForm({
-        role: (pegawai.unit?.type === 'kecamatan'
-            ? 'admin_kecamatan'
-            : 'admin_kelurahan') as
-            | 'kasubag'
-            | 'camat'
-            | 'admin_kecamatan'
-            | 'admin_kelurahan'
-            | 'lurah'
-            | 'pegawai',
+        role: roles[0]?.value || '',
         email: pegawai.email_dinas || '',
         password: '',
         password_confirmation: '',
@@ -524,32 +517,24 @@ export default function Show({ pegawai, can }: ShowProps) {
                                     onChange={(e) =>
                                         createAccountForm.setData(
                                             'role',
-                                            e.target.value as
-                                                | 'kasubag'
-                                                | 'camat'
-                                                | 'admin_kecamatan'
-                                                | 'admin_kelurahan'
-                                                | 'lurah'
-                                                | 'pegawai',
+                                            e.target.value,
                                         )
                                     }
-                                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50 disabled:text-slate-500"
                                     required
+                                    disabled={roles.length === 0}
                                 >
-                                    <option value="admin_kelurahan">
-                                        Admin Kelurahan
-                                    </option>
-                                    <option value="admin_kecamatan">
-                                        Admin Kecamatan
-                                    </option>
-                                    <option value="lurah">Lurah</option>
-                                    <option value="camat">Camat</option>
-                                    <option value="kasubag">
-                                        Kasubag Umum &amp; Kepegawaian
-                                    </option>
-                                    <option value="pegawai">
-                                        Pegawai Biasa
-                                    </option>
+                                    {roles.length > 0 ? (
+                                        roles.map((r) => (
+                                            <option key={r.value} value={r.value}>
+                                                {r.label}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="" disabled>
+                                            Tidak ada role yang dapat Anda delegasikan
+                                        </option>
+                                    )}
                                 </select>
                                 <InputError
                                     message={createAccountForm.errors.role}
@@ -687,7 +672,7 @@ export default function Show({ pegawai, can }: ShowProps) {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={createAccountForm.processing}
+                                    disabled={createAccountForm.processing || roles.length === 0}
                                     className="rounded-lg bg-blue-700 px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-800 disabled:opacity-50"
                                 >
                                     {createAccountForm.processing

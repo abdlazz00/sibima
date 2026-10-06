@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\Role;
 
 class CreatePegawaiUserRequest extends FormRequest
 {
@@ -18,7 +19,20 @@ class CreatePegawaiUserRequest extends FormRequest
         return [
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', Rule::in(['kasubag', 'camat', 'admin_kecamatan', 'admin_kelurahan', 'lurah', 'pegawai'])],
+            'role' => ['required', 'string', Rule::exists('roles', 'name')],
         ];
+    }
+
+    public function after(): array
+    {
+        return [function ($validator) {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+            $role = Role::where('name', $this->input('role'))->first();
+            if ($role && ! $this->user()->canManageRole($role)) {
+                $validator->errors()->add('role', 'Anda tidak memiliki wewenang untuk memberikan role ini.');
+            }
+        }];
     }
 }
