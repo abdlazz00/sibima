@@ -123,13 +123,13 @@ Di `app/Http/Controllers/AssetRequestController.php` (baris 120-126):
                 : [],
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `php artisan test --filter=AssetReportControllerTest`
 Run: `php artisan test --filter=AssetRequestControllerTest`
 Expected: PASS (seluruh test hijau).
 
-- [ ] **Step 6: Commit Task 1**
+- [x] **Step 6: Commit Task 1**
 
 ```bash
 git add app/Http/Controllers/AssetReportController.php app/Http/Controllers/AssetRequestController.php tests/Feature/AssetReportControllerTest.php tests/Feature/AssetRequestControllerTest.php
@@ -172,7 +172,7 @@ git commit -m "feat(controllers): include nomor_register in transaction asset pa
   }
   ```
 
-- [ ] **Step 1: Create `resources/js/Components/AssetSelectModal.tsx`**
+- [x] **Step 1: Create `resources/js/Components/AssetSelectModal.tsx`**
 
 Implementasi lengkap mencakup:
 1. Keyboard accessibility: Menutup saat tombol `Escape` ditekan.
@@ -492,12 +492,12 @@ export default function AssetSelectModal({
 }
 ```
 
-- [ ] **Step 2: Verify component with TypeScript**
+- [x] **Step 2: Verify component with TypeScript**
 
 Run: `npx tsc --noEmit`
 Expected: PASS with 0 errors.
 
-- [ ] **Step 3: Commit Task 2**
+- [x] **Step 3: Commit Task 2**
 
 ```bash
 git add resources/js/Components/AssetSelectModal.tsx
@@ -515,7 +515,7 @@ git commit -m "feat(ui): create senior-friendly AssetSelectModal component"
 - Consumes: `<AssetSelectModal>` with `mode="multiple"`
 - Produces: Form item populated simultaneously via modal; Tabel Ringkasan Barang Terpilih with Pemegang Baru & Catatan per row.
 
-- [ ] **Step 1: Update `AssetMutations/Create.tsx` state and item management**
+- [x] **Step 1: Update `AssetMutations/Create.tsx` state and item management**
 
 1. Tambahkan state `isModalOpen: boolean`.
 2. Ubah `availableAssets` agar menyertakan pemetaan `SelectableAsset` (menambahkan `holder: a.current_holder?.nama`).
@@ -529,13 +529,13 @@ git commit -m "feat(ui): create senior-friendly AssetSelectModal component"
    - Tambahkan baris baru untuk aset yang baru dipilih.
 5. Tambahkan reset konfirmasi jika `origin_unit_id` diubah ketika sudah ada barang yang dipilih.
 
-- [ ] **Step 2: Verify with TypeScript and Pest**
+- [x] **Step 2: Verify with TypeScript and Pest**
 
 Run: `npx tsc --noEmit`
 Run: `php artisan test --filter=AssetMutation`
 Expected: PASS.
 
-- [ ] **Step 3: Commit Task 3**
+- [x] **Step 3: Commit Task 3**
 
 ```bash
 git add resources/js/Pages/AssetMutations/Create.tsx
@@ -553,7 +553,7 @@ git commit -m "feat(mutasi): integrate AssetSelectModal and table summary into m
 **Interfaces:**
 - Consumes: `<AssetSelectModal>` with `mode="single"` and `mode="multiple"`.
 
-- [ ] **Step 1: Update `AssetRequests/Show.tsx`**
+- [x] **Step 1: Update `AssetRequests/Show.tsx`**
 
 1. Import `AssetSelectModal` dan `SelectableAsset`.
 2. Tambahkan state `isModalOpen: boolean`.
@@ -563,7 +563,7 @@ git commit -m "feat(mutasi): integrate AssetSelectModal and table summary into m
    - Setelah dipilih, tampilkan tabel ringkasan aset terpilih dengan tombol **`[ Ganti Pilihan Aset ]`**.
    - Tombol **`[ Serahkan ke Pegawai ]`** / **`[ Ajukan Mutasi Pemenuhan ]`** diaktifkan ketika kuota terpenuhi.
 
-- [ ] **Step 2: Update `AssetReports/Create.tsx`**
+- [x] **Step 2: Update `AssetReports/Create.tsx`**
 
 1. Import `AssetSelectModal` dan `SelectableAsset`.
 2. Tambahkan state `isModalOpen: boolean`.
@@ -571,14 +571,14 @@ git commit -m "feat(mutasi): integrate AssetSelectModal and table summary into m
    - Jika belum ada aset: Tampilkan kartu pemilih dengan tombol **`[ + Pilih Aset yang Dilaporkan ]`**.
    - Jika aset terpilih: Tampilkan **Panel Ringkasan Aset Terpilih** dengan detail lengkap (Nama, Kode, Register, Merk, Kondisi Saat Ini, Pemegang) dan tombol **`[ Ganti Aset ]`**.
 
-- [ ] **Step 3: Verify with TypeScript and Pest**
+- [x] **Step 3: Verify with TypeScript and Pest**
 
 Run: `npx tsc --noEmit`
 Run: `php artisan test --filter=AssetReport`
 Run: `php artisan test --filter=AssetRequest`
 Expected: PASS.
 
-- [ ] **Step 4: Commit Task 4**
+- [x] **Step 4: Commit Task 4**
 
 ```bash
 git add resources/js/Pages/AssetRequests/Show.tsx resources/js/Pages/AssetReports/Create.tsx
@@ -593,12 +593,12 @@ git commit -m "feat(transaksi): integrate AssetSelectModal into asset fulfillmen
 - Test all: `tests/`
 - Build: `npm run build`
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `php artisan test`
 Expected: 650+ tests passed, 0 failures.
 
-- [ ] **Step 2: Run frontend production build**
+- [x] **Step 2: Run frontend production build**
 
 Run: `npm run build`
 Expected: Vite build succeeds in < 4s with 0 errors.
