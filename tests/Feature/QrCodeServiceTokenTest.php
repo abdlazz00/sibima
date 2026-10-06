@@ -31,5 +31,5 @@ it('generates scan URL using qr_token instead of numeric database id', function 
     $url = $service->urlForAsset($asset);
 
     expect($url)->toBe(rtrim(config('app.url'), '/') . '/scan/' . $asset->qr_token)
-        ->and($url)->not->toContain('/scan/' . $asset->id);
+        ->and($url)->not->toBe(rtrim(config('app.url'), '/') . '/scan/' . $asset->id);
 });

@@ -2,11 +2,13 @@
 
 use App\Models\Unit;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Auth;
 
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
+    $this->seed(PermissionSeeder::class);
     $this->unit = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
 });
 
@@ -57,6 +59,7 @@ it('logs out and redirects an active session if user is deactivated', function (
         'unit_id' => $this->unit->id,
         'is_active' => true,
     ]);
+    $user->assignRole('admin_kecamatan');
 
     $this->actingAs($user);
     $this->get('/dashboard')->assertOk();
