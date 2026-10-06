@@ -36,8 +36,13 @@ class PenerimaanAsetController extends Controller
         $user = $request->user();
 
         $query = BeritaAcaraPenerimaan::with(['unit', 'creator', 'items.category', 'approvalRequest'])
-            ->when(! $user->hasRole('kasubag'), fn (Builder $q) => $q->whereIn('unit_id', $user->accessibleUnitIds() ?? []))
-            ->when(! $user->hasRole('admin_kecamatan'), fn (Builder $q) => $q->where('status', BeritaAcaraStatus::Submitted))
+            ->when($user->accessibleUnitIds() !== null, fn (Builder $q) => $q->whereIn('unit_id', $user->accessibleUnitIds()))
+            ->where(function (Builder $q) use ($user) {
+                $q->where('status', '!=', BeritaAcaraStatus::Draft);
+                if ($user->can('penerimaan.create') && $user->unit_id !== null) {
+                    $q->orWhere(fn (Builder $d) => $d->where('status', BeritaAcaraStatus::Draft)->where('unit_id', $user->unit_id));
+                }
+            })
             ->when($request->search, fn (Builder $q, $search) => $q->where(fn (Builder $q2) => $q2
                 ->where('no_berita_acara', 'like', "%{$search}%")
                 ->orWhereHas('items', fn (Builder $q3) => $q3->where('nama_aset', 'like', "%{$search}%"))

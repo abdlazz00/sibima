@@ -1,8 +1,11 @@
 <?php
 
+use App\Enums\BeritaAcaraStatus;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\BeritaAcaraPenerimaan;
+use App\Models\Unit;
+use App\Models\User;
 use App\Services\ApprovalWorkflowService;
 use Database\Seeders\WorkflowDefinitionSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -163,5 +166,27 @@ it('passes existingAssetNames grouped by category to create and edit views', fun
             ->component('Penerimaan/Create')
             ->where('existingAssetNames', fn ($names) => in_array('Lap Top', $names[$this->category->id] ?? []))
         );
+});
+
+test('user dengan izin penerimaan.create dapat melihat draft penerimaan di unitnya', function () {
+    $unit = makeKecamatan('Kecamatan Custom');
+    $role = Role::create(['name' => 'staf_pengadaan', 'guard_name' => 'web']);
+    $role->givePermissionTo(['penerimaan.view', 'penerimaan.create']);
+
+    $user = userWithRole('staf_pengadaan', $unit);
+
+    BeritaAcaraPenerimaan::create([
+        'no_berita_acara' => 'BA/TEST/DRAFT/01',
+        'tanggal_penerimaan' => '2026-10-06',
+        'sumber_perolehan' => 'APBD',
+        'no_kontrak_spk' => 'SPK/TEST/01',
+        'unit_id' => $unit->id,
+        'created_by' => $user->id,
+        'status' => BeritaAcaraStatus::Draft,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('penerimaan-aset.index'));
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page->has('items.data', 1));
 });
 
