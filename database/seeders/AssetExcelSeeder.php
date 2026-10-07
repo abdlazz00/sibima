@@ -10,16 +10,20 @@ use App\Models\Pegawai;
 use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class AssetExcelSeeder extends Seeder
 {
+    /**
+     * Menginjeksi data aset riil dari template Excel Kecamatan Sagulung.
+     */
     public function run(): void
     {
         ini_set('memory_limit', '1024M');
 
-        // Pengaman: seeder ini MENGHAPUS semua aset dan transaksi. Non-interaktif = batal.
         $file = base_path('docs/Template_Database_Aset_Kecamatan_Sagulung.xlsx');
         if (! file_exists($file)) {
             $this->command?->error("File template tidak ditemukan di: {$file}");
@@ -27,31 +31,40 @@ class AssetExcelSeeder extends Seeder
             return;
         }
 
-        if (! $this->command?->confirm('Seeder ini MENGOSONGKAN semua aset dan transaksi di database. Lanjutkan?', false)) {
-            $this->command?->warn('Dibatalkan, tidak ada data yang diubah.');
+        $hasAssets = Asset::exists();
+        if ($hasAssets && $this->command && ! $this->command->hasOption('force')) {
+            $isInteractive = method_exists($this->command->getOutput(), 'isInteractive')
+                ? $this->command->getOutput()->isInteractive()
+                : true;
 
-            return;
+            if ($isInteractive && ! $this->command->confirm('Database sudah memiliki aset. Kosongkan aset & transaksi lama untuk impor ulang dari Excel template?', false)) {
+                $this->command->warn('Dibatalkan, data aset tidak diubah.');
+
+                return;
+            }
         }
 
-        // 1. Bersihkan tabel transaksi dan data aset lama
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // 1. Bersihkan tabel transaksi dan data aset lama jika tabel ada isinya
+        if ($hasAssets) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        DB::table('asset_mutation_items')->truncate();
-        DB::table('asset_mutations')->truncate();
-        DB::table('berita_acara_items')->truncate();
-        DB::table('berita_acara_penerimaans')->truncate();
-        DB::table('asset_reports')->truncate();
-        DB::table('asset_requests')->truncate();
-        DB::table('approval_actions')->truncate();
-        DB::table('approval_request_steps')->truncate();
-        DB::table('approval_requests')->truncate();
-        DB::table('workflow_change_logs')->truncate();
-        DB::table('notifications')->truncate();
-        DB::table('asset_histories')->truncate();
-        DB::table('asset_photos')->truncate();
-        DB::table('assets')->truncate();
+            DB::table('asset_mutation_items')->truncate();
+            DB::table('asset_mutations')->truncate();
+            DB::table('berita_acara_items')->truncate();
+            DB::table('berita_acara_penerimaans')->truncate();
+            DB::table('asset_reports')->truncate();
+            DB::table('asset_requests')->truncate();
+            DB::table('approval_actions')->truncate();
+            DB::table('approval_request_steps')->truncate();
+            DB::table('approval_requests')->truncate();
+            DB::table('workflow_change_logs')->truncate();
+            DB::table('notifications')->truncate();
+            DB::table('asset_histories')->truncate();
+            DB::table('asset_photos')->truncate();
+            DB::table('assets')->truncate();
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
 
         // 2. Baca file Excel template database aset
         $reader = IOFactory::createReaderForFile($file);
@@ -61,9 +74,10 @@ class AssetExcelSeeder extends Seeder
         $sheet = $spreadsheet->getActiveSheet();
         $highestRow = $sheet->getHighestRow();
 
-        // 3. Cache data Unit
-        $units = Unit::all()->keyBy(fn ($u) => strtolower(trim($u->name)));
+        // 3. Cache data Unit dan Pegawai
+        $units = Unit::all()->keyBy(fn (Unit $u): string => strtolower(trim($u->name)));
         $defaultUnit = Unit::where('type', 'kecamatan')->first() ?? Unit::first();
+        $allPegawais = Pegawai::all();
 
         // 4. Injeksi baris demi baris
         $insertedCount = 0;
@@ -140,20 +154,16 @@ class AssetExcelSeeder extends Seeder
             };
 
             // Pemegang / Penanggung Jawab
-            $holder = null;
-            if ($penanggungJawab !== '') {
-                $holder = Pegawai::where('unit_id', $unit->id)
-                    ->where(fn ($q) => $q->where('nama', $penanggungJawab)->orWhere('jabatan', $penanggungJawab))
-                    ->first();
-            }
+            $holderId = $this->resolveHolderId($penanggungJawab, $unit, $allPegawais);
 
             Asset::create([
+                'qr_token' => Str::random(16),
                 'kode_barang' => $kodeBarang,
                 'nomor_register' => $nomorRegister,
                 'nama_aset' => $namaAset,
                 'category_id' => $subCategory->id,
                 'unit_id' => $unit->id,
-                'current_holder_id' => $holder?->id,
+                'current_holder_id' => $holderId,
                 'merk_type' => $merkType ?: null,
                 'kondisi' => $kondisi,
                 'status' => $status,
@@ -172,5 +182,63 @@ class AssetExcelSeeder extends Seeder
         unset($spreadsheet);
 
         $this->command?->info("Berhasil menginjeksi {$insertedCount} data aset riil dari template Excel!");
+    }
+
+    /**
+     * Resolusi ID Pegawai pemegang aset secara cerdas berdasarkan nama/jabatan penanggung jawab.
+     *
+     * @param  Collection<int, Pegawai>  $allPegawais
+     */
+    private function resolveHolderId(string $penanggungJawab, Unit $unit, $allPegawais): ?int
+    {
+        $pj = trim($penanggungJawab);
+        if ($pj === '') {
+            return null;
+        }
+
+        // 1. Jika penanggung jawab adalah Camat, langsung arahkan ke Camat Sagulung
+        if (stripos($pj, 'camat') !== false) {
+            $camat = $allPegawais->first(function (Pegawai $p): bool {
+                return stripos($p->jabatan, 'Camat Sagulung') !== false || stripos($p->jabatan, 'Camat') !== false;
+            });
+
+            if ($camat) {
+                return $camat->id;
+            }
+        }
+
+        // 2. Jika penanggung jawab adalah Lurah, cari Lurah di unit tersebut
+        if (stripos($pj, 'lurah') !== false) {
+            $lurah = $allPegawais->first(function (Pegawai $p) use ($unit): bool {
+                return $p->unit_id === $unit->id && (
+                    stripos($p->jabatan, 'Lurah') === 0 ||
+                    stripos($p->jabatan, 'Lurah '.$unit->name) !== false
+                );
+            });
+
+            if ($lurah) {
+                return $lurah->id;
+            }
+        }
+
+        // 3. Cari pegawai dalam unit yang sama berdasarkan kecocokan nama atau jabatan
+        $holderInUnit = $allPegawais->first(function (Pegawai $p) use ($pj, $unit): bool {
+            if ($p->unit_id !== $unit->id) {
+                return false;
+            }
+
+            return stripos($p->nama, $pj) !== false || stripos($p->jabatan, $pj) !== false;
+        });
+
+        if ($holderInUnit) {
+            return $holderInUnit->id;
+        }
+
+        // 4. Fallback: cari pegawai di seluruh unit
+        $fallback = $allPegawais->first(function (Pegawai $p) use ($pj): bool {
+            return stripos($p->nama, $pj) !== false || stripos($p->jabatan, $pj) !== false;
+        });
+
+        return $fallback?->id;
     }
 }

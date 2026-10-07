@@ -60,7 +60,6 @@ Database mengorganisir unit dalam relasi *Self-Referencing Parent-Child*:
    - Kelurahan Sungai Lekop
    - Kelurahan Sungai Pelunggut
    - Kelurahan Tembesi
-   - Kelurahan Sungai Buluh
 
 ### 2.2 Resolusi Cakupan pada Model `User` (`app/Models/User.php`)
 Setiap akun `User` memiliki relasi `unit_id`. Evaluasi hak akses teritorial dieksekusi melalui metode:

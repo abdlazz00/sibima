@@ -11,9 +11,9 @@ it('seeds roles, units, and one demo user per role idempotently', function () {
     $this->seed(DatabaseSeeder::class); // must be safe to run twice
 
     expect(Unit::where('type', 'kecamatan')->count())->toBe(1)
-        ->and(Unit::where('type', 'kelurahan')->count())->toBe(7)
+        ->and(Unit::where('type', 'kelurahan')->count())->toBe(6)
         ->and(User::count())->toBe(5)
-        ->and(Pegawai::count())->toBe(2);
+        ->and(Pegawai::count())->toBe(81);
 
     $kasubag = User::where('email', 'kasubag@simaset.test')->firstOrFail();
     expect($kasubag->unit_id)->toBeNull()

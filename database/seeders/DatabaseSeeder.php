@@ -6,6 +6,9 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Jalankan seeder aplikasi.
+     */
     public function run(): void
     {
         $this->call([
@@ -17,7 +20,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         if (app()->environment(['local', 'testing'])) {
-            $this->call([UserSeeder::class, PegawaiSeeder::class]);
+            $this->call([
+                PegawaiSeeder::class,
+                UserSeeder::class,
+            ]);
+        }
+
+        if (app()->environment('local')) {
+            $this->call([
+                AssetExcelSeeder::class,
+            ]);
         }
     }
 }

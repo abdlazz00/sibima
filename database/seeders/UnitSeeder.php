@@ -20,10 +20,11 @@ class UnitSeeder extends Seeder
             'Kelurahan Sungai Lekop',
             'Kelurahan Sungai Pelunggut',
             'Kelurahan Tembesi',
-            'Kelurahan Sungai Buluh',
         ])->each(fn (string $name) => Unit::firstOrCreate(
             ['name' => $name, 'type' => 'kelurahan'],
             ['parent_id' => $kecamatan->id],
         ));
+
+        Unit::where('name', 'Kelurahan Sungai Buluh')->delete();
     }
 }
