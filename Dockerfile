@@ -7,7 +7,7 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignor
 COPY . .
 RUN composer dump-autoload --no-dev --optimize --no-scripts
 
-FROM node:22-alpine AS assets
+FROM node:24-alpine AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
