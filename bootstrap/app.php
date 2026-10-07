@@ -20,7 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\EnsureUserIsActive::class,
         ]);
 
-        //
+        // Satu-satunya jalan masuk produksi adalah Cloudflare Tunnel (lihat docs/ops/deployment.md).
+        // X-Forwarded-Host sengaja tidak dipercaya: klien bisa mengirimnya lewat Cloudflare (poisoning link reset password).
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
