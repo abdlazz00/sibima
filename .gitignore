@@ -31,3 +31,4 @@ Thumbs.db
 # Dokumen pribadi/internal: jangan masuk repo
 docs/*.xlsx
 docs/*.pdf
+/backups

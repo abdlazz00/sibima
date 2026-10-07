@@ -1,0 +1,67 @@
+name: sibima
+
+x-app: &app
+  build:
+    context: .
+    target: app
+  image: sibima-app
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - storage:/var/www/html/storage
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  app:
+    <<: *app
+
+  queue:
+    <<: *app
+    command: php artisan queue:work database --sleep=3 --tries=1 --timeout=600 --max-time=3600 --memory=512
+
+  scheduler:
+    <<: *app
+    command: php artisan schedule:work
+
+  web:
+    build:
+      context: .
+      target: web
+    image: sibima-web
+    restart: unless-stopped
+    depends_on:
+      - app
+    volumes:
+      - storage:/var/www/html/storage:ro
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command: --innodb-buffer-pool-size=512M --max-connections=50
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    depends_on:
+      - web
+
+volumes:
+  dbdata:
+  storage:
