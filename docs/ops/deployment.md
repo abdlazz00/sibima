@@ -8,6 +8,7 @@ Sebagai `root`:
 
 ```bash
 timedatectl set-timezone Asia/Jakarta
+apt update && apt upgrade -y
 apt install -y ufw fail2ban git
 adduser deploy                 # isi password, sisanya Enter
 usermod -aG sudo deploy

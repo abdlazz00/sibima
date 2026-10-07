@@ -1,5 +1,11 @@
 name: sibima
 
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
 x-app: &app
   build:
     context: .
@@ -7,6 +13,7 @@ x-app: &app
   image: sibima-app
   env_file: .env
   restart: unless-stopped
+  logging: *logging
   volumes:
     - storage:/var/www/html/storage
   depends_on:
@@ -31,6 +38,7 @@ services:
       target: web
     image: sibima-web
     restart: unless-stopped
+    logging: *logging
     depends_on:
       - app
     volumes:
@@ -39,6 +47,7 @@ services:
   db:
     image: mysql:8.4
     restart: unless-stopped
+    logging: *logging
     command: --innodb-buffer-pool-size=512M --max-connections=50
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
@@ -56,6 +65,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
+    logging: *logging
     command: tunnel --no-autoupdate run
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN}

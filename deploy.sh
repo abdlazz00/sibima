@@ -11,4 +11,5 @@ $DC up -d db
 $DC run --rm app php artisan migrate --force
 $DC run --rm app php artisan db:seed --class=WorkflowDefinitionSeeder --force
 $DC up -d --remove-orphans
+$DC restart web   # nginx meresolve app:9000 sekali saat start; tanpa ini 502 setelah deploy yang hanya mengubah PHP
 docker image prune -f

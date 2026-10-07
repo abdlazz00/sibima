@@ -13,7 +13,7 @@ Target: VPS Rumahweb (Ubuntu 24.04, 2 CPU, 4 GB RAM + 4 GB swap), domain `si-bim
 
 | Service | Isi | Catatan |
 |---|---|---|
-| `app` | PHP 8.3-FPM, image Laravel | multi-stage: Node (`npm ci && npm run build`) → Composer (`--no-dev -o`) → runtime |
+| `app` | PHP 8.4-FPM, image Laravel | multi-stage: Node (`npm ci && npm run build`) → Composer (`--no-dev -o`) → runtime |
 | `web` | Nginx | melayani `public/` (aset hasil build disalin ke image), meneruskan `.php` ke `app:9000` |
 | `queue` | image `app` | `queue:work --timeout=600 --tries=3`; timeout < `DB_QUEUE_RETRY_AFTER` (900) |
 | `scheduler` | image `app` | `schedule:work` (ada `import:prune` harian) |

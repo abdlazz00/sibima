@@ -6,7 +6,7 @@
 
 **Architecture:** Satu Dockerfile multi-stage menghasilkan dua image: `app` (PHP-FPM, dipakai juga oleh `queue` dan `scheduler`) dan `web` (Nginx + aset statis). MySQL dan `cloudflared` memakai image resmi. Data persisten ada di dua named volume (`dbdata`, `storage`). Host hanya membuka port 22.
 
-**Tech Stack:** Docker Compose, PHP 8.3-FPM (Alpine), Nginx 1.27, MySQL 8.4, Node 22 (stage build), cloudflared, Pest.
+**Tech Stack:** Docker Compose, PHP 8.4-FPM (Alpine), Nginx 1.27, MySQL 8.4, Node 22 (stage build), cloudflared, Pest.
 
 **Spec:** `docs/superpowers/specs/2026-10-07-docker-deployment-design.md`
 
@@ -206,7 +206,7 @@ COPY . .
 COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
-FROM php:8.3-fpm-alpine AS app
+FROM php:8.4-fpm-alpine AS app
 RUN apk add --no-cache libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev icu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j2 pdo_mysql gd zip bcmath intl exif opcache pcntl

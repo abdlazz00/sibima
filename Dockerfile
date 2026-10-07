@@ -15,7 +15,7 @@ COPY . .
 COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
-FROM php:8.3-fpm-alpine AS app
+FROM php:8.4-fpm-alpine AS app
 RUN apk add --no-cache libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev icu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j2 pdo_mysql gd zip bcmath intl exif opcache pcntl
