@@ -1,5 +1,7 @@
 # Deployment (Docker + Cloudflare Tunnel)
 
+Branch `production` dipakai khusus untuk deployment; `main` dibiarkan sebagai cadangan codebase sebelum Docker. Fitur baru dikerjakan di `main`/branch fitur lalu di-merge ke `production` saat siap rilis.
+
 Target: VPS Ubuntu 24.04, domain `si-bima.online` (Rumahweb), DNS dan CDN lewat Cloudflare. Semua service jalan di Docker; host hanya membuka port 22. Rancangan: `docs/superpowers/specs/2026-10-07-docker-deployment-design.md`.
 
 ## 1. Siapkan VPS (sekali)
@@ -50,13 +52,13 @@ Sebagai `deploy`:
 
 ```bash
 sudo mkdir -p /opt/sibima && sudo chown deploy:deploy /opt/sibima
-git clone https://github.com/abdlazz00/sibima.git /opt/sibima
+git clone -b production https://github.com/abdlazz00/sibima.git /opt/sibima
 cd /opt/sibima
 cp .env.production.example .env
 nano .env        # isi DB_PASSWORD, RESEND_API_KEY, TUNNEL_TOKEN
 ```
 
-Repo private? Buat deploy key: `ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N ""`, tempel `~/.ssh/github_deploy.pub` di GitHub repo → Settings → Deploy keys, lalu clone dengan `GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy" git clone git@github.com:abdlazz00/sibima.git /opt/sibima` dan simpan konfigurasinya di `~/.ssh/config`.
+Repo private? Buat deploy key: `ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N ""`, tempel `~/.ssh/github_deploy.pub` di GitHub repo → Settings → Deploy keys, lalu clone dengan `GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy" git clone -b production git@github.com:abdlazz00/sibima.git /opt/sibima` dan simpan konfigurasinya di `~/.ssh/config`.
 
 Buat `APP_KEY`:
 
@@ -114,7 +116,7 @@ git checkout SHA_SEBELUMNYA
 docker compose -f compose.prod.yaml build && docker compose -f compose.prod.yaml up -d
 ```
 
-Bila rilis yang di-rollback punya migrasi, kembalikan database dari backup (bagian 5) atau jalankan `migrate:rollback --step=N`. Setelah masalah beres: `git checkout main`.
+Bila rilis yang di-rollback punya migrasi, kembalikan database dari backup (bagian 5) atau jalankan `migrate:rollback --step=N`. Setelah masalah beres: `git checkout production`.
 
 ## 7. Pemecahan masalah
 
