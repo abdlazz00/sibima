@@ -56,7 +56,7 @@ $CF tunnel route dns --overwrite-dns sibima-prod si-bima.online
 
 ```bash
 mkdir -p /opt/sibima/cloudflared && cd /opt/sibima/cloudflared
-cp ~/.cloudflared/ID.json credentials.json && chmod 644 credentials.json
+cp ~/.cloudflared/ID.json credentials.json && sudo chown 65532:65532 credentials.json && chmod 600 credentials.json
 cat > config.yml <<'YML'
 tunnel: ID
 credentials-file: /etc/cloudflared/credentials.json
