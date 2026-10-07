@@ -21,11 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Satu-satunya jalan masuk produksi adalah Cloudflare Tunnel (lihat docs/ops/deployment.md).
-        // X-Forwarded-Host sengaja tidak dipercaya: klien bisa mengirimnya lewat Cloudflare (poisoning link reset password).
-        $middleware->trustProxies(
-            at: '*',
-            headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO,
-        );
+        // Hanya skema (proto) yang dipercaya. Host dan For sengaja tidak: klien bisa mengirimnya lewat
+        // Cloudflare (poisoning link reset password, pemalsuan IP untuk rate limit). IP klien asli
+        // ditetapkan Nginx dari CF-Connecting-IP (docker/nginx.conf), jadi sudah ada di REMOTE_ADDR.
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_PROTO);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

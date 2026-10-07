@@ -31,7 +31,7 @@ PHP ekstensi: `pdo_mysql`, `gd` (+freetype/jpeg), `zip`, `mbstring`, `bcmath`, `
 
 ## Konfigurasi aplikasi
 
-- `bootstrap/app.php`: `trustProxies(at: '*')` dengan header `X-Forwarded-*`. Aman karena satu-satunya jalan masuk adalah tunnel. Tanpa ini Laravel menganggap request HTTP, sehingga URL dan cookie rusak.
+- `bootstrap/app.php`: `trustProxies(at: '*', headers: HEADER_X_FORWARDED_PROTO)`. Hanya skema yang dipercaya; Host dan For tidak (poisoning link reset, pemalsuan IP). IP klien asli diambil Nginx dari `CF-Connecting-IP` (`set_real_ip_from` jaringan Docker). Tanpa proto, Laravel menganggap request HTTP sehingga URL dan cookie rusak.
 - `.env` produksi: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://si-bima.online`, `SESSION_SECURE_COOKIE=true`, `DB_HOST=db`, `MAIL_MAILER=resend`, `LOG_LEVEL=warning`.
 - Entrypoint `app`: `config:cache`, `route:cache`, `view:cache`, `event:cache`. Migrate tidak otomatis; dijalankan eksplisit oleh `deploy.sh`.
 

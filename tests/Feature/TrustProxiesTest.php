@@ -16,6 +16,12 @@ it('mengabaikan X-Forwarded-Host agar link tidak bisa diracuni', function () {
     $this->get('/_host', ['X-Forwarded-Host' => 'evil.example'])->assertJson(['host' => 'localhost']);
 });
 
+it('mengabaikan X-Forwarded-For agar IP tidak bisa dipalsukan (rate limit)', function () {
+    Route::get('/_ip', fn () => response()->json(['ip' => request()->ip()]));
+
+    $this->get('/_ip', ['X-Forwarded-For' => '6.6.6.6'])->assertJson(['ip' => '127.0.0.1']);
+});
+
 it('menganggap request HTTP bila tidak ada header proxy', function () {
     $this->get('/_proto')->assertJson(['secure' => false]);
 });
