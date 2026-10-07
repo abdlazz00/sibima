@@ -18,7 +18,7 @@ Target: VPS Rumahweb (Ubuntu 24.04, 2 CPU, 4 GB RAM + 4 GB swap), domain `si-bim
 | `queue` | image `app` | `queue:work --timeout=600 --tries=3`; timeout < `DB_QUEUE_RETRY_AFTER` (900) |
 | `scheduler` | image `app` | `schedule:work` (ada `import:prune` harian) |
 | `db` | MySQL 8 | named volume `dbdata`, tanpa port ke host |
-| `cloudflared` | Cloudflare Tunnel | token dari `.env`, tujuan `http://web:80` |
+| `cloudflared` | Cloudflare Tunnel | tunnel dikelola lokal (CLI, tanpa Zero Trust): `cloudflared/config.yml` + `credentials.json` di host (di-ignore git), tujuan `http://web:80` |
 
 PHP ekstensi: `pdo_mysql`, `gd` (+freetype/jpeg), `zip`, `mbstring`, `bcmath`, `intl`, `opcache`, `exif`. Dibutuhkan PhpSpreadsheet, dompdf, bacon-qr-code, dan upload foto.
 

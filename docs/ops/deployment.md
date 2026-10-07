@@ -42,8 +42,32 @@ Nama file `00-` penting: pada sshd nilai pertama yang terbaca menang, dan `50-cl
 
 1. Daftar di cloudflare.com (paket Free) → **Add a site** → `si-bima.online`. Hapus A record lama bila Cloudflare mengimpornya.
 2. Rumahweb: Client Area → Domain → pilih domain → **Nameservers** → ganti ke dua nameserver yang diberikan Cloudflare. Tunggu status situs di Cloudflare menjadi **Active** (beberapa menit sampai beberapa jam).
-3. Cloudflare → **Zero Trust** → Networks → Tunnels → **Create a tunnel** (Cloudflared), nama `sibima`. Salin **token** (string panjang setelah `--token` / `TUNNEL_TOKEN`). Cloudflare kadang meminta kartu untuk verifikasi paket Free.
-4. Di tunnel itu, tab **Public Hostname**: hostname `si-bima.online`, service `HTTP`, URL `web:80`. Tambahkan `www.si-bima.online` dengan tujuan sama bila diperlukan.
+3. Buat tunnel lewat CLI di VPS (akun Cloudflare biasa, tanpa Zero Trust dan tanpa kartu). Sebagai `deploy`:
+
+```bash
+mkdir -p ~/.cloudflared && sudo chown 65532:65532 ~/.cloudflared
+CF="docker run --rm -v $HOME/.cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared:latest"
+$CF tunnel login                  # buka URL yang tercetak di browser, pilih si-bima.online, Authorize
+$CF tunnel create sibima-prod     # mencetak ID tunnel dan menulis ~/.cloudflared/ID.json
+$CF tunnel route dns --overwrite-dns sibima-prod si-bima.online
+```
+
+4. Setelah repo di-clone (bagian 3), siapkan folder konfigurasi (ganti `ID` dengan ID tunnel):
+
+```bash
+mkdir -p /opt/sibima/cloudflared && cd /opt/sibima/cloudflared
+cp ~/.cloudflared/ID.json credentials.json && chmod 644 credentials.json
+cat > config.yml <<'YML'
+tunnel: ID
+credentials-file: /etc/cloudflared/credentials.json
+ingress:
+  - hostname: si-bima.online
+    service: http://web:80
+  - service: http_status:404
+YML
+```
+
+`credentials.json` adalah kunci akses tunnel: jangan dibagikan dan jangan di-commit (folder `cloudflared/` sudah di-ignore). Untuk `www`, tambahkan entri `hostname: www.si-bima.online` dengan `service` yang sama sebelum baris `http_status:404`, lalu `$CF tunnel route dns sibima-prod www.si-bima.online`.
 5. Cloudflare → SSL/TLS → mode **Full**; Edge Certificates → **Always Use HTTPS** aktif.
 
 ## 3. Deploy pertama
@@ -55,7 +79,7 @@ sudo mkdir -p /opt/sibima && sudo chown deploy:deploy /opt/sibima
 git clone -b production https://github.com/abdlazz00/sibima.git /opt/sibima
 cd /opt/sibima
 cp .env.production.example .env
-nano .env        # isi DB_PASSWORD, RESEND_API_KEY, TUNNEL_TOKEN
+nano .env        # isi DB_PASSWORD (tanpa karakter $) dan RESEND_API_KEY
 ```
 
 Repo private? Buat deploy key: `ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N ""`, tempel `~/.ssh/github_deploy.pub` di GitHub repo → Settings → Deploy keys, lalu clone dengan `GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy" git clone -b production git@github.com:abdlazz00/sibima.git /opt/sibima` dan simpan konfigurasinya di `~/.ssh/config`.
@@ -122,7 +146,7 @@ Bila rilis yang di-rollback punya migrasi, kembalikan database dari backup (bagi
 
 | Gejala | Pemeriksaan |
 |---|---|
-| Situs tidak terbuka, Cloudflare error 1033/502 | `docker compose -f compose.prod.yaml logs cloudflared web`; pastikan token benar dan hostname mengarah ke `web:80`. |
+| Situs tidak terbuka, Cloudflare error 1033/502 | `docker compose -f compose.prod.yaml logs cloudflared web`; pastikan `cloudflared/config.yml` dan `credentials.json` ada, ID tunnel benar, dan `service` mengarah ke `http://web:80`. |
 | 500 | `docker compose -f compose.prod.yaml logs app` dan `exec app tail storage/logs/laravel.log`; periksa `APP_KEY` dan koneksi DB. |
 | Impor tetap "Memeriksa" | `docker compose -f compose.prod.yaml logs queue`. |
 | Foto tidak tampil | `docker compose -f compose.prod.yaml exec web ls -l public/storage/` harus menampilkan isi volume. |

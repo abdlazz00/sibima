@@ -5,6 +5,8 @@ DC="docker compose -f compose.prod.yaml"
 
 grep -q '^APP_KEY=base64:' .env || { echo "APP_KEY di .env kosong. Lihat docs/ops/deployment.md bagian 3." >&2; exit 1; }
 
+[ -f cloudflared/config.yml ] || { echo "cloudflared/config.yml belum ada. Lihat docs/ops/deployment.md bagian 2." >&2; exit 1; }
+
 git pull --ff-only
 $DC build
 $DC up -d db
