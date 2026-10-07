@@ -39,10 +39,15 @@ services:
     image: sibima-web
     restart: unless-stopped
     logging: *logging
+    ports:
+      - "80:80"
+      - "443:443"
     depends_on:
       - app
     volumes:
       - storage:/var/www/html/storage:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
 
   db:
     image: mysql:8.4
@@ -62,15 +67,14 @@ services:
       timeout: 5s
       retries: 20
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
+  certbot:
+    image: certbot/certbot:latest
     restart: unless-stopped
     logging: *logging
-    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
     volumes:
-      - ./cloudflared:/etc/cloudflared:ro
-    depends_on:
-      - web
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   dbdata:

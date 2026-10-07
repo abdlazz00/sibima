@@ -33,3 +33,4 @@ docs/*.xlsx
 docs/*.pdf
 /backups
 /cloudflared
+/certbot

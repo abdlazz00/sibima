@@ -1,8 +1,8 @@
-# Deployment (Docker + Cloudflare Tunnel)
+# Deployment (Docker + Let's Encrypt SSL)
 
 Branch `production` dipakai khusus untuk deployment; `main` dibiarkan sebagai cadangan codebase sebelum Docker. Fitur baru dikerjakan di `main`/branch fitur lalu di-merge ke `production` saat siap rilis.
 
-Target: VPS Ubuntu 24.04, domain `si-bima.online` (Rumahweb), DNS dan CDN lewat Cloudflare. Semua service jalan di Docker; host hanya membuka port 22. Rancangan: `docs/superpowers/specs/2026-10-07-docker-deployment-design.md`.
+Target: VPS Ubuntu 24.04, domain `si-bima.online` (Rumahweb). Semua service aplikasi jalan di Docker Compose; host membuka port 22 (SSH), 80 (HTTP), dan 443 (HTTPS). SSL ditangani langsung oleh Nginx + Certbot di dalam Docker.
 
 ## 1. Siapkan VPS (sekali)
 
@@ -33,42 +33,24 @@ PasswordAuthentication no
 EOF
 systemctl restart ssh
 ufw allow OpenSSH
+ufw allow 80/tcp
+ufw allow 443/tcp
 ufw --force enable
 ```
 
 Nama file `00-` penting: pada sshd nilai pertama yang terbaca menang, dan `50-cloud-init.conf` bisa menyalakan lagi login password. Mulai sini login sebagai `deploy`.
 
-## 2. Cloudflare dan Rumahweb
+## 2. Konfigurasi DNS di Rumahweb
 
-1. Daftar di cloudflare.com (paket Free) → **Add a site** → `si-bima.online`. Hapus A record lama bila Cloudflare mengimpornya.
-2. Rumahweb: Client Area → Domain → pilih domain → **Nameservers** → ganti ke dua nameserver yang diberikan Cloudflare. Tunggu status situs di Cloudflare menjadi **Active** (beberapa menit sampai beberapa jam).
-3. Buat tunnel lewat CLI di VPS (akun Cloudflare biasa, tanpa Zero Trust dan tanpa kartu). Sebagai `deploy`:
-
-```bash
-mkdir -p ~/.cloudflared && sudo chown 65532:65532 ~/.cloudflared
-CF="docker run --rm -v $HOME/.cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared:latest"
-$CF tunnel login                  # buka URL yang tercetak di browser, pilih si-bima.online, Authorize
-$CF tunnel create sibima-prod     # mencetak ID tunnel dan menulis ~/.cloudflared/ID.json
-$CF tunnel route dns --overwrite-dns sibima-prod si-bima.online
-```
-
-4. Setelah repo di-clone (bagian 3), siapkan folder konfigurasi (ganti `ID` dengan ID tunnel):
-
-```bash
-mkdir -p /opt/sibima/cloudflared && cd /opt/sibima/cloudflared
-cp ~/.cloudflared/ID.json credentials.json && sudo chown 65532:65532 credentials.json && chmod 600 credentials.json
-cat > config.yml <<'YML'
-tunnel: ID
-credentials-file: /etc/cloudflared/credentials.json
-ingress:
-  - hostname: si-bima.online
-    service: http://web:80
-  - service: http_status:404
-YML
-```
-
-`credentials.json` adalah kunci akses tunnel: jangan dibagikan dan jangan di-commit (folder `cloudflared/` sudah di-ignore). Untuk `www`, tambahkan entri `hostname: www.si-bima.online` dengan `service` yang sama sebelum baris `http_status:404`, lalu `$CF tunnel route dns sibima-prod www.si-bima.online`.
-5. Cloudflare → SSL/TLS → mode **Full**; Edge Certificates → **Always Use HTTPS** aktif.
+1. Buka Client Area Rumahweb → Domain → **DNS Management** (atau cPanel jika DNS dikelola di hosting).
+2. Tambahkan / sesuaikan **A Record** agar mengarah langsung ke IP Public VPS:
+   - Host `@` (atau kosong) → `IP_VPS`
+   - Host `www` → `IP_VPS`
+3. Pastikan nameserver domain menggunakan default Rumahweb (bukan Cloudflare).
+4. Verifikasi dari laptop atau VPS sampai domain merespons IP VPS:
+   ```bash
+   ping -c 2 si-bima.online
+   ```
 
 ## 3. Deploy pertama
 
@@ -78,6 +60,7 @@ Sebagai `deploy`:
 sudo mkdir -p /opt/sibima && sudo chown deploy:deploy /opt/sibima
 git clone -b production https://github.com/abdlazz00/sibima.git /opt/sibima
 cd /opt/sibima
+chmod +x deploy.sh init-ssl.sh backup.sh
 cp .env.production.example .env
 nano .env        # isi DB_PASSWORD (tanpa karakter $) dan RESEND_API_KEY
 ```
@@ -91,7 +74,15 @@ docker compose -f compose.prod.yaml build
 docker compose -f compose.prod.yaml run --rm app php artisan key:generate --show
 ```
 
-Tempel hasilnya (`base64:...`) ke `APP_KEY=` di `.env`. Lalu:
+Tempel hasilnya (`base64:...`) ke `APP_KEY=` di `.env`.
+
+Terbitkan sertifikat SSL Let's Encrypt (ganti email dengan email admin Anda):
+
+```bash
+./init-ssl.sh admin@si-bima.online
+```
+
+Lalu jalankan deploy aplikasi dan database:
 
 ```bash
 ./deploy.sh
@@ -116,14 +107,16 @@ cd /opt/sibima && ./deploy.sh
 
 Skrip: pull → build → migrate → seeder alur (non-destruktif) → ganti container. Bila migrasi gagal, container lama tetap jalan. `PermissionSeeder` tidak dijalankan otomatis karena menimpa permission role sistem; jalankan manual hanya bila rilis menambah permission: `docker compose -f compose.prod.yaml run --rm app php artisan db:seed --class=PermissionSeeder --force`.
 
-## 5. Backup
+## 5. Backup & SSL Auto-Renewal
 
 ```bash
 crontab -e     # tambahkan:
 0 2 * * * /opt/sibima/backup.sh >> /opt/sibima/backups/backup.log 2>&1
+0 4 * * * cd /opt/sibima && docker compose -f compose.prod.yaml exec -T web nginx -s reload >/dev/null 2>&1
 ```
 
-Menghasilkan `backups/sibima-TANGGAL.sql.gz` (database) dan `backups/storage-TANGGAL.tgz` (foto dan file import), disimpan 14 hari. Backup di VPS yang sama tidak melindungi bila VPS hilang: salin berkala ke luar, misalnya dari laptop `scp deploy@IP_VPS:/opt/sibima/backups/* D:\backup-sibima\`.
+- **Backup**: Menghasilkan `backups/sibima-TANGGAL.sql.gz` (database) dan `backups/storage-TANGGAL.tgz` (foto dan file import), disimpan 14 hari. Salin berkala ke luar, misalnya dari laptop: `scp deploy@IP_VPS:/opt/sibima/backups/* D:\backup-sibima\`.
+- **SSL Auto-Renewal**: Container `certbot` di `compose.prod.yaml` otomatis memeriksa pembaruan sertifikat setiap 12 jam. Cron jam 04:00 di atas me-reload Nginx agar sertifikat baru aktif.
 
 Restore database:
 
@@ -146,7 +139,8 @@ Bila rilis yang di-rollback punya migrasi, kembalikan database dari backup (bagi
 
 | Gejala | Pemeriksaan |
 |---|---|
-| Situs tidak terbuka, Cloudflare error 1033/502 | `docker compose -f compose.prod.yaml logs cloudflared web`; pastikan `cloudflared/config.yml` dan `credentials.json` ada, ID tunnel benar, dan `service` mengarah ke `http://web:80`. |
+| Situs tidak terbuka / connection timed out | Pastikan firewall UFW membuka port 80 dan 443 (`sudo ufw status`). Pastikan A Record domain di Rumahweb sudah mengarah ke IP VPS (`ping si-bima.online`). |
+| SSL error / SSL handshake failed | Periksa volume `./certbot/conf/live/si-bima.online/`. Jalankan ulang `./init-ssl.sh email@domain.com` untuk memperbarui/membuat ulang sertifikat. |
 | 500 | `docker compose -f compose.prod.yaml logs app` dan `exec app tail storage/logs/laravel.log`; periksa `APP_KEY` dan koneksi DB. |
 | Impor tetap "Memeriksa" | `docker compose -f compose.prod.yaml logs queue`. |
 | Foto tidak tampil | `docker compose -f compose.prod.yaml exec web ls -l public/storage/` harus menampilkan isi volume. |

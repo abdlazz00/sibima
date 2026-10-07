@@ -19,12 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\EnsureUserIsActive::class,
         ]);
-
-        // Satu-satunya jalan masuk produksi adalah Cloudflare Tunnel (lihat docs/ops/deployment.md).
-        // Hanya skema (proto) yang dipercaya. Host dan For sengaja tidak: klien bisa mengirimnya lewat
-        // Cloudflare (poisoning link reset password, pemalsuan IP untuk rate limit). IP klien asli
-        // ditetapkan Nginx dari CF-Connecting-IP (docker/nginx.conf), jadi sudah ada di REMOTE_ADDR.
-        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_PROTO);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
