@@ -1,0 +1,29 @@
+name: gateway
+
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: gateway-npm
+    restart: unless-stopped
+    volumes:
+      - ./npm-data:/data
+      - ./npm-letsencrypt:/etc/letsencrypt
+    networks:
+      - gateway-network
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: gateway-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --config /etc/cloudflared.config.yml run
+    volumes:
+      - ./cloudflared:/etc/cloudflared:ro
+    networks:
+      - gateway-network
+    depends_on:
+      - npm
+
+networks:
+  gateway-network:
+    name: gateway-network
+    driver: bridge

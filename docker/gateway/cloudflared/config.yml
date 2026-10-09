@@ -1,0 +1,18 @@
+tunnel: ID_TUNNEL_DARI_CLOUDFLARE
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  # Dashboard Admin Nginx Proxy Manager (NPM)
+  - hostname: npm.si-bima.online
+    service: http://gateway-npm:81
+
+  # Aplikasi SIBIMA
+  - hostname: kecsagulung.si-bima.online
+    service: http://gateway-npm:80
+
+  # Wildcard untuk semua subdomain lainnya
+  - hostname: "*.si-bima.online"
+    service: http://gateway-npm:80
+  
+  # Catch-all
+  - service: http_status:404

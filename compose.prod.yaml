@@ -23,13 +23,16 @@ x-app: &app
 services:
   app:
     <<: *app
+    container_name: sibima-prod-app
 
   queue:
     <<: *app
+    container_name: sibima-prod-queue
     command: php artisan queue:work database --sleep=3 --tries=1 --timeout=600 --max-time=3600 --memory=512
 
   scheduler:
     <<: *app
+    container_name: sibima-prod-scheduler
     command: php artisan schedule:work
 
   web:
@@ -37,20 +40,21 @@ services:
       context: .
       target: web
     image: sibima-web
+    container_name: sibima-prod-web
     restart: unless-stopped
     logging: *logging
-    ports:
-      - "80:80"
-      - "443:443"
+    # Tidak ada port host publik! Semua di-routing via gateway-network oleh NPM.
     depends_on:
       - app
     volumes:
       - storage:/var/www/html/storage:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
+    networks:
+      - default
+      - gateway-network
 
   db:
     image: mysql:8.4
+    container_name: sibima-prod-db
     restart: unless-stopped
     logging: *logging
     command: --innodb-buffer-pool-size=512M --max-connections=50
@@ -67,15 +71,12 @@ services:
       timeout: 5s
       retries: 20
 
-  certbot:
-    image: certbot/certbot:latest
-    restart: unless-stopped
-    logging: *logging
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
 volumes:
   dbdata:
   storage:
+
+networks:
+  default:
+    name: sibima-internal
+  gateway-network:
+    external: true
