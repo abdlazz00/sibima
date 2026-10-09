@@ -8,7 +8,7 @@ class ClosePermohonanRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('fulfill', $this->route('assetRequest'));
+        return $this->user()->can('close', $this->route('assetRequest'));
     }
 
     /** @return array<string, mixed> */

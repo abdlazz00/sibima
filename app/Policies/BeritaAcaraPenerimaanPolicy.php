@@ -34,7 +34,9 @@ class BeritaAcaraPenerimaanPolicy
 
     public function delete(User $user, BeritaAcaraPenerimaan $beritaAcara): bool
     {
-        return $this->update($user, $beritaAcara);
+        return $beritaAcara->status === BeritaAcaraStatus::Draft
+            && $user->can('penerimaan.delete')
+            && $user->unit_id === $beritaAcara->unit_id;
     }
 
     private function manages(User $user, BeritaAcaraPenerimaan $beritaAcara): bool

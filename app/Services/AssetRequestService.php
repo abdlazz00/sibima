@@ -94,10 +94,16 @@ class AssetRequestService
 
     public function canFulfill(User $user, AssetRequest $request): bool
     {
-        if (! $user->can('permohonan.fulfill')) {
-            return false;
-        }
+        return $user->can('permohonan.fulfill') && $this->inFulfillScope($user, $request);
+    }
 
+    public function canClose(User $user, AssetRequest $request): bool
+    {
+        return $user->can('permohonan.close') && $this->inFulfillScope($user, $request);
+    }
+
+    private function inFulfillScope(User $user, AssetRequest $request): bool
+    {
         return match ($request->jenis) {
             AssetRequestType::Pegawai => $user->canAccessUnit($request->unit),
             AssetRequestType::Unit => $request->unit->parent_id === $user->unit_id && $user->unit_id !== null,
@@ -205,7 +211,7 @@ class AssetRequestService
                 throw new InvalidArgumentException('Hanya permohonan yang sudah disetujui dan belum diproses yang dapat ditutup.');
             }
 
-            if (! $this->canFulfill($actor, $locked)) {
+            if (! $this->canClose($actor, $locked)) {
                 throw new InvalidArgumentException('Anda tidak berwenang menutup permohonan ini.');
             }
 

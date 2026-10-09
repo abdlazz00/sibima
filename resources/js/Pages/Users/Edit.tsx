@@ -37,9 +37,10 @@ interface EditProps extends PageProps {
     roles: RoleOption[];
     permissionGroups: Record<string, string[]>;
     units: { id: number; name: string; type: string }[];
+    canResetPassword: boolean;
 }
 
-export default function Edit({ auth, user, roles, permissionGroups }: EditProps) {
+export default function Edit({ auth, user, roles, permissionGroups, canResetPassword }: EditProps) {
     const [permSearch, setPermSearch] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -261,6 +262,7 @@ export default function Edit({ auth, user, roles, permissionGroups }: EditProps)
                     </div>
 
                     {/* Section 2: Reset Kata Sandi (Opsional) */}
+                    {canResetPassword && (
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
                         <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
                             <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -304,6 +306,7 @@ export default function Edit({ auth, user, roles, permissionGroups }: EditProps)
                             </div>
                         </div>
                     </div>
+                    )}
 
                     {/* Section 3: Penetapan Role & Scope */}
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">

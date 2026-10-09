@@ -184,6 +184,7 @@ class UserController extends Controller
             ],
             'roles' => $roles,
             'permissionGroups' => PermissionSeeder::PERMISSION_GROUPS,
+            'canResetPassword' => $request->user()->can('user.reset-password'),
             'units' => Unit::orderBy('name')->get(['id', 'name', 'type']),
         ]);
     }

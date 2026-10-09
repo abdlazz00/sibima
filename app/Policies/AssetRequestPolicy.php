@@ -34,4 +34,9 @@ class AssetRequestPolicy
     {
         return app(AssetRequestService::class)->canFulfill($user, $request);
     }
+
+    public function close(User $user, AssetRequest $request): bool
+    {
+        return app(AssetRequestService::class)->canClose($user, $request);
+    }
 }

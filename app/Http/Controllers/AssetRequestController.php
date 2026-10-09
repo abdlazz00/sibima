@@ -110,6 +110,10 @@ class AssetRequestController extends Controller
             && $assetRequest->mutation_id === null
             && $this->requests->canFulfill($user, $assetRequest);
 
+        $canClose = $assetRequest->status === AssetRequestStatus::Approved
+            && $assetRequest->mutation_id === null
+            && $this->requests->canClose($user, $assetRequest);
+
         return Inertia::render('AssetRequests/Show', [
             'assetRequest' => $assetRequest,
             'can' => [
@@ -117,7 +121,7 @@ class AssetRequestController extends Controller
                 'cancel' => $approval !== null && $this->workflow->canCancel($user, $approval),
                 'reassign' => $canReassign,
                 'fulfill' => $canFulfill,
-                'close' => $canFulfill,
+                'close' => $canClose,
             ],
             'reassignCandidates' => $canReassign ? $this->workflow->reassignCandidates() : [],
             'eligibleAssets' => $canFulfill

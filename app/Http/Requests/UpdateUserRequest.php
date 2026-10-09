@@ -31,6 +31,10 @@ class UpdateUserRequest extends FormRequest
     public function after(): array
     {
         return [function (Validator $validator) {
+            if ($this->filled('password') && ! $this->user()->can('user.reset-password')) {
+                $validator->errors()->add('password', 'Anda tidak berwenang mengganti kata sandi pengguna.');
+            }
+        }, function (Validator $validator) {
             if ($validator->errors()->isNotEmpty()) {
                 return;
             }
