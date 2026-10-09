@@ -13,6 +13,8 @@ storage/framework/cache/data/*
 storage/framework/sessions/*
 storage/framework/views/*
 backups
+certbot
+cloudflared
 docs
 tests
 .idea

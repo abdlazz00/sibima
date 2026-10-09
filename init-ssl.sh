@@ -4,60 +4,42 @@ cd "$(dirname "$0")"
 
 DOMAIN="si-bima.online"
 DOMAINS=("-d" "si-bima.online" "-d" "www.si-bima.online")
-RSA_KEY_SIZE=4096
 DATA_PATH="./certbot"
-EMAIL="${1:-}"
+EMAIL="${1:-sibima.kecsagulung@gmail.com}"
 
-if [ -z "$EMAIL" ]; then
-  echo "Penggunaan: ./init-ssl.sh <email-anda>"
-  echo "Contoh: ./init-ssl.sh admin@si-bima.online"
-  exit 1
-fi
+echo "### 1. Menyiapkan direktori certbot..."
+mkdir -p "$DATA_PATH/conf"
+mkdir -p "$DATA_PATH/www"
 
-if [ -d "$DATA_PATH/conf/live/$DOMAIN" ]; then
-  read -p "Sertifikat untuk $DOMAIN sudah ada. Timpa/buat ulang? (y/N) " decision
-  if [ "$decision" != "y" ] && [ "$decision" != "Y" ]; then
-    echo "Dibatalkan."
-    exit 0
+echo "### 2. Menghentikan container web sementara agar port 80 bebas..."
+docker compose -f compose.prod.yaml stop web 2>/dev/null || true
+
+echo "### 3. Meminta sertifikat SSL resmi langsung dari Let's Encrypt (Standalone)..."
+docker run --rm -p 80:80 \
+  -v "$PWD/$DATA_PATH/conf:/etc/letsencrypt" \
+  -v "$PWD/$DATA_PATH/www:/var/www/certbot" \
+  certbot/certbot certonly \
+  --standalone \
+  ${DOMAINS[*]} \
+  --email "$EMAIL" \
+  --agree-tos \
+  --no-eff-email \
+  --non-interactive
+
+echo "### 4. Menyesuaikan metode renewal ke webroot..."
+if [ -f "$DATA_PATH/conf/renewal/$DOMAIN.conf" ]; then
+  sed -i 's/authenticator = standalone/authenticator = webroot/' "$DATA_PATH/conf/renewal/$DOMAIN.conf" || true
+  if ! grep -q '\[\[webroot_map\]\]' "$DATA_PATH/conf/renewal/$DOMAIN.conf"; then
+    cat >> "$DATA_PATH/conf/renewal/$DOMAIN.conf" <<EOF
+webroot_path = /var/www/certbot,
+[[webroot_map]]
+$DOMAIN = /var/www/certbot
+www.$DOMAIN = /var/www/certbot
+EOF
   fi
 fi
 
-echo "### 1. Menyiapkan direktori certbot..."
-mkdir -p "$DATA_PATH/conf/live/$DOMAIN"
-mkdir -p "$DATA_PATH/www"
+echo "### 5. Menyalakan container web (Nginx) dengan sertifikat resmi..."
+docker compose -f compose.prod.yaml up -d web
 
-echo "### 2. Membuat dummy certificate sementara agar Nginx bisa start..."
-if command -v openssl >/dev/null 2>&1; then
-  openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-    -keyout "$DATA_PATH/conf/live/$DOMAIN/privkey.pem" \
-    -out "$DATA_PATH/conf/live/$DOMAIN/fullchain.pem" \
-    -subj '/CN=localhost'
-else
-  docker run --rm -v "$PWD/$DATA_PATH/conf:/etc/letsencrypt" alpine/openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-    -keyout "/etc/letsencrypt/live/$DOMAIN/privkey.pem" \
-    -out "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" \
-    -subj '/CN=localhost'
-fi
-
-echo "### 3. Menyalakan container Nginx (web)..."
-docker compose -f compose.prod.yaml up --force-recreate -d web
-
-echo "### 4. Menghapus dummy certificate..."
-rm -rf "$DATA_PATH/conf/live/$DOMAIN"
-rm -rf "$DATA_PATH/conf/archive/$DOMAIN"
-rm -rf "$DATA_PATH/conf/renewal/$DOMAIN.conf"
-
-echo "### 5. Meminta sertifikat SSL resmi dari Let's Encrypt..."
-docker compose -f compose.prod.yaml run --rm --entrypoint "\
-  certbot certonly --webroot -w /var/www/certbot \
-    ${DOMAINS[*]} \
-    --email $EMAIL \
-    --rsa-key-size $RSA_KEY_SIZE \
-    --agree-tos \
-    --no-eff-email \
-    --force-renewal" certbot
-
-echo "### 6. Me-reload Nginx dengan sertifikat resmi Let's Encrypt..."
-docker compose -f compose.prod.yaml exec web nginx -s reload
-
-echo "=== Selesai! SSL Let's Encrypt aktif untuk $DOMAIN ==="
+echo "=== Selesai! SSL Let's Encrypt berhasil aktif untuk $DOMAIN ==="
