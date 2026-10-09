@@ -1,0 +1,53 @@
+<?php
+
+use App\Models\Role;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
+use Spatie\Permission\Models\Permission;
+
+function pdSeed(): void
+{
+    test()->seed(RoleSeeder::class);
+    test()->seed(PermissionSeeder::class);
+}
+
+it('gives the defaults to brand new system roles', function () {
+    pdSeed();
+
+    $camat = Role::findByName('camat');
+
+    expect($camat->unit_scope)->toBe('binaan')
+        ->and($camat->is_system)->toBeTrue()
+        ->and($camat->hasPermissionTo('persetujuan.view'))->toBeTrue()
+        ->and(Role::findByName('kasubag')->permissions()->count())->toBe(Permission::count());
+});
+
+it('never overwrites what was changed from the role menu when seeded again', function () {
+    pdSeed();
+
+    Role::findByName('camat')->update(['display_name' => 'Camat Kustom', 'unit_scope' => 'all', 'description' => 'diubah']);
+    Role::findByName('camat')->syncPermissions(['dashboard.view']);
+    Role::findByName('admin_kecamatan')->revokePermissionTo('aset.delete');
+
+    pdSeed();
+
+    $camat = Role::findByName('camat');
+
+    expect($camat->display_name)->toBe('Camat Kustom')
+        ->and($camat->unit_scope)->toBe('all')
+        ->and($camat->description)->toBe('diubah')
+        ->and($camat->is_system)->toBeTrue()
+        ->and($camat->permissions->pluck('name')->all())->toBe(['dashboard.view'])
+        ->and(Role::findByName('admin_kecamatan')->hasPermissionTo('aset.delete'))->toBeFalse();
+});
+
+it('still creates a permission that is missing from the database without touching existing roles', function () {
+    pdSeed();
+    Permission::where('name', 'laporan.aset')->delete();
+    Role::findByName('lurah')->syncPermissions(['dashboard.view']);
+
+    pdSeed();
+
+    expect(Permission::where('name', 'laporan.aset')->exists())->toBeTrue()
+        ->and(Role::findByName('lurah')->permissions->pluck('name')->all())->toBe(['dashboard.view']);
+});

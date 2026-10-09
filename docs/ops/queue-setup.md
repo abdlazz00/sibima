@@ -73,12 +73,11 @@ Alamat email akun harus benar-benar bisa menerima surat (akun demo `*@simaset.te
 
 ```
 php artisan migrate --force
-php artisan db:seed --class=PermissionSeeder --force
 php artisan db:seed --class=WorkflowDefinitionSeeder --force
 php artisan queue:restart
 ```
 
-`queue:restart` membuat worker memuat kode baru setelah job berjalan selesai. `PermissionSeeder` menugaskan permission default ke role sistem (menimpa permission role sistem, cek dulu bila sudah dikustom). `WorkflowDefinitionSeeder` non-destruktif: hanya membuat alur yang belum ada (tanpa ini, mengajukan permohonan/penerimaan gagal dengan 404 karena definisi alurnya tidak ditemukan).
+`queue:restart` membuat worker memuat kode baru setelah job berjalan selesai. Permission baru tiba lewat migrasi data yang aditif (berjalan bersama `migrate`); seeder tidak menimpa role yang sudah punya permission, jadi perubahan dari menu Pengaturan Role aman. `WorkflowDefinitionSeeder` non-destruktif: hanya membuat alur yang belum ada (tanpa ini, mengajukan permohonan/penerimaan gagal dengan 404 karena definisi alurnya tidak ditemukan).
 
 ## Pemecahan masalah
 

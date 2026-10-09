@@ -38,13 +38,11 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         foreach (self::SYSTEM_ROLES as $name => $meta) {
-            $role = Role::findOrCreate($name);
-            $role->update([
-                'display_name' => $meta['display_name'],
-                'unit_scope' => $meta['unit_scope'],
-                'is_system' => true,
-                'description' => $meta['description'],
-            ]);
+            $role = Role::firstOrCreate(['name' => $name, 'guard_name' => 'web'], $meta + ['is_system' => true]);
+
+            if (! $role->is_system) {
+                $role->update(['is_system' => true]);
+            }
         }
     }
 }

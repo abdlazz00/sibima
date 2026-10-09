@@ -105,7 +105,7 @@ Cek: `curl -I https://si-bima.online/up` → `200`.
 cd /opt/sibima && ./deploy.sh
 ```
 
-Skrip: pull → build → migrate → seeder alur (non-destruktif) → ganti container. Bila migrasi gagal, container lama tetap jalan. `PermissionSeeder` tidak dijalankan otomatis karena menimpa permission role sistem; jalankan manual hanya bila rilis menambah permission: `docker compose -f compose.prod.yaml run --rm app php artisan db:seed --class=PermissionSeeder --force`.
+Skrip: pull → build → migrate → seeder alur (non-destruktif) → ganti container. Bila migrasi gagal, container lama tetap jalan. Permission baru tiba lewat migrasi data yang aditif dan berjalan bersama `migrate`; `PermissionSeeder` tidak perlu dijalankan saat deploy dan tidak menimpa role yang sudah punya permission.
 
 ## 5. Backup & SSL Auto-Renewal
 

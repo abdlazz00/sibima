@@ -44,21 +44,9 @@ class PermissionSeeder extends Seeder
         ],
     ];
 
-    public function run(): void
-    {
-        // 1. Buat semua permission
-        foreach (self::PERMISSION_GROUPS as $group => $permissions) {
-            foreach ($permissions as $perm) {
-                Permission::findOrCreate($perm);
-            }
-        }
-
-        // 2. Beri hak default ke role sistem
-        $kasubag = Role::findOrCreate('kasubag');
-        $kasubag->syncPermissions(Permission::all());
-
-        $camat = Role::findOrCreate('camat');
-        $camat->syncPermissions([
+    /** Default role sistem selain `kasubag` (yang menerima semua permission). Hanya dipakai saat role belum punya permission. */
+    public const DEFAULTS = [
+        'camat' => [
             'dashboard.view', 'scan.view',
             'aset.view', 'export-aset',
             'pegawai.view', 'export-pegawai',
@@ -68,10 +56,8 @@ class PermissionSeeder extends Seeder
             'laporan-insiden.view',
             'persetujuan.view', 'persetujuan.act',
             'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
-        ]);
-
-        $adminKecamatan = Role::findOrCreate('admin_kecamatan');
-        $adminKecamatan->syncPermissions([
+        ],
+        'admin_kecamatan' => [
             'dashboard.view', 'scan.view',
             'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
             'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
@@ -80,10 +66,8 @@ class PermissionSeeder extends Seeder
             'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
             'laporan-insiden.view', 'laporan-insiden.create',
             'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
-        ]);
-
-        $adminKelurahan = Role::findOrCreate('admin_kelurahan');
-        $adminKelurahan->syncPermissions([
+        ],
+        'admin_kelurahan' => [
             'dashboard.view', 'scan.view',
             'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
             'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
@@ -91,10 +75,8 @@ class PermissionSeeder extends Seeder
             'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
             'laporan-insiden.view', 'laporan-insiden.create',
             'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
-        ]);
-
-        $lurah = Role::findOrCreate('lurah');
-        $lurah->syncPermissions([
+        ],
+        'lurah' => [
             'dashboard.view', 'scan.view',
             'aset.view', 'export-aset',
             'pegawai.view', 'export-pegawai',
@@ -103,7 +85,25 @@ class PermissionSeeder extends Seeder
             'laporan-insiden.view',
             'persetujuan.view', 'persetujuan.act',
             'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
-        ]);
+        ],
+    ];
+
+    public function run(): void
+    {
+        foreach (self::PERMISSION_GROUPS as $permissions) {
+            foreach ($permissions as $permission) {
+                Permission::findOrCreate($permission);
+            }
+        }
+
+        // Default hanya untuk role sistem yang belum punya permission; tidak pernah menimpa pengaturan dari menu Role.
+        foreach (['kasubag' => Permission::all(), ...self::DEFAULTS] as $name => $permissions) {
+            $role = Role::findOrCreate($name);
+
+            if ($role->permissions()->doesntExist()) {
+                $role->syncPermissions($permissions);
+            }
+        }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
