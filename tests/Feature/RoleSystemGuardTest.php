@@ -33,12 +33,12 @@ it('refuses to strip the permissions that keep kasubag able to manage access', f
     expect($this->kasubagRole->fresh()->hasPermissionTo('pengaturan.role'))->toBeTrue();
 });
 
-it('refuses to narrow the kasubag unit scope', function () {
+it('lets the kasubag unit scope be narrowed because the scope is not what keeps access manageable', function () {
     $this->actingAs($this->kasubag)
-        ->put(route('roles.update', $this->kasubagRole), rsgPayload(['unit_scope' => 'own', 'permissions' => $this->all]))
-        ->assertSessionHasErrors('unit_scope');
+        ->put(route('roles.update', $this->kasubagRole), rsgPayload(['unit_scope' => 'binaan', 'permissions' => $this->all]))
+        ->assertSessionHasNoErrors();
 
-    expect($this->kasubagRole->fresh()->unit_scope)->toBe('all');
+    expect($this->kasubagRole->fresh()->unit_scope)->toBe('binaan');
 });
 
 it('still lets kasubag edit other permissions of the kasubag role', function () {

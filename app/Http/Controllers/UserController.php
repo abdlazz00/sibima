@@ -7,6 +7,7 @@ use App\Models\Pegawai;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\PegawaiService;
+use App\Support\AccessGuard;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -196,9 +197,13 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
         }
 
-        // Proteksi self kasubag: tidak boleh mencabut role kasubag dari diri sendiri
-        if ($user->id === $request->user()->id && $request->role !== 'kasubag' && $user->hasRole('kasubag')) {
-            return back()->with('error', 'Anda tidak dapat mencabut role Kasubag dari akun Anda sendiri.');
+        // Invarian: tidak boleh menelantarkan akses pengelola (berlaku untuk role apa pun, bukan hanya kasubag).
+        $role = Role::where('name', $request->validated('role'))->with('permissions')->firstOrFail();
+        $remainsAdmin = $request->boolean('is_active')
+            && array_diff(AccessGuard::REQUIRED, array_merge($role->permissions->pluck('name')->all(), $request->validated('direct_permissions') ?? [])) === [];
+
+        if (! $remainsAdmin && AccessGuard::isHolder($user) && AccessGuard::others([$user->id])->isEmpty()) {
+            return back()->with('error', AccessGuard::MESSAGE);
         }
 
         $updateData = [
@@ -230,10 +235,6 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
         }
 
-        if ($user->hasRole('kasubag')) {
-            return back()->with('error', 'Akun Kasubag sistem tidak boleh dinonaktifkan.');
-        }
-
         $user->update(['is_active' => ! $user->is_active]);
 
         $statusText = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
@@ -247,10 +248,6 @@ class UserController extends Controller
 
         if ($user->id === $request->user()->id) {
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
-        }
-
-        if ($user->hasRole('kasubag')) {
-            return back()->with('error', 'Akun Kasubag sistem tidak boleh dihapus.');
         }
 
         if ($user->approvalActions()->exists()) {

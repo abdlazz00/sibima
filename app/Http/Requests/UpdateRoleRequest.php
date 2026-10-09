@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\AccessGuard;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -32,7 +33,7 @@ class UpdateRoleRequest extends FormRequest
         ];
     }
 
-    /** Role kasubag tidak boleh dilucuti sampai tak ada lagi yang bisa mengelola akses. */
+    /** Perubahan izin role tidak boleh menelantarkan akses pengelola. */
     public function after(): array
     {
         return [function (Validator $validator) {
@@ -46,16 +47,10 @@ class UpdateRoleRequest extends FormRequest
                 $validator->errors()->add('permissions', 'Izin atau cakupan unit melebihi milik Anda.');
             }
 
-            if ($role->name !== 'kasubag') {
-                return;
-            }
-
-            if ($this->input('unit_scope') !== 'all') {
-                $validator->errors()->add('unit_scope', 'Role Kasubag harus tetap bercakupan semua unit.');
-            }
-
-            if ($this->has('permissions') && array_diff(['pengaturan.role', 'user.manage-access'], $this->input('permissions', [])) !== []) {
-                $validator->errors()->add('permissions', 'Role Kasubag harus tetap memiliki izin Pengaturan Role dan Kelola Akses Pengguna.');
+            if ($this->has('permissions')
+                && AccessGuard::others([])->isNotEmpty()
+                && ! AccessGuard::survivesRoleEdit($role, $this->input('permissions', []))) {
+                $validator->errors()->add('permissions', AccessGuard::MESSAGE);
             }
         }];
     }

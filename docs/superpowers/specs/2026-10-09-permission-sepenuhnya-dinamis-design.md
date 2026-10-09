@@ -74,9 +74,10 @@ Di luar cakupan: nama role bawaan di `WorkflowDefaults` (tersimpan di database d
 ### 3.4 Invarian terkunci keluar
 
 Kelas pendukung kecil (`App\Support\AccessGuard`) menyediakan satu pertanyaan: "apakah setelah perubahan ini masih ada pengguna aktif yang memegang `pengaturan.role` dan `user.manage-access`?". Dipakai oleh:
-- `UserController::toggleStatus` dan `destroy`: menolak bila target adalah pemegang terakhir.
-- `UserController::update`: menolak bila perubahan role target (termasuk diri sendiri) melucuti pemegang terakhir.
+- `UserController::update`: menolak bila perubahan role/izin langsung/status akun menelantarkan pemegang terakhir (terutama mengubah akun sendiri).
 - `UpdateRoleRequest`: menolak bila pengubahan izin role membuat tidak ada lagi pengguna aktif pemegang kedua izin itu.
+
+`toggleStatus` dan `destroy` tidak memerlukan invarian: `canManage` mensyaratkan pelaku memegang semua izin target (sehingga pelaku adalah pemegang aktif lain) dan menonaktifkan/menghapus akun sendiri sudah ditolak; pengecekan nama `kasubag` di kedua method dihapus tanpa pengganti.
 
 Menggantikan seluruh pengecekan nama `kasubag` dan aturan "kasubag harus bercakupan semua unit". Perlindungan "tidak boleh menonaktifkan/menghapus akun sendiri" dan `is_system` (role sistem tidak dihapus/diganti nama) tetap.
 
