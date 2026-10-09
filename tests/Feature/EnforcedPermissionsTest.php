@@ -110,3 +110,25 @@ it('tells the edit page whether the password section may be shown', function () 
 
     $this->actingAs($this->kasubag->fresh())->get(route('users.edit', $target))->assertInertia(fn ($page) => $page->where('canResetPassword', false));
 });
+
+it('does not let a user without user.reset-password take over an account by changing its email', function () {
+    $target = User::factory()->create(['unit_id' => $this->kec->id])->assignRole('admin_kecamatan');
+    Role::findByName('kasubag')->revokePermissionTo('user.reset-password');
+
+    $this->actingAs($this->kasubag->fresh())->put(route('users.update', $target), pdPasswordPayload($target, ['email' => 'baru@example.com', 'password' => '', 'password_confirmation' => '']))
+        ->assertSessionHasErrors('email');
+    expect($target->fresh()->email)->not->toBe('baru@example.com');
+
+    $this->actingAs($this->kasubag->fresh())->put(route('users.update', $target), pdPasswordPayload($target, ['password' => '', 'password_confirmation' => '']))
+        ->assertSessionHasNoErrors();
+
+    $this->actingAs($this->kasubag->fresh())->put(route('users.update', $this->kasubag), ['email' => 'saya@example.com', 'is_active' => true, 'role' => 'kasubag'])
+        ->assertSessionHasNoErrors();
+    expect($this->kasubag->fresh()->email)->toBe('saya@example.com');
+
+    Role::findByName('kasubag')->givePermissionTo('user.reset-password');
+
+    $this->actingAs($this->kasubag->fresh())->put(route('users.update', $target), pdPasswordPayload($target, ['email' => 'baru@example.com', 'password' => '', 'password_confirmation' => '']))
+        ->assertSessionHasNoErrors();
+    expect($target->fresh()->email)->toBe('baru@example.com');
+});

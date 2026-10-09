@@ -62,13 +62,13 @@ it('forbids managing an account that is more powerful than the manager, even in 
 });
 
 it('refuses to grant a role, permission or unit scope beyond the manager own', function () {
-    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['role' => 'kasubag']))
+    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['email' => $this->targetA->email, 'role' => 'kasubag']))
         ->assertSessionHasErrors('role');
-    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['role' => 'camat']))
+    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['email' => $this->targetA->email, 'role' => 'camat']))
         ->assertSessionHasErrors('role');
-    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['direct_permissions' => ['pengaturan.role']]))
+    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['email' => $this->targetA->email, 'direct_permissions' => ['pengaturan.role']]))
         ->assertSessionHasErrors('direct_permissions');
-    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['unit_scope_override' => 'all']))
+    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['email' => $this->targetA->email, 'unit_scope_override' => 'all']))
         ->assertSessionHasErrors('unit_scope_override');
 
     $fresh = $this->targetA->fresh();
@@ -78,7 +78,7 @@ it('refuses to grant a role, permission or unit scope beyond the manager own', f
 });
 
 it('lets a manager grant what it holds', function () {
-    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload([
+    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['email' => $this->targetA->email, 
         'direct_permissions' => ['user.view'], 'unit_scope_override' => 'own',
     ]))->assertRedirect()->assertSessionHasNoErrors();
 

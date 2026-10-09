@@ -84,3 +84,17 @@ it('runs on an empty database', function () {
 
     expect(Permission::where('name', 'persetujuan.reassign')->exists())->toBeTrue();
 });
+
+it('keeps the unit heads able to approve when only atasan unit steps name them', function () {
+    pdLegacyState();
+    DB::table('workflow_steps')->update(['approver_type' => 'atasan_unit', 'approver_role' => null, 'approver_user_id' => null]);
+    DB::table('approval_request_steps')->update(['approver_type' => 'atasan_unit', 'approver_role' => null, 'approver_user_id' => null]);
+    Role::findByName('camat')->revokePermissionTo('persetujuan.act');
+    Role::findByName('lurah')->revokePermissionTo('persetujuan.act');
+
+    pdMigration()->up();
+
+    expect(Role::findByName('camat')->hasPermissionTo('persetujuan.act'))->toBeTrue()
+        ->and(Role::findByName('lurah')->hasPermissionTo('persetujuan.act'))->toBeTrue()
+        ->and(Role::findByName('admin_kecamatan')->hasPermissionTo('persetujuan.act'))->toBeFalse();
+});

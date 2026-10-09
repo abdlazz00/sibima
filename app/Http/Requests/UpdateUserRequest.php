@@ -31,8 +31,16 @@ class UpdateUserRequest extends FormRequest
     public function after(): array
     {
         return [function (Validator $validator) {
-            if ($this->filled('password') && ! $this->user()->can('user.reset-password')) {
+            $actor = $this->user();
+            $target = $this->route('user');
+
+            if ($this->filled('password') && ! $actor->can('user.reset-password')) {
                 $validator->errors()->add('password', 'Anda tidak berwenang mengganti kata sandi pengguna.');
+            }
+
+            // Mengganti email akun lain lalu memakai "lupa password" sama dengan mengganti kata sandinya.
+            if ($target->id !== $actor->id && $this->input('email') !== $target->email && ! $actor->can('user.reset-password')) {
+                $validator->errors()->add('email', 'Anda tidak berwenang mengganti email pengguna lain.');
             }
         }, function (Validator $validator) {
             if ($validator->errors()->isNotEmpty()) {

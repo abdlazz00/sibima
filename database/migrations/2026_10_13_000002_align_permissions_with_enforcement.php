@@ -22,15 +22,15 @@ return new class extends Migration
 
         Role::where('name', 'kasubag')->first()?->givePermissionTo('persetujuan.reassign');
 
+        Role::where('name', 'camat')->whereNull('unit_head_of')->update(['unit_head_of' => 'kecamatan']);
+        Role::where('name', 'lurah')->whereNull('unit_head_of')->update(['unit_head_of' => 'kelurahan']);
+
         $this->grantAct();
 
         foreach (['permohonan.fulfill' => 'permohonan.close', 'penerimaan.update' => 'penerimaan.delete', 'user.manage-access' => 'user.reset-password'] as $has => $give) {
             Permission::findOrCreate($has, 'web');
             Role::permission($has)->get()->each(fn (Role $role) => $role->givePermissionTo($give));
         }
-
-        Role::where('name', 'camat')->whereNull('unit_head_of')->update(['unit_head_of' => 'kecamatan']);
-        Role::where('name', 'lurah')->whereNull('unit_head_of')->update(['unit_head_of' => 'kelurahan']);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
@@ -52,7 +52,7 @@ return new class extends Migration
     private function grantAct(): void
     {
         $steps = collect(['workflow_steps', 'approval_request_steps'])
-            ->map(fn (string $table) => DB::table($table)->get(['approver_role', 'approver_user_id']))
+            ->map(fn (string $table) => DB::table($table)->get(['approver_type', 'approver_role', 'approver_user_id']))
             ->flatten(1);
 
         $roleNames = $steps->pluck('approver_role')->filter()->unique();
@@ -60,7 +60,14 @@ return new class extends Migration
 
         $names = $roleNames->merge(
             Role::whereHas('users', fn ($q) => $q->whereIn('users.id', $userIds))->pluck('name'),
-        )->unique();
+        );
+
+        // Langkah "Atasan Unit" tidak menyebut role; yang berhak adalah role pimpinan unit.
+        if ($steps->contains(fn ($step) => $step->approver_type === 'atasan_unit')) {
+            $names = $names->merge(Role::whereNotNull('unit_head_of')->pluck('name'));
+        }
+
+        $names = $names->unique();
 
         Role::whereIn('name', $names)->get()->each(fn (Role $role) => $role->givePermissionTo('persetujuan.act'));
     }
