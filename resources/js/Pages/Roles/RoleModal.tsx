@@ -221,9 +221,9 @@ export default function RoleModal({
                 {/* Body Form */}
                 <form id="role-form" onSubmit={handleSubmit} className="overflow-y-auto px-6 py-5">
                     {/* General Errors */}
-                    {(errors.name || errors.display_name || errors.unit_scope || pageErrors.error) && (
+                    {(errors.name || errors.display_name || errors.unit_scope || errors.permissions || errors.unit_head_of || errors.description || pageErrors.error) && (
                         <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-800">
-                            {pageErrors.error || errors.name || errors.display_name || errors.unit_scope}
+                            {pageErrors.error || errors.permissions || errors.name || errors.display_name || errors.unit_scope || errors.unit_head_of || errors.description}
                         </div>
                     )}
 
@@ -412,6 +412,15 @@ export default function RoleModal({
                                     </button>
                                 </div>
                             </div>
+
+                            {errors.permissions && (
+                                <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                                    <svg className="h-4 w-4 shrink-0 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                    </svg>
+                                    <span>{errors.permissions}</span>
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 {Object.entries(permissionGroups).map(([groupTitle, perms]) => {

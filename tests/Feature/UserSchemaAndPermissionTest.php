@@ -34,7 +34,7 @@ it('provides foto_profile_url accessor from associated pegawai', function () {
     expect($userWithoutPhoto->foto_profile_url)->toBeNull();
 });
 
-it('seeds all granular user management permissions and grants them to kasubag', function () {
+it('seeds all granular user management permissions and grants them to super-admin while excluding kasubag', function () {
     $expected = [
         'user.view',
         'user.manage-access',
@@ -47,8 +47,13 @@ it('seeds all granular user management permissions and grants them to kasubag', 
         expect(Permission::where('name', $perm)->exists())->toBeTrue("Permission {$perm} not seeded");
     }
 
+    $superAdmin = Role::findByName('super-admin');
+    foreach ($expected as $perm) {
+        expect($superAdmin->hasPermissionTo($perm))->toBeTrue("Super-admin lacks {$perm}");
+    }
+
     $kasubag = Role::findByName('kasubag');
     foreach ($expected as $perm) {
-        expect($kasubag->hasPermissionTo($perm))->toBeTrue("Kasubag lacks {$perm}");
+        expect($kasubag->hasPermissionTo($perm))->toBeFalse("Kasubag should not have {$perm}");
     }
 });

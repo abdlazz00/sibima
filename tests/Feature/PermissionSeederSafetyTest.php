@@ -15,11 +15,17 @@ it('gives the defaults to brand new system roles', function () {
     pdSeed();
 
     $camat = Role::findByName('camat');
+    $kasubag = Role::findByName('kasubag');
+    $superAdmin = Role::findByName('super-admin');
 
     expect($camat->unit_scope)->toBe('binaan')
         ->and($camat->is_system)->toBeTrue()
         ->and($camat->hasPermissionTo('persetujuan.view'))->toBeTrue()
-        ->and(Role::findByName('kasubag')->permissions()->count())->toBe(Permission::count());
+        ->and($superAdmin->permissions()->count())->toBe(Permission::count())
+        ->and($kasubag->hasPermissionTo('pengaturan.role'))->toBeFalse()
+        ->and($kasubag->hasPermissionTo('user.manage-access'))->toBeFalse()
+        ->and($kasubag->hasPermissionTo('aset.view'))->toBeTrue()
+        ->and($kasubag->permissions()->count())->toBe(Permission::count() - count(PermissionSeeder::PERMISSION_GROUPS['Pengaturan']));
 });
 
 it('never overwrites what was changed from the role menu when seeded again', function () {

@@ -19,6 +19,7 @@ beforeEach(function () {
     $this->seed(PermissionSeeder::class);
 
     $kel = makeKelurahan(makeKecamatan(), 'Kelurahan A');
+    $this->superAdmin = userWithRole('super-admin');
     $this->kasubag = userWithRole('kasubag');
     $this->manager = userWithRole('admin_kelurahan', $kel);
     $this->manager->givePermissionTo('pengaturan.role');
@@ -79,7 +80,12 @@ it('forbids a unit-scoped manager from editing a role that users outside its sco
         ->assertForbidden();
 });
 
-it('lets kasubag create and edit any role', function () {
-    $this->actingAs($this->kasubag)->post(route('roles.store'), rdPayload(['unit_scope' => 'all', 'permissions' => ['pengaturan.alur', 'aset.view']]))
+it('lets super-admin create and edit any role', function () {
+    $this->actingAs($this->superAdmin)->post(route('roles.store'), rdPayload(['unit_scope' => 'all', 'permissions' => ['pengaturan.alur', 'aset.view']]))
         ->assertRedirect(route('roles.index'))->assertSessionHasNoErrors();
+});
+
+it('forbids kasubag without pengaturan.role from creating roles', function () {
+    $this->actingAs($this->kasubag)->post(route('roles.store'), rdPayload(['unit_scope' => 'all', 'permissions' => ['aset.view']]))
+        ->assertForbidden();
 });

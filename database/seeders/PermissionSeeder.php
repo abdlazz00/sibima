@@ -43,8 +43,20 @@ class PermissionSeeder extends Seeder
         ],
     ];
 
-    /** Default role sistem selain `kasubag` (yang menerima semua permission). Hanya dipakai saat role belum punya permission. */
+    /** Default role sistem selain `super-admin` (yang menerima semua permission). Hanya dipakai saat role belum punya permission. */
     public const DEFAULTS = [
+        'kasubag' => [
+            'dashboard.view', 'scan.view',
+            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
+            'kategori.view', 'kategori.create', 'kategori.update', 'kategori.delete', 'import-kategori', 'export-kategori',
+            'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'pegawai.create-user', 'import-pegawai', 'export-pegawai',
+            'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete',
+            'mutasi.view', 'mutasi.create',
+            'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
+            'laporan-insiden.view', 'laporan-insiden.create',
+            'persetujuan.view', 'persetujuan.act', 'persetujuan.reassign',
+            'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
+        ],
         'camat' => [
             'dashboard.view', 'scan.view',
             'aset.view', 'export-aset',
@@ -98,7 +110,7 @@ class PermissionSeeder extends Seeder
         }
 
         // Default hanya untuk role sistem yang belum punya permission; tidak pernah menimpa pengaturan dari menu Role.
-        foreach (['kasubag' => Permission::all(), ...self::DEFAULTS] as $name => $permissions) {
+        foreach (['super-admin' => Permission::all(), ...self::DEFAULTS] as $name => $permissions) {
             $role = Role::findOrCreate($name);
 
             if ($role->permissions()->doesntExist()) {

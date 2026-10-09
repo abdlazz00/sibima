@@ -1,14 +1,18 @@
 <?php
 
+use App\Enums\ApprovalActionType;
+use App\Enums\ApprovalStatus;
 use App\Models\ApprovalAction;
+use App\Models\ApprovalRequest;
 use App\Models\Pegawai;
 use App\Models\Unit;
 use App\Models\User;
+use App\Models\WorkflowDefinition;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\WorkflowDefinitionSeeder;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia;
-use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
@@ -16,6 +20,9 @@ beforeEach(function () {
 
     $this->kecamatan = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
     $this->kelurahan = Unit::create(['name' => 'Kelurahan Sei Lekop', 'type' => 'kelurahan', 'parent_id' => $this->kecamatan->id]);
+
+    $this->superAdmin = User::factory()->create(['unit_id' => $this->kecamatan->id]);
+    $this->superAdmin->assignRole('super-admin');
 
     $this->kasubag = User::factory()->create(['unit_id' => $this->kecamatan->id]);
     $this->kasubag->assignRole('kasubag');
@@ -29,7 +36,7 @@ beforeEach(function () {
 });
 
 it('allows user with user.view to access users index page with filters', function () {
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->get(route('users.index', ['search' => $this->operator->name]))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
@@ -45,10 +52,14 @@ it('denies user without user.view from accessing users index', function () {
     $this->actingAs($this->operator)
         ->get(route('users.index'))
         ->assertForbidden();
+
+    $this->actingAs($this->kasubag)
+        ->get(route('users.index'))
+        ->assertForbidden();
 });
 
 it('renders show page with user detail, pegawai link, and effective permissions', function () {
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->get(route('users.show', $this->operator))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
@@ -60,7 +71,7 @@ it('renders show page with user detail, pegawai link, and effective permissions'
 });
 
 it('renders edit page with all roles and permission groups', function () {
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->get(route('users.edit', $this->operator))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
@@ -72,7 +83,7 @@ it('renders edit page with all roles and permission groups', function () {
 });
 
 it('updates user email, password, role, and direct permissions on edit submission', function () {
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->put(route('users.update', $this->operator), [
             'email' => 'operator.baru@sagulung.go.id',
             'password' => 'PasswordBaru123',
@@ -93,18 +104,18 @@ it('updates user email, password, role, and direct permissions on edit submissio
 
 it('toggles user is_active status with self-guard and system role protection', function () {
     // 1. Sukses toggle user biasa
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->patch(route('users.toggle-status', $this->operator))
         ->assertRedirect();
 
     expect($this->operator->fresh()->is_active)->toBeFalse();
 
     // 2. Cegah toggle diri sendiri
-    $this->actingAs($this->kasubag)
-        ->patch(route('users.toggle-status', $this->kasubag))
+    $this->actingAs($this->superAdmin)
+        ->patch(route('users.toggle-status', $this->superAdmin))
         ->assertSessionHas('error');
 
-    expect($this->kasubag->fresh()->is_active)->toBeTrue();
+    expect($this->superAdmin->fresh()->is_active)->toBeTrue();
 });
 
 it('deletes user credentials, clears pegawai user_id link, and prevents deletion if audit exists', function () {
@@ -112,7 +123,7 @@ it('deletes user credentials, clears pegawai user_id link, and prevents deletion
     $userToDelete = User::factory()->create(['unit_id' => $this->kelurahan->id]);
     $pegawai = Pegawai::factory()->create(['user_id' => $userToDelete->id, 'unit_id' => $this->kelurahan->id]);
 
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->delete(route('users.destroy', $userToDelete))
         ->assertRedirect(route('users.index'));
 
@@ -120,25 +131,25 @@ it('deletes user credentials, clears pegawai user_id link, and prevents deletion
         ->and($pegawai->fresh()->user_id)->toBeNull();
 
     // 2. Tolak hapus jika user memiliki riwayat audit
-    (new \Database\Seeders\WorkflowDefinitionSeeder)->run();
-    $definition = \App\Models\WorkflowDefinition::first();
-    $req = \App\Models\ApprovalRequest::create([
+    (new WorkflowDefinitionSeeder)->run();
+    $definition = WorkflowDefinition::first();
+    $req = ApprovalRequest::create([
         'workflow_definition_id' => $definition->id,
         'approvable_type' => User::class,
         'approvable_id' => $this->operator->id,
         'current_step' => 1,
-        'status' => \App\Enums\ApprovalStatus::Pending,
-        'created_by' => $this->kasubag->id,
+        'status' => ApprovalStatus::Pending,
+        'created_by' => $this->superAdmin->id,
     ]);
 
     ApprovalAction::create([
         'approval_request_id' => $req->id,
         'user_id' => $this->operator->id,
-        'action' => \App\Enums\ApprovalActionType::Approve->value,
+        'action' => ApprovalActionType::Approve->value,
         'step_order' => 1,
     ]);
 
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->delete(route('users.destroy', $this->operator))
         ->assertSessionHas('error');
 

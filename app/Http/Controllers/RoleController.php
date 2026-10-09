@@ -73,7 +73,7 @@ class RoleController extends Controller
         $role->update($data);
 
         if ($request->has('permissions')) {
-            $role->syncPermissions($request->validated('permissions'));
+            $role->syncPermissions($request->validated('permissions') ?? []);
         }
 
         return redirect()->route('roles.index')->with('success', "Role {$role->display_name} berhasil diperbarui.");

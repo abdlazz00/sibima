@@ -34,7 +34,8 @@ it('protects system roles with is_system flag and default unit_scope', function 
     $kasubag = Role::findByName('kasubag');
     expect($kasubag->is_system)->toBeTrue()
         ->and($kasubag->unit_scope)->toBe('all')
-        ->and($kasubag->hasPermissionTo('pengaturan.role'))->toBeTrue();
+        ->and($kasubag->hasPermissionTo('pengaturan.role'))->toBeFalse()
+        ->and(Role::findByName('super-admin')->hasPermissionTo('pengaturan.role'))->toBeTrue();
 
     $camat = Role::findByName('camat');
     expect($camat->is_system)->toBeTrue()

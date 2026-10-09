@@ -2,16 +2,21 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
     public const SYSTEM_ROLES = [
+        'super-admin' => [
+            'display_name' => 'Super Admin',
+            'unit_scope' => 'all',
+            'description' => 'Administrator sistem dengan hak akses penuh terhadap konfigurasi, alur, dan role pengguna.',
+        ],
         'kasubag' => [
             'display_name' => 'Kasubag Kepegawaian & Umum',
             'unit_scope' => 'all',
-            'description' => 'Administrator penuh seluruh modul dan unit kerja.',
+            'description' => 'Pimpinan operasional tertinggi seluruh modul kerja dan data aset.',
         ],
         'camat' => [
             'display_name' => 'Camat Sagulung',

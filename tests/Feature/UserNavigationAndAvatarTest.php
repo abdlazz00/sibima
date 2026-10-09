@@ -42,12 +42,17 @@ it('returns null for foto_profile_url when user has no pegawai photo', function 
         );
 });
 
-it('includes user.view permission for kasubag in shared props', function () {
+it('includes user.view permission for super-admin and excludes it for kasubag in shared props', function () {
+    $superAdmin = userWithRole('super-admin');
     $kasubag = userWithRole('kasubag');
 
-    $response = $this->actingAs($kasubag)->get(route('dashboard'));
-    $response->assertOk();
-    $pageProps = $response->viewData('page')['props'];
+    $responseAdmin = $this->actingAs($superAdmin)->get(route('dashboard'));
+    $responseAdmin->assertOk();
+    $adminProps = $responseAdmin->viewData('page')['props'];
+    expect($adminProps['auth']['user']['permissions'])->toContain('user.view');
 
-    expect($pageProps['auth']['user']['permissions'])->toContain('user.view');
+    $responseKasubag = $this->actingAs($kasubag)->get(route('dashboard'));
+    $responseKasubag->assertOk();
+    $kasubagProps = $responseKasubag->viewData('page')['props'];
+    expect($kasubagProps['auth']['user']['permissions'])->not->toContain('user.view');
 });

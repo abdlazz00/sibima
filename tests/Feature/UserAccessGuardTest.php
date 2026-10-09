@@ -4,6 +4,7 @@ use App\Models\Unit;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Route;
 
 function uagPayload(array $o = []): array
 {
@@ -20,6 +21,9 @@ beforeEach(function () {
     $kec = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
     $this->kelA = Unit::create(['name' => 'Kelurahan A', 'type' => 'kelurahan', 'parent_id' => $kec->id]);
     $this->kelB = Unit::create(['name' => 'Kelurahan B', 'type' => 'kelurahan', 'parent_id' => $kec->id]);
+
+    $this->superAdmin = User::factory()->create(['unit_id' => $kec->id]);
+    $this->superAdmin->assignRole('super-admin');
 
     $this->kasubag = User::factory()->create(['unit_id' => $kec->id]);
     $this->kasubag->assignRole('kasubag');
@@ -78,21 +82,26 @@ it('refuses to grant a role, permission or unit scope beyond the manager own', f
 });
 
 it('lets a manager grant what it holds', function () {
-    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['email' => $this->targetA->email, 
+    $this->actingAs($this->manager)->put(route('users.update', $this->targetA), uagPayload(['email' => $this->targetA->email,
         'direct_permissions' => ['user.view'], 'unit_scope_override' => 'own',
     ]))->assertRedirect()->assertSessionHasNoErrors();
 
     expect($this->targetA->fresh()->hasDirectPermission('user.view'))->toBeTrue();
 });
 
-it('lets kasubag grant any role and scope', function () {
-    $this->actingAs($this->kasubag)->put(route('users.update', $this->targetA), uagPayload([
+it('lets super-admin grant any role and scope', function () {
+    $this->actingAs($this->superAdmin)->put(route('users.update', $this->targetA), uagPayload([
         'role' => 'camat', 'unit_scope_override' => 'all', 'direct_permissions' => ['pengaturan.role'],
     ]))->assertRedirect()->assertSessionHasNoErrors();
 
     expect($this->targetA->fresh()->hasRole('camat'))->toBeTrue();
 });
 
+it('forbids kasubag without user.manage-access from updating users', function () {
+    $this->actingAs($this->kasubag)->put(route('users.update', $this->targetA), uagPayload())
+        ->assertForbidden();
+});
+
 it('no longer has the duplicate pegawai access route', function () {
-    expect(\Illuminate\Support\Facades\Route::has('pegawais.user-access'))->toBeFalse();
+    expect(Route::has('pegawais.user-access'))->toBeFalse();
 });

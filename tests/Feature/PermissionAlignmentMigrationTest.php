@@ -48,7 +48,7 @@ it('keeps every role able to do what it could before and removes only the ghost 
         ->and($kec->hasPermissionTo('permohonan.close'))->toBeTrue()
         ->and($kec->hasPermissionTo('penerimaan.delete'))->toBeTrue()
         ->and(Role::findByName('kasubag')->hasPermissionTo('persetujuan.reassign'))->toBeTrue()
-        ->and(Role::findByName('kasubag')->hasPermissionTo('user.reset-password'))->toBeTrue()
+        ->and(Role::findByName('super-admin')->hasPermissionTo('user.reset-password'))->toBeTrue()
         ->and(Role::findByName('camat')->unit_head_of)->toBe('kecamatan')
         ->and(Role::findByName('lurah')->unit_head_of)->toBe('kelurahan')
         ->and(Role::findByName('lurah')->hasPermissionTo('permohonan.close'))->toBeFalse();

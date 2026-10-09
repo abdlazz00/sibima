@@ -5,28 +5,27 @@ use App\Models\Unit;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
-use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(PermissionSeeder::class);
 
-    $this->kasubag = User::factory()->create();
-    $this->kasubag->assignRole('kasubag');
+    $this->superAdmin = User::factory()->create();
+    $this->superAdmin->assignRole('super-admin');
 
     $this->kecamatan = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
     $this->unit = Unit::create(['name' => 'Kelurahan A', 'type' => 'kelurahan', 'parent_id' => $this->kecamatan->id]);
     $this->pegawai = Pegawai::factory()->create(['unit_id' => $this->unit->id]);
 });
 
-it('allows kasubag to grant direct permissions to a specific user on top of base role', function () {
+it('allows super-admin to grant direct permissions to a specific user on top of base role', function () {
     $user = User::factory()->create(['unit_id' => $this->unit->id]);
     $user->assignRole('admin_kelurahan');
     $this->pegawai->update(['user_id' => $user->id]);
 
     expect($user->can('import-kategori'))->toBeFalse();
 
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->put(route('users.update', $user), [
             'email' => $user->email,
             'is_active' => true,

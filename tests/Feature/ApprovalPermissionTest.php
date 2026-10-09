@@ -11,6 +11,7 @@ beforeEach(function () {
     (new WorkflowDefinitionSeeder)->run();
 
     $this->kec = makeKecamatan();
+    $this->superAdmin = userWithRole('super-admin');
     $this->kasubag = userWithRole('kasubag');
     $this->adminKec = userWithRole('admin_kecamatan', $this->kec);
     $this->camat = userWithRole('camat', $this->kec);
@@ -104,7 +105,7 @@ it('flags roles and users without persetujuan.act on the workflow settings page'
     Role::findByName('admin_kecamatan')->revokePermissionTo('persetujuan.act');
     $definition = WorkflowDefinition::where('code', 'pengembalian_aset')->firstOrFail();
 
-    $this->actingAs($this->kasubag)->get(route('workflow-settings.edit', $definition))
+    $this->actingAs($this->superAdmin)->get(route('workflow-settings.edit', $definition))
         ->assertInertia(fn ($page) => $page
             ->where('options.roles', fn ($roles) => collect($roles)->firstWhere('value', 'admin_kecamatan')['can_act'] === false
                 && collect($roles)->firstWhere('value', 'camat')['can_act'] === true)

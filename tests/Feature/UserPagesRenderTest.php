@@ -14,8 +14,8 @@ beforeEach(function () {
     $this->kecamatan = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
     $this->kelurahan = Unit::create(['name' => 'Kelurahan Sei Lekop', 'type' => 'kelurahan', 'parent_id' => $this->kecamatan->id]);
 
-    $this->kasubag = User::factory()->create(['unit_id' => $this->kecamatan->id]);
-    $this->kasubag->assignRole('kasubag');
+    $this->superAdmin = User::factory()->create(['unit_id' => $this->kecamatan->id]);
+    $this->superAdmin->assignRole('super-admin');
 
     $this->targetUser = User::factory()->create(['unit_id' => $this->kelurahan->id]);
     $this->targetUser->assignRole('admin_kelurahan');
@@ -29,7 +29,7 @@ beforeEach(function () {
 });
 
 it('renders Users/Index page with users list, roles, units, filters and can props', function () {
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->get(route('users.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -45,7 +45,7 @@ it('renders Users/Index page with users list, roles, units, filters and can prop
 });
 
 it('renders Users/Show page with user details and effective permissions matrix', function () {
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->get(route('users.show', $this->targetUser))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -58,7 +58,7 @@ it('renders Users/Show page with user details and effective permissions matrix',
 });
 
 it('renders Users/Edit page with roles, permission groups and initial values', function () {
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->get(route('users.edit', $this->targetUser))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page

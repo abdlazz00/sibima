@@ -103,3 +103,38 @@ it('includes the asset photos in the index so the Foto column can render them', 
             ->has('assets.data', 1)
             ->where('assets.data.0.photos.0.url', fn (string $url) => str_ends_with($url, 'assets/papan.jpg')));
 });
+
+it('allows super-admin and kasubag to access edit page for any unit asset', function () {
+    $superAdmin = userWithRole('super-admin');
+    $kasubag = userWithRole('kasubag');
+
+    $this->actingAs($superAdmin)
+        ->get(route('assets.edit', $this->acKec))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Assets/Edit')->where('asset.id', $this->acKec->id));
+
+    $this->actingAs($kasubag)
+        ->get(route('assets.edit', $this->acKel))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Assets/Edit')->where('asset.id', $this->acKel->id));
+});
+
+it('allows scoped admin to edit only its own unit asset and forbids other units', function () {
+    $adminKel = userWithRole('admin_kelurahan', $this->kelA);
+
+    $this->actingAs($adminKel)
+        ->get(route('assets.edit', $this->acKel))
+        ->assertOk();
+
+    $this->actingAs($adminKel)
+        ->get(route('assets.edit', $this->acKec))
+        ->assertForbidden();
+});
+
+it('forbids users without aset.update from accessing edit page', function () {
+    $camat = userWithRole('camat', $this->kec);
+
+    $this->actingAs($camat)
+        ->get(route('assets.edit', $this->acKec))
+        ->assertForbidden();
+});

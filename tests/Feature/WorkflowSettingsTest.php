@@ -17,6 +17,7 @@ beforeEach(function () {
 
     $this->kec = makeKecamatan();
     $this->kel = makeKelurahan($this->kec, 'Kelurahan A');
+    $this->superAdmin = userWithRole('super-admin');
     $this->kasubag = userWithRole('kasubag');
     $this->camat = userWithRole('camat', $this->kec);
     $this->lurah = userWithRole('lurah', $this->kel);
@@ -35,12 +36,12 @@ function stepPayload(array $override = []): array
     ], $override);
 }
 
-it('shows the workflow list and editor only to a kasubag', function () {
-    $this->actingAs($this->kasubag)->get(route('workflow-settings.index'))
+it('shows the workflow list and editor only to a super-admin', function () {
+    $this->actingAs($this->superAdmin)->get(route('workflow-settings.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $p) => $p->component('WorkflowSettings/Index')->has('workflows', 10));
 
-    $this->actingAs($this->kasubag)->get(route('workflow-settings.edit', $this->penerimaan))
+    $this->actingAs($this->superAdmin)->get(route('workflow-settings.edit', $this->penerimaan))
         ->assertOk()
         ->assertInertia(fn (Assert $p) => $p
             ->component('WorkflowSettings/Edit')
@@ -52,8 +53,8 @@ it('shows the workflow list and editor only to a kasubag', function () {
             ->has('logs'));
 });
 
-it('refuses every non-kasubag role on every settings endpoint', function () {
-    foreach (['camat', 'lurah', 'adminKec', 'adminKel'] as $who) {
+it('refuses every non-super-admin role on every settings endpoint including kasubag', function () {
+    foreach (['kasubag', 'camat', 'lurah', 'adminKec', 'adminKel'] as $who) {
         $user = $this->$who;
         $this->actingAs($user)->get(route('workflow-settings.index'))->assertForbidden();
         $this->actingAs($user)->get(route('workflow-settings.edit', $this->penerimaan))->assertForbidden();
@@ -71,7 +72,7 @@ it('replaces the steps, normalises them per approver type and writes an audit lo
         stepPayload(['label' => 'Atasan Unit', 'approver_type' => 'atasan_unit', 'approver_role' => 'camat', 'unit_scope' => 'none']),
     ]];
 
-    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $this->penerimaan), $payload)->assertRedirect();
+    $this->actingAs($this->superAdmin)->put(route('workflow-settings.update', $this->penerimaan), $payload)->assertRedirect();
 
     $steps = $this->penerimaan->fresh()->steps;
     expect($steps)->toHaveCount(2)
@@ -84,7 +85,7 @@ it('replaces the steps, normalises them per approver type and writes an audit lo
         ->and($steps[1]->unit_scope->value)->toBe('subject');
 
     $log = WorkflowChangeLog::firstOrFail();
-    expect($log->user_id)->toBe($this->kasubag->id)
+    expect($log->user_id)->toBe($this->superAdmin->id)
         ->and($log->event)->toBe('update')
         ->and($log->steps_before)->toHaveCount(2)
         ->and($log->steps_before[0]['approver_role'])->toBe('kasubag')
@@ -110,7 +111,7 @@ it('rejects invalid step configurations', function (string $case) {
         'origin scope on penerimaan' => [stepPayload(['unit_scope' => 'origin'])],
     };
 
-    $this->actingAs($this->kasubag)->from('/x')
+    $this->actingAs($this->superAdmin)->from('/x')
         ->put(route('workflow-settings.update', $this->penerimaan), ['steps' => $steps])
         ->assertSessionHasErrors();
 
@@ -122,11 +123,11 @@ it('rejects invalid step configurations', function (string $case) {
 ]);
 
 it('rejects scopes and approver types the workflow cannot support', function () {
-    $this->actingAs($this->kasubag)->from('/x')
+    $this->actingAs($this->superAdmin)->from('/x')
         ->put(route('workflow-settings.update', $this->mutasi), ['steps' => [stepPayload(['unit_scope' => 'subject'])]])
         ->assertSessionHasErrors('steps.0.unit_scope');
 
-    $this->actingAs($this->kasubag)->from('/x')
+    $this->actingAs($this->superAdmin)->from('/x')
         ->put(route('workflow-settings.update', $this->mutasi), ['steps' => [stepPayload(['approver_type' => 'atasan_unit', 'approver_role' => null, 'unit_scope' => 'subject'])]])
         ->assertSessionHasErrors('steps.0.approver_type');
 
@@ -134,7 +135,7 @@ it('rejects scopes and approver types the workflow cannot support', function () 
 });
 
 it('saves atomically: a valid first step is not kept when a later step is invalid', function () {
-    $this->actingAs($this->kasubag)->from('/x')
+    $this->actingAs($this->superAdmin)->from('/x')
         ->put(route('workflow-settings.update', $this->penerimaan), ['steps' => [
             stepPayload(['label' => 'Baru', 'approver_role' => 'kasubag', 'unit_scope' => 'none']),
             stepPayload(['label' => '']),
@@ -154,7 +155,7 @@ it('applies an edited flow to new submissions while running requests keep their 
     ]);
     $running = $this->service->submit($ba('BA/W/1'), 'penerimaan_aset', $this->adminKec);
 
-    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $this->penerimaan), ['steps' => [
+    $this->actingAs($this->superAdmin)->put(route('workflow-settings.update', $this->penerimaan), ['steps' => [
         stepPayload(['label' => 'Langsung Camat']),
     ]])->assertRedirect();
 
@@ -168,10 +169,10 @@ it('applies an edited flow to new submissions while running requests keep their 
 });
 
 it('resets a workflow to its defaults and logs the reset', function () {
-    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $this->penerimaan), ['steps' => [stepPayload()]])->assertRedirect();
+    $this->actingAs($this->superAdmin)->put(route('workflow-settings.update', $this->penerimaan), ['steps' => [stepPayload()]])->assertRedirect();
     expect($this->penerimaan->fresh()->steps)->toHaveCount(1);
 
-    $this->actingAs($this->kasubag)->post(route('workflow-settings.reset', $this->penerimaan))->assertRedirect();
+    $this->actingAs($this->superAdmin)->post(route('workflow-settings.reset', $this->penerimaan))->assertRedirect();
 
     $steps = $this->penerimaan->fresh()->steps;
     expect($steps->pluck('approver_role')->all())->toBe(['kasubag', 'camat'])
@@ -184,12 +185,12 @@ it('offers every role, including custom ones, as an approver and accepts a step 
     $verifikator->update(['display_name' => 'Verifikator Aset']);
     $user = userWithRole('verifikator', $this->kec);
 
-    $this->actingAs($this->kasubag)->get(route('workflow-settings.edit', $this->penerimaan))
+    $this->actingAs($this->superAdmin)->get(route('workflow-settings.edit', $this->penerimaan))
         ->assertInertia(fn (Assert $p) => $p->where('options.roles', fn ($roles) => collect($roles)->contains(
             fn ($r) => $r['value'] === 'verifikator' && $r['label'] === 'Verifikator Aset',
         )));
 
-    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $this->penerimaan), [
+    $this->actingAs($this->superAdmin)->put(route('workflow-settings.update', $this->penerimaan), [
         'steps' => [stepPayload(['label' => 'Verifikasi', 'approver_role' => 'verifikator', 'unit_scope' => 'none'])],
     ])->assertRedirect()->assertSessionHasNoErrors();
 
@@ -198,7 +199,7 @@ it('offers every role, including custom ones, as an approver and accepts a step 
 });
 
 it('still rejects an approver role that does not exist', function () {
-    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $this->penerimaan), [
+    $this->actingAs($this->superAdmin)->put(route('workflow-settings.update', $this->penerimaan), [
         'steps' => [stepPayload(['approver_role' => 'tidak_ada', 'unit_scope' => 'none'])],
     ])->assertSessionHasErrors('steps.0.approver_role');
 });

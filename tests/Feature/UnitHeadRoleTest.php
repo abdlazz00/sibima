@@ -12,6 +12,7 @@ beforeEach(function () {
     $this->kec = makeKecamatan();
     $this->kelA = makeKelurahan($this->kec, 'Kelurahan A');
     $this->kelB = makeKelurahan($this->kec, 'Kelurahan B');
+    $this->superAdmin = userWithRole('super-admin');
     $this->kasubag = userWithRole('kasubag');
     $this->adminKec = userWithRole('admin_kecamatan', $this->kec);
     $this->adminKel = userWithRole('admin_kelurahan', $this->kelA);
@@ -77,17 +78,17 @@ it('notifies exactly the atasan unit of the requesting unit', function () {
 });
 
 it('saves and lists unit_head_of from the role menu and rejects an unknown value', function () {
-    $this->actingAs($this->kasubag)->post(route('roles.store'), [
+    $this->actingAs($this->superAdmin)->post(route('roles.store'), [
         'name' => 'kepala_x', 'display_name' => 'Kepala X', 'unit_scope' => 'own', 'unit_head_of' => 'kelurahan', 'permissions' => [],
     ])->assertSessionHasNoErrors();
 
     $role = Role::findByName('kepala_x');
     expect($role->unit_head_of)->toBe('kelurahan');
 
-    $this->actingAs($this->kasubag)->put(route('roles.update', $role), [
+    $this->actingAs($this->superAdmin)->put(route('roles.update', $role), [
         'name' => 'kepala_x', 'display_name' => 'Kepala X', 'unit_scope' => 'own', 'unit_head_of' => 'provinsi', 'permissions' => [],
     ])->assertSessionHasErrors('unit_head_of');
 
-    $this->actingAs($this->kasubag)->get(route('roles.index'))
+    $this->actingAs($this->superAdmin)->get(route('roles.index'))
         ->assertInertia(fn ($page) => $page->where('roles', fn ($roles) => collect($roles)->firstWhere('name', 'camat')['unit_head_of'] === 'kecamatan'));
 });

@@ -14,6 +14,9 @@ beforeEach(function () {
     $this->kecamatan = Unit::create(['name' => 'Kecamatan Sagulung', 'type' => 'kecamatan']);
     $this->kelurahan = Unit::create(['name' => 'Kelurahan Sei Lekop', 'type' => 'kelurahan', 'parent_id' => $this->kecamatan->id]);
 
+    $this->superAdmin = User::factory()->create(['unit_id' => $this->kecamatan->id]);
+    $this->superAdmin->assignRole('super-admin');
+
     $this->kasubag = User::factory()->create(['unit_id' => $this->kecamatan->id]);
     $this->kasubag->assignRole('kasubag');
 
@@ -26,7 +29,7 @@ it('only exposes the manageAccess flag, not roles or the permission catalog, on 
     $pegawaiUser->assignRole('admin_kelurahan');
     $pegawai = Pegawai::factory()->create(['unit_id' => $this->kelurahan->id, 'user_id' => $pegawaiUser->id]);
 
-    $this->actingAs($this->kasubag)
+    $this->actingAs($this->superAdmin)
         ->get(route('pegawais.index'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
@@ -44,6 +47,14 @@ it('only exposes the manageAccess flag, not roles or the permission catalog, on 
 
 it('disables manageAccess for users without user.manage-access', function () {
     $this->actingAs($this->operator)
+        ->get(route('pegawais.index'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Pegawai/Index')
+            ->where('can.manageAccess', false)
+        );
+
+    $this->actingAs($this->kasubag)
         ->get(route('pegawais.index'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page

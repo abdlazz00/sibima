@@ -24,11 +24,11 @@ class AssetPolicy
 
     public function update(User $user, Asset $asset): bool
     {
-        return $user->can('aset.update') && $user->canAccessUnit($asset->unit) && $user->unit_id === $asset->unit_id;
+        return $user->can('aset.update') && $user->canAccessUnit($asset->unit);
     }
 
     public function delete(User $user, Asset $asset): bool
     {
-        return $user->can('aset.delete') && $user->canAccessUnit($asset->unit) && $user->unit_id === $asset->unit_id;
+        return $user->can('aset.delete') && $user->canAccessUnit($asset->unit);
     }
 }

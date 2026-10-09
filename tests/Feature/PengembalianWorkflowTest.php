@@ -3,7 +3,6 @@
 use App\Enums\ApproverType;
 use App\Enums\UnitScope;
 use App\Models\AssetMutation;
-use App\Models\User;
 use App\Models\WorkflowDefinition;
 use App\Services\ApprovalWorkflowService;
 use App\Services\AssetMutationEffect;
@@ -13,6 +12,7 @@ beforeEach(function () {
     (new WorkflowDefinitionSeeder)->run();
 
     $this->kec = makeKecamatan();
+    $this->superAdmin = userWithRole('super-admin');
     $this->kasubag = userWithRole('kasubag');
     $this->adminKec = userWithRole('admin_kecamatan', $this->kec);
 });
@@ -41,10 +41,10 @@ it('seeds the pengembalian_aset workflow with one atasan unit step', function ()
 it('lists the workflow in settings and lets its atasan unit step be saved', function () {
     $definition = WorkflowDefinition::where('code', 'pengembalian_aset')->firstOrFail();
 
-    $this->actingAs($this->kasubag)->get(route('workflow-settings.index'))
+    $this->actingAs($this->superAdmin)->get(route('workflow-settings.index'))
         ->assertInertia(fn ($page) => $page->has('workflows', 10));
 
-    $this->actingAs($this->kasubag)->put(route('workflow-settings.update', $definition), [
+    $this->actingAs($this->superAdmin)->put(route('workflow-settings.update', $definition), [
         'steps' => [[
             'label' => 'Persetujuan Atasan Unit', 'approver_type' => 'atasan_unit',
             'approver_role' => null, 'approver_user_id' => null, 'unit_scope' => 'subject',
