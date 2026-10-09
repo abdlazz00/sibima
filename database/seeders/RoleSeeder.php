@@ -42,8 +42,9 @@ class RoleSeeder extends Seeder
         foreach (self::SYSTEM_ROLES as $name => $meta) {
             $role = Role::firstOrCreate(['name' => $name, 'guard_name' => 'web'], $meta + ['is_system' => true]);
 
+            // Role bernama sistem yang belum pernah diinisialisasi (belum bertanda sistem) diadopsi sekali; yang sudah tidak disentuh.
             if (! $role->is_system) {
-                $role->update(['is_system' => true]);
+                $role->update($meta + ['is_system' => true]);
             }
         }
     }

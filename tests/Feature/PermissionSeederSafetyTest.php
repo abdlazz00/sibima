@@ -51,3 +51,21 @@ it('still creates a permission that is missing from the database without touchin
     expect(Permission::where('name', 'laporan.aset')->exists())->toBeTrue()
         ->and(Role::findByName('lurah')->permissions->pluck('name')->all())->toBe(['dashboard.view']);
 });
+
+it('adopts a bare role with a system name that was created before seeding, but never an initialised one', function () {
+    Role::findOrCreate('lurah');
+
+    test()->seed(RoleSeeder::class);
+
+    $lurah = Role::findByName('lurah');
+
+    expect($lurah->is_system)->toBeTrue()
+        ->and($lurah->unit_head_of)->toBe('kelurahan')
+        ->and($lurah->display_name)->toBe('Lurah');
+
+    $lurah->update(['display_name' => 'Lurah Kustom', 'unit_head_of' => null]);
+
+    test()->seed(RoleSeeder::class);
+
+    expect($lurah->fresh()->display_name)->toBe('Lurah Kustom')->and($lurah->fresh()->unit_head_of)->toBeNull();
+});

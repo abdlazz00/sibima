@@ -16,6 +16,7 @@ interface StepForm {
 interface Option {
     value: string;
     label: string;
+    can_act?: boolean;
 }
 
 interface UserOption {
@@ -23,6 +24,7 @@ interface UserOption {
     name: string;
     role: string | null;
     unit: string | null;
+    can_act: boolean;
 }
 
 interface LogRow {
@@ -169,6 +171,9 @@ export default function Edit({ workflow, options, logs }: EditProps) {
                                             {options.roles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                                         </select>
                                         {errors[`steps.${index}.approver_role`] && <p className="mt-1 text-xs text-red-600">{errors[`steps.${index}.approver_role`]}</p>}
+                                        {step.approver_role && options.roles.find((r) => r.value === step.approver_role)?.can_act === false && (
+                                            <p className="mt-1 text-xs text-amber-700">Role ini belum memegang izin &quot;Setujui / Tolak&quot;; anggotanya tidak akan bisa menyetujui langkah ini.</p>
+                                        )}
                                     </div>
                                     <div>
                                         <label className="mb-1 block text-xs font-medium text-slate-900">Cakupan Unit</label>
@@ -191,6 +196,9 @@ export default function Edit({ workflow, options, logs }: EditProps) {
                                     </select>
                                     {errors[`steps.${index}.approver_user_id`] && <p className="mt-1 text-xs text-red-600">{errors[`steps.${index}.approver_user_id`]}</p>}
                                     <p className="mt-1 text-xs text-slate-500">Hanya user ini yang dapat menyetujui langkah ini.</p>
+                                    {step.approver_user_id && options.users.find((u) => String(u.id) === String(step.approver_user_id))?.can_act === false && (
+                                        <p className="mt-1 text-xs text-amber-700">User ini belum memegang izin &quot;Setujui / Tolak&quot; sehingga tidak akan bisa menyetujui langkah ini.</p>
+                                    )}
                                 </div>
                             )}
 

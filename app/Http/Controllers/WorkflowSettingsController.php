@@ -71,13 +71,18 @@ class WorkflowSettingsController extends Controller
                 ])->values(),
             ],
             'options' => [
-                'roles' => Role::orderBy('name')->get()->map(fn ($r) => ['value' => $r->name, 'label' => $r->display_name ?? $r->name])->values(),
+                'roles' => Role::with('permissions')->orderBy('name')->get()->map(fn ($r) => [
+                    'value' => $r->name,
+                    'label' => $r->display_name ?? $r->name,
+                    'can_act' => $r->permissions->contains('name', 'persetujuan.act'),
+                ])->values(),
                 'types' => collect(ApproverType::cases())
                     ->filter(fn ($t) => $t !== ApproverType::AtasanUnit || $capability === 'subject')
                     ->map(fn ($t) => ['value' => $t->value, 'label' => $t->label()])->values(),
                 'scopes' => collect($scopes)->map(fn ($s) => ['value' => $s, 'label' => self::SCOPE_LABELS[$s]])->values(),
                 'users' => User::whereHas('roles')->with(['roles', 'unit'])->orderBy('name')->get()->map(fn (User $u) => [
                     'id' => $u->id, 'name' => $u->name, 'role' => $u->getRoleNames()->first(), 'unit' => $u->unit?->name,
+                    'can_act' => $u->can('persetujuan.act'),
                 ])->values(),
             ],
             'logs' => $workflow->changeLogs()->with('user')->limit(20)->get()->map(fn ($l) => [

@@ -170,17 +170,21 @@ class ApprovalWorkflowService
 
     public function canReassign(User $user, ApprovalRequest $request): bool
     {
-        return $user->hasRole('kasubag') && $request->status === ApprovalStatus::Pending;
+        return $user->can('persetujuan.reassign') && $request->status === ApprovalStatus::Pending;
     }
 
     public function reassign(ApprovalRequest $request, User $by, User $to, string $note, ?int $expectedStep = null): void
     {
         if (! $this->canReassign($by, $request)) {
-            throw new InvalidArgumentException('Hanya Kasubag yang dapat mengalihkan approver pengajuan yang masih pending.');
+            throw new InvalidArgumentException('Anda tidak berwenang mengalihkan approver pengajuan ini.');
         }
 
         if ($to->getRoleNames()->isEmpty()) {
             throw new InvalidArgumentException('Approver tujuan harus memiliki akun dengan role yang valid.');
+        }
+
+        if (! $to->can('persetujuan.act')) {
+            throw new InvalidArgumentException('Approver tujuan harus memiliki izin Setujui / Tolak.');
         }
 
         if ($to->id === $request->created_by) {
@@ -227,12 +231,13 @@ class ApprovalWorkflowService
     public function reassignCandidates(): array
     {
         return User::whereHas('roles')->with(['roles', 'unit'])->orderBy('name')->get()
+            ->filter(fn (User $u) => $u->can('persetujuan.act'))
             ->map(fn (User $u) => [
                 'id' => $u->id,
                 'name' => $u->name,
                 'role' => $u->getRoleNames()->first(),
                 'unit' => $u->unit?->name,
-            ])->all();
+            ])->values()->all();
     }
 
     /** @return Collection<int, ApprovalRequest> */
@@ -302,7 +307,7 @@ class ApprovalWorkflowService
 
     private function stepAllows(User $user, ApprovalRequestStep $step, Model $approvable): bool
     {
-        return match ($step->approver_type) {
+        return $user->can('persetujuan.act') && match ($step->approver_type) {
             ApproverType::User => $step->approver_user_id !== null && $user->id === $step->approver_user_id,
             ApproverType::AtasanUnit => $this->allowsAtasanUnit($user, $approvable),
             ApproverType::Role => $step->approver_role !== null

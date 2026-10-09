@@ -30,7 +30,7 @@ class PermissionSeeder extends Seeder
         'Mutasi Aset' => ['mutasi.view', 'mutasi.create'],
         'Permohonan Aset' => ['permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close'],
         'Lapor Insiden' => ['laporan-insiden.view', 'laporan-insiden.create'],
-        'Persetujuan' => ['persetujuan.view', 'persetujuan.act'],
+        'Persetujuan' => ['persetujuan.view', 'persetujuan.act', 'persetujuan.reassign'],
         'Laporan' => ['laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang'],
         'Pengaturan' => [
             'pengaturan.alur',
@@ -65,6 +65,7 @@ class PermissionSeeder extends Seeder
             'mutasi.view', 'mutasi.create',
             'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
             'laporan-insiden.view', 'laporan-insiden.create',
+            'persetujuan.act',
             'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
         ],
         'admin_kelurahan' => [
@@ -74,6 +75,7 @@ class PermissionSeeder extends Seeder
             'mutasi.view', 'mutasi.create',
             'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
             'laporan-insiden.view', 'laporan-insiden.create',
+            'persetujuan.act',
             'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
         ],
         'lurah' => [
