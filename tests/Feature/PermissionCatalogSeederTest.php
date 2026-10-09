@@ -16,13 +16,13 @@ it('seeds all core granular permissions', function () {
         'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
         'kategori.view', 'kategori.create', 'kategori.update', 'kategori.delete', 'import-kategori', 'export-kategori',
         'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'pegawai.create-user', 'import-pegawai', 'export-pegawai',
-        'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete', 'penerimaan.submit',
+        'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete',
         'mutasi.view', 'mutasi.create',
         'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
         'laporan-insiden.view', 'laporan-insiden.create',
-        'persetujuan.view', 'persetujuan.act',
+        'persetujuan.view', 'persetujuan.act', 'persetujuan.reassign',
         'laporan.aset', 'laporan.mutasi', 'laporan.rusak-hilang',
-        'pengaturan.alur', 'pengaturan.role', 'pengaturan.user',
+        'pengaturan.alur', 'pengaturan.role',
     ];
 
     foreach ($expected as $perm) {

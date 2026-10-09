@@ -36,7 +36,6 @@ const PERMISSION_LABELS: Record<string, string> = {
     'penerimaan.create': 'Buat Dokumen Penerimaan',
     'penerimaan.update': 'Ubah Dokumen Penerimaan',
     'penerimaan.delete': 'Hapus Dokumen Penerimaan',
-    'penerimaan.submit': 'Kirim ke Verifikator / Camat',
     'mutasi.view': 'Lihat Riwayat & Daftar Mutasi',
     'mutasi.create': 'Ajukan Mutasi Aset',
     'permohonan.view': 'Lihat Permohonan Aset',
@@ -47,12 +46,17 @@ const PERMISSION_LABELS: Record<string, string> = {
     'laporan-insiden.create': 'Buat Laporan Kerusakan / Kehilangan',
     'persetujuan.view': 'Lihat Kotak Persetujuan',
     'persetujuan.act': 'Setujui / Tolak Dokumen Persetujuan',
+    'persetujuan.reassign': 'Alihkan Approver Persetujuan',
     'laporan.aset': 'Laporan Rekapitulasi Aset',
     'laporan.mutasi': 'Laporan Rekapitulasi Mutasi',
     'laporan.rusak-hilang': 'Laporan Rekap Rusak & Hilang',
     'pengaturan.alur': 'Pengaturan Alur Persetujuan',
     'pengaturan.role': 'Pengaturan Role & Hak Akses',
-    'pengaturan.user': 'Pengaturan Akses Pengguna',
+    'user.view': 'Lihat Daftar Pengguna',
+    'user.manage-access': 'Kelola Role & Akses Pengguna',
+    'user.reset-password': 'Atur Ulang Kata Sandi Pengguna',
+    'user.toggle-status': 'Aktifkan / Nonaktifkan Pengguna',
+    'user.delete': 'Hapus Pengguna',
 };
 
 function formatPermissionLabel(perm: string): string {

@@ -25,7 +25,7 @@ class PermissionSeeder extends Seeder
             'pegawai.create-user', 'import-pegawai', 'export-pegawai',
         ],
         'Penerimaan Aset' => [
-            'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete', 'penerimaan.submit',
+            'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete',
         ],
         'Mutasi Aset' => ['mutasi.view', 'mutasi.create'],
         'Permohonan Aset' => ['permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close'],
@@ -35,7 +35,6 @@ class PermissionSeeder extends Seeder
         'Pengaturan' => [
             'pengaturan.alur',
             'pengaturan.role',
-            'pengaturan.user',
             'user.view',
             'user.manage-access',
             'user.reset-password',
@@ -61,7 +60,7 @@ class PermissionSeeder extends Seeder
             'dashboard.view', 'scan.view',
             'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
             'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
-            'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete', 'penerimaan.submit',
+            'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete',
             'mutasi.view', 'mutasi.create',
             'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',
             'laporan-insiden.view', 'laporan-insiden.create',

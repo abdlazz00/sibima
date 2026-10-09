@@ -32,7 +32,7 @@ it('lets a role manager create a role within its own permissions and scope', fun
 });
 
 it('refuses a new role with permissions or a unit scope beyond the manager own', function () {
-    $this->actingAs($this->manager)->post(route('roles.store'), rdPayload(['permissions' => ['pengaturan.user']]))
+    $this->actingAs($this->manager)->post(route('roles.store'), rdPayload(['permissions' => ['pengaturan.alur']]))
         ->assertSessionHasErrors('permissions');
     $this->actingAs($this->manager)->post(route('roles.store'), rdPayload(['name' => 'luas', 'unit_scope' => 'all']))
         ->assertSessionHasErrors('unit_scope');
@@ -48,7 +48,7 @@ it('refuses to edit a role that is more powerful than the manager or to add perm
     $own = Role::create(['name' => 'operator_baru', 'display_name' => 'Operator', 'unit_scope' => 'own', 'is_system' => false]);
     $own->givePermissionTo('aset.view');
 
-    $this->actingAs($this->manager)->put(route('roles.update', $own), rdPayload(['permissions' => ['aset.view', 'pengaturan.user']]))
+    $this->actingAs($this->manager)->put(route('roles.update', $own), rdPayload(['permissions' => ['aset.view', 'pengaturan.alur']]))
         ->assertSessionHasErrors('permissions');
     $this->actingAs($this->manager)->put(route('roles.update', $own), rdPayload(['permissions' => ['aset.view', 'aset.create']]))
         ->assertRedirect(route('roles.index'));
@@ -80,6 +80,6 @@ it('forbids a unit-scoped manager from editing a role that users outside its sco
 });
 
 it('lets kasubag create and edit any role', function () {
-    $this->actingAs($this->kasubag)->post(route('roles.store'), rdPayload(['unit_scope' => 'all', 'permissions' => ['pengaturan.user', 'aset.view']]))
+    $this->actingAs($this->kasubag)->post(route('roles.store'), rdPayload(['unit_scope' => 'all', 'permissions' => ['pengaturan.alur', 'aset.view']]))
         ->assertRedirect(route('roles.index'))->assertSessionHasNoErrors();
 });

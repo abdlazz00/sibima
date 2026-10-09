@@ -49,8 +49,8 @@ expect()->extend('toBeOne', function () {
 
 function userWithRole(string $role, ?Unit $unit = null): User
 {
-    // RBAC bawaan (role sistem + permission default) disiapkan sekali per test.
-    if (! \Spatie\Permission\Models\Permission::query()->exists()) {
+    // RBAC bawaan (role sistem + permission default) disiapkan sekali per test; permission dari migrasi data tidak dihitung.
+    if (! \Spatie\Permission\Models\Permission::where('name', 'dashboard.view')->exists()) {
         (new \Database\Seeders\RoleSeeder)->run();
         (new \Database\Seeders\PermissionSeeder)->run();
     }
