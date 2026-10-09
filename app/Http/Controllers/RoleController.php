@@ -25,6 +25,7 @@ class RoleController extends Controller
                 'name' => $r->name,
                 'display_name' => $r->display_name ?? $r->name,
                 'unit_scope' => $r->unit_scope,
+                'unit_head_of' => $r->unit_head_of,
                 'is_system' => (bool) $r->is_system,
                 'description' => $r->description,
                 'users_count' => $r->users_count,
@@ -44,6 +45,7 @@ class RoleController extends Controller
             'name' => $request->validated('name'),
             'display_name' => $request->validated('display_name'),
             'unit_scope' => $request->validated('unit_scope'),
+            'unit_head_of' => $request->validated('unit_head_of'),
             'description' => $request->validated('description'),
             'is_system' => false,
         ]);
@@ -60,6 +62,7 @@ class RoleController extends Controller
         $data = [
             'display_name' => $request->validated('display_name'),
             'unit_scope' => $request->validated('unit_scope'),
+            'unit_head_of' => $request->validated('unit_head_of'),
             'description' => $request->validated('description'),
         ];
 

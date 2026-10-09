@@ -73,6 +73,7 @@ export default function RoleModal({
     const [name, setName] = useState('');
     const [displayName, setDisplayName] = useState('');
     const [unitScope, setUnitScope] = useState<'all' | 'binaan' | 'own'>('own');
+    const [unitHeadOf, setUnitHeadOf] = useState<'' | 'kecamatan' | 'kelurahan'>('');
     const [description, setDescription] = useState('');
     const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
@@ -90,12 +91,14 @@ export default function RoleModal({
             setName(role.name);
             setDisplayName(role.display_name);
             setUnitScope(role.unit_scope);
+            setUnitHeadOf(role.unit_head_of ?? '');
             setDescription(role.description ?? '');
             setSelectedPermissions(role.permissions ?? []);
         } else {
             setName('');
             setDisplayName('');
             setUnitScope('own');
+            setUnitHeadOf('');
             setDescription('');
             setSelectedPermissions([]);
         }
@@ -143,6 +146,7 @@ export default function RoleModal({
             name,
             display_name: displayName,
             unit_scope: unitScope,
+            unit_head_of: unitHeadOf || null,
             description: description.trim() || null,
             permissions: selectedPermissions,
         };
@@ -340,6 +344,26 @@ export default function RoleModal({
                                     </p>
                                 </label>
                             </div>
+                        </div>
+
+                        {/* Pimpinan Unit */}
+                        <div>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700">
+                                Pimpinan Unit (untuk langkah &quot;Atasan Unit&quot;)
+                            </label>
+                            <select
+                                value={unitHeadOf}
+                                onChange={(e) => setUnitHeadOf(e.target.value as '' | 'kecamatan' | 'kelurahan')}
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                            >
+                                <option value="">Bukan pimpinan unit</option>
+                                <option value="kecamatan">Pimpinan Kecamatan</option>
+                                <option value="kelurahan">Pimpinan Kelurahan</option>
+                            </select>
+                            {errors.unit_head_of && <p className="mt-1 text-xs text-red-600">{errors.unit_head_of}</p>}
+                            <p className="mt-1 text-[11px] text-slate-500">
+                                Role ini menjadi atasan otomatis bagi pengajuan dari unit sejenis.
+                            </p>
                         </div>
 
                         {/* Section 3: Description */}

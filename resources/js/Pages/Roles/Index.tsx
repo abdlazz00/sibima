@@ -196,6 +196,11 @@ export default function Index({ roles, permissionGroups }: IndexProps) {
                                                         <span className="font-mono text-xs text-slate-400">
                                                             {r.name}
                                                         </span>
+                                                        {r.unit_head_of && (
+                                                            <span className="mt-1 inline-flex w-fit rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 ring-1 ring-inset ring-blue-600/10">
+                                                                Pimpinan {r.unit_head_of === 'kecamatan' ? 'Kecamatan' : 'Kelurahan'}
+                                                            </span>
+                                                        )}
                                                         {r.description && (
                                                             <span className="mt-1 line-clamp-1 text-xs text-slate-500">
                                                                 {r.description}

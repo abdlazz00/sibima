@@ -25,6 +25,7 @@ class UpdateRoleRequest extends FormRequest
             'name' => $nameRule,
             'display_name' => 'required|string|max:100',
             'unit_scope' => 'required|in:all,binaan,own',
+            'unit_head_of' => 'nullable|in:kecamatan,kelurahan',
             'description' => 'nullable|string|max:255',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|exists:permissions,name',

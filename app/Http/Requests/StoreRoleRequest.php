@@ -18,6 +18,7 @@ class StoreRoleRequest extends FormRequest
             'name' => 'required|string|max:50|regex:/^[a-z0-9_]+$/|unique:roles,name',
             'display_name' => 'required|string|max:100',
             'unit_scope' => 'required|in:all,binaan,own',
+            'unit_head_of' => 'nullable|in:kecamatan,kelurahan',
             'description' => 'nullable|string|max:255',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|exists:permissions,name',

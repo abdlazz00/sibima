@@ -293,7 +293,7 @@ class ApprovalWorkflowService
     {
         $candidates = match ($step->approver_type) {
             ApproverType::User => User::whereKey($step->approver_user_id)->get(),
-            ApproverType::AtasanUnit => User::role($this->atasanRole($approvable))->get(),
+            ApproverType::AtasanUnit => User::whereHas('roles', fn ($q) => $q->where('unit_head_of', $this->unitKind($approvable)))->get(),
             ApproverType::Role => User::role($step->approver_role)->get(),
         };
 
@@ -316,15 +316,16 @@ class ApprovalWorkflowService
         $unit = $approvable->unit ?? null;
 
         return $unit instanceof Unit
-            && $user->hasRole($unit->isKecamatan() ? 'camat' : 'lurah')
+            && $user->roles->contains(fn ($role) => $role->unit_head_of === $this->unitKind($approvable))
             && $user->canAccessUnit($unit);
     }
 
-    private function atasanRole(Model $approvable): string
+    /** `kecamatan` atau `kelurahan` menurut jenis unit pengaju; role pimpinan dicocokkan dengan nilai ini. */
+    private function unitKind(Model $approvable): ?string
     {
         $unit = $approvable->unit ?? null;
 
-        return $unit instanceof Unit && $unit->isKecamatan() ? 'camat' : 'lurah';
+        return $unit instanceof Unit ? ($unit->isKecamatan() ? 'kecamatan' : 'kelurahan') : null;
     }
 
     private function inUnitScope(User $user, UnitScope $scope, Model $approvable): bool

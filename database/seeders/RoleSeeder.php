@@ -16,6 +16,7 @@ class RoleSeeder extends Seeder
         'camat' => [
             'display_name' => 'Camat Sagulung',
             'unit_scope' => 'binaan',
+            'unit_head_of' => 'kecamatan',
             'description' => 'Pimpinan kecamatan, dapat melihat unit kecamatan dan kelurahan binaan.',
         ],
         'admin_kecamatan' => [
@@ -31,6 +32,7 @@ class RoleSeeder extends Seeder
         'lurah' => [
             'display_name' => 'Lurah',
             'unit_scope' => 'own',
+            'unit_head_of' => 'kelurahan',
             'description' => 'Pimpinan kelurahan untuk persetujuan dokumen tingkat kelurahan.',
         ],
     ];

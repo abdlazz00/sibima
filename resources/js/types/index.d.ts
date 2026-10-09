@@ -14,6 +14,7 @@ export interface RoleItem {
     name: string;
     display_name: string;
     unit_scope: 'all' | 'binaan' | 'own';
+    unit_head_of: 'kecamatan' | 'kelurahan' | null;
     is_system: boolean;
     description: string | null;
     users_count: number;
