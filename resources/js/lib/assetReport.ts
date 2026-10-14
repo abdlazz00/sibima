@@ -22,3 +22,10 @@ export const KONDISI_LABEL: Record<string, string> = {
     rusak_berat: 'Rusak Berat',
     hilang: 'Hilang',
 };
+
+export const KONDISI_BADGE_COLOR: Record<string, 'success' | 'warning' | 'error' | 'gray'> = {
+    baik: 'success',
+    rusak_ringan: 'warning',
+    rusak_berat: 'error',
+    hilang: 'gray',
+};

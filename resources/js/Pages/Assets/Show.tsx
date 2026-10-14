@@ -3,6 +3,7 @@ import PrintLabelModal from '@/Components/PrintLabelModal';
 import { Badge } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { KONDISI_BADGE_COLOR } from '@/lib/assetReport';
 import { Asset, PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
 import { Camera01, Edit01, Printer } from '@untitledui/icons';
@@ -14,13 +15,6 @@ interface ShowProps extends PageProps {
     can: { update: boolean };
     qr: string;
 }
-
-const KONDISI_BADGE: Record<string, 'success' | 'warning' | 'error' | 'gray'> = {
-    baik: 'success',
-    rusak_ringan: 'warning',
-    rusak_berat: 'error',
-    hilang: 'gray',
-};
 
 function formatRupiah(value: string | number): string {
     return new Intl.NumberFormat('id-ID', {
@@ -71,7 +65,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                     title={asset.nama_aset}
                     badges={
                         <>
-                            <Badge type="color" size="sm" color={KONDISI_BADGE[asset.kondisi] ?? 'gray'} className="rounded-sm">
+                            <Badge type="color" size="sm" color={KONDISI_BADGE_COLOR[asset.kondisi] ?? 'gray'} className="rounded-sm">
                                 {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ?? asset.kondisi}
                             </Badge>
                             <Badge type="color" size="sm" color={asset.status === 'aktif' ? 'brand' : 'warning'} className="rounded-sm">

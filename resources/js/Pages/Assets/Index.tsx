@@ -9,6 +9,7 @@ import ImportExportButtons from '@/Components/ImportExportButtons';
 import PageHeader from '@/Components/PageHeader';
 import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { KONDISI_BADGE_COLOR } from '@/lib/assetReport';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Edit01, Eye, Plus, Printer, SearchLg, XClose } from '@untitledui/icons';
@@ -51,13 +52,6 @@ interface IndexProps extends PageProps {
 const ALL = '__all';
 const DEFAULT_SORT = 'nama_asc';
 const MAX_LABELS = 99;
-
-const KONDISI_BADGE: Record<string, 'success' | 'warning' | 'error' | 'gray'> = {
-    baik: 'success',
-    rusak_ringan: 'warning',
-    rusak_berat: 'error',
-    hilang: 'gray',
-};
 
 function formatRupiah(value: string | number): string {
     return new Intl.NumberFormat('id-ID', {
@@ -308,7 +302,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                     <Table.Cell>{asset.unit?.name}</Table.Cell>
                                     <Table.Cell>{asset.current_holder?.nama ?? '—'}</Table.Cell>
                                     <Table.Cell>
-                                        <Badge type="color" color={KONDISI_BADGE[asset.kondisi] ?? 'gray'} size="sm" className="rounded-sm">
+                                        <Badge type="color" color={KONDISI_BADGE_COLOR[asset.kondisi] ?? 'gray'} size="sm" className="rounded-sm">
                                             {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ?? asset.kondisi}
                                         </Badge>
                                     </Table.Cell>
