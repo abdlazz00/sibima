@@ -11,6 +11,15 @@ export const PENERIMAAN_STATUS_STYLE: Record<PenerimaanStatusKey, string> = {
     dibatalkan: 'bg-slate-100 text-slate-500',
 };
 
+export const PENERIMAAN_STATUS_COLOR: Record<PenerimaanStatusKey, 'gray' | 'blue' | 'warning' | 'success' | 'error'> = {
+    draft: 'gray',
+    diajukan: 'blue',
+    diverifikasi: 'warning',
+    disetujui: 'success',
+    ditolak: 'error',
+    dibatalkan: 'gray',
+};
+
 export const PENERIMAAN_STATUS_LABEL: Record<PenerimaanStatusKey, string> = {
     draft: 'Draft',
     diajukan: 'Diajukan',

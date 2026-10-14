@@ -241,6 +241,7 @@ export interface InputProps
             | "inputClassName"
             | "iconClassName"
             | "tooltipClassName"
+            | "list"
         > {
     /** Label text for the input */
     label?: string;
@@ -267,6 +268,7 @@ export const Input = ({
     wrapperClassName,
     tooltipClassName,
     type = "text",
+    list,
     ...props
 }: InputProps) => {
     return (
@@ -293,6 +295,7 @@ export const Input = ({
                             tooltipClassName,
                             tooltip,
                             type,
+                            list,
                         }}
                     />
 

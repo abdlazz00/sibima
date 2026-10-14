@@ -1,3 +1,6 @@
+import { Dialog, Modal, ModalOverlay } from '@/Components/ui/application/modals/modal';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { TextArea } from '@/Components/ui/base/textarea/textarea';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -22,30 +25,33 @@ export default function CancelRequestModal({ approvalRequestId, onClose, descrip
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => !submitting && onClose()}>
-            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-                <h3 className="mb-2 text-base font-bold text-slate-900">Batalkan Pengajuan</h3>
-                <p className="mb-3 text-xs leading-relaxed text-slate-600">{description}</p>
-                <label htmlFor="cancel-note" className="mb-1.5 block text-xs font-semibold text-slate-700">
-                    Alasan Pembatalan <span className="text-red-600">*</span>
-                </label>
-                <textarea
-                    id="cancel-note"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    rows={4}
-                    maxLength={1000}
-                    className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-600/20"
-                />
-                <div className="mt-6 flex items-center justify-end gap-3">
-                    <button type="button" onClick={onClose} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
-                        Kembali
-                    </button>
-                    <button type="button" onClick={cancel} disabled={!note.trim() || submitting} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
-                        {submitting ? 'Memproses...' : 'Ya, Batalkan'}
-                    </button>
-                </div>
-            </div>
-        </div>
+        <ModalOverlay
+            isOpen
+            isDismissable={!submitting}
+            isKeyboardDismissDisabled={submitting}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
+            <Modal className="sm:max-w-md">
+                <Dialog aria-labelledby="cancel-request-title">
+                    <div className="w-full p-6">
+                        <h3 id="cancel-request-title" className="mb-2 text-base font-bold text-slate-900">
+                            Batalkan Pengajuan
+                        </h3>
+                        <p className="mb-4 text-xs leading-relaxed text-slate-600">{description}</p>
+                        <TextArea label="Alasan Pembatalan" isRequired rows={4} maxLength={1000} value={note} onChange={setNote} />
+                        <div className="mt-6 flex items-center justify-end gap-3">
+                            <Button color="secondary" size="md" isDisabled={submitting} onPress={onClose}>
+                                Kembali
+                            </Button>
+                            <Button color="primary-destructive" size="md" isLoading={submitting} isDisabled={!note.trim()} onPress={cancel}>
+                                Ya, Batalkan
+                            </Button>
+                        </div>
+                    </div>
+                </Dialog>
+            </Modal>
+        </ModalOverlay>
     );
 }
