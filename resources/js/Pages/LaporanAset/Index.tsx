@@ -1,375 +1,196 @@
+import ChartLegend from '@/Components/ChartLegend';
 import DonutChart from '@/Components/Charts/DonutChart';
 import TrenAsetChart from '@/Components/Charts/TrenAsetChart';
-import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
+import ReportCard from '@/Components/ReportCard';
+import ReportDetailTable, { DetailColumn } from '@/Components/ReportDetailTable';
+import ReportFilterBar, { ReportSelect } from '@/Components/ReportFilterBar';
+import StatCard from '@/Components/StatCard';
+import SummaryTable, { SummaryColumn } from '@/Components/SummaryTable';
+import { Badge } from '@/Components/ui/base/badges/badges';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { KONDISI_LABEL } from '@/lib/assetReport';
+import { KONDISI_BADGE_COLOR, KONDISI_LABEL } from '@/lib/assetReport';
 import { KONDISI_COLOR } from '@/lib/chartColors';
 import { rupiah } from '@/lib/format';
-import { pageNumbersWithGaps } from '@/lib/pagination';
-import { LaporanAsetData, PageProps, RekapTotals } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Fragment, useState } from 'react';
+import { useLaporanFilters } from '@/lib/use-laporan-filters';
+import { LaporanAsetData, LaporanAsetRow, PageProps } from '@/types';
+import { Head } from '@inertiajs/react';
+import { useState } from 'react';
 
-type Filters = Record<string, string | number | undefined>;
+interface RekapRow {
+    id: string | number;
+    nama: string;
+    level: 0 | 1;
+    jumlah: number;
+    nilai_perolehan: number;
+    nilai_buku: number;
+}
 
-const CARD = 'rounded-lg border border-slate-200 bg-white p-5';
-const FIELD = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
-const TH = 'px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500';
-
-const KONDISI_BADGE: Record<string, string> = {
-    baik: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    rusak_ringan: 'bg-amber-50 text-amber-700 border-amber-200',
-    rusak_berat: 'bg-red-50 text-red-700 border-red-200',
-    hilang: 'bg-gray-100 text-gray-600 border-gray-300',
-};
-
-const SORTABLE_COLUMNS: { key: string; label: string; sort?: string; align?: 'right' }[] = [
-    { key: 'kode_barang', label: 'Kode Barang', sort: 'kode_barang' },
-    { key: 'nomor_register', label: 'No. Register', sort: 'nomor_register' },
-    { key: 'nama_aset', label: 'Nama / Merk', sort: 'nama_aset' },
-    { key: 'kategori', label: 'Kategori' },
-    { key: 'unit', label: 'Unit' },
-    { key: 'tahun', label: 'Tahun', sort: 'tanggal_perolehan' },
-    { key: 'kondisi', label: 'Kondisi', sort: 'kondisi' },
-    { key: 'nilai_perolehan', label: 'Nilai Perolehan', sort: 'nilai_perolehan', align: 'right' },
-    { key: 'nilai_buku', label: 'Nilai Buku', sort: 'nilai_buku', align: 'right' },
+const rekapColumns = (label: string): SummaryColumn<RekapRow>[] => [
+    {
+        key: 'nama',
+        label,
+        isRowHeader: true,
+        render: (r) => <span className={r.level === 1 ? 'pl-5 text-slate-600' : 'font-semibold'}>{r.nama}</span>,
+    },
+    { key: 'jumlah', label: 'Jumlah', align: 'right', render: (r) => r.jumlah.toLocaleString('id-ID') },
+    { key: 'nilai_perolehan', label: 'Nilai Perolehan', align: 'right', render: (r) => rupiah(r.nilai_perolehan) },
+    { key: 'nilai_buku', label: 'Nilai Buku', align: 'right', render: (r) => rupiah(r.nilai_buku) },
 ];
 
-const clean = (data: Filters) =>
-    Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined && v !== ''));
+const asetColumns: DetailColumn<LaporanAsetRow>[] = [
+    { key: 'kode_barang', label: 'Kode Barang', sort: 'kode_barang', render: (a) => <span className="tabular-nums">{a.kode_barang}</span> },
+    { key: 'nomor_register', label: 'No. Register', sort: 'nomor_register', render: (a) => <span className="tabular-nums">{a.nomor_register}</span> },
+    {
+        key: 'nama_aset',
+        label: 'Nama / Merk',
+        sort: 'nama_aset',
+        render: (a) => (
+            <>
+                <span className="font-medium text-slate-900">{a.nama_aset}</span>
+                {a.merk_type && <span className="block text-xs text-slate-500">{a.merk_type}</span>}
+            </>
+        ),
+    },
+    {
+        key: 'kategori',
+        label: 'Kategori',
+        render: (a) => (
+            <>
+                {a.kategori}
+                {a.subkategori && <span className="block text-xs text-slate-500">{a.subkategori}</span>}
+            </>
+        ),
+    },
+    { key: 'unit', label: 'Unit', render: (a) => a.unit },
+    { key: 'tahun', label: 'Tahun', sort: 'tanggal_perolehan', render: (a) => <span className="tabular-nums">{a.tahun_perolehan}</span> },
+    {
+        key: 'kondisi',
+        label: 'Kondisi',
+        sort: 'kondisi',
+        render: (a) => (
+            <Badge type="color" size="sm" color={KONDISI_BADGE_COLOR[a.kondisi] ?? 'gray'} className="rounded-sm">
+                {KONDISI_LABEL[a.kondisi] ?? a.kondisi}
+            </Badge>
+        ),
+    },
+    { key: 'nilai_perolehan', label: 'Nilai Perolehan', sort: 'nilai_perolehan', align: 'right', render: (a) => rupiah(a.nilai_perolehan) },
+    { key: 'nilai_buku', label: 'Nilai Buku', sort: 'nilai_buku', align: 'right', render: (a) => rupiah(a.nilai_buku) },
+];
 
-const signature = (data: Filters) =>
-    JSON.stringify(Object.entries(clean(data)).map(([k, v]) => [k, String(v)]).sort());
-
-function Badge({ label, style }: { label: string; style: string }) {
-    return <span className={`inline-flex rounded-sm border px-2 py-0.5 text-xs font-semibold ${style}`}>{label}</span>;
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
+function DetailItem({ label, children, wide = false }: { label: string; children: React.ReactNode; wide?: boolean }) {
     return (
-        <div className={CARD}>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 tabular-nums">{value}</p>
+        <div className={wide ? 'sm:col-span-2 lg:col-span-4' : undefined}>
+            <dt className="text-xs font-semibold uppercase text-slate-500">{label}</dt>
+            <dd className="whitespace-pre-line text-slate-900">{children}</dd>
         </div>
-    );
-}
-
-function TotalsCells({ row, bold }: { row: RekapTotals; bold?: boolean }) {
-    const cls = `px-4 py-3 text-right tabular-nums ${bold ? 'font-semibold' : ''}`;
-    return (
-        <>
-            <td className={cls}>{row.jumlah.toLocaleString('id-ID')}</td>
-            <td className={cls}>{rupiah(row.nilai_perolehan)}</td>
-            <td className={cls}>{rupiah(row.nilai_buku)}</td>
-        </>
     );
 }
 
 export default function Index(props: PageProps & LaporanAsetData) {
     const { filters, sort, ringkasan, kondisi, tren, rekap_kategori: rekapKategori, rekap_unit: rekapUnit, asets, units, categories, kondisiOptions } = props;
-    const { errors } = usePage<PageProps & { errors: Record<string, string> }>().props;
-    const errorMessages = Object.values(errors ?? {});
-
-    const [form, setForm] = useState<Filters>(filters);
+    const { form, set, dirty, visit, sortBy, apply, downloadUrl } = useLaporanFilters('laporan-aset.index', 'laporan-aset.download', filters, sort);
     const [open, setOpen] = useState<number | null>(null);
-    const dirty = signature(form) !== signature(filters);
 
-    const visit = (extra: Filters, base: Filters = filters) =>
-        router.get(route('laporan-aset.index'), clean({ ...base, urut: sort.urut, arah: sort.arah, ...extra }), {
-            preserveScroll: true,
-            preserveState: 'errors',
-            replace: true,
-        });
+    const legendItems = kondisi.map((k) => ({ label: KONDISI_LABEL[k.kondisi] ?? k.label, jumlah: k.jumlah, persen: k.persen, color: KONDISI_COLOR[k.kondisi] }));
 
-    const set = (key: string, value: string) => setForm((cur) => ({ ...cur, [key]: value }));
-    const sortBy = (column: string) => visit({ urut: column, arah: sort.urut === column && sort.arah === 'asc' ? 'desc' : 'asc', page: undefined });
-
-    const downloadUrl = `${route('laporan-aset.download')}?${new URLSearchParams(
-        Object.entries(clean(filters)).map(([k, v]) => [k, String(v)]),
-    ).toString()}`;
-
-    const pages = pageNumbersWithGaps(asets.current_page, asets.last_page);
+    const kategoriRows: RekapRow[] = rekapKategori.grup.flatMap((g) => [
+        { id: `g-${g.id}`, nama: g.nama, level: 0 as const, jumlah: g.jumlah, nilai_perolehan: g.nilai_perolehan, nilai_buku: g.nilai_buku },
+        ...g.anak.map((a) => ({ id: `a-${a.id}`, nama: a.nama, level: 1 as const, jumlah: a.jumlah, nilai_perolehan: a.nilai_perolehan, nilai_buku: a.nilai_buku })),
+    ]);
 
     return (
         <AuthenticatedLayout>
             <Head title="Laporan Aset" />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span>Laporan</span>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Laporan Aset</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Laporan Aset</h1>
-                </div>
+                <PageHeader crumbs={[{ label: 'Laporan' }, { label: 'Laporan Aset' }]} title="Laporan Aset" />
 
-                {errorMessages.length > 0 && (
-                    <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-                        {errorMessages.map((m) => <p key={m}>{m}</p>)}
-                    </div>
-                )}
-
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        visit({ page: undefined }, form);
-                    }}
-                    className={`${CARD} space-y-4`}
-                >
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {units.length > 0 && (
-                            <div>
-                                <label htmlFor="filter-unit_id" className="mb-1.5 block text-sm font-medium text-slate-900">Unit</label>
-                                <select id="filter-unit_id" value={form.unit_id ?? ''} onChange={(e) => set('unit_id', e.target.value)} className={FIELD}>
-                                    <option value="">Semua unit</option>
-                                    {units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-                                </select>
-                            </div>
-                        )}
-                        <div>
-                            <label htmlFor="filter-category_id" className="mb-1.5 block text-sm font-medium text-slate-900">Kategori</label>
-                            <select id="filter-category_id" value={form.category_id ?? ''} onChange={(e) => set('category_id', e.target.value)} className={FIELD}>
-                                <option value="">Semua kategori</option>
-                                {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="filter-kondisi" className="mb-1.5 block text-sm font-medium text-slate-900">Kondisi</label>
-                            <select id="filter-kondisi" value={form.kondisi ?? ''} onChange={(e) => set('kondisi', e.target.value)} className={FIELD}>
-                                <option value="">Semua kondisi</option>
-                                {kondisiOptions.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <button type="submit" className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                            Terapkan filter
-                        </button>
-                        <div className="flex items-center gap-4">
-                            <p className={`text-sm text-slate-600 ${dirty ? 'opacity-50' : ''}`}>
-                                <span className="font-semibold text-slate-900 tabular-nums">{asets.total}</span> baris akan diunduh
-                                {dirty && <span className="ml-2 text-amber-700">(terapkan filter dulu)</span>}
-                            </p>
-                            {asets.total > 0 && !dirty ? (
-                                <a href={downloadUrl} className="rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
-                                    Unduh Excel
-                                </a>
-                            ) : (
-                                <span aria-disabled="true" className="cursor-not-allowed rounded-lg bg-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-500">
-                                    Unduh Excel
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </form>
+                <ReportFilterBar dirty={dirty} total={asets.total} downloadUrl={downloadUrl} onApply={apply}>
+                    {units.length > 0 && (
+                        <ReportSelect
+                            label="Unit"
+                            allLabel="Semua unit"
+                            value={form.unit_id}
+                            onChange={(v) => set('unit_id', v)}
+                            options={units.map((u) => ({ value: u.id, label: u.name }))}
+                        />
+                    )}
+                    <ReportSelect
+                        label="Kategori"
+                        allLabel="Semua kategori"
+                        value={form.category_id}
+                        onChange={(v) => set('category_id', v)}
+                        options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                    />
+                    <ReportSelect label="Kondisi" allLabel="Semua kondisi" value={form.kondisi} onChange={(v) => set('kondisi', v)} options={kondisiOptions} />
+                </ReportFilterBar>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Stat label="Jumlah Aset" value={ringkasan.jumlah.toLocaleString('id-ID')} />
-                    <Stat label="Total Nilai Perolehan" value={rupiah(ringkasan.nilai_perolehan)} />
-                    <Stat label="Total Nilai Buku" value={rupiah(ringkasan.nilai_buku)} />
+                    <StatCard label="Jumlah Aset" value={ringkasan.jumlah.toLocaleString('id-ID')} />
+                    <StatCard label="Total Nilai Perolehan" value={rupiah(ringkasan.nilai_perolehan)} />
+                    <StatCard label="Total Nilai Buku" value={rupiah(ringkasan.nilai_buku)} />
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <div className={CARD}>
-                        <p className="mb-4 text-lg font-semibold text-slate-900">Persentase per Kondisi</p>
-                        <DonutChart
-                            ariaLabel="Grafik persentase aset menurut kondisi"
-                            data={kondisi.map((k) => ({ label: k.label, jumlah: k.jumlah, persen: k.persen, color: KONDISI_COLOR[k.kondisi] }))}
-                        />
-                        <ul className="mt-4 space-y-2 text-sm">
-                            {kondisi.map((k) => (
-                                <li key={k.kondisi} className="flex items-center justify-between gap-3">
-                                    <span className="flex items-center gap-2 text-slate-800">
-                                        <span className="h-3 w-3 rounded-xs" style={{ backgroundColor: KONDISI_COLOR[k.kondisi] }} aria-hidden="true" />
-                                        {KONDISI_LABEL[k.kondisi] ?? k.label}
-                                    </span>
-                                    <span className="tabular-nums text-slate-600">{k.jumlah.toLocaleString('id-ID')} aset · {k.persen.toLocaleString('id-ID')}%</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className={`${CARD} lg:col-span-2`}>
-                        <p className="mb-4 text-lg font-semibold text-slate-900">Tren per Tahun Perolehan</p>
+                    <ReportCard title="Persentase per Kondisi">
+                        <DonutChart ariaLabel="Grafik persentase aset menurut kondisi" data={legendItems} />
+                        <ChartLegend unit="aset" items={legendItems} />
+                    </ReportCard>
+                    <ReportCard title="Tren per Tahun Perolehan" className="lg:col-span-2">
                         <TrenAsetChart data={tren} />
-                    </div>
+                    </ReportCard>
                 </div>
 
-                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-                    <p className="border-b border-slate-200 px-5 py-4 text-lg font-semibold text-slate-900">Rekap per Kategori</p>
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-left text-sm">
-                            <thead>
-                                <tr className="bg-slate-50">
-                                    <th className={TH}>Kategori</th>
-                                    <th className={`${TH} text-right`}>Jumlah</th>
-                                    <th className={`${TH} text-right`}>Nilai Perolehan</th>
-                                    <th className={`${TH} text-right`}>Nilai Buku</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-slate-800">
-                                {rekapKategori.grup.length === 0 && (
-                                    <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400">Belum ada data.</td></tr>
-                                )}
-                                {rekapKategori.grup.map((g) => (
-                                    <Fragment key={g.id}>
-                                        <tr className="bg-slate-50/60">
-                                            <td className="px-4 py-3 font-semibold">{g.nama}</td>
-                                            <TotalsCells row={g} bold />
-                                        </tr>
-                                        {g.anak.map((a) => (
-                                            <tr key={a.id}>
-                                                <td className="py-3 pl-10 pr-4 text-slate-600">{a.nama}</td>
-                                                <TotalsCells row={a} />
-                                            </tr>
-                                        ))}
-                                    </Fragment>
-                                ))}
-                            </tbody>
-                            <tfoot>
-                                <tr className="border-t border-slate-300 bg-slate-50 font-semibold">
-                                    <td className="px-4 py-3">Total</td>
-                                    <TotalsCells row={rekapKategori.total} bold />
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
+                <ReportCard title="Rekap per Kategori" flush>
+                    <SummaryTable
+                        ariaLabel="Rekap aset per kategori"
+                        columns={rekapColumns('Kategori')}
+                        rows={kategoriRows}
+                        total={{ id: 'total', nama: 'Total', level: 0, ...rekapKategori.total }}
+                        emptyText="Belum ada data."
+                    />
+                </ReportCard>
 
                 {rekapUnit && (
-                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-                        <p className="border-b border-slate-200 px-5 py-4 text-lg font-semibold text-slate-900">Rekap per Unit</p>
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-left text-sm">
-                                <thead>
-                                    <tr className="bg-slate-50">
-                                        <th className={TH}>Unit</th>
-                                        <th className={`${TH} text-right`}>Jumlah</th>
-                                        <th className={`${TH} text-right`}>Nilai Perolehan</th>
-                                        <th className={`${TH} text-right`}>Nilai Buku</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 text-slate-800">
-                                    {rekapUnit.baris.map((u) => (
-                                        <tr key={u.id}>
-                                            <td className="px-4 py-3 font-medium">{u.nama}</td>
-                                            <TotalsCells row={u} />
-                                        </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot>
-                                    <tr className="border-t border-slate-300 bg-slate-50 font-semibold">
-                                        <td className="px-4 py-3">Total</td>
-                                        <TotalsCells row={rekapUnit.total} bold />
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
+                    <ReportCard title="Rekap per Unit" flush>
+                        <SummaryTable
+                            ariaLabel="Rekap aset per unit"
+                            columns={rekapColumns('Unit')}
+                            rows={rekapUnit.baris.map((u) => ({ id: u.id, nama: u.nama, level: 0 as const, jumlah: u.jumlah, nilai_perolehan: u.nilai_perolehan, nilai_buku: u.nilai_buku }))}
+                            total={{ id: 'total', nama: 'Total', level: 0, ...rekapUnit.total }}
+                            emptyText="Belum ada data."
+                        />
+                    </ReportCard>
                 )}
 
-                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-                    <p className="border-b border-slate-200 px-5 py-4 text-lg font-semibold text-slate-900">Daftar Rinci</p>
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-left text-sm">
-                            <thead>
-                                <tr className="bg-slate-50">
-                                    <th className={TH}>No</th>
-                                    {SORTABLE_COLUMNS.map((c) => (
-                                        <th
-                                            key={c.key}
-                                            className={`${TH} ${c.align === 'right' ? 'text-right' : ''}`}
-                                            aria-sort={c.sort && sort.urut === c.sort ? (sort.arah === 'asc' ? 'ascending' : 'descending') : undefined}
-                                        >
-                                            {c.sort ? (
-                                                <button type="button" onClick={() => sortBy(c.sort as string)} className="inline-flex items-center gap-1 uppercase tracking-wider hover:text-blue-700">
-                                                    {c.label}
-                                                    {sort.urut === c.sort && <span aria-hidden="true">{sort.arah === 'asc' ? '▲' : '▼'}</span>}
-                                                </button>
-                                            ) : (
-                                                c.label
-                                            )}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-slate-800">
-                                {asets.data.length === 0 && (
-                                    <tr><td colSpan={10} className="px-4 py-10 text-center text-slate-400">Tidak ada aset yang cocok.</td></tr>
-                                )}
-                                {asets.data.map((a, i) => (
-                                    <Fragment key={a.id}>
-                                        <tr className="cursor-pointer hover:bg-slate-50" onClick={() => setOpen(open === a.id ? null : a.id)}>
-                                            <td className="px-4 py-3 tabular-nums">
-                                                <button type="button" aria-expanded={open === a.id} aria-label={`Detail ${a.nama_aset}`} className="mr-2 text-slate-400 hover:text-blue-700">
-                                                    {open === a.id ? '▾' : '▸'}
-                                                </button>
-                                                {(asets.from ?? 1) + i}
-                                            </td>
-                                            <td className="px-4 py-3 tabular-nums">{a.kode_barang}</td>
-                                            <td className="px-4 py-3 tabular-nums">{a.nomor_register}</td>
-                                            <td className="px-4 py-3">
-                                                <p className="font-medium text-slate-900">{a.nama_aset}</p>
-                                                {a.merk_type && <p className="text-xs text-slate-500">{a.merk_type}</p>}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                {a.kategori}
-                                                {a.subkategori && <p className="text-xs text-slate-500">{a.subkategori}</p>}
-                                            </td>
-                                            <td className="px-4 py-3">{a.unit}</td>
-                                            <td className="px-4 py-3 tabular-nums">{a.tahun_perolehan}</td>
-                                            <td className="px-4 py-3"><Badge label={KONDISI_LABEL[a.kondisi] ?? a.kondisi} style={KONDISI_BADGE[a.kondisi]} /></td>
-                                            <td className="px-4 py-3 text-right tabular-nums">{rupiah(a.nilai_perolehan)}</td>
-                                            <td className="px-4 py-3 text-right tabular-nums">{rupiah(a.nilai_buku)}</td>
-                                        </tr>
-                                        {open === a.id && (
-                                            <tr className="bg-slate-50">
-                                                <td colSpan={10} className="px-4 py-4">
-                                                    <dl className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                                                        <div><dt className="text-xs font-semibold uppercase text-slate-500">Pemegang</dt><dd className="text-slate-900">{a.detail.pemegang ?? '—'}</dd></div>
-                                                        <div><dt className="text-xs font-semibold uppercase text-slate-500">Status</dt><dd className="text-slate-900">{a.detail.status === 'aktif' ? 'Aktif' : 'Dalam Proses'}</dd></div>
-                                                        <div><dt className="text-xs font-semibold uppercase text-slate-500">Sumber Perolehan</dt><dd className="text-slate-900">{a.detail.sumber_perolehan ?? '—'}</dd></div>
-                                                        <div><dt className="text-xs font-semibold uppercase text-slate-500">No. Dokumen</dt><dd className="text-slate-900">{a.detail.no_dokumen ?? '—'}</dd></div>
-                                                        <div className="sm:col-span-2 lg:col-span-4"><dt className="text-xs font-semibold uppercase text-slate-500">Keterangan</dt><dd className="whitespace-pre-line text-slate-900">{a.detail.keterangan ?? '—'}</dd></div>
-                                                    </dl>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </Fragment>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row">
-                        <p className="text-xs text-slate-500">
-                            Menampilkan <span className="font-semibold text-slate-800 tabular-nums">{asets.from ?? 0}-{asets.to ?? 0}</span> dari{' '}
-                            <span className="font-semibold text-slate-800 tabular-nums">{asets.total}</span> aset
-                        </p>
-                        {asets.last_page > 1 && (
-                            <div className="flex items-center gap-1">
-                                {pages.map((page, idx) =>
-                                    page === '...' ? (
-                                        <span key={`gap-${idx}`} className="px-1 text-xs text-slate-400">...</span>
-                                    ) : (
-                                        <button
-                                            key={page}
-                                            type="button"
-                                            onClick={() => visit({ page })}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === asets.current_page ? 'bg-blue-800 text-white' : 'text-slate-700 hover:bg-slate-100'}`}
-                                        >
-                                            {page}
-                                        </button>
-                                    ),
-                                )}
-                            </div>
+                <ReportCard title="Daftar Rinci" flush>
+                    <ReportDetailTable
+                        ariaLabel="Daftar rinci aset"
+                        columns={asetColumns}
+                        rows={asets.data}
+                        paginator={asets}
+                        unit="aset"
+                        sort={sort}
+                        onSort={sortBy}
+                        onPage={(page) => visit({ page })}
+                        openId={open}
+                        onToggle={(id) => setOpen(open === id ? null : id)}
+                        rowLabel={(a) => a.nama_aset}
+                        emptyText="Tidak ada aset yang cocok."
+                        renderDetail={(a) => (
+                            <dl className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                                <DetailItem label="Pemegang">{a.detail.pemegang ?? '—'}</DetailItem>
+                                <DetailItem label="Status">{a.detail.status === 'aktif' ? 'Aktif' : 'Dalam Proses'}</DetailItem>
+                                <DetailItem label="Sumber Perolehan">{a.detail.sumber_perolehan ?? '—'}</DetailItem>
+                                <DetailItem label="No. Dokumen">{a.detail.no_dokumen ?? '—'}</DetailItem>
+                                <DetailItem label="Keterangan" wide>
+                                    {a.detail.keterangan ?? '—'}
+                                </DetailItem>
+                            </dl>
                         )}
-                    </div>
-                </div>
+                    />
+                </ReportCard>
             </div>
         </AuthenticatedLayout>
     );
