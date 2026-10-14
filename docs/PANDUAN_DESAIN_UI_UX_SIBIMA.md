@@ -26,6 +26,8 @@ Dokumen ini disusun sebagai acuan tunggal dan komprehensif bagi perancangan anta
    - [6.12 Modul Rekapitulasi & Ekspor Laporan Excel](#612-modul-rekapitulasi--ekspor-laporan-excel)
    - [6.13 Modul Profil Akun](#613-modul-profil-akun)
 7. [Status Lifecycle & Diagram Alur Transaksi (User Flows)](#7-status-lifecycle--diagram-alur-transaksi-user-flows)
+8. [Ringkasan Panduan Implementasi UI Designer](#8-ringkasan-panduan-implementasi-ui-designer)
+9. [Token dan Komponen UI (Untitled UI)](#9-token-dan-komponen-ui-untitled-ui)
 
 ---
 
@@ -560,3 +562,18 @@ flowchart TD
    * Warna Biru Navy (`#0F2440` dan `#1E40AF`) hanya untuk aksi navigasi, konfirmasi, dan identitas utama.
    * Warna Hijau, Kuning, Merah digunakan eksklusif untuk badge status kondisi dan peringatan sistem, bukan untuk dekorasi latar belakang.
 4. **Tidak Menggunakan Elemen Slop**: Pertahankan kanvas yang bersih, flat, bergaris tepi tegas (`1px solid #E2E8F0`), dan berorientasi penuh pada efisiensi kerja aparatur sipil daerah.
+
+---
+
+## 9. TOKEN DAN KOMPONEN UI (UNTITLED UI)
+
+Halaman yang sudah dimigrasi memakai komponen Untitled UI (versi gratis, berbasis React Aria Components). Halaman lain masih memakai komponen Breeze lama; **jangan mencampur keduanya dalam satu halaman**.
+
+* **Lokasi**: komponen di `resources/js/Components/ui/` (`base/`, `application/`, `foundations/`), helper di `resources/js/lib/` (`cx`, `use-breakpoint`, dll.), token di `resources/css/theme.css`, titik masuk CSS di `resources/css/app.css`.
+* **Menambah komponen**: `npx untitledui@latest add <nama> -y --path resources/js/Components/ui --lib-version 8`. Setelah itu: (1) ganti alias hasil CLI `@/resources/js/Components/ui/` menjadi `@/Components/ui/`, `@/utils/` dan `@/hooks/` menjadi `@/lib/`; (2) pastikan tidak ada `@/components/` huruf kecil (Docker berjalan di Linux yang membedakan huruf besar-kecil); (3) buang berkas yang tidak dipakai yang ikut terbawa CLI; (4) cantumkan paket baru di `package.json` hanya bila benar-benar diimpor.
+* **Warna**: Sapphire `#1E40AF` = `blue-800` = `brand-600` (tombol utama `color="primary"`). Skala `brand-*` di `theme.css` mengikuti palet `blue`. Netral memakai `slate-*` bawaan Tailwind. Nama `bg-primary`/`text-primary` kini berarti warna semantik Untitled UI (putih/abu-abu tua), **bukan** Sapphire; untuk Sapphire tulis `bg-blue-800` atau gunakan `Button`.
+* **Aturan konflik**: panduan ini menang untuk identitas (Sapphire, `tabular-nums` pada angka, badge radius 4px, tanpa kartu di dalam kartu); Untitled UI menang untuk semantik, aksesibilitas, keyboard, dan fokus.
+* **Tabel**: kerapatan baris mengikuti bawaan Untitled UI; jangan menambah `py-*` kustom pada sel. Berikan `onRowAction={() => {}}` agar menekan baris atau tautan di dalamnya tidak memilih baris (pemilihan hanya lewat checkbox).
+* **Navigasi**: `RouterProvider` di `app.tsx` meneruskan `href` komponen ke `router.visit` Inertia. Unduhan berkas (mis. Ekspor) memakai `window.location.href`, bukan `href`.
+* **Filter "semua"**: kunci kosong tidak valid di Select React Aria; pakai penanda (mis. `__all`) lalu petakan kembali ke `undefined` untuk URL.
+* **Mode gelap** tidak dipakai: varian `dark` terikat ke class `.dark-mode` yang tidak pernah dipasang.
