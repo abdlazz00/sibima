@@ -1,13 +1,11 @@
-import {
-    CameraIcon as Camera,
-    ChevronRightIcon as ChevronRight,
-    PencilIcon as Pencil,
-    PrinterIcon as Printer,
-} from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
 import PrintLabelModal from '@/Components/PrintLabelModal';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Asset, PageProps } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
+import { Camera01, Edit01, Printer } from '@untitledui/icons';
 import { useState } from 'react';
 
 interface ShowProps extends PageProps {
@@ -17,16 +15,11 @@ interface ShowProps extends PageProps {
     qr: string;
 }
 
-const KONDISI_STYLE: Record<string, string> = {
-    baik: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    rusak_ringan: 'bg-amber-50 text-amber-700 border-amber-200',
-    rusak_berat: 'bg-red-50 text-red-700 border-red-200',
-    hilang: 'bg-slate-100 text-slate-600 border-slate-200',
-};
-
-const STATUS_STYLE: Record<string, string> = {
-    aktif: 'bg-blue-50 text-blue-700 border-blue-200',
-    dalam_proses: 'bg-amber-50 text-amber-700 border-amber-200',
+const KONDISI_BADGE: Record<string, 'success' | 'warning' | 'error' | 'gray'> = {
+    baik: 'success',
+    rusak_ringan: 'warning',
+    rusak_berat: 'error',
+    hilang: 'gray',
 };
 
 function formatRupiah(value: string | number): string {
@@ -55,8 +48,8 @@ function formatDateTime(value: string): string {
 
 function DetailRow({ label, value, striped }: { label: string; value: React.ReactNode; striped: boolean }) {
     return (
-        <div className={`flex gap-4 px-3 py-2.5 text-sm ${striped ? 'bg-slate-50' : 'bg-white'}`}>
-            <p className="w-40 shrink-0 font-medium text-slate-500">{label}</p>
+        <div className={`flex flex-col gap-1 px-3 py-2.5 text-sm sm:flex-row sm:gap-4 ${striped ? 'bg-slate-50' : 'bg-white'}`}>
+            <p className="shrink-0 font-medium text-slate-500 sm:w-40">{label}</p>
             <p className="flex-1 text-slate-900">{value}</p>
         </div>
     );
@@ -73,55 +66,32 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
             <Head title={asset.nama_aset} />
 
             <div className="space-y-6">
-                {/* Header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <Link href={route('dashboard')} className="hover:text-blue-700">
-                                Home
-                            </Link>
-                            <ChevronRight className="h-3 w-3 text-slate-400" />
-                            <Link href={route('assets.index')} className="hover:text-blue-700">
-                                Data Aset
-                            </Link>
-                            <ChevronRight className="h-3 w-3 text-slate-400" />
-                            <span className="font-medium text-slate-800">Detail Aset</span>
-                        </nav>
-                        <div className="mt-1 flex flex-wrap items-center gap-3">
-                            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{asset.nama_aset}</h1>
-                            <span
-                                className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[asset.kondisi]}`}
-                            >
+                <PageHeader
+                    crumbs={[{ label: 'Data Aset', href: route('assets.index') }, { label: 'Detail Aset' }]}
+                    title={asset.nama_aset}
+                    badges={
+                        <>
+                            <Badge type="color" size="sm" color={KONDISI_BADGE[asset.kondisi] ?? 'gray'} className="rounded-sm">
                                 {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ?? asset.kondisi}
-                            </span>
-                            <span
-                                className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[asset.status] ?? STATUS_STYLE.aktif}`}
-                            >
+                            </Badge>
+                            <Badge type="color" size="sm" color={asset.status === 'aktif' ? 'brand' : 'warning'} className="rounded-sm">
                                 {asset.status === 'aktif' ? 'Aktif' : 'Dalam Proses'}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => setShowPrintModal(true)}
-                            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
-                        >
-                            <Printer className="h-4 w-4" />
-                            <span>Cetak Label QR</span>
-                        </button>
-                        {can.update && (
-                            <Link
-                                href={route('assets.edit', asset.id)}
-                                className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                            >
-                                <Pencil className="h-4 w-4" />
-                                <span>Edit Data</span>
-                            </Link>
-                        )}
-                    </div>
-                </div>
+                            </Badge>
+                        </>
+                    }
+                    actions={
+                        <>
+                            <Button color="secondary-violet" size="md" iconLeading={Printer} onPress={() => setShowPrintModal(true)}>
+                                Cetak Label QR
+                            </Button>
+                            {can.update && (
+                                <Button color="secondary-green" size="md" iconLeading={Edit01} href={route('assets.edit', asset.id)}>
+                                    Edit Data
+                                </Button>
+                            )}
+                        </>
+                    }
+                />
 
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     {/* Galeri Foto */}
@@ -137,7 +107,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                                 />
                             ) : (
                                 <div className="flex flex-col items-center gap-2 text-slate-400">
-                                    <Camera className="h-9 w-9" />
+                                    <Camera01 className="size-9" aria-hidden="true" />
                                     <p className="text-sm">Belum ada foto aset</p>
                                 </div>
                             )}
@@ -150,6 +120,8 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                                         key={photo.id}
                                         type="button"
                                         onClick={() => setActivePhoto(idx)}
+                                        aria-label={`Foto ${idx + 1}`}
+                                        aria-current={idx === activePhoto}
                                         className={`h-16 w-16 overflow-hidden rounded border-2 ${
                                             idx === activePhoto ? 'border-blue-600' : 'border-transparent'
                                         }`}

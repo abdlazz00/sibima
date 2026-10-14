@@ -10,10 +10,12 @@ export interface Crumb {
 export default function PageHeader({
     crumbs,
     title,
+    badges,
     actions,
 }: {
     crumbs: Crumb[];
     title: string;
+    badges?: ReactNode;
     actions?: ReactNode;
 }) {
     return (
@@ -41,7 +43,10 @@ export default function PageHeader({
                         </Fragment>
                     ))}
                 </nav>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+                <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+                    {badges}
+                </div>
             </div>
             {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
         </div>
