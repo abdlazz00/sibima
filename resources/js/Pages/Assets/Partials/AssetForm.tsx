@@ -1,8 +1,11 @@
-import { UploadIcon as CloudUpload, PlusIcon as Plus, XIcon as X } from '@/Components/Icons';
-import InputError from '@/Components/InputError';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import { Select } from '@/Components/ui/base/select/select';
+import { TextArea } from '@/Components/ui/base/textarea/textarea';
 import { AssetCategory, AssetPhoto } from '@/types';
 import { InertiaFormProps } from '@inertiajs/react';
-import { ChangeEvent, FormEvent, useRef } from 'react';
+import { Plus, UploadCloud02, XClose } from '@untitledui/icons';
+import { ChangeEvent, FormEvent, useEffect, useRef } from 'react';
 
 export type AssetFormData = {
     category_id: number | '';
@@ -31,6 +34,19 @@ type Props = {
     cancelHref: string;
 };
 
+const rupiah = (value: string) =>
+    value === '' || Number.isNaN(Number(value))
+        ? undefined
+        : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value));
+
+function SectionTitle({ children }: { children: string }) {
+    return (
+        <div className="border-b border-slate-100 pb-2">
+            <h2 className="text-base font-semibold text-slate-900">{children}</h2>
+        </div>
+    );
+}
+
 export default function AssetForm({
     form,
     categories,
@@ -44,6 +60,18 @@ export default function AssetForm({
 }: Props) {
     const { data, setData, processing, errors } = form;
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const errorCount = Object.keys(errors).length;
+
+    // Form panjang: setelah kirim gagal, bawa pengguna ke isian bermasalah pertama.
+    useEffect(() => {
+        if (errorCount === 0) return;
+        const target = formRef.current?.querySelector<HTMLElement>(
+            '[aria-invalid="true"], [data-invalid], [data-photo-error]',
+        );
+        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target?.focus({ preventScroll: true });
+    }, [errors]);
 
     const handlePhotosChange = (e: ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files ?? []);
@@ -59,181 +87,142 @@ export default function AssetForm({
 
     const totalPhotoCount = existingPhotos.length + data.photos.length;
 
+    const categoryItems = categories.flatMap((kategori) =>
+        (kategori.children ?? []).map((sub) => ({ id: sub.id, label: `${kategori.name} › ${sub.name}` })),
+    );
+
+    const photoButtonClass =
+        'rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1';
+
     return (
-        <form onSubmit={onSubmit} className="space-y-6">
+        <form ref={formRef} onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-8 rounded-xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
                 {/* Informasi Dasar Aset */}
                 <section className="space-y-4">
-                    <div className="border-b border-slate-100 pb-2">
-                        <h2 className="text-base font-semibold text-slate-900">Informasi Dasar Aset</h2>
-                    </div>
+                    <SectionTitle>Informasi Dasar Aset</SectionTitle>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">
-                                Subkategori Aset <span className="text-rose-600">*</span>
-                            </label>
-                            <select
-                                value={data.category_id}
-                                onChange={(e) => setData('category_id', e.target.value ? Number(e.target.value) : '')}
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                required
-                            >
-                                <option value="">Pilih subkategori...</option>
-                                {categories.map((kategori) => (
-                                    <optgroup key={kategori.id} label={kategori.name}>
-                                        {(kategori.children ?? []).map((sub) => (
-                                            <option key={sub.id} value={sub.id}>
-                                                {sub.name}
-                                            </option>
-                                        ))}
-                                    </optgroup>
-                                ))}
-                            </select>
-                            <InputError message={errors.category_id} className="mt-1" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">
-                                Kode Barang BMD <span className="text-rose-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={data.kode_barang}
-                                onChange={(e) => setData('kode_barang', e.target.value)}
-                                placeholder="1.3.2.05.02.04.xxx"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 font-mono text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                required
-                            />
-                            <InputError message={errors.kode_barang} className="mt-1" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">
-                                Nama Barang <span className="text-rose-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={data.nama_aset}
-                                onChange={(e) => setData('nama_aset', e.target.value)}
-                                placeholder="Masukkan nama barang aset"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                required
-                            />
-                            <InputError message={errors.nama_aset} className="mt-1" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">Merk / Tipe Pabrikasi</label>
-                            <input
-                                type="text"
-                                value={data.merk_type}
-                                onChange={(e) => setData('merk_type', e.target.value)}
-                                placeholder="Masukkan merk atau tipe"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                            />
-                            <InputError message={errors.merk_type} className="mt-1" />
-                        </div>
+                        <Select
+                            label="Subkategori Aset"
+                            isRequired
+                            placeholder="Pilih subkategori..."
+                            popoverClassName="w-[46rem]! max-w-[calc(100vw-2rem)]"
+                            items={categoryItems}
+                            selectedKey={data.category_id === '' ? null : data.category_id}
+                            onSelectionChange={(key) => setData('category_id', key == null ? '' : Number(key))}
+                            isInvalid={Boolean(errors.category_id)}
+                            hint={errors.category_id}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
+                        <Input
+                            label="Kode Barang BMD"
+                            isRequired
+                            placeholder="1.3.2.05.02.04.xxx"
+                            inputClassName="font-mono"
+                            value={data.kode_barang}
+                            onChange={(v) => setData('kode_barang', v)}
+                            isInvalid={Boolean(errors.kode_barang)}
+                            hint={errors.kode_barang ?? 'Format kode BMD, mis. 1.3.2.05.02.04.xxx'}
+                        />
+                        <Input
+                            label="Nama Barang"
+                            isRequired
+                            placeholder="Masukkan nama barang aset"
+                            value={data.nama_aset}
+                            onChange={(v) => setData('nama_aset', v)}
+                            isInvalid={Boolean(errors.nama_aset)}
+                            hint={errors.nama_aset}
+                        />
+                        <Input
+                            label="Merk / Tipe Pabrikasi"
+                            placeholder="Masukkan merk atau tipe"
+                            value={data.merk_type}
+                            onChange={(v) => setData('merk_type', v)}
+                            isInvalid={Boolean(errors.merk_type)}
+                            hint={errors.merk_type}
+                        />
                         {kondisiOptions && (
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-700">
-                                    Kondisi Saat Dicatat <span className="text-rose-600">*</span>
-                                </label>
-                                <select
-                                    value={data.kondisi}
-                                    onChange={(e) => setData('kondisi', e.target.value)}
-                                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                    required
-                                >
-                                    {kondisiOptions.map((o) => (
-                                        <option key={o.value} value={o.value}>
-                                            {o.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <InputError message={errors.kondisi} className="mt-1" />
-                            </div>
+                            <Select
+                                label="Kondisi Saat Dicatat"
+                                isRequired
+                                items={kondisiOptions.map((o) => ({ id: o.value, label: o.label }))}
+                                selectedKey={data.kondisi ?? null}
+                                onSelectionChange={(key) => setData('kondisi', String(key))}
+                                isInvalid={Boolean(errors.kondisi)}
+                                hint={errors.kondisi}
+                            >
+                                {(item) => <Select.Item id={item.id} label={item.label} />}
+                            </Select>
                         )}
                     </div>
                 </section>
 
                 {/* Informasi Perolehan */}
                 <section className="space-y-4">
-                    <div className="border-b border-slate-100 pb-2">
-                        <h2 className="text-base font-semibold text-slate-900">Informasi Perolehan</h2>
-                    </div>
+                    <SectionTitle>Informasi Perolehan</SectionTitle>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">
-                                Tanggal Perolehan <span className="text-rose-600">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                value={data.tanggal_perolehan}
-                                onChange={(e) => setData('tanggal_perolehan', e.target.value)}
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                required
-                            />
-                            <InputError message={errors.tanggal_perolehan} className="mt-1" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">Sumber Perolehan</label>
-                            <input
-                                type="text"
-                                value={data.sumber_perolehan}
-                                onChange={(e) => setData('sumber_perolehan', e.target.value)}
-                                placeholder="mis. APBD, Hibah, Bantuan"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                            />
-                            <InputError message={errors.sumber_perolehan} className="mt-1" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">
-                                Nilai Perolehan (Rp) <span className="text-rose-600">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                min="0"
-                                value={data.nilai_perolehan}
-                                onChange={(e) => setData('nilai_perolehan', e.target.value)}
-                                placeholder="Masukkan nilai perolehan"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                required
-                            />
-                            <InputError message={errors.nilai_perolehan} className="mt-1" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-700">
-                                Nilai Buku Saat Ini (Rp) <span className="text-rose-600">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                min="0"
-                                value={data.nilai_buku}
-                                onChange={(e) => setData('nilai_buku', e.target.value)}
-                                placeholder="Masukkan nilai buku saat ini"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                required
-                            />
-                            <InputError message={errors.nilai_buku} className="mt-1" />
-                        </div>
+                        <Input
+                            label="Tanggal Perolehan"
+                            type="date"
+                            isRequired
+                            value={data.tanggal_perolehan}
+                            onChange={(v) => setData('tanggal_perolehan', v)}
+                            isInvalid={Boolean(errors.tanggal_perolehan)}
+                            hint={errors.tanggal_perolehan}
+                        />
+                        <Input
+                            label="Sumber Perolehan"
+                            placeholder="mis. APBD, Hibah, Bantuan"
+                            value={data.sumber_perolehan}
+                            onChange={(v) => setData('sumber_perolehan', v)}
+                            isInvalid={Boolean(errors.sumber_perolehan)}
+                            hint={errors.sumber_perolehan}
+                        />
+                        <Input
+                            label="Nilai Perolehan (Rp)"
+                            type="number"
+                            inputMode="numeric"
+                            isRequired
+                            placeholder="Masukkan nilai perolehan"
+                            inputClassName="tabular-nums"
+                            value={data.nilai_perolehan}
+                            onChange={(v) => setData('nilai_perolehan', v)}
+                            isInvalid={Boolean(errors.nilai_perolehan)}
+                            hint={errors.nilai_perolehan ?? rupiah(data.nilai_perolehan)}
+                        />
+                        <Input
+                            label="Nilai Buku Saat Ini (Rp)"
+                            type="number"
+                            inputMode="numeric"
+                            isRequired
+                            placeholder="Masukkan nilai buku saat ini"
+                            inputClassName="tabular-nums"
+                            value={data.nilai_buku}
+                            onChange={(v) => setData('nilai_buku', v)}
+                            isInvalid={Boolean(errors.nilai_buku)}
+                            hint={
+                                errors.nilai_buku ??
+                                [rupiah(data.nilai_buku), 'Tidak boleh melebihi nilai perolehan'].filter(Boolean).join(' · ')
+                            }
+                        />
                         <div className="sm:col-span-2">
-                            <label className="block text-xs font-semibold text-slate-700">No. Dokumen Pengadaan / BAST</label>
-                            <input
-                                type="text"
-                                value={data.no_dokumen}
-                                onChange={(e) => setData('no_dokumen', e.target.value)}
+                            <Input
+                                label="No. Dokumen Pengadaan / BAST"
                                 placeholder="Masukkan nomor dokumen pengadaan atau berita acara serah terima"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
+                                value={data.no_dokumen}
+                                onChange={(v) => setData('no_dokumen', v)}
+                                isInvalid={Boolean(errors.no_dokumen)}
+                                hint={errors.no_dokumen}
                             />
-                            <InputError message={errors.no_dokumen} className="mt-1" />
                         </div>
                     </div>
                 </section>
 
                 {/* Foto Aset */}
                 <section className="space-y-4">
-                    <div className="border-b border-slate-100 pb-2">
-                        <h2 className="text-base font-semibold text-slate-900">Foto Aset</h2>
-                    </div>
+                    <SectionTitle>Foto Aset</SectionTitle>
                     <div className="space-y-3">
-                        <label className="block text-xs font-semibold text-slate-700">Unggah Foto Aset</label>
+                        <p className="text-sm font-medium text-slate-700">Unggah Foto Aset</p>
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -243,20 +232,25 @@ export default function AssetForm({
                             className="hidden"
                         />
                         {totalPhotoCount < maxPhotos && (
-                            <div
+                            <button
+                                type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center transition hover:border-blue-400 hover:bg-blue-50/30"
+                                className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center outline-hidden transition hover:border-blue-400 hover:bg-blue-50/30 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
                             >
-                                <CloudUpload className="h-8 w-8 text-slate-400" />
-                                <p className="text-sm text-slate-700">
-                                    <span className="font-semibold text-slate-900">Klik untuk unggah</span> atau seret foto ke sini
-                                </p>
-                                <p className="text-xs text-slate-500">
+                                <UploadCloud02 className="size-8 text-slate-400" aria-hidden="true" />
+                                <span className="text-sm text-slate-700">
+                                    <span className="font-semibold text-slate-900">Klik untuk unggah</span> foto aset
+                                </span>
+                                <span className="text-xs text-slate-500">
                                     Maksimal {maxPhotos} foto, masing-masing maks. 5MB (JPG, PNG, WebP)
-                                </p>
-                            </div>
+                                </span>
+                            </button>
                         )}
-                        <InputError message={errors.photos} className="mt-1" />
+                        {errors.photos && (
+                            <p data-photo-error tabIndex={-1} className="text-sm text-red-600 outline-hidden">
+                                {errors.photos}
+                            </p>
+                        )}
 
                         {(existingPhotos.length > 0 || data.photos.length > 0) && (
                             <div className="flex flex-wrap gap-3">
@@ -267,10 +261,10 @@ export default function AssetForm({
                                             <button
                                                 type="button"
                                                 onClick={() => onRemoveExistingPhoto(photo)}
-                                                className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white"
-                                                title="Hapus foto"
+                                                className={`absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-white before:absolute before:-inset-1.5 ${photoButtonClass}`}
+                                                aria-label="Hapus foto"
                                             >
-                                                <X className="h-2.5 w-2.5" />
+                                                <XClose className="size-3" aria-hidden="true" />
                                             </button>
                                         )}
                                     </div>
@@ -281,10 +275,10 @@ export default function AssetForm({
                                         <button
                                             type="button"
                                             onClick={() => removeNewPhoto(idx)}
-                                            className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white"
-                                            title="Batalkan"
+                                            className={`absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-white before:absolute before:-inset-1.5 ${photoButtonClass}`}
+                                            aria-label="Batalkan foto"
                                         >
-                                            <X className="h-2.5 w-2.5" />
+                                            <XClose className="size-3" aria-hidden="true" />
                                         </button>
                                     </div>
                                 ))}
@@ -292,9 +286,10 @@ export default function AssetForm({
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="flex h-20 w-20 shrink-0 items-center justify-center rounded-sm border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-blue-400 hover:text-blue-600"
+                                        aria-label="Tambah foto"
+                                        className={`flex h-20 w-20 shrink-0 items-center justify-center border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-blue-400 hover:text-blue-600 ${photoButtonClass}`}
                                     >
-                                        <Plus className="h-5 w-5" />
+                                        <Plus className="size-5" aria-hidden="true" />
                                     </button>
                                 )}
                             </div>
@@ -304,37 +299,31 @@ export default function AssetForm({
 
                 {/* Keterangan */}
                 <section className="space-y-4">
-                    <div className="border-b border-slate-100 pb-2">
-                        <h2 className="text-base font-semibold text-slate-900">Keterangan Tambahan</h2>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-slate-700">Keterangan</label>
-                        <textarea
-                            value={data.keterangan}
-                            onChange={(e) => setData('keterangan', e.target.value)}
-                            placeholder="Tambahkan catatan atau keterangan tambahan mengenai kondisi detail aset..."
-                            rows={4}
-                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                        />
-                        <InputError message={errors.keterangan} className="mt-1" />
-                    </div>
+                    <SectionTitle>Keterangan Tambahan</SectionTitle>
+                    <TextArea
+                        label="Keterangan"
+                        rows={4}
+                        placeholder="Tambahkan catatan atau keterangan tambahan mengenai kondisi detail aset..."
+                        value={data.keterangan}
+                        onChange={(v) => setData('keterangan', v)}
+                        isInvalid={Boolean(errors.keterangan)}
+                        hint={errors.keterangan}
+                    />
                 </section>
             </div>
 
             <div className="flex items-center justify-end gap-3">
-                <a
-                    href={cancelHref}
-                    className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-200"
-                >
+                {errorCount > 0 && (
+                    <p role="alert" className="mr-auto text-sm font-medium text-red-600">
+                        {errorCount} isian perlu diperbaiki
+                    </p>
+                )}
+                <Button color="secondary" size="md" href={cancelHref}>
                     Batal
-                </a>
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-800 px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
-                >
-                    <span>{processing ? 'Menyimpan...' : submitLabel}</span>
-                </button>
+                </Button>
+                <Button color="primary" size="md" type="submit" isLoading={processing}>
+                    {submitLabel}
+                </Button>
             </div>
         </form>
     );
