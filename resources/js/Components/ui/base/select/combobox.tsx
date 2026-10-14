@@ -169,7 +169,7 @@ export const ComboBox = ({
                             onPointerEnter={onResize}
                         />
 
-                        <Popover size={size} triggerRef={placeholderRef} style={{ width: popoverWidth }} className={otherProps.popoverClassName}>
+                        <Popover size={size} placement="bottom start" triggerRef={placeholderRef} style={{ width: popoverWidth }} className={otherProps.popoverClassName}>
                             <AriaListBox items={items} className="size-full outline-hidden">
                                 {children}
                             </AriaListBox>

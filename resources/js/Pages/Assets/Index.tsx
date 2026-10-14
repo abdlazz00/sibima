@@ -181,6 +181,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             size="md"
                             shortcut={false}
                             icon={Tag01}
+                            popoverClassName="w-[40rem]! max-w-[calc(100vw-2rem)]"
                             placeholder="Pilih atau cari kategori"
                             items={categoryItems}
                             selectedKey={filters.category_id ?? ALL}
