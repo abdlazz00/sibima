@@ -1,7 +1,13 @@
+import PageHeader from '@/Components/PageHeader';
+import { Badge, BadgeWithDot } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { filterPermissionGroups, formatPermissionLabel } from '@/lib/permissions';
 import { PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import React, { useMemo, useState } from 'react';
+import { ArrowLeft, Check, Edit01, SearchLg, Shield01, Users01 } from '@untitledui/icons';
+import { ReactNode, useMemo, useState } from 'react';
 
 interface UserDetail {
     id: number;
@@ -44,15 +50,30 @@ interface ShowProps extends PageProps {
     };
 }
 
+const SCOPE_INFO: Record<string, { label: string; color: 'blue' | 'purple' | 'success' }> = {
+    all: { label: 'Semua Unit Kerja (Kecamatan & Seluruh Kelurahan)', color: 'blue' },
+    binaan: { label: 'Kecamatan & Kelurahan Binaan', color: 'purple' },
+    own: { label: 'Unit Kerja Sendiri Saja', color: 'success' },
+};
+
+const getInitials = (name: string) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+};
+
+function InfoLine({ label, children }: { label: string; children: ReactNode }) {
+    return (
+        <div className="flex justify-between gap-3">
+            <span className="text-slate-500">{label}</span>
+            <span className="text-right font-medium text-slate-800">{children}</span>
+        </div>
+    );
+}
+
 export default function Show({ auth, user, effectivePermissions, can }: ShowProps) {
     const [permSearch, setPermSearch] = useState('');
-
-    const getInitials = (name: string) => {
-        if (!name) return 'U';
-        const parts = name.trim().split(/\s+/);
-        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-    };
 
     const directPermsSet = useMemo(() => {
         return new Set(user.direct_permissions || []);
@@ -60,184 +81,92 @@ export default function Show({ auth, user, effectivePermissions, can }: ShowProp
 
     const primaryRole = user.roles[0];
 
-    const getScopeLabel = (scope: string) => {
-        switch (scope) {
-            case 'all':
-                return {
-                    label: 'Semua Unit Kerja (Kecamatan & Seluruh Kelurahan)',
-                    color: 'bg-blue-50 text-blue-700 border-blue-200',
-                };
-            case 'binaan':
-                return {
-                    label: 'Kecamatan & Kelurahan Binaan',
-                    color: 'bg-purple-50 text-purple-700 border-purple-200',
-                };
-            case 'own':
-            default:
-                return {
-                    label: 'Unit Kerja Sendiri Saja',
-                    color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                };
-        }
-    };
-
     const effectiveScope = user.unit_scope_override || primaryRole?.unit_scope || 'own';
-    const scopeInfo = getScopeLabel(effectiveScope);
+    const scopeInfo = SCOPE_INFO[effectiveScope] ?? SCOPE_INFO.own;
 
-    // Total count of permissions
-    const totalEffectivePerms = useMemo(() => {
-        return Object.values(effectivePermissions).reduce((acc, perms) => acc + perms.length, 0);
-    }, [effectivePermissions]);
+    const totalEffectivePerms = Object.values(effectivePermissions).reduce((acc, perms) => acc + perms.length, 0);
 
-    // Filter permissions by search
-    const filteredModules = useMemo(() => {
-        if (!permSearch) return effectivePermissions;
-
-        const query = permSearch.toLowerCase();
-        const result: Record<string, string[]> = {};
-
-        Object.entries(effectivePermissions).forEach(([moduleName, perms]) => {
-            const matchesModule = moduleName.toLowerCase().includes(query);
-            const matchingPerms = perms.filter((p) => p.toLowerCase().includes(query));
-
-            if (matchesModule) {
-                result[moduleName] = perms;
-            } else if (matchingPerms.length > 0) {
-                result[moduleName] = matchingPerms;
-            }
-        });
-
-        return result;
-    }, [effectivePermissions, permSearch]);
+    const filteredModules = filterPermissionGroups(effectivePermissions, permSearch);
 
     return (
         <AuthenticatedLayout>
             <Head title={`Detail Pengguna - ${user.name}`} />
 
             <div className="space-y-6">
-                {/* Header & Breadcrumb */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <nav className="mb-1.5 flex items-center gap-1.5 text-xs text-slate-500">
-                            <Link href={route('dashboard')} className="hover:text-blue-700">
-                                Beranda
-                            </Link>
-                            <span>/</span>
-                            <Link href={route('users.index')} className="hover:text-blue-700">
-                                Manajemen Pengguna
-                            </Link>
-                            <span>/</span>
-                            <span className="font-medium text-slate-700">{user.name}</span>
-                        </nav>
-                        <div className="flex flex-wrap items-center gap-3">
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-                                {user.name}
-                            </h1>
-                            {user.is_active ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                    Akun Aktif
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 border border-rose-200">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                                    Akun Dinonaktifkan
-                                </span>
-                            )}
+                <PageHeader
+                    crumbs={[{ label: 'Manajemen Pengguna', href: route('users.index') }, { label: user.name }]}
+                    title={user.name}
+                    badges={
+                        <>
+                            <BadgeWithDot type="color" size="sm" color={user.is_active ? 'success' : 'error'} className="rounded-sm">
+                                {user.is_active ? 'Akun Aktif' : 'Akun Dinonaktifkan'}
+                            </BadgeWithDot>
                             {user.id === auth.user?.id && (
-                                <span className="rounded-sm bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">
+                                <Badge type="color" size="sm" color="brand" className="rounded-sm">
                                     Akun Anda
-                                </span>
+                                </Badge>
                             )}
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5">
-                        <Link
-                            href={route('users.index')}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 focus:outline-hidden"
-                        >
-                            <svg className="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="m15 18-6-6 6-6" />
-                            </svg>
-                            Kembali
-                        </Link>
-
-                        {can.manageAccess && (
-                            <Link
-                                href={route('users.edit', user.id)}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-2xs hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                            >
-                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                    <path d="m15 5 4 4" />
-                                </svg>
-                                Edit Hak Akses
-                            </Link>
-                        )}
-                    </div>
-                </div>
+                        </>
+                    }
+                    actions={
+                        <>
+                            <Button color="secondary" size="md" iconLeading={ArrowLeft} href={route('users.index')}>
+                                Kembali
+                            </Button>
+                            {can.manageAccess && (
+                                <Button color="secondary-green" size="md" iconLeading={Edit01} href={route('users.edit', user.id)}>
+                                    Edit Hak Akses
+                                </Button>
+                            )}
+                        </>
+                    }
+                />
 
                 {/* Top Info Cards Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Card 1: Identitas Akun */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <div className="flex items-center gap-4">
                             {user.foto_profile_url ? (
                                 <img
                                     src={user.foto_profile_url}
                                     alt={user.name}
-                                    className="h-16 w-16 shrink-0 rounded-full object-cover border-2 border-slate-200 shadow-2xs"
+                                    className="size-16 shrink-0 rounded-full border-2 border-slate-200 object-cover"
                                 />
                             ) : (
-                                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700 border-2 border-blue-200">
+                                <div className="flex size-16 shrink-0 items-center justify-center rounded-full border-2 border-blue-200 bg-blue-100 text-lg font-bold text-blue-700">
                                     {getInitials(user.name)}
                                 </div>
                             )}
                             <div className="min-w-0">
-                                <h3 className="font-bold text-slate-900 truncate text-base">{user.name}</h3>
-                                <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>
-                                <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 border border-slate-200 mt-2">
+                                <h3 className="truncate text-base font-bold text-slate-900">{user.name}</h3>
+                                <p className="mt-0.5 truncate text-xs text-slate-500">{user.email}</p>
+                                <Badge type="color" size="sm" color="gray" className="mt-2 rounded-sm">
                                     {user.unit?.name ?? 'Unit tidak ditetapkan'}
-                                </span>
+                                </Badge>
                             </div>
                         </div>
 
                         <div className="mt-5 space-y-2.5 border-t border-slate-100 pt-4 text-xs">
-                            <div className="flex justify-between">
-                                <span className="text-slate-500">ID Pengguna</span>
-                                <span className="font-semibold text-slate-700">#{user.id}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-500">Terdaftar Pada</span>
-                                <span className="font-medium text-slate-700">{user.created_at}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-500">Foto Profil</span>
-                                <span className="font-medium text-slate-700">
-                                    {user.foto_profile_url ? 'Dari Data Pegawai' : 'Inisial Standar'}
-                                </span>
-                            </div>
+                            <InfoLine label="ID Pengguna">
+                                <span className="font-semibold tabular-nums">#{user.id}</span>
+                            </InfoLine>
+                            <InfoLine label="Terdaftar Pada">{user.created_at}</InfoLine>
+                            <InfoLine label="Foto Profil">{user.foto_profile_url ? 'Dari Data Pegawai' : 'Inisial Standar'}</InfoLine>
                         </div>
                     </div>
 
                     {/* Card 2: Kaitan Data Pegawai */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                             <div className="flex items-center gap-2">
-                                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
-                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                    </svg>
+                                <div className="flex size-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
+                                    <Users01 className="size-4" aria-hidden="true" />
                                 </div>
-                                <h3 className="font-bold text-slate-900 text-sm">Data Pegawai Terkait</h3>
+                                <h3 className="text-sm font-bold text-slate-900">Data Pegawai Terkait</h3>
                             </div>
                             {user.pegawai && (
-                                <Link
-                                    href={route('pegawais.index')}
-                                    className="text-xs font-semibold text-blue-600 hover:text-blue-800"
-                                >
+                                <Link href={route('pegawais.show', user.pegawai.id)} className="text-xs font-semibold text-blue-700 hover:text-blue-900">
                                     Lihat Pegawai &rarr;
                                 </Link>
                             )}
@@ -246,172 +175,133 @@ export default function Show({ auth, user, effectivePermissions, can }: ShowProp
                         {user.pegawai ? (
                             <div className="mt-4 space-y-2.5 text-xs">
                                 <div>
-                                    <span className="text-slate-400 block text-[11px]">Nama Lengkap Pegawai</span>
-                                    <span className="font-semibold text-slate-800 text-sm">{user.pegawai.nama}</span>
+                                    <span className="block text-[11px] text-slate-400">Nama Lengkap Pegawai</span>
+                                    <span className="text-sm font-semibold text-slate-800">{user.pegawai.nama}</span>
                                 </div>
-                                <div className="flex justify-between pt-1">
-                                    <span className="text-slate-500">NIP</span>
-                                    <span className="font-semibold text-slate-800">{user.pegawai.nip || '-'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Jabatan</span>
-                                    <span className="font-medium text-slate-800">{user.pegawai.jabatan}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">Unit Kerja</span>
-                                    <span className="font-medium text-slate-800">{user.pegawai.unit_nama || '-'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">No. Telepon / HP</span>
-                                    <span className="font-medium text-slate-800">{user.pegawai.no_hp || '-'}</span>
-                                </div>
+                                <InfoLine label="NIP">
+                                    <span className="tabular-nums">{user.pegawai.nip || '-'}</span>
+                                </InfoLine>
+                                <InfoLine label="Jabatan">{user.pegawai.jabatan}</InfoLine>
+                                <InfoLine label="Unit Kerja">{user.pegawai.unit_nama || '-'}</InfoLine>
+                                <InfoLine label="No. Telepon / HP">{user.pegawai.no_hp || '-'}</InfoLine>
                             </div>
                         ) : (
-                            <div className="mt-6 text-center text-slate-400 text-xs py-4">
+                            <div className="mt-6 py-4 text-center text-xs text-slate-400">
                                 Tidak ada data pegawai yang terhubung langsung dengan akun ini.
                             </div>
                         )}
                     </div>
 
                     {/* Card 3: Peran & Cakupan Wilayah */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs">
-                        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                </svg>
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+                        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <div className="flex size-7 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                                <Shield01 className="size-4" aria-hidden="true" />
                             </div>
-                            <h3 className="font-bold text-slate-900 text-sm">Peran & Cakupan Wilayah</h3>
+                            <h3 className="text-sm font-bold text-slate-900">Peran & Cakupan Wilayah</h3>
                         </div>
 
                         <div className="mt-4 space-y-3.5 text-xs">
                             <div>
-                                <span className="text-slate-400 block text-[11px] mb-1">Peran Utama (Role)</span>
+                                <span className="mb-1 block text-[11px] text-slate-400">Peran Utama (Role)</span>
                                 {primaryRole ? (
                                     <div>
-                                        <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-800 border border-blue-200">
+                                        <Badge type="color" size="md" color="blue" className="rounded-sm font-bold">
                                             {primaryRole.display_name}
-                                        </span>
+                                        </Badge>
                                         {primaryRole.description && (
-                                            <p className="mt-1 text-slate-500 text-[11px] leading-relaxed">
-                                                {primaryRole.description}
-                                            </p>
+                                            <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{primaryRole.description}</p>
                                         )}
                                     </div>
                                 ) : (
-                                    <span className="text-slate-400 italic">Belum ada peran yang ditetapkan</span>
+                                    <span className="italic text-slate-400">Belum ada peran yang ditetapkan</span>
                                 )}
                             </div>
 
                             <div>
-                                <span className="text-slate-400 block text-[11px] mb-1">Cakupan Wilayah Data (Unit Scope)</span>
-                                <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold border ${scopeInfo.color}`}>
+                                <span className="mb-1 block text-[11px] text-slate-400">Cakupan Wilayah Data (Unit Scope)</span>
+                                <Badge type="color" size="md" color={scopeInfo.color} className="h-auto rounded-sm whitespace-normal text-left">
                                     {scopeInfo.label}
-                                </span>
+                                </Badge>
                                 {user.unit_scope_override && (
-                                    <p className="mt-1 text-purple-700 text-[11px]">
-                                        * Diatur khusus (override) berbeda dari default peran.
-                                    </p>
+                                    <p className="mt-1 text-[11px] text-purple-700">* Diatur khusus (override) berbeda dari default peran.</p>
                                 )}
                             </div>
 
-                            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center justify-between border-t border-slate-100 pt-2">
                                 <span className="text-slate-500">Total Izin Efektif</span>
-                                <span className="font-bold text-slate-800 text-sm">{totalEffectivePerms} Izin</span>
+                                <span className="text-sm font-bold tabular-nums text-slate-800">{totalEffectivePerms} Izin</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Bottom Section: Matriks Hak Akses Efektif */}
-                <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
-                    <div className="border-b border-slate-200 px-5 py-4 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                    <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-base font-bold text-slate-900">
-                                Matriks Hak Akses Efektif (Effective Permissions)
-                            </h2>
-                            <p className="text-xs text-slate-500 mt-0.5">
+                            <h2 className="text-base font-bold text-slate-900">Matriks Hak Akses Efektif (Effective Permissions)</h2>
+                            <p className="mt-0.5 text-xs text-slate-500">
                                 Daftar seluruh izin yang dimiliki pengguna, baik yang diwarisi dari Role maupun diberikan sebagai Izin Khusus.
                             </p>
                         </div>
 
-                        {/* Search in permissions */}
-                        <div className="relative w-full sm:w-64">
-                            <input
-                                type="text"
-                                value={permSearch}
-                                onChange={(e) => setPermSearch(e.target.value)}
+                        <div className="w-full sm:w-64">
+                            <Input
+                                aria-label="Cari izin atau modul"
+                                size="sm"
+                                icon={SearchLg}
                                 placeholder="Cari izin atau modul..."
-                                className="w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-8 pr-3 text-xs placeholder-slate-400 focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
+                                value={permSearch}
+                                onChange={setPermSearch}
                             />
-                            <svg
-                                className="pointer-events-none absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                            >
-                                <circle cx="11" cy="11" r="8" />
-                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                            </svg>
                         </div>
                     </div>
 
                     <div className="p-5">
                         {Object.keys(filteredModules).length === 0 ? (
-                            <div className="text-center py-10 text-slate-400">
+                            <div className="py-10 text-center text-slate-400">
                                 <p className="text-sm font-medium">Tidak ada izin yang sesuai dengan pencarian.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 {Object.entries(filteredModules).map(([moduleName, perms]) => (
-                                    <div
-                                        key={moduleName}
-                                        className="rounded-lg border border-slate-200 bg-slate-50/30 p-4 transition hover:border-slate-300"
-                                    >
-                                        <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5 mb-3">
-                                            <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">
-                                                {moduleName}
-                                            </h4>
-                                            <span className="rounded-full bg-slate-200/80 px-2 py-0.5 text-[10px] font-bold text-slate-700">
+                                    <div key={moduleName} className="rounded-lg border border-slate-200 bg-slate-50/30 p-4">
+                                        <div className="mb-3 flex items-center justify-between border-b border-slate-200/80 pb-2.5">
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">{moduleName}</h4>
+                                            <Badge type="color" size="sm" color="gray" className="rounded-sm tabular-nums">
                                                 {perms.length}
-                                            </span>
+                                            </Badge>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            {perms.map((perm) => {
-                                                const isDirect = directPermsSet.has(perm);
-                                                return (
-                                                    <div
-                                                        key={perm}
-                                                        className="flex items-center justify-between rounded-md bg-white p-2 text-xs border border-slate-100 shadow-2xs"
-                                                    >
-                                                        <div className="flex items-center gap-2 min-w-0">
-                                                            <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                                                                <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                                                    <polyline points="20 6 9 17 4 12" />
-                                                                </svg>
-                                                            </div>
-                                                            <span className="font-mono text-[11px] text-slate-700 truncate" title={perm}>
+                                        <ul className="space-y-2">
+                                            {perms.map((perm) => (
+                                                <li
+                                                    key={perm}
+                                                    className="flex items-center justify-between gap-2 rounded-md border border-slate-100 bg-white p-2 text-xs shadow-xs"
+                                                >
+                                                    <div className="flex min-w-0 items-center gap-2">
+                                                        <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                                                            <Check className="size-2.5" strokeWidth={3} aria-hidden="true" />
+                                                        </span>
+                                                        <span className="min-w-0">
+                                                            <span className="block text-xs font-semibold text-slate-800">{formatPermissionLabel(perm)}</span>
+                                                            <span className="block truncate font-mono text-[10px] text-slate-400" title={perm}>
                                                                 {perm}
                                                             </span>
-                                                        </div>
-
-                                                        <div>
-                                                            {isDirect ? (
-                                                                <span className="shrink-0 rounded-sm bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 border border-emerald-200">
-                                                                    Izin Khusus
-                                                                </span>
-                                                            ) : (
-                                                                <span className="shrink-0 rounded-sm bg-blue-50 px-1.5 py-0.5 text-[9px] font-semibold text-blue-700 border border-blue-200">
-                                                                    Dari Role
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                        </span>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
+                                                    <Badge
+                                                        type="color"
+                                                        size="sm"
+                                                        color={directPermsSet.has(perm) ? 'success' : 'blue'}
+                                                        className="shrink-0 rounded-sm"
+                                                    >
+                                                        {directPermsSet.has(perm) ? 'Izin Khusus' : 'Dari Role'}
+                                                    </Badge>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 ))}
                             </div>
