@@ -1,10 +1,13 @@
-import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
 import QrScanner, { ScanError } from '@/Components/QrScanner';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { KONDISI_LABEL } from '@/lib/assetReport';
+import { KONDISI_BADGE_COLOR, KONDISI_LABEL } from '@/lib/assetReport';
 import { qrTokenFromScan } from '@/lib/qr';
 import { AssetScanSummary, PageProps } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { Camera01, RefreshCw01 } from '@untitledui/icons';
 import { useState } from 'react';
 
 interface ScanProps extends PageProps {
@@ -20,15 +23,6 @@ const ERROR_TEXT: Record<ScanError, string> = {
     busy: 'Kamera sedang dipakai aplikasi lain. Tutup aplikasi tersebut lalu tekan Coba lagi.',
     unknown: 'Kamera tidak dapat dibuka. Tekan Coba lagi atau muat ulang halaman.',
 };
-
-const KONDISI_STYLE: Record<string, string> = {
-    baik: 'bg-emerald-50 text-emerald-700',
-    rusak_ringan: 'bg-amber-50 text-amber-700',
-    rusak_berat: 'bg-red-50 text-red-700',
-    hilang: 'bg-slate-200 text-slate-700',
-};
-
-const BUTTON = 'rounded-lg bg-blue-800 px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800';
 
 export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
     const [scanning, setScanning] = useState(summary === null && !notFound);
@@ -72,14 +66,7 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
             <Head title="Scan QR" />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Scan QR</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Scan QR Aset</h1>
-                </div>
+                <PageHeader crumbs={[{ label: 'Scan QR' }]} title="Scan QR Aset" />
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div className="space-y-3">
@@ -87,6 +74,9 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
                             <>
                                 <QrScanner key={scanKey} onDetect={handleDetect} onError={setError} />
                                 <p className="text-center text-sm text-slate-600">Arahkan kamera ke QR pada label aset.</p>
+                                <Button color="secondary" size="lg" className="w-full" onPress={() => setScanning(false)}>
+                                    Tutup kamera
+                                </Button>
                                 {invalid && (
                                     <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
                                         QR ini bukan label aset SIBIMA.
@@ -94,15 +84,33 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
                                 )}
                             </>
                         ) : error ? (
-                            <div role="alert" className="space-y-3 rounded-xl border border-red-200 bg-red-50 p-5">
+                            <div role="alert" className="space-y-4 rounded-xl border border-red-200 bg-red-50 p-5">
                                 <p className="text-sm text-red-800">{ERROR_TEXT[error]}</p>
-                                <button type="button" onClick={startScan} className={`${BUTTON} w-full sm:w-auto`}>Coba lagi</button>
+                                <Button color="primary" size="lg" iconLeading={RefreshCw01} className="w-full sm:w-auto" onPress={startScan}>
+                                    Coba lagi
+                                </Button>
                             </div>
                         ) : (
-                            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-                                <button type="button" onClick={startScan} className={`${BUTTON} w-full`}>
+                            <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+                                {!summary && !notFound && (
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+                                            <Camera01 className="size-5" aria-hidden="true" />
+                                        </div>
+                                        <p className="text-sm text-slate-600">
+                                            Arahkan kamera ke QR pada label aset untuk melihat ringkasan aset di lapangan.
+                                        </p>
+                                    </div>
+                                )}
+                                <Button
+                                    color={summary || notFound ? 'secondary' : 'primary'}
+                                    size="lg"
+                                    iconLeading={Camera01}
+                                    className="w-full"
+                                    onPress={startScan}
+                                >
                                     {summary || notFound ? 'Scan aset lain' : 'Mulai scan'}
-                                </button>
+                                </Button>
                             </div>
                         )}
                     </div>
@@ -111,7 +119,9 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
                         {notFound && (
                             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                                 <p className="text-base font-semibold text-slate-900">Aset tidak ditemukan</p>
-                                <p className="mt-1 text-sm text-slate-600">Aset dengan QR ini sudah tidak ada di SIBIMA. Periksa label atau hubungi admin unit.</p>
+                                <p className="mt-1 text-sm text-slate-600">
+                                    Aset dengan QR ini sudah tidak ada di SIBIMA. Periksa label atau hubungi admin unit.
+                                </p>
                             </div>
                         )}
 
@@ -122,28 +132,31 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
                                     <div>
                                         <p className="text-lg font-bold text-slate-900">{summary.nama_aset}</p>
                                         <div className="mt-2 flex flex-wrap gap-2">
-                                            <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[summary.kondisi] ?? KONDISI_STYLE.baik}`}>
+                                            <Badge type="color" size="sm" color={KONDISI_BADGE_COLOR[summary.kondisi] ?? 'gray'} className="rounded-sm">
                                                 {KONDISI_LABEL[summary.kondisi] ?? summary.kondisi}
-                                            </span>
-                                            <span className="inline-flex rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                            </Badge>
+                                            <Badge type="color" size="sm" color={summary.status === 'aktif' ? 'brand' : 'warning'} className="rounded-sm">
                                                 {summary.status === 'aktif' ? 'Aktif' : 'Dalam Proses'}
-                                            </span>
+                                            </Badge>
                                         </div>
                                     </div>
 
                                     <dl className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200 text-sm">
                                         {rows.map(([label, value], i) => (
-                                            <div key={label} className={`flex gap-4 px-3 py-2.5 ${i % 2 === 0 ? 'bg-slate-50' : 'bg-white'}`}>
-                                                <dt className="w-32 shrink-0 font-medium text-slate-500">{label}</dt>
+                                            <div
+                                                key={label}
+                                                className={`flex flex-col gap-1 px-3 py-2.5 sm:flex-row sm:gap-4 ${i % 2 === 0 ? 'bg-slate-50' : 'bg-white'}`}
+                                            >
+                                                <dt className="shrink-0 font-medium text-slate-500 sm:w-32">{label}</dt>
                                                 <dd className="wrap-break-word text-slate-900">{value}</dd>
                                             </div>
                                         ))}
                                     </dl>
 
                                     {canViewDetail && (
-                                        <Link href={route('assets.show', summary.id)} className={`${BUTTON} block text-center`}>
+                                        <Button color="primary" size="lg" href={route('assets.show', summary.id)} className="w-full">
                                             Lihat detail lengkap
-                                        </Link>
+                                        </Button>
                                     )}
                                 </div>
                             </div>
