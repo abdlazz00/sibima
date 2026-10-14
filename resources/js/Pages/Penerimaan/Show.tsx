@@ -1,17 +1,17 @@
+import ApprovalStepper from '@/Components/ApprovalStepper';
+import ApprovalTimeline from '@/Components/ApprovalTimeline';
 import CancelRequestModal from '@/Components/CancelRequestModal';
 import ConfirmDialog from '@/Components/ConfirmDialog';
 import PageHeader from '@/Components/PageHeader';
 import ReassignApproverModal from '@/Components/ReassignApproverModal';
-import { Dialog, Modal, ModalOverlay } from '@/Components/ui/application/modals/modal';
+import RejectRequestModal from '@/Components/RejectRequestModal';
 import { Badge } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
-import { TextArea } from '@/Components/ui/base/textarea/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { rupiah } from '@/lib/format';
 import { PENERIMAAN_STATUS_COLOR, PENERIMAAN_STATUS_LABEL, penerimaanStatus } from '@/lib/penerimaanStatus';
 import { BeritaAcaraPenerimaan, PageProps, ReassignCandidate } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Check } from '@untitledui/icons';
 import { useState } from 'react';
 
 interface ShowProps extends PageProps {
@@ -20,33 +20,11 @@ interface ShowProps extends PageProps {
     reassignCandidates: ReassignCandidate[];
 }
 
-type StepState = 'done' | 'current' | 'upcoming' | 'rejected' | 'cancelled';
-
-const STEP_CIRCLE: Record<StepState, string> = {
-    done: 'bg-emerald-100',
-    current: 'bg-amber-100',
-    upcoming: 'bg-slate-100',
-    rejected: 'bg-red-100',
-    cancelled: 'bg-slate-200',
-};
-
-const STEP_TEXT: Record<StepState, string> = {
-    done: 'Selesai',
-    current: 'Menunggu',
-    upcoming: 'Belum dimulai',
-    rejected: 'Ditolak',
-    cancelled: 'Dibatalkan',
-};
-
-const ACTION_LABEL = { approve: 'Disetujui', reject: 'Ditolak', cancel: 'Dibatalkan', reassign: 'Dialihkan' } as const;
-const ACTION_DOT = { approve: 'bg-emerald-600', reject: 'bg-red-600', cancel: 'bg-slate-500', reassign: 'bg-blue-600' } as const;
-
 export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps) {
     const [showReject, setShowReject] = useState(false);
     const [showCancel, setShowCancel] = useState(false);
     const [showReassign, setShowReassign] = useState(false);
     const [confirmingDelete, setConfirmingDelete] = useState(false);
-    const [note, setNote] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const req = beritaAcara.approval_request;
     const steps = req?.steps ?? [];
@@ -59,16 +37,6 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
         router.post(route('approval-requests.approve', req.id), {}, { preserveScroll: true, onFinish: () => setSubmitting(false) });
     };
 
-    const reject = () => {
-        if (!req || submitting) return;
-        setSubmitting(true);
-        router.post(
-            route('approval-requests.reject', req.id),
-            { note },
-            { preserveScroll: true, onSuccess: () => setShowReject(false), onFinish: () => setSubmitting(false) },
-        );
-    };
-
     const deleteDraft = () => {
         setSubmitting(true);
         router.delete(route('penerimaan-aset.destroy', beritaAcara.id), {
@@ -77,18 +45,6 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                 setConfirmingDelete(false);
             },
         });
-    };
-
-    const stepState = (order: number): StepState => {
-        if (!req) return 'upcoming';
-        if (req.status === 'approved') return 'done';
-        if (order < req.current_step) return 'done';
-        if (order === req.current_step) {
-            if (req.status === 'rejected') return 'rejected';
-            if (req.status === 'cancelled') return 'cancelled';
-            return 'current';
-        }
-        return 'upcoming';
     };
 
     return (
@@ -146,32 +102,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                     </div>
                 )}
 
-                {req && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-                        <p className="mb-4 text-sm font-semibold text-slate-900">Status Alur Persetujuan</p>
-                        <ol className="flex items-start overflow-x-auto">
-                            {steps.map((step, idx) => {
-                                const state = stepState(step.step_order);
-                                return (
-                                    <li key={step.step_order} className="flex min-w-32 flex-1 flex-col gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`flex size-6 items-center justify-center rounded-full ${STEP_CIRCLE[state]}`}>
-                                                {state === 'done' && <Check className="size-3.5 text-emerald-700" aria-hidden="true" />}
-                                            </div>
-                                            {idx < steps.length - 1 && <div className="h-px flex-1 bg-slate-200" />}
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-semibold text-slate-900">
-                                                Step {step.step_order}: {step.label}
-                                            </p>
-                                            <p className="text-[11px] text-slate-500">{STEP_TEXT[state]}</p>
-                                        </div>
-                                    </li>
-                                );
-                            })}
-                        </ol>
-                    </div>
-                )}
+                {req && <ApprovalStepper request={req} />}
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
@@ -216,27 +147,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                     </div>
                 </div>
 
-                {req && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-                        <p className="mb-4 text-base font-semibold text-slate-900">Riwayat Aktivitas</p>
-                        <ol className="space-y-4 border-l border-slate-200 pl-5">
-                            <li className="relative">
-                                <span className="absolute left-[-25px] top-1 size-2.5 rounded-full bg-blue-600" />
-                                <p className="text-sm font-semibold text-slate-900">Pengajuan Dibuat</p>
-                                <p className="text-xs text-slate-500">oleh {beritaAcara.creator?.name}</p>
-                            </li>
-                            {req.actions?.map((action) => (
-                                <li key={action.id} className="relative">
-                                    <span className={`absolute left-[-25px] top-1 size-2.5 rounded-full ${ACTION_DOT[action.action]}`} />
-                                    <p className="text-sm font-semibold text-slate-900">
-                                        {ACTION_LABEL[action.action]} oleh {action.user?.name}
-                                    </p>
-                                    {action.note && <p className="text-xs text-slate-500">{action.note}</p>}
-                                </li>
-                            ))}
-                        </ol>
-                    </div>
-                )}
+                {req && <ApprovalTimeline request={req} createdTitle="Pengajuan Dibuat" creatorName={beritaAcara.creator?.name} />}
             </div>
 
             {confirmingDelete && (
@@ -269,33 +180,13 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                 />
             )}
 
-            <ModalOverlay isOpen={showReject} isDismissable={!submitting} isKeyboardDismissDisabled={submitting} onOpenChange={setShowReject}>
-                <Modal className="sm:max-w-md">
-                    <Dialog aria-labelledby="reject-title">
-                        <div className="w-full p-6">
-                            <h3 id="reject-title" className="mb-3 text-base font-bold text-slate-900">
-                                Tolak Pengajuan
-                            </h3>
-                            <TextArea
-                                aria-label="Alasan penolakan"
-                                isRequired
-                                rows={3}
-                                placeholder="Alasan penolakan (wajib diisi)"
-                                value={note}
-                                onChange={setNote}
-                            />
-                            <div className="mt-4 flex justify-end gap-3">
-                                <Button color="secondary" size="md" isDisabled={submitting} onPress={() => setShowReject(false)}>
-                                    Batal
-                                </Button>
-                                <Button color="primary-destructive" size="md" isLoading={submitting} isDisabled={!note.trim()} onPress={reject}>
-                                    Ya, Tolak
-                                </Button>
-                            </div>
-                        </div>
-                    </Dialog>
-                </Modal>
-            </ModalOverlay>
+            {showReject && req && (
+                <RejectRequestModal
+                    approvalRequestId={req.id}
+                    onClose={() => setShowReject(false)}
+                    description="Tuliskan alasan penolakan secara jelas. Alasan ini akan terlihat oleh pengaju."
+                />
+            )}
         </AuthenticatedLayout>
     );
 }
