@@ -53,3 +53,14 @@
   transition-duration: inherit;
   transition-timing-function: inherit;
 }
+
+/* @tailwindcss/forms memberi border, padding, dan ring pada semua <input>; input React Aria (Untitled UI) sudah dibungkus dan digayakan sendiri. */
+@layer components {
+  input[data-rac] {
+    border-width: 0;
+    border-radius: 0;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+  }
+}

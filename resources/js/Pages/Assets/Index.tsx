@@ -11,7 +11,7 @@ import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Edit01, Eye, Plus, Printer, SearchLg, XClose } from '@untitledui/icons';
+import { Edit01, Eye, Plus, Printer, SearchLg, Tag01, XClose } from '@untitledui/icons';
 import { FormEvent, useEffect, useState } from 'react';
 import type { Selection } from 'react-aria-components';
 
@@ -180,7 +180,8 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             aria-label="Kategori"
                             size="md"
                             shortcut={false}
-                            placeholder="Cari kategori..."
+                            icon={Tag01}
+                            placeholder="Pilih atau cari kategori"
                             items={categoryItems}
                             selectedKey={filters.category_id ?? ALL}
                             onSelectionChange={(key) =>
