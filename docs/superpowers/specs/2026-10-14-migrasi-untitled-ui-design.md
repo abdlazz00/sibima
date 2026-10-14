@@ -78,7 +78,7 @@ Memindahkan lapisan tampilan SIBIMA dari komponen buatan sendiri (scaffold Breez
 ### 3.3 Fase 2: lapisan komponen
 
 - CLI dijalankan per komponen; hasil ditaruh di `resources/js/Components/ui/` (subfolder di dalam `Components` yang sudah ada). Impor memakai alias `@/Components/ui/...`.
-- Komponen yang ditambah hanya yang dibutuhkan pilot: **button, input, select, checkbox, badge, tabel, paginasi, modal/dialog, dropdown**. Sisanya ditambah saat halamannya tiba.
+- Komponen yang ditambah hanya yang dibutuhkan pilot: **button, input, select, combobox, tooltip, badge, tabel, paginasi, modal/dialog** (diperbarui 2026-10-14 setelah review plan: `checkbox` ikut `tabel`, `dropdown` dan `radio` tidak dibutuhkan pilot; `combobox` dan `tooltip` ditambah). Sisanya ditambah saat halamannya tiba.
 - `@untitledui/icons` ditambahkan sebagai dependensi baru. `Components/Icons.tsx` dipertahankan sampai halaman terakhir pindah.
 - **Integrasi Inertia:** `RouterProvider` React Aria dipasang di `app.tsx` dan diarahkan ke `router.visit` Inertia, supaya `href` pada komponen tidak memicu reload penuh dan prefetch Inertia tetap bekerja.
 - Komponen Breeze lama **tidak dibungkus** dengan adaptor; tetap dipakai halaman yang belum dimigrasi dan dihapus di pembersihan akhir.
