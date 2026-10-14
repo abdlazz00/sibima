@@ -36,11 +36,6 @@ export default function AuthenticatedLayout({
     const profileRef = useRef<HTMLDivElement>(null);
     const notifRef = useRef<HTMLDivElement>(null);
 
-    // Keep Preline auto-init for any child components using Preline classes
-    useEffect(() => {
-        window.HSStaticMethods?.autoInit();
-    });
-
     // Close dropdowns when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
