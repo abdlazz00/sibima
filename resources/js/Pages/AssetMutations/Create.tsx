@@ -1,13 +1,15 @@
 import AssetSelectModal, { SelectableAsset } from '@/Components/AssetSelectModal';
-import {
-    ChevronRightIcon as ChevronRight,
-    PlusIcon as Plus,
-    TrashIcon as Trash,
-} from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
+import { Table } from '@/Components/ui/application/table/table';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import { Select } from '@/Components/ui/base/select/select';
+import { TextArea } from '@/Components/ui/base/textarea/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Asset, MutationType, PageProps, Pegawai } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEvent, useMemo, useState } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import { Plus, Trash01 } from '@untitledui/icons';
+import { useMemo, useState } from 'react';
 
 interface UnitOption {
     id: number;
@@ -34,6 +36,21 @@ const EMPTY_ITEM: ItemForm = {
     catatan: '',
 };
 
+const NONE = '__none';
+
+const KECAMATAN_TYPES = [
+    { id: 'kec_ke_kel', label: 'Mutasi Kecamatan ke Kelurahan' },
+    { id: 'internal', label: 'Mutasi Internal Kecamatan' },
+    { id: 'pengembalian', label: 'Pengembalian ke Inventaris' },
+];
+
+const KELURAHAN_TYPES = [
+    { id: 'antar_kel', label: 'Mutasi Antar Kelurahan' },
+    { id: 'retur_kel_ke_kec', label: 'Retur Kelurahan ke Kecamatan' },
+    { id: 'internal', label: 'Mutasi Internal Kelurahan' },
+    { id: 'pengembalian', label: 'Pengembalian ke Inventaris' },
+];
+
 export default function Create({ units, allUnits, assets, pegawais, auth }: CreateProps) {
     // Default origin to user's assigned unit or first accessible unit
     const defaultOriginId = auth.user?.unit?.id ?? units[0]?.id ?? 1;
@@ -58,13 +75,12 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
         items: [{ ...EMPTY_ITEM }] as ItemForm[],
     });
 
+    const errors = form.errors as Record<string, string>;
     const isReturn = form.data.jenis_mutasi === 'pengembalian';
-    const sameUnit = form.data.jenis_mutasi === 'internal' || isReturn;
+    const isInternal = form.data.jenis_mutasi === 'internal';
+    const sameUnit = isInternal || isReturn;
 
-    const originUnit = useMemo(
-        () => allUnits.find((u) => u.id === Number(form.data.origin_unit_id)),
-        [allUnits, form.data.origin_unit_id]
-    );
+    const originUnit = useMemo(() => allUnits.find((u) => u.id === Number(form.data.origin_unit_id)), [allUnits, form.data.origin_unit_id]);
 
     // Eligible destination units based on mutation type & origin unit
     const destinationOptions = useMemo(() => {
@@ -93,17 +109,12 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
     // Available assets from selected origin unit
     const availableAssets = useMemo(() => {
         const originId = Number(form.data.origin_unit_id);
-        return assets.filter(
-            (a) => a.unit_id === originId && a.status === 'aktif' && (!isReturn || a.current_holder != null),
-        );
+        return assets.filter((a) => a.unit_id === originId && a.status === 'aktif' && (!isReturn || a.current_holder != null));
     }, [assets, form.data.origin_unit_id, isReturn]);
 
     // Eligible pegawais for target holder dropdown
     const targetPegawaiOptions = useMemo(() => {
-        const destId =
-            sameUnit
-                ? Number(form.data.origin_unit_id)
-                : Number(form.data.destination_unit_id);
+        const destId = sameUnit ? Number(form.data.origin_unit_id) : Number(form.data.destination_unit_id);
 
         if (!destId) return [];
         return pegawais.filter((p) => p.unit_id === destId);
@@ -185,23 +196,23 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
 
     const hasSelectedAssets = form.data.items.length > 0 && form.data.items.some((i) => Boolean(i.asset_id));
 
-    const submit = (e: FormEvent) => {
-        e.preventDefault();
+    const submit = () => {
+        if (isInternal && form.data.items.some((i) => i.asset_id && !i.target_holder_id)) {
+            form.setError('items', 'Mutasi internal wajib menentukan pegawai pemegang baru untuk setiap aset.');
+            return;
+        }
 
         // Convert string numbers to integers
         form.transform((data) => ({
             ...data,
             origin_unit_id: Number(data.origin_unit_id),
             destination_unit_id:
-                data.jenis_mutasi === 'internal' || data.jenis_mutasi === 'pengembalian'
-                    ? Number(data.origin_unit_id)
-                    : Number(data.destination_unit_id),
+                data.jenis_mutasi === 'internal' || data.jenis_mutasi === 'pengembalian' ? Number(data.origin_unit_id) : Number(data.destination_unit_id),
             items: data.items
                 .filter((item) => Boolean(item.asset_id))
                 .map((item) => ({
                     asset_id: Number(item.asset_id),
-                    target_holder_id:
-                        data.jenis_mutasi !== 'pengembalian' && item.target_holder_id ? Number(item.target_holder_id) : null,
+                    target_holder_id: data.jenis_mutasi !== 'pengembalian' && item.target_holder_id ? Number(item.target_holder_id) : null,
                     catatan: item.catatan || null,
                 })),
         }));
@@ -210,346 +221,233 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
     };
 
     // Selected asset IDs to prevent picking duplicate assets in multi-item
-    const selectedAssetIds = useMemo(
-        () => form.data.items.map((i) => Number(i.asset_id)).filter(Boolean),
-        [form.data.items]
-    );
+    const selectedAssetIds = useMemo(() => form.data.items.map((i) => Number(i.asset_id)).filter(Boolean), [form.data.items]);
+
+    const errorCount = Object.keys(errors).length;
 
     return (
         <AuthenticatedLayout>
             <Head title="Formulir Pengajuan Mutasi Aset" />
 
             <div className="space-y-6">
-                {/* Breadcrumbs & Header */}
-                <div>
-                    <nav className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="transition hover:text-blue-700">
-                            Home
-                        </Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <Link href={route('asset-mutations.index')} className="transition hover:text-blue-700">
-                            Mutasi Aset
-                        </Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Ajukan Mutasi</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-                        Formulir Pengajuan Mutasi Aset
-                    </h1>
-                    <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-                        Lengkapi dokumen berita acara mutasi dan tentukan aset yang dialihkan kepemilikannya.
-                    </p>
-                </div>
+                <PageHeader
+                    crumbs={[{ label: 'Mutasi Aset', href: route('asset-mutations.index') }, { label: 'Ajukan Mutasi' }]}
+                    title="Formulir Pengajuan Mutasi Aset"
+                />
 
-                <form onSubmit={submit} className="space-y-6 sm:space-y-8">
-                    {/* Section 1: Informasi Dokumen Mutasi */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs sm:p-6 lg:p-8">
+                <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
                         <div className="border-b border-slate-100 pb-3">
-                            <h2 className="text-base font-semibold text-slate-900">
-                                Informasi Dokumen & Alur Mutasi
-                            </h2>
-                            <p className="text-xs text-slate-500">
-                                Identitas surat pengajuan dan relasi unit kerja yang terlibat
-                            </p>
+                            <h2 className="text-base font-semibold text-slate-900">Informasi Dokumen &amp; Alur Mutasi</h2>
+                            <p className="text-xs text-slate-500">Identitas surat pengajuan dan relasi unit kerja yang terlibat</p>
                         </div>
 
-                        <div className="mt-5 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
-                            <div>
-                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    Nomor Dokumen Mutasi <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={form.data.nomor_mutasi}
-                                    onChange={(e) => form.setData('nomor_mutasi', e.target.value)}
-                                    placeholder="MUT/YYYYMMDD/XXXX"
-                                    required
-                                    className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                />
-                                {form.errors.nomor_mutasi && (
-                                    <p className="mt-1 text-xs text-red-600">{form.errors.nomor_mutasi}</p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    Tanggal Mutasi <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    value={form.data.tanggal_mutasi}
-                                    onChange={(e) => form.setData('tanggal_mutasi', e.target.value)}
-                                    required
-                                    className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                />
-                                {form.errors.tanggal_mutasi && (
-                                    <p className="mt-1 text-xs text-red-600">{form.errors.tanggal_mutasi}</p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    Jenis Mutasi <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={form.data.jenis_mutasi}
-                                    onChange={(e) => handleTypeChange(e.target.value as MutationType)}
-                                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                                >
-                                    {originUnit?.type === 'kecamatan' ? (
-                                        <>
-                                            <option value="kec_ke_kel">Mutasi Kecamatan ke Kelurahan</option>
-                                            <option value="internal">Mutasi Internal Kecamatan</option>
-                                            <option value="pengembalian">Pengembalian ke Inventaris</option>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <option value="antar_kel">Mutasi Antar Kelurahan</option>
-                                            <option value="retur_kel_ke_kec">Retur Kelurahan ke Kecamatan</option>
-                                            <option value="internal">Mutasi Internal Kelurahan</option>
-                                            <option value="pengembalian">Pengembalian ke Inventaris</option>
-                                        </>
-                                    )}
-                                </select>
-                                {form.errors.jenis_mutasi && (
-                                    <p className="mt-1 text-xs text-red-600">{form.errors.jenis_mutasi}</p>
-                                )}
-                                {isReturn && (
-                                    <p className="mt-1 text-xs text-slate-500">
-                                        Aset kembali menjadi stok unit setelah disetujui. Untuk memindahkan langsung ke pegawai lain
-                                        gunakan Mutasi Internal.
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    Unit Asal <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={form.data.origin_unit_id}
-                                    onChange={(e) => {
-                                        const newOriginId = Number(e.target.value);
-                                        form.setData((d) => ({
-                                            ...d,
-                                            origin_unit_id: newOriginId,
-                                            destination_unit_id:
-                                                d.jenis_mutasi === 'internal' || d.jenis_mutasi === 'pengembalian' ? newOriginId : '',
-                                            items: [{ ...EMPTY_ITEM }],
-                                        }));
-                                    }}
-                                    disabled={units.length <= 1}
-                                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100 disabled:opacity-80"
-                                >
-                                    {units.map((u) => (
-                                        <option key={u.id} value={u.id}>
-                                            {u.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                        <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <Input
+                                label="Nomor Dokumen Mutasi"
+                                isRequired
+                                placeholder="MUT/YYYYMMDD/XXXX"
+                                value={form.data.nomor_mutasi}
+                                onChange={(v) => form.setData('nomor_mutasi', v)}
+                                isInvalid={Boolean(errors.nomor_mutasi)}
+                                hint={errors.nomor_mutasi}
+                            />
+                            <Input
+                                label="Tanggal Mutasi"
+                                type="date"
+                                isRequired
+                                value={form.data.tanggal_mutasi}
+                                onChange={(v) => form.setData('tanggal_mutasi', v)}
+                                isInvalid={Boolean(errors.tanggal_mutasi)}
+                                hint={errors.tanggal_mutasi}
+                            />
+                            <Select
+                                label="Jenis Mutasi"
+                                isRequired
+                                items={originUnit?.type === 'kecamatan' ? KECAMATAN_TYPES : KELURAHAN_TYPES}
+                                selectedKey={form.data.jenis_mutasi}
+                                onSelectionChange={(key) => handleTypeChange(String(key) as MutationType)}
+                                isInvalid={Boolean(errors.jenis_mutasi)}
+                                hint={
+                                    errors.jenis_mutasi ??
+                                    (isReturn
+                                        ? 'Aset kembali menjadi stok unit setelah disetujui. Untuk memindahkan langsung ke pegawai lain gunakan Mutasi Internal.'
+                                        : undefined)
+                                }
+                            >
+                                {(item) => <Select.Item id={item.id} label={item.label} />}
+                            </Select>
+                            <Select
+                                label="Unit Asal"
+                                isRequired
+                                items={units.map((u) => ({ id: String(u.id), label: u.name }))}
+                                selectedKey={String(form.data.origin_unit_id)}
+                                isDisabled={units.length <= 1}
+                                onSelectionChange={(key) => {
+                                    const newOriginId = Number(key);
+                                    form.setData((d) => ({
+                                        ...d,
+                                        origin_unit_id: newOriginId,
+                                        destination_unit_id: d.jenis_mutasi === 'internal' || d.jenis_mutasi === 'pengembalian' ? newOriginId : '',
+                                        items: [{ ...EMPTY_ITEM }],
+                                    }));
+                                }}
+                            >
+                                {(item) => <Select.Item id={item.id} label={item.label} />}
+                            </Select>
 
                             {!sameUnit && (
                                 <div className="md:col-span-2">
-                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                        Unit Tujuan <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        value={form.data.destination_unit_id}
-                                        onChange={(e) => form.setData('destination_unit_id', e.target.value)}
-                                        required
-                                        className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
+                                    <Select
+                                        label="Unit Tujuan"
+                                        isRequired
+                                        placeholder="Pilih unit tujuan..."
+                                        items={destinationOptions.map((u) => ({ id: String(u.id), label: `${u.name} (${u.type})` }))}
+                                        selectedKey={form.data.destination_unit_id ? String(form.data.destination_unit_id) : null}
+                                        onSelectionChange={(key) => form.setData('destination_unit_id', String(key))}
+                                        isInvalid={Boolean(errors.destination_unit_id)}
+                                        hint={errors.destination_unit_id}
                                     >
-                                        <option value="">-- Pilih Unit Tujuan --</option>
-                                        {destinationOptions.map((u) => (
-                                            <option key={u.id} value={u.id}>
-                                                {u.name} ({u.type})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {form.errors.destination_unit_id && (
-                                        <p className="mt-1 text-xs text-red-600">
-                                            {form.errors.destination_unit_id}
-                                        </p>
-                                    )}
+                                        {(item) => <Select.Item id={item.id} label={item.label} />}
+                                    </Select>
                                 </div>
                             )}
 
                             <div className="md:col-span-2">
-                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    Keterangan / Alasan {isReturn ? 'Pengembalian' : 'Mutasi'}
-                                    {isReturn && <span className="text-red-500"> *</span>}
-                                </label>
-                                <textarea
+                                <TextArea
+                                    label={`Keterangan / Alasan ${isReturn ? 'Pengembalian' : 'Mutasi'}`}
+                                    isRequired={isReturn}
                                     rows={2}
-                                    required={isReturn}
-                                    value={form.data.keterangan}
-                                    onChange={(e) => form.setData('keterangan', e.target.value)}
                                     placeholder="Tuliskan catatan atau latar belakang pengalihan aset ini..."
-                                    className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
+                                    value={form.data.keterangan}
+                                    onChange={(v) => form.setData('keterangan', v)}
+                                    isInvalid={Boolean(errors.keterangan)}
+                                    hint={errors.keterangan}
                                 />
-                                {form.errors.keterangan && (
-                                    <p className="mt-1 text-xs text-red-600">{form.errors.keterangan}</p>
-                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Section 2: Daftar Aset yang Dimutasi */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs sm:p-6 lg:p-8">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
                         <div className="flex flex-col gap-3 border-b border-slate-100 pb-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h2 className="text-base font-semibold text-slate-900">
-                                    Daftar Aset yang Dimutasi
-                                </h2>
+                                <h2 className="text-base font-semibold text-slate-900">Daftar Aset yang Dimutasi</h2>
                                 <p className="text-xs text-slate-500">
                                     Pilih barang aktif yang akan diserahterimakan (tersedia {availableAssets.length} aset aktif di {originUnit?.name}).
                                 </p>
                             </div>
                             {hasSelectedAssets && (
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50/50 px-3.5 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100/60 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 sm:w-auto"
-                                >
-                                    <Plus className="h-3.5 w-3.5" /> Tambah / Ubah Pilihan Aset
-                                </button>
+                                <Button color="secondary-brand" size="md" iconLeading={Plus} onPress={() => setIsModalOpen(true)}>
+                                    Tambah / Ubah Pilihan Aset
+                                </Button>
                             )}
                         </div>
 
-                        {form.errors.items && (
-                            <p className="mt-3 text-xs font-medium text-red-600">{form.errors.items}</p>
-                        )}
+                        {errors.items && <p className="mt-3 text-xs font-medium text-red-600">{errors.items}</p>}
 
                         {!hasSelectedAssets ? (
-                            <div className="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-8 text-center transition hover:border-blue-400">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-                                    <Plus className="h-6 w-6" />
-                                </div>
-                                <h3 className="mt-3 text-base font-bold text-slate-900">Belum Ada Aset yang Dipilih</h3>
+                            <div className="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-8 text-center">
+                                <h3 className="text-base font-bold text-slate-900">Belum Ada Aset yang Dipilih</h3>
                                 <p className="mt-1 max-w-md text-xs text-slate-500">
                                     Pilih satu atau beberapa aset aktif di {originUnit?.name ?? 'unit asal'} yang akan dialihkan ke unit tujuan.
                                 </p>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition hover:bg-blue-800"
-                                >
-                                    <Plus className="h-4 w-4" /> Buka Daftar & Pilih Aset ({availableAssets.length} Tersedia)
-                                </button>
+                                <Button className="mt-4" color="primary" size="md" iconLeading={Plus} onPress={() => setIsModalOpen(true)}>
+                                    Buka Daftar &amp; Pilih Aset ({availableAssets.length} Tersedia)
+                                </Button>
                             </div>
                         ) : (
-                            <div className="mt-5 space-y-4">
-                                <div className="overflow-x-auto rounded-xl border border-slate-200">
-                                    <table className="w-full border-collapse text-left text-sm">
-                                        <thead>
-                                            <tr className="border-b border-slate-200 bg-slate-100/80 text-xs font-semibold uppercase tracking-wider text-slate-600">
-                                                <th className="py-3 px-3.5">Barang / Aset</th>
-                                                <th className="py-3 px-3.5">Pemegang Asal</th>
-                                                {!isReturn && <th className="py-3 px-3.5">Pemegang Baru di Tujuan</th>}
-                                                <th className="py-3 px-3.5">Catatan Barang</th>
-                                                <th className="py-3 px-3 w-16 text-center">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100 bg-white">
-                                            {form.data.items.map((item, idx) => {
-                                                const selectedAsset = assets.find((a) => a.id === Number(item.asset_id));
-                                                if (!selectedAsset) return null;
-                                                const itemHolderError = (form.errors as Record<string, string>)[`items.${idx}.target_holder_id`];
+                            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200">
+                                <Table aria-label="Aset yang akan dimutasi" size="sm">
+                                    <Table.Header>
+                                        <Table.Head id="aset" label="Barang / Aset" isRowHeader />
+                                        <Table.Head id="asal" label="Pemegang Asal" />
+                                        {!isReturn && <Table.Head id="baru" label="Pemegang Baru di Tujuan" />}
+                                        <Table.Head id="catatan" label="Catatan Barang" />
+                                        <Table.Head id="aksi" label="Aksi" />
+                                    </Table.Header>
+                                    <Table.Body items={form.data.items.filter((item) => assets.some((a) => a.id === Number(item.asset_id)))}>
+                                        {(item) => {
+                                            const idx = form.data.items.indexOf(item);
+                                            const selectedAsset = assets.find((a) => a.id === Number(item.asset_id))!;
+                                            const holderError = errors[`items.${idx}.target_holder_id`];
 
-                                                return (
-                                                    <tr key={item.asset_id} className="hover:bg-slate-50/50">
-                                                        <td className="py-3 px-3.5">
-                                                            <div className="font-semibold text-slate-900">{selectedAsset.nama_aset}</div>
-                                                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
-                                                                <span className="font-mono">{selectedAsset.kode_barang}</span>
-                                                                <span>&bull;</span>
-                                                                <span className="rounded-sm bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-700">
-                                                                    Reg. #{String(selectedAsset.nomor_register).padStart(4, '0')}
-                                                                </span>
-                                                                {selectedAsset.merk_type && (
-                                                                    <>
-                                                                        <span>&bull;</span>
-                                                                        <span>{selectedAsset.merk_type}</span>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="py-3 px-3.5 text-xs whitespace-nowrap">
-                                                            {selectedAsset.current_holder ? (
-                                                                <span className="font-medium text-slate-800">{selectedAsset.current_holder.nama}</span>
-                                                            ) : (
-                                                                <span className="italic text-slate-400">Inventaris Unit</span>
-                                                            )}
-                                                        </td>
-                                                        {!isReturn && (
-                                                            <td className="py-3 px-3.5 min-w-[200px]">
-                                                                <select
-                                                                    value={item.target_holder_id}
-                                                                    onChange={(e) => updateItem(idx, 'target_holder_id', e.target.value)}
-                                                                    required={form.data.jenis_mutasi === 'internal'}
-                                                                    className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-100"
-                                                                >
-                                                                    <option value="">
-                                                                        {form.data.jenis_mutasi === 'internal'
-                                                                            ? '-- Pilih Pegawai Baru * --'
-                                                                            : '-- Inventaris Unit --'}
-                                                                    </option>
-                                                                    {targetPegawaiOptions.map((p) => (
-                                                                        <option key={p.id} value={p.id}>
-                                                                            {p.nama} ({p.jabatan})
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
-                                                                {itemHolderError && (
-                                                                    <p className="mt-1 text-[11px] text-red-600">{itemHolderError}</p>
-                                                                )}
-                                                            </td>
+                                            return (
+                                                <Table.Row id={selectedAsset.id}>
+                                                    <Table.Cell>
+                                                        <span className="font-semibold text-slate-900">{selectedAsset.nama_aset}</span>
+                                                        <span className="mt-0.5 block text-xs text-slate-500">
+                                                            <span className="font-mono">{selectedAsset.kode_barang}</span> • Reg. #
+                                                            {String(selectedAsset.nomor_register).padStart(4, '0')}
+                                                            {selectedAsset.merk_type && <> • {selectedAsset.merk_type}</>}
+                                                        </span>
+                                                    </Table.Cell>
+                                                    <Table.Cell className="whitespace-nowrap text-xs">
+                                                        {selectedAsset.current_holder ? (
+                                                            <span className="font-medium text-slate-800">{selectedAsset.current_holder.nama}</span>
+                                                        ) : (
+                                                            <span className="italic text-slate-400">Inventaris Unit</span>
                                                         )}
-                                                        <td className="py-3 px-3.5 min-w-[180px]">
-                                                            <input
-                                                                type="text"
-                                                                value={item.catatan}
-                                                                onChange={(e) => updateItem(idx, 'catatan', e.target.value)}
-                                                                placeholder="Catatan kondisi/kelengkapan..."
-                                                                className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-100"
-                                                            />
-                                                        </td>
-                                                        <td className="py-3 px-3 text-center">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeItem(idx)}
-                                                                title="Hapus aset ini dari mutasi"
-                                                                className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 transition"
+                                                    </Table.Cell>
+                                                    {!isReturn && (
+                                                        <Table.Cell className="min-w-56">
+                                                            <Select
+                                                                aria-label={`Pemegang baru ${selectedAsset.nama_aset}`}
+                                                                size="sm"
+                                                                placeholder="Pilih pegawai baru"
+                                                                items={[
+                                                                    ...(isInternal ? [] : [{ id: NONE, label: 'Inventaris Unit' }]),
+                                                                    ...targetPegawaiOptions.map((p) => ({ id: String(p.id), label: `${p.nama} (${p.jabatan})` })),
+                                                                ]}
+                                                                selectedKey={item.target_holder_id ? String(item.target_holder_id) : isInternal ? null : NONE}
+                                                                onSelectionChange={(key) => updateItem(idx, 'target_holder_id', key === NONE ? '' : String(key))}
+                                                                isInvalid={Boolean(holderError)}
+                                                                hint={holderError}
                                                             >
-                                                                <Trash className="h-4 w-4" />
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                                {(opt) => <Select.Item id={opt.id} label={opt.label} />}
+                                                            </Select>
+                                                        </Table.Cell>
+                                                    )}
+                                                    <Table.Cell className="min-w-48">
+                                                        <Input
+                                                            aria-label={`Catatan ${selectedAsset.nama_aset}`}
+                                                            size="sm"
+                                                            placeholder="Catatan kondisi/kelengkapan..."
+                                                            value={item.catatan}
+                                                            onChange={(v) => updateItem(idx, 'catatan', v)}
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Button
+                                                            color="secondary-destructive"
+                                                            size="sm"
+                                                            iconLeading={Trash01}
+                                                            aria-label={`Hapus ${selectedAsset.nama_aset} dari mutasi`}
+                                                            onPress={() => removeItem(idx)}
+                                                        />
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            );
+                                        }}
+                                    </Table.Body>
+                                </Table>
                             </div>
                         )}
                     </div>
 
-                    {/* Submit Actions */}
-                    <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:justify-end">
-                        <Link
-                            href={route('asset-mutations.index')}
-                            className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-300 sm:w-auto"
-                        >
-                            Batal
-                        </Link>
-                        <button
-                            type="submit"
-                            disabled={form.processing}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-800 px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 sm:w-auto"
-                        >
-                            {form.processing ? 'Menyimpan...' : 'Kirim Pengajuan Mutasi'}
-                        </button>
+                    <div className="sticky bottom-0 z-20 -mx-6 border-t border-slate-200 bg-white/95 px-6 py-3 backdrop-blur-xs lg:-mx-8 lg:px-8">
+                        <div className="flex items-center justify-between gap-3">
+                            <p role="alert" className="text-sm font-medium text-red-600">
+                                {errorCount > 0 && `${errorCount} isian perlu diperbaiki`}
+                            </p>
+                            <div className="flex items-center gap-3">
+                                <Button color="secondary" size="md" href={route('asset-mutations.index')}>
+                                    Batal
+                                </Button>
+                                <Button color="primary" size="md" isLoading={form.processing} onPress={submit}>
+                                    Kirim Pengajuan Mutasi
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </form>
 
