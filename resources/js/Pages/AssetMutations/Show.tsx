@@ -272,7 +272,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                     type="button"
                                     onClick={approve}
                                     disabled={submitting}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
                                 >
                                     {submitting ? 'Memproses...' : 'Setujui'}
                                 </button>

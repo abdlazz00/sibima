@@ -86,7 +86,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                     {can.create && (
                         <Link
                             href={route('asset-mutations.create')}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                         >
                             <Plus className="h-4 w-4" /> Ajukan Mutasi Aset
                         </Link>
@@ -293,7 +293,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                                             })}
                                             className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold ${
                                                 p === mutations.current_page
-                                                    ? 'bg-primary text-white shadow-2xs'
+                                                    ? 'bg-blue-800 text-white shadow-2xs'
                                                     : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
                                             }`}
                                         >

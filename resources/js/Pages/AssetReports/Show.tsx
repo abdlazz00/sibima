@@ -113,7 +113,7 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                         {can.act && (
                             <>
                                 <button onClick={() => setShowReject(true)} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Tolak</button>
-                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{submitting ? 'Memproses...' : 'Setujui'}</button>
+                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{submitting ? 'Memproses...' : 'Setujui'}</button>
                             </>
                         )}
                     </div>

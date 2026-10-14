@@ -1,14 +1,18 @@
 @import 'tailwindcss';
+@import './theme.css';
 
 @plugin '@tailwindcss/forms';
+@plugin 'tailwindcss-animate';
+@plugin 'tailwindcss-react-aria-components';
+
+@custom-variant dark (&:where(.dark-mode, .dark-mode *));
+@custom-variant label (& [data-label]);
+@custom-variant focus-input-within (&:has(input:focus));
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
-  --color-primary: #1e40af;
-  --color-primary-hover: #1d4ed8;
-  --color-primary-dark: #172554;
 
   --font-sans:
     Figtree, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',

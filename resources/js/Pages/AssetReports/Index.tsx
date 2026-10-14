@@ -44,7 +44,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Lapor Rusak/Hilang</h1>
                     </div>
                     {can.create && (
-                        <Link href={route('asset-reports.create')} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800">
+                        <Link href={route('asset-reports.create')} className="inline-flex items-center gap-2 rounded-lg bg-blue-800 px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800">
                             <Plus className="h-4 w-4" /> Buat Laporan
                         </Link>
                     )}
@@ -128,7 +128,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                             key={page}
                                             type="button"
                                             onClick={() => go({ page })}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === items.current_page ? 'bg-primary text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'}`}
+                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === items.current_page ? 'bg-blue-800 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'}`}
                                         >
                                             {page}
                                         </button>

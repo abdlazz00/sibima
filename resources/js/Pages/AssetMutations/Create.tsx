@@ -433,7 +433,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(true)}
-                                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition hover:bg-blue-800"
+                                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition hover:bg-blue-800"
                                 >
                                     <Plus className="h-4 w-4" /> Buka Daftar & Pilih Aset ({availableAssets.length} Tersedia)
                                 </button>
@@ -546,7 +546,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                         <button
                             type="submit"
                             disabled={form.processing}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 sm:w-auto"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-800 px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60 sm:w-auto"
                         >
                             {form.processing ? 'Menyimpan...' : 'Kirim Pengajuan Mutasi'}
                         </button>

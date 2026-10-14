@@ -151,7 +151,7 @@ export default function AuthenticatedLayout({
                                         }
                                         className={`flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium transition ${
                                             active
-                                                ? 'bg-primary text-white shadow-xs'
+                                                ? 'bg-blue-800 text-white shadow-xs'
                                                 : 'text-slate-300 hover:bg-white/5 hover:text-white'
                                         }`}
                                     >
@@ -335,7 +335,7 @@ export default function AuthenticatedLayout({
                                         className="shadow-2xs h-8 w-8 shrink-0 rounded-full object-cover border border-gray-200"
                                     />
                                 ) : (
-                                    <div className="shadow-2xs flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                                    <div className="shadow-2xs flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-blue-800 text-xs font-bold text-white">
                                         {userInitials}
                                     </div>
                                 )}

@@ -317,7 +317,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                             type="button"
                             disabled={form.processing}
                             onClick={submit('submitted')}
-                            className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+                            className="rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
                         >
                             Ajukan Penerimaan
                         </button>

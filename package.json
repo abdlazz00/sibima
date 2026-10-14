@@ -38,9 +38,13 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "@untitledui/icons": "^0.0.23",
         "chart.js": "^4.5.1",
         "chartjs-plugin-datalabels": "^2.2.0",
         "jsqr": "^1.4.0",
-        "react-chartjs-2": "^5.3.1"
+        "react-aria-components": "^1.22.1",
+        "react-chartjs-2": "^5.3.1",
+        "tailwindcss-animate": "^1.0.7",
+        "tailwindcss-react-aria-components": "^2.2.0"
     }
 }

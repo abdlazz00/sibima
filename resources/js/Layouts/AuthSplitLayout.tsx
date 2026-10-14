@@ -3,7 +3,7 @@ import { PropsWithChildren } from 'react';
 /** Tata letak dua panel untuk halaman guest (Masuk, Lupa & Atur Ulang Kata Sandi). */
 export default function AuthSplitLayout({ children }: PropsWithChildren) {
     return (
-        <div className="flex min-h-screen flex-col bg-white selection:bg-primary selection:text-white md:flex-row">
+        <div className="flex min-h-screen flex-col bg-white selection:bg-blue-800 selection:text-white md:flex-row">
             {/* Left Panel - Visual Branding (Desktop) */}
             <div
                 role="img"

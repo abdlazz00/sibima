@@ -452,7 +452,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                                 }
                                                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition ${
                                                     page === assets.current_page
-                                                        ? 'bg-primary text-white shadow-xs'
+                                                        ? 'bg-blue-800 text-white shadow-xs'
                                                         : 'text-slate-700 hover:bg-slate-100'
                                                 }`}
                                             >

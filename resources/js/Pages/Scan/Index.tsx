@@ -28,7 +28,7 @@ const KONDISI_STYLE: Record<string, string> = {
     hilang: 'bg-slate-200 text-slate-700',
 };
 
-const BUTTON = 'rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800';
+const BUTTON = 'rounded-lg bg-blue-800 px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800';
 
 export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
     const [scanning, setScanning] = useState(summary === null && !notFound);

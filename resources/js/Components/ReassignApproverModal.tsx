@@ -63,7 +63,7 @@ export default function ReassignApproverModal({ approvalRequestId, candidates, s
                     <button type="button" onClick={onClose} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
                         Batal
                     </button>
-                    <button type="button" onClick={submit} disabled={!userId || !note.trim() || submitting} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+                    <button type="button" onClick={submit} disabled={!userId || !note.trim() || submitting} className="rounded-lg bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
                         {submitting ? 'Memproses...' : 'Alihkan'}
                     </button>
                 </div>

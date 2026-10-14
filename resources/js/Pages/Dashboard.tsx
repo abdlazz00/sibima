@@ -166,7 +166,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                                 <span className="tabular-nums">{d.antrean.persetujuan_menunggu}</span> persetujuan menunggu Anda.
                             </p>
                         </div>
-                        <Link href={route('persetujuan.index')} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+                        <Link href={route('persetujuan.index')} className="rounded-lg bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
                             Buka Kotak Persetujuan
                         </Link>
                     </div>

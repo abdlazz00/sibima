@@ -135,7 +135,7 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
                         {can.act && (
                             <>
                                 <button onClick={() => setShowReject(true)} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Tolak</button>
-                                <button onClick={() => req && post('approval-requests.approve', req.id, {})} disabled={submitting} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{submitting ? 'Memproses...' : 'Setujui'}</button>
+                                <button onClick={() => req && post('approval-requests.approve', req.id, {})} disabled={submitting} className="rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{submitting ? 'Memproses...' : 'Setujui'}</button>
                             </>
                         )}
                     </div>
@@ -222,7 +222,7 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
                                         <button
                                             type="button"
                                             onClick={() => setIsFulfillModalOpen(true)}
-                                            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800"
+                                            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-blue-800 px-4 py-2 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800"
                                         >
                                             Buka Daftar Aset untuk Dipenuhi
                                         </button>
@@ -291,7 +291,7 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
                                             type="button"
                                             onClick={() => post('asset-requests.fulfill', r.id, { asset_ids: selected }, () => setSelected([]))}
                                             disabled={submitting || selected.length === 0 || (!single && selected.length !== r.jumlah)}
-                                            className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800 disabled:opacity-50"
+                                            className="w-full rounded-xl bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800 disabled:opacity-50"
                                         >
                                             {single ? 'Serahkan ke Pegawai' : 'Ajukan Mutasi Pemenuhan'}
                                         </button>

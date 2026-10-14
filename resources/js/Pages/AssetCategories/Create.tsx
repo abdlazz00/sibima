@@ -302,7 +302,7 @@ export default function Create({
                         <button
                             type="submit"
                             disabled={processing}
-                            className="shadow-2xs inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="shadow-2xs inline-flex h-11 items-center justify-center rounded-lg bg-blue-800 px-6 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {processing ? 'Menyimpan...' : 'Simpan Kategori'}
                         </button>

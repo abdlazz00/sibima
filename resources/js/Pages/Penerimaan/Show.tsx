@@ -113,7 +113,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                             </button>
                         )}
                         {can.edit && (
-                            <Link href={route('penerimaan-aset.edit', beritaAcara.id)} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                            <Link href={route('penerimaan-aset.edit', beritaAcara.id)} className="rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
                                 Edit &amp; Ajukan
                             </Link>
                         )}
@@ -132,7 +132,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                                 <button onClick={() => setShowReject(true)} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
                                     Tolak
                                 </button>
-                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
                                     {submitting ? 'Memproses...' : 'Setujui'}
                                 </button>
                             </>

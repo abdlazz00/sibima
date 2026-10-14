@@ -174,7 +174,7 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                                 {dirty && <span className="ml-2 text-amber-700">(terapkan filter dulu)</span>}
                             </p>
                             {mutasis.total > 0 && !dirty ? (
-                                <a href={downloadUrl} className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                                <a href={downloadUrl} className="rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
                                     Unduh Excel
                                 </a>
                             ) : (
@@ -441,7 +441,7 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                                             key={page}
                                             type="button"
                                             onClick={() => visit({ page })}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === mutasis.current_page ? 'bg-primary text-white' : 'text-slate-700 hover:bg-slate-100'}`}
+                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === mutasis.current_page ? 'bg-blue-800 text-white' : 'text-slate-700 hover:bg-slate-100'}`}
                                         >
                                             {page}
                                         </button>

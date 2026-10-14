@@ -4,7 +4,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useRef } from 'react';
 
 const backLink =
-    'inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm font-medium text-primary hover:text-primary-hover hover:underline focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-1';
+    'inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm font-medium text-blue-800 hover:text-blue-700 hover:underline focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:ring-offset-1';
 
 export default function ForgotPassword({ status }: { status?: string }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -103,7 +103,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                         autoFocus
                         placeholder="Masukkan email kedinasan"
                         onChange={(e) => setData('email', e.target.value)}
-                        className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-primary"
+                        className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-blue-800"
                         required
                     />
                     <InputError message={errors.email} className="mt-1.5" />
@@ -112,7 +112,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 <button
                     type="submit"
                     disabled={processing}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-xs transition hover:bg-primary-hover focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-800 text-sm font-medium text-white shadow-xs transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:ring-offset-2 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {processing ? 'Mengirim...' : 'Kirim Tautan Pemulihan'}
                 </button>

@@ -293,7 +293,7 @@ export default function AssetSelectModal({
                             type="button"
                             onClick={handleConfirm}
                             disabled={isConfirmDisabled}
-                            className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800 disabled:opacity-50"
+                            className="rounded-xl bg-blue-800 px-5 py-2 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800 disabled:opacity-50"
                         >
                             Gunakan {tempSelected.length > 0 ? `(${tempSelected.length}) ` : ''}Aset Terpilih
                         </button>

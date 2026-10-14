@@ -184,7 +184,7 @@ export default function Index({
                         {can.create && (
                             <Link
                                 href={route('asset-categories.create')}
-                                className="shadow-2xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                                className="shadow-2xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-800 px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 <span>Tambah Kategori</span>
@@ -441,7 +441,7 @@ export default function Index({
                                         onClick={() => setCurrentPage(page)}
                                         className={`flex h-8 min-w-8 items-center justify-center rounded-lg text-xs font-medium transition ${
                                             currentPage === page
-                                                ? 'bg-primary text-white'
+                                                ? 'bg-blue-800 text-white'
                                                 : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                                         }`}
                                     >
