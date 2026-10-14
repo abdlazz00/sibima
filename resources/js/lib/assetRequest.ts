@@ -8,6 +8,14 @@ export const REQUEST_STATUS_LABEL: Record<AssetRequestStatus, string> = {
     cancelled: 'Dibatalkan',
 };
 
+export const REQUEST_STATUS_COLOR: Record<AssetRequestStatus, 'warning' | 'blue' | 'success' | 'error' | 'gray'> = {
+    pending: 'warning',
+    approved: 'blue',
+    fulfilled: 'success',
+    rejected: 'error',
+    cancelled: 'gray',
+};
+
 export const REQUEST_STATUS_STYLE: Record<AssetRequestStatus, string> = {
     pending: 'bg-amber-50 text-amber-700',
     approved: 'bg-blue-50 text-blue-700',
