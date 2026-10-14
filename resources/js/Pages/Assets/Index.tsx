@@ -3,7 +3,6 @@ import { Table } from '@/Components/ui/application/table/table';
 import { Badge } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
 import { Input } from '@/Components/ui/base/input/input';
-import { ComboBox } from '@/Components/ui/base/select/combobox';
 import { Select } from '@/Components/ui/base/select/select';
 import { Tooltip } from '@/Components/ui/base/tooltip/tooltip';
 import ImportExportButtons from '@/Components/ImportExportButtons';
@@ -11,7 +10,7 @@ import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Edit01, Eye, Plus, Printer, SearchLg, Tag01, XClose } from '@untitledui/icons';
+import { Edit01, Eye, Plus, Printer, SearchLg, XClose } from '@untitledui/icons';
 import { FormEvent, useEffect, useState } from 'react';
 import type { Selection } from 'react-aria-components';
 
@@ -176,21 +175,16 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                 {/* Filter Toolbar */}
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <ComboBox
+                        <Select
                             aria-label="Kategori"
                             size="md"
-                            shortcut={false}
-                            icon={Tag01}
-                            popoverClassName="w-[40rem]! max-w-[calc(100vw-2rem)]"
-                            placeholder="Pilih atau cari kategori"
+                            popoverClassName="w-[46rem]! max-w-[calc(100vw-2rem)]"
                             items={categoryItems}
                             selectedKey={filters.category_id ?? ALL}
-                            onSelectionChange={(key) =>
-                                applyFilters({ category_id: key == null || key === ALL ? undefined : String(key) })
-                            }
+                            onSelectionChange={(key) => applyFilters({ category_id: key === ALL ? undefined : String(key) })}
                         >
                             {(item) => <Select.Item id={item.id} label={item.label} />}
-                        </ComboBox>
+                        </Select>
                         <Select
                             aria-label="Unit"
                             size="md"

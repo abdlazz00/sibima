@@ -129,7 +129,7 @@ const Select = ({
 
                         <SelectValue {...state} {...{ size, placeholder }} icon={icon} />
 
-                        <Popover size={size} className={rest.popoverClassName}>
+                        <Popover size={size} placement="bottom start" className={rest.popoverClassName}>
                             <AriaListBox items={items} className="size-full outline-hidden">
                                 {children}
                             </AriaListBox>
