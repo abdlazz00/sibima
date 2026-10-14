@@ -72,7 +72,11 @@ const DropdownItem = ({ label, children, addon, icon: Icon, avatarUrl, unstyled,
     );
 
     if (unstyled) {
-        return <AriaMenuItem id={label} textValue={label} {...props} />;
+        return (
+            <AriaMenuItem id={label} textValue={label} {...props}>
+                {children}
+            </AriaMenuItem>
+        );
     }
 
     return (
