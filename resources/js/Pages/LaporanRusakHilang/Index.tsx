@@ -176,7 +176,7 @@ export default function Index(props: PageProps & LaporanRusakHilangData) {
                             ariaLabel="Sebaran insiden per unit kerja"
                             columns={sebaranColumns}
                             rows={sebaranUnit.baris.map((r) => ({ id: r.id, name: r.name, jumlah_rusak: r.jumlah_rusak, jumlah_hilang: r.jumlah_hilang, total: r.total, nilai_buku: r.nilai_buku }))}
-                            total={{ id: 'total', name: 'Total', ...sebaranUnit.total }}
+                            total={{ id: '__total', name: 'Total', ...sebaranUnit.total }}
                             emptyText="Belum ada laporan yang disetujui."
                         />
                     </ReportCard>

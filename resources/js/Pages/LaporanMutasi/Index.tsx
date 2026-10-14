@@ -131,7 +131,7 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                         ariaLabel="Arus mutasi antar unit"
                         columns={arusColumns}
                         rows={arus.baris.map((r) => ({ id: `${r.asal_id}-${r.tujuan_id}`, asal: r.asal, tujuan: r.tujuan, jumlah_mutasi: r.jumlah_mutasi, aset: r.aset, nilai: r.nilai }))}
-                        total={{ id: 'total', asal: 'Total', tujuan: '', ...arus.total }}
+                        total={{ id: '__total', asal: 'Total', tujuan: '', ...arus.total }}
                         emptyText="Belum ada mutasi yang disetujui."
                     />
                 </ReportCard>

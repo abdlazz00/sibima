@@ -147,7 +147,7 @@ export default function Index(props: PageProps & LaporanAsetData) {
                         ariaLabel="Rekap aset per kategori"
                         columns={rekapColumns('Kategori')}
                         rows={kategoriRows}
-                        total={{ id: 'total', nama: 'Total', level: 0, ...rekapKategori.total }}
+                        total={{ id: '__total', nama: 'Total', level: 0, ...rekapKategori.total }}
                         emptyText="Belum ada data."
                     />
                 </ReportCard>
@@ -158,7 +158,7 @@ export default function Index(props: PageProps & LaporanAsetData) {
                             ariaLabel="Rekap aset per unit"
                             columns={rekapColumns('Unit')}
                             rows={rekapUnit.baris.map((u) => ({ id: u.id, nama: u.nama, level: 0 as const, jumlah: u.jumlah, nilai_perolehan: u.nilai_perolehan, nilai_buku: u.nilai_buku }))}
-                            total={{ id: 'total', nama: 'Total', level: 0, ...rekapUnit.total }}
+                            total={{ id: '__total', nama: 'Total', level: 0, ...rekapUnit.total }}
                             emptyText="Belum ada data."
                         />
                     </ReportCard>
