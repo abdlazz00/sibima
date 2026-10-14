@@ -1,7 +1,9 @@
-import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 
 interface PersetujuanItem {
     id: number;
@@ -23,30 +25,30 @@ export default function Index({ items }: IndexProps) {
             <Head title="Kotak Persetujuan" />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Kotak Persetujuan</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Kotak Persetujuan</h1>
-                </div>
+                <PageHeader
+                    crumbs={[{ label: 'Kotak Persetujuan' }]}
+                    title="Kotak Persetujuan"
+                />
 
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
                     {items.length === 0 ? (
                         <p className="py-14 text-center text-sm text-slate-400">Tidak ada pengajuan yang menunggu persetujuan Anda.</p>
                     ) : (
                         <ul className="divide-y divide-slate-100">
                             {items.map((item) => (
-                                <li key={item.id} className="flex items-center justify-between px-5 py-4 hover:bg-slate-50/60">
-                                    <div>
-                                        <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">{item.workflow_name}</p>
+                                <li key={item.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="min-w-0 space-y-1">
+                                        <Badge type="color" size="sm" color="blue" className="rounded-sm">
+                                            {item.workflow_name}
+                                        </Badge>
                                         <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                                        <p className="text-xs text-slate-500">Diajukan oleh {item.submitted_by} · {item.created_at}</p>
+                                        <p className="text-xs text-slate-500">
+                                            Diajukan oleh {item.submitted_by} · {item.created_at}
+                                        </p>
                                     </div>
-                                    <Link href={item.show_url} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                    <Button color="secondary-brand" size="md" href={item.show_url} aria-label={`Tinjau ${item.title}`} className="shrink-0">
                                         Tinjau
-                                    </Link>
+                                    </Button>
                                 </li>
                             ))}
                         </ul>
