@@ -1,10 +1,17 @@
-import { ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight, EyeIcon as Eye, PlusIcon as Plus } from '@/Components/Icons';
-import { FilterCard, FilterSelect, TableSearch } from '@/Components/ListFilters';
+import PageHeader from '@/Components/PageHeader';
+import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { Table } from '@/Components/ui/application/table/table';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import { Select } from '@/Components/ui/base/select/select';
+import { Tooltip } from '@/Components/ui/base/tooltip/tooltip';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { pageNumbersWithGaps } from '@/lib/pagination';
-import { PENERIMAAN_STATUS_LABEL, PENERIMAAN_STATUS_STYLE, PenerimaanStatusKey, penerimaanStatus } from '@/lib/penerimaanStatus';
+import { rupiah } from '@/lib/format';
+import { PENERIMAAN_STATUS_COLOR, PENERIMAAN_STATUS_LABEL, PenerimaanStatusKey, penerimaanStatus } from '@/lib/penerimaanStatus';
 import { BeritaAcaraPenerimaan, Paginated, PageProps } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { Eye, Plus, SearchLg, XClose } from '@untitledui/icons';
 import { FormEvent, useState } from 'react';
 
 interface IndexProps extends PageProps {
@@ -14,16 +21,15 @@ interface IndexProps extends PageProps {
     can: { create: boolean };
 }
 
-function formatRupiah(value: string | number): string {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value));
-}
+const ALL = '__all';
 
-const DATE_INPUT = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
-const DATE_LABEL = 'mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500';
+const STATUS_ITEMS = [
+    { id: ALL, label: 'Semua status' },
+    ...(Object.keys(PENERIMAAN_STATUS_LABEL) as PenerimaanStatusKey[]).map((key) => ({ id: key, label: PENERIMAAN_STATUS_LABEL[key] })),
+];
 
 export default function Index({ items, filters, sortOptions, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
-    const pages = pageNumbersWithGaps(items.current_page, items.last_page);
 
     const goTo = (changes: Record<string, string | number | undefined>) => {
         const params = { ...filters, search: search || undefined, ...changes };
@@ -36,157 +42,179 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
         goTo({ page: undefined });
     };
 
+    const hasFilter = Boolean(filters.status || filters.dari || filters.sampai);
+
     return (
         <AuthenticatedLayout>
             <Head title="Penerimaan Aset" />
 
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                            <ChevronRight className="h-3 w-3 text-slate-400" />
-                            <span className="font-medium text-slate-800">Penerimaan Aset</span>
-                        </nav>
-                        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Penerimaan Aset Baru</h1>
+                <PageHeader
+                    crumbs={[{ label: 'Penerimaan Aset' }]}
+                    title="Penerimaan Aset Baru"
+                    actions={
+                        can.create && (
+                            <Button color="primary" size="md" iconLeading={Plus} href={route('penerimaan-aset.create')}>
+                                Ajukan Penerimaan
+                            </Button>
+                        )
+                    }
+                />
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                    <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <Select
+                            label="Status"
+                            size="md"
+                            items={STATUS_ITEMS}
+                            selectedKey={filters.status ?? ALL}
+                            onSelectionChange={(key) => goTo({ status: key === ALL ? undefined : String(key), page: undefined })}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
+                        <Input
+                            label="Dari tanggal"
+                            type="date"
+                            size="md"
+                            value={filters.dari ?? ''}
+                            onChange={(v) => goTo({ dari: v || undefined, page: undefined })}
+                        />
+                        <Input
+                            label="Sampai tanggal"
+                            type="date"
+                            size="md"
+                            value={filters.sampai ?? ''}
+                            onChange={(v) => goTo({ sampai: v || undefined, page: undefined })}
+                        />
+                        <Select
+                            label="Urutkan"
+                            size="md"
+                            items={sortOptions.map((o) => ({ id: o.value, label: o.label }))}
+                            selectedKey={filters.urut ?? 'terbaru'}
+                            onSelectionChange={(key) => goTo({ urut: key === 'terbaru' ? undefined : String(key), page: undefined })}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
                     </div>
-                    {can.create && (
-                        <Link href={route('penerimaan-aset.create')} className="inline-flex items-center gap-2 rounded-lg bg-blue-800 px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800">
-                            <Plus className="h-4 w-4" /> Ajukan Penerimaan
-                        </Link>
+                    {hasFilter && (
+                        <div className="mt-3">
+                            <Button
+                                color="link-color"
+                                size="md"
+                                onPress={() => goTo({ status: undefined, dari: undefined, sampai: undefined, page: undefined })}
+                            >
+                                Reset filter
+                            </Button>
+                        </div>
                     )}
                 </div>
 
-                <FilterCard
-                    action={
-                        (filters.status || filters.dari || filters.sampai) && (
-                            <button
-                                type="button"
-                                onClick={() => goTo({ status: undefined, dari: undefined, sampai: undefined, page: undefined })}
-                                className="text-sm font-medium text-blue-700 hover:underline"
-                            >
-                                Reset filter
-                            </button>
-                        )
-                    }
-                >
-                    <FilterSelect ariaLabel="Status" value={filters.status ?? ''} onChange={(v) => goTo({ status: v || undefined, page: undefined })}>
-                        <option value="">Semua status</option>
-                        {(Object.keys(PENERIMAAN_STATUS_LABEL) as PenerimaanStatusKey[]).map((key) => (
-                            <option key={key} value={key}>{PENERIMAAN_STATUS_LABEL[key]}</option>
-                        ))}
-                    </FilterSelect>
-                    <div>
-                        <label htmlFor="filter-dari" className={DATE_LABEL}>Dari tanggal</label>
-                        <input id="filter-dari" type="date" value={filters.dari ?? ''} onChange={(e) => goTo({ dari: e.target.value || undefined, page: undefined })} className={DATE_INPUT} />
-                    </div>
-                    <div>
-                        <label htmlFor="filter-sampai" className={DATE_LABEL}>Sampai tanggal</label>
-                        <input id="filter-sampai" type="date" value={filters.sampai ?? ''} onChange={(e) => goTo({ sampai: e.target.value || undefined, page: undefined })} className={DATE_INPUT} />
-                    </div>
-                    <FilterSelect ariaLabel="Urutkan" value={filters.urut ?? 'terbaru'} onChange={(v) => goTo({ urut: v === 'terbaru' ? undefined : v, page: undefined })}>
-                        {sortOptions.map((o) => <option key={o.value} value={o.value}>Urutkan: {o.label}</option>)}
-                    </FilterSelect>
-                </FilterCard>
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                    <form onSubmit={submitSearch} className="flex max-w-lg items-center gap-2 border-b border-slate-200 p-4">
+                        <div className="flex-1">
+                            <Input
+                                aria-label="Cari"
+                                size="md"
+                                icon={SearchLg}
+                                placeholder="Cari no. berita acara atau nama aset..."
+                                value={search}
+                                onChange={setSearch}
+                            />
+                        </div>
+                        {search && (
+                            <Button
+                                color="tertiary"
+                                size="md"
+                                iconLeading={XClose}
+                                aria-label="Hapus pencarian"
+                                onPress={() => {
+                                    setSearch('');
+                                    goTo({ search: undefined, page: undefined });
+                                }}
+                            />
+                        )}
+                        <Button type="submit" color="secondary" size="md">
+                            Cari
+                        </Button>
+                    </form>
 
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                    <TableSearch
-                        value={search}
-                        onChange={setSearch}
-                        onSubmit={submitSearch}
-                        onClear={() => {
-                            setSearch('');
-                            goTo({ search: undefined, page: undefined });
-                        }}
-                        placeholder="Cari no. berita acara atau nama aset..."
-                    />
-                    <table className="w-full border-collapse text-left">
-                        <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50">
-                                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No. Berita Acara</th>
-                                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Aset</th>
-                                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Kategori</th>
-                                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nilai</th>
-                                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Pengaju</th>
-                                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tanggal</th>
-                                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                                <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {items.data.length === 0 ? (
-                                <tr><td colSpan={8} className="py-14 text-center text-sm text-slate-400">Belum ada pengajuan penerimaan aset.</td></tr>
-                            ) : (
-                                items.data.map((ba) => {
-                                    const status = penerimaanStatus(ba);
-                                    const extra = (ba.items?.length ?? 0) - 1;
-                                    const nilai = (ba.items ?? []).reduce((sum, i) => sum + Number(i.nilai_per_unit) * i.jumlah_unit, 0);
-                                    return (
-                                        <tr key={ba.id} className="hover:bg-slate-50/60">
-                                            <td className="px-4 py-3 text-sm text-slate-800">{ba.no_berita_acara}</td>
-                                            <td className="px-4 py-3 text-sm font-semibold text-slate-900">
-                                                {ba.items?.[0]?.nama_aset}
-                                                {extra > 0 && <span className="font-normal text-slate-400"> +{extra} lainnya</span>}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-slate-800">{ba.items?.[0]?.category?.name ?? '—'}</td>
-                                            <td className="px-4 py-3 text-right text-sm text-slate-800">{formatRupiah(nilai)}</td>
-                                            <td className="px-4 py-3 text-sm text-slate-800">{ba.creator?.name}</td>
-                                            <td className="px-4 py-3 text-sm text-slate-800">{new Date(ba.tanggal_penerimaan).toLocaleDateString('id-ID')}</td>
-                                            <td className="px-4 py-3">
-                                                <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${PENERIMAAN_STATUS_STYLE[status]}`}>{PENERIMAAN_STATUS_LABEL[status]}</span>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                <Link href={route('penerimaan-aset.show', ba.id)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700">
-                                                    <Eye className="h-4 w-4" />
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
+                    <Table aria-label="Daftar penerimaan aset" size="sm">
+                        <Table.Header>
+                            <Table.Head id="no" label="No. Berita Acara" isRowHeader />
+                            <Table.Head id="nama" label="Nama Aset" />
+                            <Table.Head id="kategori" label="Kategori" />
+                            <Table.Head id="nilai" label="Nilai" />
+                            <Table.Head id="pengaju" label="Pengaju" />
+                            <Table.Head id="tanggal" label="Tanggal" />
+                            <Table.Head id="status" label="Status" />
+                            <Table.Head id="aksi" label="Aksi" />
+                        </Table.Header>
+                        <Table.Body
+                            items={items.data}
+                            renderEmptyState={() => (
+                                <p className="py-14 text-center text-sm text-slate-400">
+                                    {hasFilter || filters.search ? 'Tidak ada penerimaan yang cocok dengan filter.' : 'Belum ada pengajuan penerimaan aset.'}
+                                </p>
                             )}
-                        </tbody>
-                    </table>
+                        >
+                            {(ba) => {
+                                const status = penerimaanStatus(ba);
+                                const extra = (ba.items?.length ?? 0) - 1;
+                                const nilai = (ba.items ?? []).reduce((sum, i) => sum + Number(i.nilai_per_unit) * i.jumlah_unit, 0);
 
-                    <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row">
+                                return (
+                                    <Table.Row id={ba.id}>
+                                        <Table.Cell className="text-slate-800">{ba.no_berita_acara}</Table.Cell>
+                                        <Table.Cell className="font-semibold text-slate-900">
+                                            {ba.items?.[0]?.nama_aset}
+                                            {extra > 0 && <span className="font-normal text-slate-400"> +{extra} lainnya</span>}
+                                        </Table.Cell>
+                                        <Table.Cell className="text-slate-800">{ba.items?.[0]?.category?.name ?? '—'}</Table.Cell>
+                                        <Table.Cell className="whitespace-nowrap text-right tabular-nums text-slate-800">{rupiah(nilai)}</Table.Cell>
+                                        <Table.Cell className="text-slate-800">{ba.creator?.name}</Table.Cell>
+                                        <Table.Cell className="whitespace-nowrap text-slate-800">
+                                            {new Date(ba.tanggal_penerimaan).toLocaleDateString('id-ID')}
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <Badge type="color" size="sm" color={PENERIMAAN_STATUS_COLOR[status]} className="rounded-sm">
+                                                {PENERIMAAN_STATUS_LABEL[status]}
+                                            </Badge>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <Tooltip title="Lihat detail">
+                                                <Button
+                                                    color="secondary-brand"
+                                                    size="sm"
+                                                    iconLeading={Eye}
+                                                    aria-label={`Lihat penerimaan ${ba.no_berita_acara}`}
+                                                    href={route('penerimaan-aset.show', ba.id)}
+                                                />
+                                            </Tooltip>
+                                        </Table.Cell>
+                                    </Table.Row>
+                                );
+                            }}
+                        </Table.Body>
+                    </Table>
+
+                    <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
                         <p className="text-xs text-slate-500">
-                            Menampilkan <span className="font-semibold text-slate-800">{items.from ?? 0}-{items.to ?? 0}</span> dari <span className="font-semibold text-slate-800">{items.total}</span> penerimaan
+                            Menampilkan{' '}
+                            <span className="font-semibold tabular-nums text-slate-800">
+                                {items.from ?? 0}-{items.to ?? 0}
+                            </span>{' '}
+                            dari <span className="font-semibold tabular-nums text-slate-800">{items.total}</span> penerimaan
                         </p>
 
                         {items.last_page > 1 && (
-                            <div className="flex items-center gap-1.5">
-                                <button
-                                    type="button"
-                                    disabled={items.current_page <= 1}
-                                    onClick={() => router.get(route('penerimaan-aset.index'), { ...filters, page: items.current_page - 1 }, { preserveState: true, preserveScroll: true })}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                                >
-                                    <ChevronLeft className="h-3.5 w-3.5" /> <span>Sebelumnya</span>
-                                </button>
-                                <div className="flex items-center gap-1">
-                                    {pages.map((page, idx) =>
-                                        page === '...' ? (
-                                            <span key={`gap-${idx}`} className="px-1 text-xs text-slate-400">...</span>
-                                        ) : (
-                                            <button
-                                                key={page}
-                                                type="button"
-                                                onClick={() => router.get(route('penerimaan-aset.index'), { ...filters, page }, { preserveState: true, preserveScroll: true })}
-                                                className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition ${page === items.current_page ? 'bg-blue-800 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'}`}
-                                            >
-                                                {page}
-                                            </button>
-                                        ),
-                                    )}
-                                </div>
-                                <button
-                                    type="button"
-                                    disabled={items.current_page >= items.last_page}
-                                    onClick={() => router.get(route('penerimaan-aset.index'), { ...filters, page: items.current_page + 1 }, { preserveState: true, preserveScroll: true })}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                                >
-                                    <span>Berikutnya</span> <ChevronRight className="h-3.5 w-3.5" />
-                                </button>
-                            </div>
+                            <PaginationPageDefault
+                                className="border-t-0 pt-0 md:pt-0"
+                                page={items.current_page}
+                                total={items.last_page}
+                                onPageChange={(page) =>
+                                    router.get(route('penerimaan-aset.index'), { ...filters, page }, { preserveState: true, preserveScroll: true })
+                                }
+                            />
                         )}
                     </div>
                 </div>
