@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\File;
 function pdSources(): string
 {
     return collect(File::allFiles(app_path()))->merge(File::allFiles(resource_path('js')))
-        ->reject(fn ($file) => str_ends_with(str_replace('\\', '/', $file->getPathname()), 'Pages/Roles/RoleModal.tsx'))
+        ->reject(fn ($file) => str_ends_with(str_replace('\\', '/', $file->getPathname()), 'Pages/Roles/Partials/RoleForm.tsx'))
         ->map(fn ($file) => File::get($file->getPathname()))
         ->implode("\n");
 }
