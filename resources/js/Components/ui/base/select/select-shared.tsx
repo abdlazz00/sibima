@@ -18,7 +18,7 @@ export type SelectItemType = {
 
 export interface CommonProps {
     /** Helper text displayed below the input. */
-    hint?: string;
+    hint?: ReactNode;
     /** Field label displayed above the input. */
     label?: string;
     /** Tooltip text for the help icon next to the label. */

@@ -1,7 +1,13 @@
-import { ChevronRightIcon as ChevronRight, PlusIcon as Plus, TrashIcon as Trash } from '@/Components/Icons';
+import ConfirmDialog from '@/Components/ConfirmDialog';
+import PageHeader from '@/Components/PageHeader';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import { Select } from '@/Components/ui/base/select/select';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { ArrowDown, ArrowUp, Plus, Trash01 } from '@untitledui/icons';
+import { useState } from 'react';
 
 type ApproverType = 'role' | 'user' | 'atasan_unit';
 
@@ -58,12 +64,16 @@ const toStepForm = (s: ServerStep): StepForm => ({
     unit_scope: s.unit_scope,
 });
 
-const FIELD = 'w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden';
+const warning = (text: string) => <span className="text-amber-700">{text}</span>;
 
 export default function Edit({ workflow, options, logs }: EditProps) {
     const form = useForm({ steps: workflow.steps.map(toStepForm) });
+    const [confirmingReset, setConfirmingReset] = useState(false);
+    const [resetting, setResetting] = useState(false);
+    const [announce, setAnnounce] = useState('');
 
     const errors = form.errors as Record<string, string>;
+    const stepError = (index: number, field: string): string | undefined => errors[`steps.${index}.${field}`];
 
     const setSteps = (steps: StepForm[]) => form.setData('steps', steps);
 
@@ -76,12 +86,18 @@ export default function Edit({ workflow, options, logs }: EditProps) {
         const steps = [...form.data.steps];
         [steps[index], steps[target]] = [steps[target], steps[index]];
         setSteps(steps);
+        setAnnounce(`Langkah dipindah ke posisi ${target + 1}`);
     };
 
-    const add = () =>
+    const add = () => {
         setSteps([...form.data.steps, { label: '', approver_type: 'role', approver_role: '', approver_user_id: '', unit_scope: 'none' }]);
+        setAnnounce(`Langkah ${form.data.steps.length + 1} ditambahkan`);
+    };
 
-    const remove = (index: number) => setSteps(form.data.steps.filter((_, i) => i !== index));
+    const remove = (index: number) => {
+        setSteps(form.data.steps.filter((_, i) => i !== index));
+        setAnnounce(`Langkah ${index + 1} dihapus`);
+    };
 
     const save = () => {
         form.transform((data) => ({
@@ -96,19 +112,22 @@ export default function Edit({ workflow, options, logs }: EditProps) {
     };
 
     const reset = () => {
-        if (window.confirm('Kembalikan alur ini ke pengaturan default? Perubahan yang belum tersimpan hilang.')) {
-            router.post(
-                route('workflow-settings.reset', workflow.id),
-                {},
-                {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        form.clearErrors();
-                        form.setData('steps', (page.props as unknown as EditProps).workflow.steps.map(toStepForm));
-                    },
+        setResetting(true);
+        router.post(
+            route('workflow-settings.reset', workflow.id),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    form.clearErrors();
+                    form.setData('steps', (page.props as unknown as EditProps).workflow.steps.map(toStepForm));
                 },
-            );
-        }
+                onFinish: () => {
+                    setResetting(false);
+                    setConfirmingReset(false);
+                },
+            },
+        );
     };
 
     return (
@@ -116,110 +135,160 @@ export default function Edit({ workflow, options, logs }: EditProps) {
             <Head title={`Atur Alur: ${workflow.name}`} />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <Link href={route('workflow-settings.index')} className="hover:text-blue-700">Pengaturan Alur</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">{workflow.name}</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{workflow.name}</h1>
-                </div>
+                <PageHeader
+                    crumbs={[{ label: 'Pengaturan Alur', href: route('workflow-settings.index') }, { label: workflow.name }]}
+                    title={workflow.name}
+                />
+
+                <p className="sr-only" aria-live="polite">
+                    {announce}
+                </p>
 
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                     Pengajuan yang sedang berjalan tidak terpengaruh. Perubahan hanya berlaku untuk pengajuan baru.
                 </div>
 
-                {errors.steps && <p className="text-sm text-red-600">{errors.steps}</p>}
+                {errors.steps && (
+                    <p role="alert" className="text-sm text-red-600">
+                        {errors.steps}
+                    </p>
+                )}
 
                 <div className="space-y-4">
-                    {form.data.steps.map((step, index) => (
-                        <div key={index} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-bold text-blue-700">Langkah {index + 1}</p>
-                                <div className="flex items-center gap-1 text-xs">
-                                    <button type="button" onClick={() => move(index, -1)} disabled={index === 0} className="rounded-sm border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-40">Naik</button>
-                                    <button type="button" onClick={() => move(index, 1)} disabled={index === form.data.steps.length - 1} className="rounded-sm border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-40">Turun</button>
-                                    <button type="button" onClick={() => remove(index)} className="flex items-center gap-1 rounded-sm px-2 py-1 font-medium text-slate-500 hover:text-red-600">
-                                        <Trash className="h-3.5 w-3.5" /> Hapus
-                                    </button>
-                                </div>
-                            </div>
+                    {form.data.steps.map((step, index) => {
+                        const selectedRole = options.roles.find((r) => r.value === step.approver_role);
+                        const selectedUser = options.users.find((u) => String(u.id) === step.approver_user_id);
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
-                                    <label className="mb-1 block text-xs font-medium text-slate-900">Nama Langkah *</label>
-                                    <input type="text" value={step.label} onChange={(e) => update(index, { label: e.target.value })} className={FIELD} placeholder="mis. Verifikasi Kasubag" />
-                                    {errors[`steps.${index}.label`] && <p className="mt-1 text-xs text-red-600">{errors[`steps.${index}.label`]}</p>}
+                        return (
+                            <div key={index} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-bold text-blue-700">Langkah {index + 1}</p>
+                                    <div className="flex items-center gap-1.5">
+                                        <Button
+                                            color="secondary"
+                                            size="sm"
+                                            iconLeading={ArrowUp}
+                                            aria-label={`Naikkan langkah ${index + 1}`}
+                                            isDisabled={index === 0}
+                                            onPress={() => move(index, -1)}
+                                        />
+                                        <Button
+                                            color="secondary"
+                                            size="sm"
+                                            iconLeading={ArrowDown}
+                                            aria-label={`Turunkan langkah ${index + 1}`}
+                                            isDisabled={index === form.data.steps.length - 1}
+                                            onPress={() => move(index, 1)}
+                                        />
+                                        <Button
+                                            color="secondary-destructive"
+                                            size="sm"
+                                            iconLeading={Trash01}
+                                            aria-label={`Hapus langkah ${index + 1}`}
+                                            onPress={() => remove(index)}
+                                        >
+                                            Hapus
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="mb-1 block text-xs font-medium text-slate-900">Tipe Approver *</label>
-                                    <select value={step.approver_type} onChange={(e) => update(index, { approver_type: e.target.value as ApproverType })} className={FIELD}>
-                                        {options.types.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                                    </select>
-                                    {errors[`steps.${index}.approver_type`] && <p className="mt-1 text-xs text-red-600">{errors[`steps.${index}.approver_type`]}</p>}
-                                </div>
-                            </div>
 
-                            {step.approver_type === 'role' && (
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    <div>
-                                        <label className="mb-1 block text-xs font-medium text-slate-900">Role *</label>
-                                        <select value={step.approver_role} onChange={(e) => update(index, { approver_role: e.target.value })} className={FIELD}>
-                                            <option value="">Pilih role...</option>
-                                            {options.roles.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                                        </select>
-                                        {errors[`steps.${index}.approver_role`] && <p className="mt-1 text-xs text-red-600">{errors[`steps.${index}.approver_role`]}</p>}
-                                        {step.approver_role && options.roles.find((r) => r.value === step.approver_role)?.can_act === false && (
-                                            <p className="mt-1 text-xs text-amber-700">Role ini belum memegang izin &quot;Setujui / Tolak&quot;; anggotanya tidak akan bisa menyetujui langkah ini.</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-xs font-medium text-slate-900">Cakupan Unit</label>
-                                        <select value={step.unit_scope} onChange={(e) => update(index, { unit_scope: e.target.value })} className={FIELD}>
-                                            {options.scopes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                                        </select>
-                                        {errors[`steps.${index}.unit_scope`] && <p className="mt-1 text-xs text-red-600">{errors[`steps.${index}.unit_scope`]}</p>}
-                                    </div>
+                                    <Input
+                                        label="Nama Langkah"
+                                        isRequired
+                                        placeholder="mis. Verifikasi Kasubag"
+                                        value={step.label}
+                                        onChange={(v) => update(index, { label: v })}
+                                        isInvalid={Boolean(stepError(index, 'label'))}
+                                        hint={stepError(index, 'label')}
+                                    />
+                                    <Select
+                                        label="Tipe Approver"
+                                        isRequired
+                                        items={options.types.map((t) => ({ id: t.value, label: t.label }))}
+                                        selectedKey={step.approver_type}
+                                        onSelectionChange={(key) => update(index, { approver_type: String(key) as ApproverType })}
+                                        isInvalid={Boolean(stepError(index, 'approver_type'))}
+                                        hint={stepError(index, 'approver_type')}
+                                    >
+                                        {(item) => <Select.Item id={item.id} label={item.label} />}
+                                    </Select>
                                 </div>
-                            )}
 
-                            {step.approver_type === 'user' && (
-                                <div>
-                                    <label className="mb-1 block text-xs font-medium text-slate-900">User *</label>
-                                    <select value={step.approver_user_id} onChange={(e) => update(index, { approver_user_id: e.target.value })} className={FIELD}>
-                                        <option value="">Pilih user...</option>
-                                        {options.users.map((u) => (
-                                            <option key={u.id} value={u.id}>{u.name} ({u.role ?? '-'}{u.unit ? `, ${u.unit}` : ''})</option>
-                                        ))}
-                                    </select>
-                                    {errors[`steps.${index}.approver_user_id`] && <p className="mt-1 text-xs text-red-600">{errors[`steps.${index}.approver_user_id`]}</p>}
-                                    <p className="mt-1 text-xs text-slate-500">Hanya user ini yang dapat menyetujui langkah ini.</p>
-                                    {step.approver_user_id && options.users.find((u) => String(u.id) === String(step.approver_user_id))?.can_act === false && (
-                                        <p className="mt-1 text-xs text-amber-700">User ini belum memegang izin &quot;Setujui / Tolak&quot; sehingga tidak akan bisa menyetujui langkah ini.</p>
-                                    )}
-                                </div>
-                            )}
+                                {step.approver_type === 'role' && (
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        <Select
+                                            label="Role"
+                                            isRequired
+                                            placeholder="Pilih role..."
+                                            items={options.roles.map((r) => ({ id: r.value, label: r.label }))}
+                                            selectedKey={step.approver_role || null}
+                                            onSelectionChange={(key) => update(index, { approver_role: String(key) })}
+                                            isInvalid={Boolean(stepError(index, 'approver_role'))}
+                                            hint={
+                                                stepError(index, 'approver_role') ??
+                                                (selectedRole?.can_act === false
+                                                    ? warning('Role ini belum memegang izin "Setujui / Tolak"; anggotanya tidak akan bisa menyetujui langkah ini.')
+                                                    : undefined)
+                                            }
+                                        >
+                                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                                        </Select>
+                                        <Select
+                                            label="Cakupan Unit"
+                                            items={options.scopes.map((s) => ({ id: s.value, label: s.label }))}
+                                            selectedKey={step.unit_scope}
+                                            onSelectionChange={(key) => update(index, { unit_scope: String(key) })}
+                                            isInvalid={Boolean(stepError(index, 'unit_scope'))}
+                                            hint={stepError(index, 'unit_scope')}
+                                        >
+                                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                                        </Select>
+                                    </div>
+                                )}
 
-                            {step.approver_type === 'atasan_unit' && (
-                                <p className="text-xs text-slate-500">Otomatis: Camat bila unit pengajuan kecamatan, Lurah bila kelurahan.</p>
-                            )}
-                        </div>
-                    ))}
+                                {step.approver_type === 'user' && (
+                                    <Select
+                                        label="User"
+                                        isRequired
+                                        placeholder="Pilih user..."
+                                        items={options.users.map((u) => ({
+                                            id: String(u.id),
+                                            label: `${u.name} (${u.role ?? '-'}${u.unit ? `, ${u.unit}` : ''})`,
+                                        }))}
+                                        selectedKey={step.approver_user_id || null}
+                                        onSelectionChange={(key) => update(index, { approver_user_id: String(key) })}
+                                        isInvalid={Boolean(stepError(index, 'approver_user_id'))}
+                                        hint={
+                                            stepError(index, 'approver_user_id') ??
+                                            (selectedUser?.can_act === false
+                                                ? warning('User ini belum memegang izin "Setujui / Tolak" sehingga tidak akan bisa menyetujui langkah ini.')
+                                                : 'Hanya user ini yang dapat menyetujui langkah ini.')
+                                        }
+                                    >
+                                        {(item) => <Select.Item id={item.id} label={item.label} />}
+                                    </Select>
+                                )}
+
+                                {step.approver_type === 'atasan_unit' && (
+                                    <p className="text-xs text-slate-500">Otomatis: Camat bila unit pengajuan kecamatan, Lurah bila kelurahan.</p>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
 
-                <button type="button" onClick={add} className="flex items-center gap-1.5 text-sm font-semibold text-blue-700">
-                    <Plus className="h-3.5 w-3.5" /> Tambah Langkah
-                </button>
+                <Button color="secondary-brand" size="md" iconLeading={Plus} onPress={add}>
+                    Tambah Langkah
+                </Button>
 
                 <div className="flex items-center justify-between">
-                    <button type="button" onClick={reset} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                    <Button color="secondary" size="md" onPress={() => setConfirmingReset(true)}>
                         Kembalikan ke Default
-                    </button>
-                    <button type="button" onClick={save} disabled={form.processing} className="rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
-                        {form.processing ? 'Menyimpan...' : 'Simpan Alur'}
-                    </button>
+                    </Button>
+                    <Button color="primary" size="md" isLoading={form.processing} onPress={save}>
+                        Simpan Alur
+                    </Button>
                 </div>
 
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
@@ -230,7 +299,9 @@ export default function Edit({ workflow, options, logs }: EditProps) {
                         <ul className="space-y-3 text-sm">
                             {logs.map((l) => (
                                 <li key={l.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-                                    <p className="font-semibold text-slate-900">{l.event === 'reset' ? 'Dikembalikan ke default' : 'Diubah'} oleh {l.user}</p>
+                                    <p className="font-semibold text-slate-900">
+                                        {l.event === 'reset' ? 'Dikembalikan ke default' : 'Diubah'} oleh {l.user}
+                                    </p>
                                     <p className="text-xs text-slate-500">{l.created_at}</p>
                                     <p className="mt-1 text-xs text-slate-600">Sebelum: {l.before || '-'}</p>
                                     <p className="text-xs text-slate-600">Sesudah: {l.after || '-'}</p>
@@ -240,6 +311,18 @@ export default function Edit({ workflow, options, logs }: EditProps) {
                     )}
                 </div>
             </div>
+
+            {confirmingReset && (
+                <ConfirmDialog
+                    title="Kembalikan ke Default"
+                    confirmLabel="Ya, Kembalikan"
+                    isLoading={resetting}
+                    onConfirm={reset}
+                    onClose={() => setConfirmingReset(false)}
+                >
+                    Kembalikan alur ini ke pengaturan default? Perubahan yang belum tersimpan hilang.
+                </ConfirmDialog>
+            )}
         </AuthenticatedLayout>
     );
 }
