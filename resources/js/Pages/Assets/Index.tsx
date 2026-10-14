@@ -327,8 +327,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                         <div className="flex items-center justify-center gap-1.5">
                                             <Tooltip title="Lihat detail">
                                                 <Button
-                                                    color="secondary"
-                                                    className="hover:*:data-icon:text-brand-600!"
+                                                    color="secondary-brand"
                                                     size="sm"
                                                     iconLeading={Eye}
                                                     aria-label="Lihat detail"
@@ -338,8 +337,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                             {can.update && (
                                                 <Tooltip title="Ubah aset">
                                                     <Button
-                                                        color="secondary"
-                                                        className="hover:*:data-icon:text-brand-600!"
+                                                        color="secondary-green"
                                                         size="sm"
                                                         iconLeading={Edit01}
                                                         aria-label="Ubah aset"
@@ -350,8 +348,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                             {can.printLabel && (
                                                 <Tooltip title="Cetak label QR">
                                                     <Button
-                                                        color="secondary"
-                                                        className="hover:*:data-icon:text-brand-600!"
+                                                        color="secondary-violet"
                                                         size="sm"
                                                         iconLeading={Printer}
                                                         aria-label="Cetak label QR"
