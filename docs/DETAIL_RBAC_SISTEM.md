@@ -62,7 +62,7 @@ Role kustom bisa dibuat dari UI. Kolom `roles.unit_head_of` (`kecamatan`/`kelura
 | Laporan | `laporan.aset`, `laporan.mutasi`, `laporan.rusak-hilang` |
 | Pengaturan | `pengaturan.alur`, `pengaturan.role`, `user.view`, `user.manage-access`, `user.reset-password`, `user.toggle-status`, `user.delete` |
 
-Aturan katalog: setiap permission harus ditegakkan di kode (ada test penjaga di `PermissionCatalogTest`). Permission baru ditambahkan ke katalog, label di `RoleModal.tsx`, dan migrasi data yang aditif untuk lingkungan yang sudah berjalan (seeder tidak menimpa role yang sudah punya permission).
+Aturan katalog: setiap permission harus ditegakkan di kode (ada test penjaga di `PermissionCatalogTest`). Permission baru ditambahkan ke katalog, label di `Pages/Roles/Partials/RoleForm.tsx`, dan migrasi data yang aditif untuk lingkungan yang sudah berjalan (seeder tidak menimpa role yang sudah punya permission).
 
 ---
 
