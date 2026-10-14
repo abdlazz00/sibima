@@ -11,3 +11,13 @@ export const bulanLabel = (ym: string): string => {
 
     return new Intl.DateTimeFormat('id-ID', { month: 'short', year: 'numeric' }).format(new Date(year, month - 1, 1));
 };
+
+/** "2026-10-14" -> "14 Oktober 2026". */
+export const tanggal = (value?: string | null): string =>
+    value ? new Date(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+
+/** "2026-10-14T08:30:00Z" -> "14 Okt 2026 15.30". */
+export const tanggalWaktu = (value?: string | null): string =>
+    value
+        ? new Date(value).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : '—';
