@@ -1,7 +1,8 @@
-import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
+import { Button } from '@/Components/ui/base/buttons/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 
 interface WorkflowRow {
     id: number;
@@ -23,34 +24,33 @@ export default function Index({ workflows }: IndexProps) {
             <Head title="Pengaturan Alur Persetujuan" />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Pengaturan Alur</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Pengaturan Alur Persetujuan</h1>
-                    <p className="mt-1 text-sm text-slate-500">Atur langkah dan approver tiap alur. Perubahan hanya berlaku untuk pengajuan baru.</p>
-                </div>
+                <PageHeader crumbs={[{ label: 'Pengaturan Alur' }]} title="Pengaturan Alur Persetujuan" />
+                <p className="-mt-3 text-sm text-slate-500">
+                    Atur langkah dan approver tiap alur. Perubahan hanya berlaku untuk pengajuan baru.
+                </p>
 
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                    <ul className="divide-y divide-slate-100">
-                        {workflows.map((w) => (
-                            <li key={w.id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50/60">
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-slate-900">{w.name}</p>
-                                    <p className="truncate text-xs text-slate-500">{w.summary || 'Belum ada langkah'}</p>
-                                    <p className="mt-1 text-[11px] text-slate-400">
-                                        {w.step_count} langkah · {w.pending_count} pengajuan berjalan
-                                        {w.last_changed_at ? ` · diubah ${new Date(w.last_changed_at).toLocaleDateString('id-ID')}` : ''}
-                                    </p>
-                                </div>
-                                <Link href={route('workflow-settings.edit', w.id)} className="shrink-0 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                                    Atur
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                    {workflows.length === 0 ? (
+                        <p className="py-12 text-center text-sm text-slate-400">Belum ada alur persetujuan.</p>
+                    ) : (
+                        <ul className="divide-y divide-slate-100">
+                            {workflows.map((w) => (
+                                <li key={w.id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50/60">
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-slate-900">{w.name}</p>
+                                        <p className="truncate text-xs text-slate-500">{w.summary || 'Belum ada langkah'}</p>
+                                        <p className="mt-1 text-[11px] tabular-nums text-slate-400">
+                                            {w.step_count} langkah · {w.pending_count} pengajuan berjalan
+                                            {w.last_changed_at ? ` · diubah ${new Date(w.last_changed_at).toLocaleDateString('id-ID')}` : ''}
+                                        </p>
+                                    </div>
+                                    <Button color="secondary-green" size="md" className="shrink-0" href={route('workflow-settings.edit', w.id)}>
+                                        Atur
+                                    </Button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>
