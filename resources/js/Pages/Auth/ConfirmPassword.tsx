@@ -1,8 +1,6 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import AuthSplitLayout from '@/Layouts/AuthSplitLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -20,37 +18,35 @@ export default function ConfirmPassword() {
     };
 
     return (
-        <GuestLayout>
-            <Head title="Confirm Password" />
+        <AuthSplitLayout>
+            <Head title="Konfirmasi Kata Sandi - SIBIMA" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                This is a secure area of the application. Please confirm your
-                password before continuing.
-            </div>
+            <h1 className="mb-2 text-[28px] font-bold tracking-tight text-gray-900">Konfirmasi Kata Sandi</h1>
+            <p className="mb-7 text-sm text-gray-600">
+                Ini adalah area aman aplikasi. Mohon konfirmasi kata sandi Anda sebelum melanjutkan.
+            </p>
 
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+            <form onSubmit={submit} className="space-y-5">
+                <Input
+                    label="Kata Sandi"
+                    name="password"
+                    type="password"
+                    size="lg"
+                    autoComplete="current-password"
+                    autoFocus
+                    isRequired
+                    hideRequiredIndicator
+                    placeholder="••••••••"
+                    value={data.password}
+                    onChange={(v) => setData('password', v)}
+                    isInvalid={Boolean(errors.password)}
+                    hint={errors.password}
+                />
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirm
-                    </PrimaryButton>
-                </div>
+                <Button type="submit" color="primary" size="lg" className="w-full" isLoading={processing}>
+                    Konfirmasi
+                </Button>
             </form>
-        </GuestLayout>
+        </AuthSplitLayout>
     );
 }
