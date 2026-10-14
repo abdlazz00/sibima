@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 19, Inertia 2, Tailwind 4, Untitled UI (React Aria Components), `@untitledui/icons`.
 
-**Spec:** `docs/superpowers/specs/2026-10-14-migrasi-untitled-ui-design.md` §3.5 (modul Aset dikerjakan di luar urutan kelompok atas permintaan pengguna 2026-10-14). Komponen bersama: commit `c1c16e8` (`PageHeader`, `ConfirmDialog`, `TextArea`).
+**Spec:** `docs/superpowers/specs/2026-10-14-migrasi-untitled-ui-design.md` §3.5 (modul Aset dikerjakan di luar urutan kelompok atas permintaan pengguna 2026-10-14). Komponen bersama: commit `c1c16e8` (`PageHeader`, `ConfirmDialog`, `TextArea`). Plan ini sudah memuat hasil review ponytail dan impeccable (2026-10-14).
 
 ## Global Constraints
 
@@ -28,8 +28,10 @@
 4. **Unggah foto**: batas `maxPhotos`, penggabungan file baru dengan yang sudah dipilih, pratinjau `URL.createObjectURL`, dan pengiriman `forceFormData` tidak boleh berubah; area unggah harus bisa dioperasikan keyboard (sebelumnya `div` dengan `onClick`). Pagar: `<button>` sungguhan (Task 1).
 5. **Hapus foto lama (Edit)** sebelumnya `confirm()` native; sekarang `ConfirmDialog` yang tidak bisa ditutup saat permintaan berjalan, dan foto tidak boleh terhapus bila dialog dibatalkan. Pagar: Task 2.
 6. **Tombol Batal** sebelumnya `<a href>` (muat ulang penuh); sekarang `Button href` lewat Inertia. Pagar: `RouterProvider` dari Fase 2; butir gerbang.
-7. **Edit tanpa `kondisiOptions`**: field Kondisi hanya tampil di Create (prop opsional). Pagar: kondisi `kondisiOptions &&` dipertahankan (Task 1).
-8. **Badge Kondisi/Status di Show** untuk nilai tak dikenal (mis. status baru) tidak boleh membuat halaman crash. Pagar: fallback `?? 'gray'` (Task 3).
+7. **Isian Edit hilang saat hapus foto** (Inertia me-remount halaman bila state tidak dipertahankan). Pagar: `preserveState: true` pada `router.delete` (Task 2); butir gerbang.
+8. **Galat server di bagian atas form panjang tak terlihat** dari tombol Simpan. Pagar: gulir/fokus ke field galat pertama dan ringkasan jumlah galat (Task 1).
+9. **Batas nilai buku ≤ nilai perolehan** baru diketahui setelah gagal kirim. Pagar: hint tetap + pratinjau Rupiah (Task 1).
+10. **Badge Kondisi/Status di Show** untuk nilai tak dikenal (mis. status baru) tidak boleh membuat halaman crash. Pagar: fallback `?? 'gray'` (Task 3).
 
 ---
 
@@ -41,6 +43,7 @@
 | `resources/js/Pages/Assets/Create.tsx` | Halaman Tambah Aset |
 | `resources/js/Pages/Assets/Edit.tsx` | Halaman Ubah Aset (+ konfirmasi hapus foto) |
 | `resources/js/Pages/Assets/Show.tsx` | Halaman detail |
+| `resources/js/Components/PageHeader.tsx` | Menambah prop `badges` (Task 3) |
 
 ---
 
@@ -63,7 +66,7 @@ import { TextArea } from '@/Components/ui/base/textarea/textarea';
 import { AssetCategory, AssetPhoto } from '@/types';
 import { InertiaFormProps } from '@inertiajs/react';
 import { Plus, UploadCloud02, XClose } from '@untitledui/icons';
-import { ChangeEvent, FormEvent, useRef } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef } from 'react';
 
 export type AssetFormData = {
     category_id: number | '';
@@ -92,6 +95,11 @@ type Props = {
     cancelHref: string;
 };
 
+const rupiah = (value: string) =>
+    value === '' || Number.isNaN(Number(value))
+        ? undefined
+        : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value));
+
 function SectionTitle({ children }: { children: string }) {
     return (
         <div className="border-b border-slate-100 pb-2">
@@ -113,6 +121,18 @@ export default function AssetForm({
 }: Props) {
     const { data, setData, processing, errors } = form;
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const errorCount = Object.keys(errors).length;
+
+    // Form panjang: setelah kirim gagal, bawa pengguna ke isian bermasalah pertama.
+    useEffect(() => {
+        if (errorCount === 0) return;
+        const target = formRef.current?.querySelector<HTMLElement>(
+            '[aria-invalid="true"], [data-invalid], [data-photo-error]',
+        );
+        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target?.focus({ preventScroll: true });
+    }, [errors]);
 
     const handlePhotosChange = (e: ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files ?? []);
@@ -136,7 +156,7 @@ export default function AssetForm({
         'rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1';
 
     return (
-        <form onSubmit={onSubmit} className="space-y-6">
+        <form ref={formRef} onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-8 rounded-xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
                 {/* Informasi Dasar Aset */}
                 <section className="space-y-4">
@@ -163,7 +183,7 @@ export default function AssetForm({
                             value={data.kode_barang}
                             onChange={(v) => setData('kode_barang', v)}
                             isInvalid={Boolean(errors.kode_barang)}
-                            hint={errors.kode_barang}
+                            hint={errors.kode_barang ?? 'Format kode BMD, mis. 1.3.2.05.02.04.xxx'}
                         />
                         <Input
                             label="Nama Barang"
@@ -229,7 +249,7 @@ export default function AssetForm({
                             value={data.nilai_perolehan}
                             onChange={(v) => setData('nilai_perolehan', v)}
                             isInvalid={Boolean(errors.nilai_perolehan)}
-                            hint={errors.nilai_perolehan}
+                            hint={errors.nilai_perolehan ?? rupiah(data.nilai_perolehan)}
                         />
                         <Input
                             label="Nilai Buku Saat Ini (Rp)"
@@ -241,7 +261,10 @@ export default function AssetForm({
                             value={data.nilai_buku}
                             onChange={(v) => setData('nilai_buku', v)}
                             isInvalid={Boolean(errors.nilai_buku)}
-                            hint={errors.nilai_buku}
+                            hint={
+                                errors.nilai_buku ??
+                                [rupiah(data.nilai_buku), 'Tidak boleh melebihi nilai perolehan'].filter(Boolean).join(' · ')
+                            }
                         />
                         <div className="sm:col-span-2">
                             <Input
@@ -268,8 +291,6 @@ export default function AssetForm({
                             accept="image/jpeg,image/png,image/webp"
                             multiple
                             className="hidden"
-                            tabIndex={-1}
-                            aria-hidden="true"
                         />
                         {totalPhotoCount < maxPhotos && (
                             <button
@@ -279,14 +300,18 @@ export default function AssetForm({
                             >
                                 <UploadCloud02 className="size-8 text-slate-400" aria-hidden="true" />
                                 <span className="text-sm text-slate-700">
-                                    <span className="font-semibold text-slate-900">Klik untuk unggah</span> atau seret foto ke sini
+                                    <span className="font-semibold text-slate-900">Klik untuk unggah</span> foto aset
                                 </span>
                                 <span className="text-xs text-slate-500">
                                     Maksimal {maxPhotos} foto, masing-masing maks. 5MB (JPG, PNG, WebP)
                                 </span>
                             </button>
                         )}
-                        {errors.photos && <p className="text-sm text-red-600">{errors.photos}</p>}
+                        {errors.photos && (
+                            <p data-photo-error tabIndex={-1} className="text-sm text-red-600 outline-hidden">
+                                {errors.photos}
+                            </p>
+                        )}
 
                         {(existingPhotos.length > 0 || data.photos.length > 0) && (
                             <div className="flex flex-wrap gap-3">
@@ -297,7 +322,7 @@ export default function AssetForm({
                                             <button
                                                 type="button"
                                                 onClick={() => onRemoveExistingPhoto(photo)}
-                                                className={`absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-white ${photoButtonClass}`}
+                                                className={`absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-white before:absolute before:-inset-1.5 ${photoButtonClass}`}
                                                 aria-label="Hapus foto"
                                             >
                                                 <XClose className="size-3" aria-hidden="true" />
@@ -311,7 +336,7 @@ export default function AssetForm({
                                         <button
                                             type="button"
                                             onClick={() => removeNewPhoto(idx)}
-                                            className={`absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-white ${photoButtonClass}`}
+                                            className={`absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-white before:absolute before:-inset-1.5 ${photoButtonClass}`}
                                             aria-label="Batalkan foto"
                                         >
                                             <XClose className="size-3" aria-hidden="true" />
@@ -349,11 +374,16 @@ export default function AssetForm({
             </div>
 
             <div className="flex items-center justify-end gap-3">
+                {errorCount > 0 && (
+                    <p role="alert" className="mr-auto text-sm font-medium text-red-600">
+                        {errorCount} isian perlu diperbaiki
+                    </p>
+                )}
                 <Button color="secondary" size="md" href={cancelHref}>
                     Batal
                 </Button>
                 <Button color="primary" size="md" type="submit" isLoading={processing}>
-                    {processing ? 'Menyimpan...' : submitLabel}
+                    {submitLabel}
                 </Button>
             </div>
         </form>
@@ -368,7 +398,7 @@ npx tsc --noEmit
 npm run build 2>&1 | tail -5
 grep -n "InputError\|@/Components/Icons" resources/js/Pages/Assets/Partials/AssetForm.tsx
 ```
-Expected: `tsc` dan build bersih; `grep` tidak menemukan apa pun. Prop `Input`/`Select`/`TextArea` yang berbeda dari yang diasumsikan (mis. `inputMode`, `isRequired` pada `TextArea`) disesuaikan dalam commit yang sama dan dicatat sebagai `Ruling`.
+Expected: `tsc` dan build bersih; `grep` tidak menemukan apa pun. Prop `Input`/`Select`/`TextArea` yang berbeda dari yang diasumsikan (mis. `inputMode`, `isRequired` pada `TextArea`) disesuaikan dalam commit yang sama dan dicatat sebagai `Ruling`. Selector efek gulir-ke-galat (`[aria-invalid="true"], [data-invalid], [data-photo-error]`) harus cocok dengan atribut yang benar-benar dipasang React Aria pada input dan tombol `Select` yang tidak valid; sesuaikan bila berbeda dan catat sebagai `Ruling`.
 
 - [ ] **Step 3: Commit**
 
@@ -423,6 +453,7 @@ const confirmDeletePhoto = () => {
     setDeletingPhoto(true);
     router.delete(route('assets.photos.destroy', { asset: asset.id, photo: photoToDelete.id }), {
         preserveScroll: true,
+        preserveState: true,
         onFinish: () => {
             setDeletingPhoto(false);
             setPhotoToDelete(null);
@@ -457,9 +488,9 @@ Header:
 ```bash
 npx tsc --noEmit
 npm run build 2>&1 | tail -5
-php artisan test --compact --filter='AssetManage|AssetVisibility|AssetBrowse'
+php artisan test --compact --filter='Asset'
 ```
-Expected: bersih dan hijau (nama berkas `AssetManage…` mengikuti yang ada; sesuaikan filter dengan `ls tests/Feature | grep -i asset`).
+Expected: bersih dan hijau.
 
 - [ ] **Step 4: Commit**
 
@@ -473,10 +504,34 @@ git commit -m "feat(ui): migrate the asset create and edit pages to Untitled UI 
 ### Task 3: `Show`
 
 **Files:**
-- Modify: `resources/js/Pages/Assets/Show.tsx`
+- Modify: `resources/js/Components/PageHeader.tsx`, `resources/js/Pages/Assets/Show.tsx`
 
 **Interfaces:**
 - Consumes: `PageHeader` (+ slot `actions`), `Button` (`secondary-violet`, `secondary-green`), `Badge`, ikon `Camera01`, `Edit01`, `Printer`.
+
+- [ ] **Step 0: `PageHeader` mendukung `badges`**
+
+Badge Kondisi/Status adalah keterangan tentang judul, bukan aksi, jadi tampil di samping `h1`. Di `resources/js/Components/PageHeader.tsx` tambah prop `badges?: ReactNode` dan ganti baris `h1`:
+```tsx
+{
+    crumbs,
+    title,
+    badges,
+    actions,
+}: {
+    crumbs: Crumb[];
+    title: string;
+    badges?: ReactNode;
+    actions?: ReactNode;
+}
+```
+```tsx
+<div className="flex flex-wrap items-center gap-3">
+    <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+    {badges}
+</div>
+```
+Halaman lain yang sudah memakai `PageHeader` (Data Aset) tidak berubah karena `badges` opsional.
 
 - [ ] **Step 1: Impor dan peta badge**
 
@@ -500,12 +555,8 @@ const KONDISI_BADGE: Record<string, 'success' | 'warning' | 'error' | 'gray'> = 
     hilang: 'gray',
 };
 
-const STATUS_BADGE: Record<string, 'brand' | 'warning'> = {
-    aktif: 'brand',
-    dalam_proses: 'warning',
-};
 ```
-Hapus `KONDISI_STYLE` dan `STATUS_STYLE`.
+Hapus `KONDISI_STYLE` dan `STATUS_STYLE` (status memakai ternary langsung, tanpa peta).
 
 - [ ] **Step 2: Header**
 
@@ -514,14 +565,18 @@ Ganti seluruh blok `{/* Header */} …` (div bertingkat sampai penutup kelompok 
 <PageHeader
     crumbs={[{ label: 'Data Aset', href: route('assets.index') }, { label: 'Detail Aset' }]}
     title={asset.nama_aset}
-    actions={
+    badges={
         <>
             <Badge type="color" size="sm" color={KONDISI_BADGE[asset.kondisi] ?? 'gray'} className="rounded-sm">
                 {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ?? asset.kondisi}
             </Badge>
-            <Badge type="color" size="sm" color={STATUS_BADGE[asset.status] ?? 'brand'} className="rounded-sm">
+            <Badge type="color" size="sm" color={asset.status === 'aktif' ? 'brand' : 'warning'} className="rounded-sm">
                 {asset.status === 'aktif' ? 'Aktif' : 'Dalam Proses'}
             </Badge>
+        </>
+    }
+    actions={
+        <>
             <Button color="secondary-violet" size="md" iconLeading={Printer} onPress={() => setShowPrintModal(true)}>
                 Cetak Label QR
             </Button>
@@ -534,7 +589,7 @@ Ganti seluruh blok `{/* Header */} …` (div bertingkat sampai penutup kelompok 
     }
 />
 ```
-Ganti `<Camera className="h-9 w-9" />` menjadi `<Camera01 className="size-9" aria-hidden="true" />`. Bagian galeri, tabel detail (`DetailRow`), dan riwayat tidak berubah, kecuali tombol thumbnail galeri mendapat `aria-label={`Foto ${idx + 1}`}` dan `aria-current={idx === activePhoto}`.
+Ganti `<Camera className="h-9 w-9" />` menjadi `<Camera01 className="size-9" aria-hidden="true" />`. `DetailRow` menumpuk di layar sempit: ganti kelas `flex gap-4 px-3 py-2.5 text-sm ${…}` menjadi `flex flex-col gap-1 px-3 py-2.5 text-sm sm:flex-row sm:gap-4 ${…}` dan kelas label `w-40 shrink-0` menjadi `shrink-0 sm:w-40`. Bagian galeri dan riwayat tidak berubah, kecuali tombol thumbnail galeri mendapat `aria-label={`Foto ${idx + 1}`}` dan `aria-current={idx === activePhoto}`.
 
 - [ ] **Step 3: Verifikasi dan commit**
 
@@ -542,8 +597,8 @@ Ganti `<Camera className="h-9 w-9" />` menjadi `<Camera01 className="size-9" ari
 npx tsc --noEmit
 npm run build 2>&1 | tail -5
 grep -n "@/Components/Icons\|KONDISI_STYLE" resources/js/Pages/Assets/Show.tsx
-php artisan test --compact --filter='AssetManage|AssetVisibility|AssetBrowse'
-git add resources/js/Pages/Assets/Show.tsx
+php artisan test --compact --filter='Asset'
+git add resources/js/Components/PageHeader.tsx resources/js/Pages/Assets/Show.tsx
 git commit -m "feat(ui): migrate the asset detail page to Untitled UI components"
 ```
 Expected: `tsc`/build bersih; `grep` kosong; test hijau.
@@ -551,8 +606,8 @@ Expected: `tsc`/build bersih; `grep` kosong; test hijau.
 - [ ] **Step 4: GERBANG ASET — berhenti**
 
 Laporkan hasil Task 1–3, `Ruling`, dan hal yang tak bisa diverifikasi tanpa browser. Minta pengguna memeriksa (Data Aset → Tambah, → Detail, → Ubah):
-- **Tambah**: semua field tampil dengan label dan tanda wajib; kirim kosong ditolak browser; Subkategori bisa diketik-lompat dan label terbaca utuh; angka rata kanan/tabular; galat validasi server tampil merah per field (mis. nilai buku > nilai perolehan); area unggah bisa dicapai dan dipicu dengan Tab+Enter; pilih beberapa foto, batas jumlah, pratinjau, batalkan foto; simpan berhasil; Batal berpindah tanpa muat ulang penuh.
-- **Ubah**: nilai awal terisi (subkategori, tanggal, angka), field Kondisi tidak ada; hapus foto lama membuka dialog (Esc/klik luar menutup, foto tetap bila dibatalkan, terhapus bila dikonfirmasi); simpan perubahan.
+- **Tambah**: semua field tampil dengan label dan tanda wajib; kirim kosong ditolak browser; Subkategori bisa diketik-lompat dan label terbaca utuh; angka rata kanan/tabular; galat validasi server tampil merah per field (mis. nilai buku > nilai perolehan) dan layar berpindah ke isian bermasalah pertama dengan ringkasan "N isian perlu diperbaiki"; pratinjau Rupiah muncul di bawah field nilai; hint batas nilai buku terlihat sebelum mengirim; area unggah bisa dicapai dan dipicu dengan Tab+Enter; pilih beberapa foto, batas jumlah, pratinjau, batalkan foto; simpan berhasil; Batal berpindah tanpa muat ulang penuh.
+- **Ubah**: nilai awal terisi (subkategori, tanggal, angka), field Kondisi tidak ada; **ubah satu isian lalu hapus foto lama: isian yang belum disimpan tetap ada**; hapus foto lama membuka dialog (Esc/klik luar menutup, foto tetap bila dibatalkan, terhapus bila dikonfirmasi); simpan perubahan.
 - **Detail**: badge Kondisi/Status dengan warna benar, tombol Cetak Label QR (ungu) membuka modal, Edit Data (hijau) hanya untuk yang berhak, galeri foto, QR, tabel detail, riwayat.
 - Umum: keyboard (Tab/Enter/Esc), layar 375 px, cincin fokus terlihat.
 **Jangan memulai halaman/modul berikutnya** sebelum pengguna menyatakan lolos.
