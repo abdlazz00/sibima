@@ -6,6 +6,7 @@ import { Input } from '@/Components/ui/base/input/input';
 import { Select } from '@/Components/ui/base/select/select';
 import { Tooltip } from '@/Components/ui/base/tooltip/tooltip';
 import ImportExportButtons from '@/Components/ImportExportButtons';
+import PageHeader from '@/Components/PageHeader';
 import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
@@ -137,44 +138,35 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <Link href={route('dashboard')} className="hover:text-blue-700">
-                                Home
-                            </Link>
-                            <span aria-hidden="true">/</span>
-                            <span className="font-medium text-slate-800">Data Aset</span>
-                        </nav>
-                        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-                            Daftar Barang Milik Daerah
-                        </h1>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        {selectedIds.length > 0 && Boolean(can.printLabel) && (
-                            <Button
-                                color="secondary-brand"
-                                size="md"
-                                iconLeading={Printer}
-                                className={
-                                    overLimit
-                                        ? 'bg-amber-50 text-amber-800 ring-amber-300 hover:bg-amber-100 hover:text-amber-900 *:data-icon:text-amber-600 hover:*:data-icon:text-amber-700'
-                                        : undefined
-                                }
-                                onPress={() => setPrintIds(selectedIds)}
-                            >
-                                Cetak Label ({selectedIds.length}){overLimit && ` · Maks ${MAX_LABELS}`}
-                            </Button>
-                        )}
-                        <ImportExportButtons modul="aset" query={filters} />
-                        {can.create && (
-                            <Button color="primary" size="md" iconLeading={Plus} href={route('assets.create')}>
-                                Tambah Aset Baru
-                            </Button>
-                        )}
-                    </div>
-                </div>
+                <PageHeader
+                    crumbs={[{ label: 'Data Aset' }]}
+                    title="Daftar Barang Milik Daerah"
+                    actions={
+                        <>
+                            {selectedIds.length > 0 && Boolean(can.printLabel) && (
+                                <Button
+                                    color="secondary-brand"
+                                    size="md"
+                                    iconLeading={Printer}
+                                    className={
+                                        overLimit
+                                            ? 'bg-amber-50 text-amber-800 ring-amber-300 hover:bg-amber-100 hover:text-amber-900 *:data-icon:text-amber-600 hover:*:data-icon:text-amber-700'
+                                            : undefined
+                                    }
+                                    onPress={() => setPrintIds(selectedIds)}
+                                >
+                                    Cetak Label ({selectedIds.length}){overLimit && ` · Maks ${MAX_LABELS}`}
+                                </Button>
+                            )}
+                            <ImportExportButtons modul="aset" query={filters} />
+                            {can.create && (
+                                <Button color="primary" size="md" iconLeading={Plus} href={route('assets.create')}>
+                                    Tambah Aset Baru
+                                </Button>
+                            )}
+                        </>
+                    }
+                />
 
                 {/* Filter Toolbar */}
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
