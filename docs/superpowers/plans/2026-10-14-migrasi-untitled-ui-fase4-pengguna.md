@@ -12,6 +12,8 @@
 
 Plan ini sudah memuat hasil review ponytail dan impeccable (2026-10-14).
 
+Review ponytail (-30 baris) dan impeccable (label bertulisan untuk ubah status, label Indonesia cakupan dan izin, tombol Cari) sudah diterapkan.
+
 ## Global Constraints
 
 - Hanya komponen Untitled UI gratis. Panduan UI/UX menang untuk identitas; Untitled UI menang untuk semantik, keyboard, fokus.
@@ -26,14 +28,16 @@ Plan ini sudah memuat hasil review ponytail dan impeccable (2026-10-14).
 ## Review Focus
 
 1. **Konfirmasi non-destruktif tidak boleh berlabel "tidak dapat dibatalkan"**: aktif/nonaktifkan akun bisa dibalik. Pagar: `ConfirmDialog variant="default"` (Task 1).
-2. **Paginasi server**: pindah halaman harus mempertahankan filter yang sedang berlaku (dari props `filters`, bukan isi kolom yang belum dikirim). Pagar: Task 2; butir gerbang.
-3. **Filter dan pencarian**: Enter di kolom cari menerapkan pencarian; Select menerapkan langsung; "Hapus semua filter" mengosongkan semuanya dan kembali ke halaman 1. Pagar: logika `applyFilter` tidak diubah (Task 2).
-4. **Penguncian diri**: tombol Nonaktifkan tidak tampil untuk akun sendiri; di Edit, status dan peran Kasubag terkunci untuk akun sendiri dengan penjelasan; zona hapus tidak tampil. Pagar: kondisi dipertahankan persis (Task 2, 4).
-5. **Izin dari role tidak bisa dicabut lewat izin khusus**: di Edit, izin bawaan role tampil tercentang dan terkunci, hanya izin tambahan yang bisa diubah; mengganti role memperbarui kunci tersebut seketika. Pagar: `isDisabled={fromRole}` dan `rolePermissionsSet` tidak diubah (Task 4).
-6. **Radio cakupan "ikuti default"** bernilai kosong di server (`unit_scope_override: ''`/`null`). Pagar: peta `default` ⇄ `''` (Task 4).
-7. **Kata sandi opsional**: dikosongkan = tidak diubah; hanya tampil bila `canResetPassword`; galat tampil di field. Pagar: Task 4.
-8. **Form panjang** (4 bagian + matriks): bilah aksi harus tetap terjangkau dan galat harus terlihat. Pagar: bilah lengket dengan ringkasan galat (Task 4).
-9. **Animasi `animate-pulse`** pada titik status Aktif dihapus (gerak tanpa fungsi dan tidak mengikuti `prefers-reduced-motion`). Perubahan disengaja (Task 2).
+2. **Paginasi server**: pindah halaman harus mempertahankan filter yang sedang berlaku (dari props `filters`, bukan isi kolom yang belum dikirim). Pagar: Task 3; butir gerbang.
+3. **Filter dan pencarian**: Enter di kolom cari menerapkan pencarian; Select menerapkan langsung; "Hapus semua filter" mengosongkan semuanya dan kembali ke halaman 1. Pagar: logika `applyFilter` tidak diubah (Task 3).
+4. **Penguncian diri**: tombol Nonaktifkan tidak tampil untuk akun sendiri; di Edit, status dan peran Kasubag terkunci untuk akun sendiri dengan penjelasan; zona hapus tidak tampil. Pagar: kondisi dipertahankan persis (Task 3, 4).
+5. **Izin dari role tidak bisa dicabut lewat izin khusus**: di Edit, izin bawaan role tampil tercentang dan terkunci, hanya izin tambahan yang bisa diubah; mengganti role memperbarui kunci tersebut seketika. Pagar: `isDisabled={fromRole}` dan `rolePermissionsSet` tidak diubah (Task 5).
+6. **Radio cakupan "ikuti default"** bernilai kosong di server (`unit_scope_override: ''`/`null`). Pagar: peta `default` ⇄ `''` (Task 5).
+7. **Kata sandi opsional**: dikosongkan = tidak diubah; hanya tampil bila `canResetPassword`; galat tampil di field. Pagar: Task 5.
+8. **Form panjang** (4 bagian + matriks): bilah aksi harus tetap terjangkau dan galat harus terlihat. Pagar: bilah lengket dengan ringkasan galat (Task 5).
+9. **Kode mentah ke pengguna**: `Scope: all`, `(own)`, dan kode izin (`aset.view`) sebelumnya tampil apa adanya. Pagar: `UNIT_SCOPE_LABEL` dan `formatPermissionLabel` (Task 2, 3, 4, 5).
+10. **Aksi ubah status harus jelas dan terbaca di layar sentuh**: tombol bertulisan "Nonaktifkan"/"Aktifkan", bukan ikon saja (Task 3).
+11. **Pencarian tanpa kontrol terlihat**: tombol "Cari" di samping kolom; Enter tetap bekerja (Task 3).
 
 ---
 
@@ -42,6 +46,7 @@ Plan ini sudah memuat hasil review ponytail dan impeccable (2026-10-14).
 | Berkas | Tanggung jawab |
 |---|---|
 | `resources/js/Components/ConfirmDialog.tsx` | Prop `variant` (`danger`/`default`) |
+| `resources/js/lib/unitScope.ts`, `lib/permissions.ts` (baru) | Label cakupan dan izin, penyaring grup izin |
 | `resources/js/Pages/Users/Index.tsx` | Daftar pengguna |
 | `resources/js/Pages/Users/Show.tsx` | Detail pengguna |
 | `resources/js/Pages/Users/Edit.tsx` | Ubah pengguna dan hak akses |
@@ -140,13 +145,134 @@ Expected: bersih (pemanggil lama memakai `variant` bawaan `danger`).
 
 ---
 
-### Task 2: `Index`
+### Task 2: Pustaka bersama (`unitScope`, `permissions`)
+
+**Files:**
+- Create: `resources/js/lib/unitScope.ts`, `resources/js/lib/permissions.ts`
+- Modify: `resources/js/Pages/Roles/Partials/RoleForm.tsx`, `tests/Feature/PermissionCatalogTest.php`
+
+**Interfaces:**
+- Produces: `UNIT_SCOPE_LABEL: Record<string, string>` (`@/lib/unitScope`); `PERMISSION_LABELS`, `formatPermissionLabel(perm)`, `filterPermissionGroups(groups, query)` (`@/lib/permissions`).
+
+- [ ] **Step 1: `lib/unitScope.ts`**
+
+```ts
+export const UNIT_SCOPE_LABEL: Record<string, string> = {
+    all: 'Semua Unit',
+    binaan: 'Unit & Binaan',
+    own: 'Unit Sendiri',
+};
+```
+
+- [ ] **Step 2: `lib/permissions.ts`**
+
+Label izin dipindah apa adanya dari `RoleForm.tsx` supaya dipakai bersama daftar/detail/ubah pengguna; penyaring grup menggantikan dua salinan identik di `Show` dan `Edit`.
+```ts
+const PERMISSION_LABELS: Record<string, string> = {
+    'dashboard.view': 'Lihat Dashboard',
+    'aset.view': 'Lihat Data Aset',
+    'aset.create': 'Tambah Aset Baru',
+    'aset.update': 'Ubah / Edit Aset',
+    'aset.print-label': 'Cetak Label & Barcode QR',
+    'import-aset': 'Import Data Aset Excel',
+    'export-aset': 'Export Data Aset Excel',
+    'scan.view': 'Akses Fitur Scan QR',
+    'kategori.view': 'Lihat Kategori Aset',
+    'kategori.create': 'Tambah Kategori',
+    'kategori.update': 'Ubah Kategori',
+    'kategori.delete': 'Hapus Kategori',
+    'import-kategori': 'Import Kategori Excel',
+    'export-kategori': 'Export Kategori Excel',
+    'pegawai.view': 'Lihat Data Pegawai',
+    'pegawai.create': 'Tambah Pegawai',
+    'pegawai.update': 'Ubah Pegawai',
+    'pegawai.delete': 'Hapus Pegawai',
+    'pegawai.create-user': 'Buat Akun Pengguna',
+    'import-pegawai': 'Import Pegawai Excel',
+    'export-pegawai': 'Export Pegawai Excel',
+    'penerimaan.view': 'Lihat Dokumen Penerimaan',
+    'penerimaan.create': 'Buat Dokumen Penerimaan',
+    'penerimaan.update': 'Ubah Dokumen Penerimaan',
+    'penerimaan.delete': 'Hapus Dokumen Penerimaan',
+    'mutasi.view': 'Lihat Riwayat & Daftar Mutasi',
+    'mutasi.create': 'Ajukan Mutasi Aset',
+    'permohonan.view': 'Lihat Permohonan Aset',
+    'permohonan.create': 'Ajukan Permohonan Aset',
+    'permohonan.fulfill': 'Penuhi Permohonan Aset',
+    'permohonan.close': 'Tutup / Selesaikan Permohonan',
+    'laporan-insiden.view': 'Lihat Laporan Kerusakan / Kehilangan',
+    'laporan-insiden.create': 'Buat Laporan Kerusakan / Kehilangan',
+    'persetujuan.view': 'Lihat Kotak Persetujuan',
+    'persetujuan.act': 'Setujui / Tolak Dokumen Persetujuan',
+    'persetujuan.reassign': 'Alihkan Approver Persetujuan',
+    'laporan.aset': 'Laporan Rekapitulasi Aset',
+    'laporan.mutasi': 'Laporan Rekapitulasi Mutasi',
+    'laporan.rusak-hilang': 'Laporan Rekap Rusak & Hilang',
+    'pengaturan.alur': 'Pengaturan Alur Persetujuan',
+    'pengaturan.role': 'Pengaturan Role & Hak Akses',
+    'user.view': 'Lihat Daftar Pengguna',
+    'user.manage-access': 'Kelola Role & Akses Pengguna',
+    'user.reset-password': 'Atur Ulang Kata Sandi Pengguna',
+    'user.toggle-status': 'Aktifkan / Nonaktifkan Pengguna',
+    'user.delete': 'Hapus Pengguna',
+};
+
+export function formatPermissionLabel(perm: string): string {
+    return PERMISSION_LABELS[perm] ?? perm.replace(/[-.]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** Menyaring grup izin berdasarkan nama grup, kode izin, atau label Indonesia. */
+export function filterPermissionGroups(groups: Record<string, string[]>, query: string): Record<string, string[]> {
+    const q = query.trim().toLowerCase();
+    if (!q) return groups;
+
+    const result: Record<string, string[]> = {};
+
+    Object.entries(groups).forEach(([groupName, perms]) => {
+        if (groupName.toLowerCase().includes(q)) {
+            result[groupName] = perms;
+            return;
+        }
+
+        const matching = perms.filter((p) => p.toLowerCase().includes(q) || formatPermissionLabel(p).toLowerCase().includes(q));
+        if (matching.length > 0) result[groupName] = matching;
+    });
+
+    return result;
+}
+```
+
+- [ ] **Step 3: `RoleForm.tsx` memakai pustaka**
+
+Hapus `const PERMISSION_LABELS ... ;` dan `function formatPermissionLabel(...) {...}` dari `RoleForm.tsx`, lalu tambahkan impor:
+```tsx
+import { formatPermissionLabel } from '@/lib/permissions';
+```
+
+- [ ] **Step 4: Perbarui pengecualian pada `PermissionCatalogTest`**
+
+Berkas sumber label kini `resources/js/lib/permissions.ts`. Di `pdSources()` ganti `'Pages/Roles/Partials/RoleForm.tsx'` menjadi `'lib/permissions.ts'`.
+
+- [ ] **Step 5: Verifikasi dan commit**
+
+```bash
+npx tsc --noEmit
+npm run build 2>&1 | tail -5
+php artisan test --compact --filter='PermissionCatalog|RolePages'
+git add resources/js/lib/unitScope.ts resources/js/lib/permissions.ts resources/js/Pages/Roles/Partials/RoleForm.tsx tests/Feature/PermissionCatalogTest.php
+git commit -m "refactor(ui): share unit scope and permission labels across role and user pages"
+```
+Expected: bersih; test hijau (form Role tampil identik).
+
+---
+
+### Task 3: `Index`
 
 **Files:**
 - Modify: `resources/js/Pages/Users/Index.tsx` (ganti seluruh isi)
 
 **Interfaces:**
-- Consumes: `PageHeader`, `ConfirmDialog` (Task 1), `Table`, `PaginationPageDefault`, `Input`, `Select`, `Button`, `Badge`, `BadgeWithDot`, `Tooltip`; ikon `Edit01`, `Eye`, `InfoCircle`, `SearchLg`, `UserCheck01`, `UserX01`, `Users01`, `XClose`.
+- Consumes: `PageHeader`, `ConfirmDialog` (Task 1), `UNIT_SCOPE_LABEL` (Task 2), `Table`, `PaginationPageDefault`, `Input`, `Select`, `Button`, `Badge`, `BadgeWithDot`, `Tooltip` (hanya untuk ikon Detail dan Edit); ikon `Edit01`, `Eye`, `InfoCircle`, `SearchLg`, `UserCheck01`, `UserX01`, `Users01`, `XClose`.
 - Produces: halaman dengan props Inertia sama.
 
 - [ ] **Step 1: Tulis ulang `Index.tsx`**
@@ -162,6 +288,7 @@ import { Input } from '@/Components/ui/base/input/input';
 import { Select } from '@/Components/ui/base/select/select';
 import { Tooltip } from '@/Components/ui/base/tooltip/tooltip';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { UNIT_SCOPE_LABEL } from '@/lib/unitScope';
 import { PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Edit01, Eye, InfoCircle, SearchLg, UserCheck01, UserX01, Users01, XClose } from '@untitledui/icons';
@@ -189,9 +316,7 @@ interface UserListItem {
         display_name: string;
     }[];
     direct_permissions_count: number;
-    direct_permissions: string[];
     unit_scope_override: 'all' | 'binaan' | 'own' | null;
-    created_at: string;
 }
 
 interface PaginatedUsers {
@@ -202,11 +327,6 @@ interface PaginatedUsers {
     to: number | null;
     total: number;
     per_page: number;
-    links: {
-        url: string | null;
-        label: string;
-        active: boolean;
-    }[];
 }
 
 interface UnitOption {
@@ -266,7 +386,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
     const [role, setRole] = useState(filters.role || '');
     const [unitId, setUnitId] = useState(filters.unit_id || '');
     const [status, setStatus] = useState(filters.status || '');
-    const [isUpdating, setIsUpdating] = useState<number | null>(null);
+    const [updating, setUpdating] = useState(false);
     const [statusTarget, setStatusTarget] = useState<UserListItem | null>(null);
 
     const applyFilter = (newParams: Partial<typeof filters>) => {
@@ -311,14 +431,14 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
     const confirmToggleStatus = () => {
         if (!statusTarget) return;
 
-        setIsUpdating(statusTarget.id);
+        setUpdating(true);
         router.patch(
             route('users.toggle-status', statusTarget.id),
             {},
             {
                 preserveScroll: true,
                 onFinish: () => {
-                    setIsUpdating(null);
+                    setUpdating(false);
                     setStatusTarget(null);
                 },
             },
@@ -371,15 +491,20 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                 {/* Filters Bar */}
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
                     <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
-                        <div className="lg:col-span-2">
-                            <Input
-                                label="Cari Pengguna"
-                                size="md"
-                                icon={SearchLg}
-                                placeholder="Cari nama, email, NIP..."
-                                value={search}
-                                onChange={setSearch}
-                            />
+                        <div className="flex items-end gap-2 lg:col-span-2">
+                            <div className="flex-1">
+                                <Input
+                                    label="Cari Pengguna"
+                                    size="md"
+                                    icon={SearchLg}
+                                    placeholder="Cari nama, email, NIP..."
+                                    value={search}
+                                    onChange={setSearch}
+                                />
+                            </div>
+                            <Button type="submit" color="secondary" size="md">
+                                Cari
+                            </Button>
                         </div>
 
                         <Select
@@ -427,15 +552,13 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                 </Select>
                             </div>
                             {hasActiveFilter && (
-                                <Tooltip title="Hapus semua filter">
-                                    <Button
-                                        color="secondary"
-                                        size="md"
-                                        iconLeading={XClose}
-                                        aria-label="Hapus semua filter"
-                                        onPress={handleResetFilters}
-                                    />
-                                </Tooltip>
+                                <Button
+                                    color="secondary"
+                                    size="md"
+                                    iconLeading={XClose}
+                                    aria-label="Hapus semua filter"
+                                    onPress={handleResetFilters}
+                                />
                             )}
                         </div>
                     </form>
@@ -526,7 +649,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                             )}
                                             {user.unit_scope_override && (
                                                 <Badge type="color" size="sm" color="purple" className="rounded-sm">
-                                                    Scope: {user.unit_scope_override}
+                                                    Cakupan: {UNIT_SCOPE_LABEL[user.unit_scope_override] ?? user.unit_scope_override}
                                                 </Badge>
                                             )}
                                         </div>
@@ -568,16 +691,15 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                                 </Tooltip>
                                             )}
                                             {can.toggleStatus && user.id !== auth.user?.id && (
-                                                <Tooltip title={user.is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun'}>
-                                                    <Button
-                                                        color={user.is_active ? 'secondary-destructive' : 'secondary'}
-                                                        size="sm"
-                                                        iconLeading={user.is_active ? UserX01 : UserCheck01}
-                                                        aria-label={`${user.is_active ? 'Nonaktifkan' : 'Aktifkan'} akun ${user.name}`}
-                                                        isDisabled={isUpdating === user.id}
-                                                        onPress={() => setStatusTarget(user)}
-                                                    />
-                                                </Tooltip>
+                                                <Button
+                                                    color={user.is_active ? 'secondary-destructive' : 'secondary'}
+                                                    size="sm"
+                                                    iconLeading={user.is_active ? UserX01 : UserCheck01}
+                                                    aria-label={`${user.is_active ? 'Nonaktifkan' : 'Aktifkan'} akun ${user.name}`}
+                                                    onPress={() => setStatusTarget(user)}
+                                                >
+                                                    {user.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                                                </Button>
                                             )}
                                         </div>
                                     </Table.Cell>
@@ -610,7 +732,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                     variant="default"
                     title={statusTarget.is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun'}
                     confirmLabel={statusTarget.is_active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan'}
-                    isLoading={isUpdating === statusTarget.id}
+                    isLoading={updating}
                     onConfirm={confirmToggleStatus}
                     onClose={() => setStatusTarget(null)}
                 >
@@ -623,7 +745,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
     );
 }
 ```
-Prop yang berbeda dari yang diasumsikan (`Badge color="blue"|"indigo"|"sky"`, `Select label`, ikon `UserX01`/`UserCheck01`/`InfoCircle`) disesuaikan dan dicatat sebagai `Ruling`.
+Titik status Aktif tidak lagi berdenyut (`animate-pulse` dibuang: gerak tanpa fungsi dan tidak mengikuti `prefers-reduced-motion`). Detail dan Edit berupa ikon bertooltip; Nonaktifkan/Aktifkan berupa tombol bertulisan karena berdampak besar. Prop yang berbeda dari yang diasumsikan (`Badge color="blue"|"indigo"|"sky"`, `Select label`, ikon `UserX01`/`UserCheck01`/`InfoCircle`) disesuaikan dan dicatat sebagai `Ruling`.
 
 - [ ] **Step 2: Verifikasi dan commit**
 
@@ -639,13 +761,13 @@ Expected: bersih; `grep` kosong; test hijau.
 
 ---
 
-### Task 3: `Show`
+### Task 4: `Show`
 
 **Files:**
 - Modify: `resources/js/Pages/Users/Show.tsx` (ganti seluruh isi)
 
 **Interfaces:**
-- Consumes: `PageHeader` (dengan `badges`), `Button`, `Badge`, `BadgeWithDot`, `Input`; ikon `ArrowLeft`, `Check`, `Edit01`, `SearchLg`, `Shield01`, `Users01`.
+- Consumes: `PageHeader` (dengan `badges`), `Button`, `Badge`, `BadgeWithDot`, `Input`, `filterPermissionGroups`/`formatPermissionLabel` (Task 2); ikon `ArrowLeft`, `Check`, `Edit01`, `SearchLg`, `Shield01`, `Users01`.
 - Produces: halaman dengan props Inertia sama.
 
 - [ ] **Step 1: Tulis ulang `Show.tsx`**
@@ -656,6 +778,7 @@ import { Badge, BadgeWithDot } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
 import { Input } from '@/Components/ui/base/input/input';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { filterPermissionGroups, formatPermissionLabel } from '@/lib/permissions';
 import { PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Check, Edit01, SearchLg, Shield01, Users01 } from '@untitledui/icons';
@@ -736,31 +859,9 @@ export default function Show({ auth, user, effectivePermissions, can }: ShowProp
     const effectiveScope = user.unit_scope_override || primaryRole?.unit_scope || 'own';
     const scopeInfo = SCOPE_INFO[effectiveScope] ?? SCOPE_INFO.own;
 
-    // Total count of permissions
-    const totalEffectivePerms = useMemo(() => {
-        return Object.values(effectivePermissions).reduce((acc, perms) => acc + perms.length, 0);
-    }, [effectivePermissions]);
+    const totalEffectivePerms = Object.values(effectivePermissions).reduce((acc, perms) => acc + perms.length, 0);
 
-    // Filter permissions by search
-    const filteredModules = useMemo(() => {
-        if (!permSearch) return effectivePermissions;
-
-        const query = permSearch.toLowerCase();
-        const result: Record<string, string[]> = {};
-
-        Object.entries(effectivePermissions).forEach(([moduleName, perms]) => {
-            const matchesModule = moduleName.toLowerCase().includes(query);
-            const matchingPerms = perms.filter((p) => p.toLowerCase().includes(query));
-
-            if (matchesModule) {
-                result[moduleName] = perms;
-            } else if (matchingPerms.length > 0) {
-                result[moduleName] = matchingPerms;
-            }
-        });
-
-        return result;
-    }, [effectivePermissions, permSearch]);
+    const filteredModules = filterPermissionGroups(effectivePermissions, permSearch);
 
     return (
         <AuthenticatedLayout>
@@ -958,8 +1059,11 @@ export default function Show({ auth, user, effectivePermissions, can }: ShowProp
                                                         <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
                                                             <Check className="size-2.5" strokeWidth={3} aria-hidden="true" />
                                                         </span>
-                                                        <span className="truncate font-mono text-[11px] text-slate-700" title={perm}>
-                                                            {perm}
+                                                        <span className="min-w-0">
+                                                            <span className="block truncate text-xs font-semibold text-slate-800">{formatPermissionLabel(perm)}</span>
+                                                            <span className="block truncate font-mono text-[10px] text-slate-400" title={perm}>
+                                                                {perm}
+                                                            </span>
                                                         </span>
                                                     </div>
                                                     <Badge
@@ -999,13 +1103,13 @@ Expected: bersih; test hijau.
 
 ---
 
-### Task 4: `Edit`
+### Task 5: `Edit`
 
 **Files:**
 - Modify: `resources/js/Pages/Users/Edit.tsx` (ganti seluruh isi)
 
 **Interfaces:**
-- Consumes: `PageHeader`, `ConfirmDialog` (Task 1), `Toggle` (`@/Components/ui/base/toggle/toggle`), `Input`, `Select`, `Label`, `RadioGroup`/`RadioButton`, `Checkbox`, `Badge`, `Button`; ikon `SearchLg`, `Trash01`.
+- Consumes: `PageHeader`, `ConfirmDialog` (Task 1), `UNIT_SCOPE_LABEL`, `filterPermissionGroups`, `formatPermissionLabel` (Task 2), `Toggle` (`@/Components/ui/base/toggle/toggle`), `Input`, `Select`, `Label`, `RadioGroup`/`RadioButton`, `Checkbox`, `Badge`, `Button`; ikon `SearchLg`, `Trash01`.
 - Produces: halaman dengan props Inertia sama.
 
 - [ ] **Step 1: Tulis ulang `Edit.tsx`**
@@ -1022,6 +1126,8 @@ import { RadioButton, RadioGroup } from '@/Components/ui/base/radio-buttons/radi
 import { Select } from '@/Components/ui/base/select/select';
 import { Toggle } from '@/Components/ui/base/toggle/toggle';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { filterPermissionGroups, formatPermissionLabel } from '@/lib/permissions';
+import { UNIT_SCOPE_LABEL } from '@/lib/unitScope';
 import { PageProps } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { SearchLg, Trash01 } from '@untitledui/icons';
@@ -1104,6 +1210,8 @@ export default function Edit({ auth, user, roles, permissionGroups, canResetPass
         return roles.find((r) => r.name === data.role) || roles[0];
     }, [roles, data.role]);
 
+    const defaultScopeLabel = UNIT_SCOPE_LABEL[selectedRole?.unit_scope ?? ''] ?? selectedRole?.unit_scope;
+
     // Permissions belonging to the selected role
     const rolePermissionsSet = useMemo(() => {
         return new Set(selectedRole?.permissions || []);
@@ -1141,25 +1249,7 @@ export default function Edit({ auth, user, roles, permissionGroups, canResetPass
         });
     };
 
-    // Filtered permission groups
-    const filteredGroups = useMemo(() => {
-        if (!permSearch) return permissionGroups;
-        const query = permSearch.toLowerCase();
-        const result: Record<string, string[]> = {};
-
-        Object.entries(permissionGroups).forEach(([groupName, perms]) => {
-            const matchesGroup = groupName.toLowerCase().includes(query);
-            const matchesPerms = perms.filter((p) => p.toLowerCase().includes(query));
-
-            if (matchesGroup) {
-                result[groupName] = perms;
-            } else if (matchesPerms.length > 0) {
-                result[groupName] = matchesPerms;
-            }
-        });
-
-        return result;
-    }, [permissionGroups, permSearch]);
+    const filteredGroups = filterPermissionGroups(permissionGroups, permSearch);
 
     return (
         <AuthenticatedLayout>
@@ -1296,7 +1386,7 @@ export default function Edit({ auth, user, roles, permissionGroups, canResetPass
                                     <div className="rounded-lg border border-blue-100 bg-blue-50/40 p-3.5 text-xs">
                                         <span className="block font-semibold text-blue-900">Hak Bawaan Peran: {selectedRole.display_name}</span>
                                         <p className="mt-0.5 text-[11px] leading-relaxed text-blue-800">
-                                            Default Cakupan Wilayah: <span className="font-semibold">{selectedRole.unit_scope}</span>. Membawa{' '}
+                                            Default Cakupan Wilayah: <span className="font-semibold">{defaultScopeLabel}</span>. Membawa{' '}
                                             <span className="font-semibold tabular-nums">{selectedRole.permissions.length} izin standar</span> yang otomatis aktif di
                                             bawah.
                                         </p>
@@ -1311,13 +1401,14 @@ export default function Edit({ auth, user, roles, permissionGroups, canResetPass
                             >
                                 <Label>Cakupan Wilayah Data (Unit Scope Override)</Label>
                                 <div className="space-y-2">
-                                    <RadioButton
-                                        value={DEFAULT_SCOPE}
-                                        label={`Ikuti Default Peran (${selectedRole?.unit_scope})`}
-                                        hint="Menggunakan cakupan bawaan dari peran yang dipilih."
-                                        className="rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50 data-selected:border-blue-600 data-selected:bg-blue-50/40"
-                                    />
-                                    {SCOPE_CHOICES.map((choice) => (
+                                    {[
+                                        {
+                                            value: DEFAULT_SCOPE,
+                                            label: `Ikuti Default Peran (${defaultScopeLabel})`,
+                                            hint: 'Menggunakan cakupan bawaan dari peran yang dipilih.',
+                                        },
+                                        ...SCOPE_CHOICES,
+                                    ].map((choice) => (
                                         <RadioButton
                                             key={choice.value}
                                             value={choice.value}
@@ -1384,10 +1475,15 @@ export default function Edit({ auth, user, roles, permissionGroups, canResetPass
                                                                   ? 'border-emerald-200 bg-emerald-50/60'
                                                                   : 'border-slate-100 bg-white hover:border-slate-200'
                                                         }`}
+                                                        hint={
+                                                            <span className="font-mono text-[10px] text-slate-400" title={perm}>
+                                                                {perm}
+                                                            </span>
+                                                        }
                                                         label={
                                                             <span className="flex items-center justify-between gap-2">
-                                                                <span className="truncate font-mono text-[11px]" title={perm}>
-                                                                    {perm}
+                                                                <span className="truncate text-xs font-semibold" title={formatPermissionLabel(perm)}>
+                                                                    {formatPermissionLabel(perm)}
                                                                 </span>
                                                                 {fromRole && (
                                                                     <Badge type="color" size="sm" color="blue" className="shrink-0 rounded-sm">
@@ -1501,7 +1597,7 @@ Expected: bersih; `grep` kosong; test hijau.
 
 Cek di browser headless (super-admin): daftar (filter, pagination bila ada), detail, edit (izin dari role terkunci, mengganti role memperbarui kunci, kirim dengan email kosong untuk galat) tanpa menyimpan perubahan permanen.
 
-Laporkan hasil Task 1–4, `Ruling`, dan hal yang tak bisa diverifikasi tanpa browser pengguna. Minta pengguna memeriksa:
+Laporkan hasil Task 1–5, `Ruling`, dan hal yang tak bisa diverifikasi tanpa browser pengguna. Minta pengguna memeriksa:
 - **Daftar**: filter Unit/Peran/Status menerapkan langsung, pencarian dengan Enter, "Hapus semua filter"; badge peran berwarna; tombol Detail (biru muda), Edit (hijau), Nonaktifkan (merah)/Aktifkan dengan tooltip; dialog konfirmasi aktif/nonaktif (tanpa kalimat "tidak dapat dibatalkan", Esc menutup); tombol tidak tampil untuk akun sendiri; pagination mempertahankan filter.
 - **Detail**: badge status di samping judul, tiga kartu, tautan "Lihat Pegawai" ke detail pegawai, pencarian izin efektif, label "Izin Khusus" vs "Dari Role".
 - **Ubah**: status aktif (Toggle) terkunci untuk akun sendiri; peran Kasubag terkunci untuk akun sendiri; mengganti peran memperbarui hitungan izin standar dan mengunci izin bawaan; radio cakupan (termasuk "Ikuti Default Peran" lalu simpan: server menerima kosong); kata sandi opsional (kosong tidak mengubah, galat per field); filter izin; bilah Simpan/Batal lengket; hapus akun lewat dialog (pesan peringatan lengkap; ditolak bila ada riwayat persetujuan).
