@@ -68,6 +68,13 @@ export const styles = sortCx({
                 "*:data-icon:text-fg-quaternary hover:*:data-icon:text-fg-quaternary_hover",
             ].join(" "),
         },
+        "secondary-brand": {
+            root: [
+                "bg-brand-50 text-brand-700 shadow-xs ring-1 ring-brand-200 ring-inset hover:bg-brand-100 hover:text-brand-800 data-loading:bg-brand-100",
+                // Icon styles
+                "*:data-icon:text-brand-600 hover:*:data-icon:text-brand-700",
+            ].join(" "),
+        },
         tertiary: {
             root: [
                 "text-tertiary hover:bg-primary_hover hover:text-tertiary_hover data-loading:bg-primary_hover",

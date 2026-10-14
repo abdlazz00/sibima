@@ -154,10 +154,14 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                     <div className="flex flex-wrap items-center gap-3">
                         {selectedIds.length > 0 && Boolean(can.printLabel) && (
                             <Button
-                                color="secondary"
+                                color="secondary-brand"
                                 size="md"
                                 iconLeading={Printer}
-                                className={overLimit ? 'bg-amber-50 text-amber-800 ring-amber-300 hover:bg-amber-100' : undefined}
+                                className={
+                                    overLimit
+                                        ? 'bg-amber-50 text-amber-800 ring-amber-300 hover:bg-amber-100 hover:text-amber-900 *:data-icon:text-amber-600 hover:*:data-icon:text-amber-700'
+                                        : undefined
+                                }
                                 onPress={() => setPrintIds(selectedIds)}
                             >
                                 Cetak Label ({selectedIds.length}){overLimit && ` · Maks ${MAX_LABELS}`}
@@ -324,6 +328,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                             <Tooltip title="Lihat detail">
                                                 <Button
                                                     color="secondary"
+                                                    className="hover:*:data-icon:text-brand-600!"
                                                     size="sm"
                                                     iconLeading={Eye}
                                                     aria-label="Lihat detail"
@@ -334,6 +339,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                                 <Tooltip title="Ubah aset">
                                                     <Button
                                                         color="secondary"
+                                                        className="hover:*:data-icon:text-brand-600!"
                                                         size="sm"
                                                         iconLeading={Edit01}
                                                         aria-label="Ubah aset"
@@ -345,6 +351,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                                 <Tooltip title="Cetak label QR">
                                                     <Button
                                                         color="secondary"
+                                                        className="hover:*:data-icon:text-brand-600!"
                                                         size="sm"
                                                         iconLeading={Printer}
                                                         aria-label="Cetak label QR"
