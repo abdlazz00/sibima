@@ -66,9 +66,10 @@ export default function AssetForm({
     // Form panjang: setelah kirim gagal, bawa pengguna ke isian bermasalah pertama.
     useEffect(() => {
         if (errorCount === 0) return;
-        const target = formRef.current?.querySelector<HTMLElement>(
-            '[aria-invalid="true"], [data-invalid], [data-photo-error]',
-        );
+        const field = formRef.current?.querySelector<HTMLElement>('[data-invalid], [data-photo-error]');
+        const target = field?.matches('input, textarea, button, [tabindex]')
+            ? field
+            : field?.querySelector<HTMLElement>('input, textarea, button');
         target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         target?.focus({ preventScroll: true });
     }, [errors]);
