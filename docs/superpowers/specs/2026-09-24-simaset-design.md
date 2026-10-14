@@ -13,6 +13,14 @@
 > Model — Request & Laporan Aset"), lepas dari Generic Approval Workflow
 > Engine yang tetap dipakai untuk alur a–e.
 
+> **Catatan 2026-10-14 (kondisi kode sekarang):** dokumen ini adalah desain
+> awal. Yang sudah berbeda: (1) request aset, lapor rusak/hilang, dan
+> pengembalian aset kini juga memakai Generic Approval Workflow Engine
+> (10 alur, bukan model satu langkah terpisah); (2) role dan permission
+> sepenuhnya dinamis (lihat `docs/DETAIL_RBAC_SISTEM.md`) dan ada role
+> `super-admin`; (3) ditambah import/ekspor Excel, laporan Excel, scan QR
+> bertoken, manajemen pengguna, dan deployment Docker + nginx + certbot.
+
 ## Ringkasan
 
 SIBIMA mengelola seluruh aset milik Kecamatan Sagulung beserta kelurahan-kelurahan
