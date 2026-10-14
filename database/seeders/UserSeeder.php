@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
 
         $accounts = [
             ['name' => 'Super Admin Demo', 'email' => 'superadmin@simaset.test', 'unit_id' => null, 'role' => 'super-admin'],
-            ['name' => 'Kasubag Demo', 'email' => 'kasubag@simaset.test', 'unit_id' => null, 'role' => 'kasubag'],
+            ['name' => 'Kasubag Demo', 'email' => 'kasubag@simaset.test', 'unit_id' => $kecamatan->id, 'role' => 'kasubag'],
             ['name' => 'Camat Demo', 'email' => 'camat@simaset.test', 'unit_id' => $kecamatan->id, 'role' => 'camat'],
             ['name' => 'Admin Kecamatan Demo', 'email' => 'admin.kecamatan@simaset.test', 'unit_id' => $kecamatan->id, 'role' => 'admin_kecamatan'],
             ['name' => 'Admin Kelurahan Demo', 'email' => 'admin.kelurahan@simaset.test', 'unit_id' => $kelurahan->id, 'role' => 'admin_kelurahan'],

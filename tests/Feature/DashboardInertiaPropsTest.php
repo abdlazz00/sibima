@@ -24,8 +24,8 @@ it('shares role and unit info with the dashboard for every seeded role', functio
     ['lurah@simaset.test', 'lurah'],
 ]);
 
-it('shares a null unit for the kasubag global account', function () {
-    $user = User::where('email', 'kasubag@simaset.test')->firstOrFail();
+it('shares a null unit for the super admin global account', function () {
+    $user = User::where('email', 'superadmin@simaset.test')->firstOrFail();
 
     $this->actingAs($user)
         ->get('/dashboard')

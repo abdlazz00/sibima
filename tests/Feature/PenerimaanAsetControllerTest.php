@@ -4,8 +4,6 @@ use App\Enums\BeritaAcaraStatus;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\BeritaAcaraPenerimaan;
-use App\Models\Unit;
-use App\Models\User;
 use App\Services\ApprovalWorkflowService;
 use Database\Seeders\WorkflowDefinitionSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -190,3 +188,9 @@ test('user dengan izin penerimaan.create dapat melihat draft penerimaan di unitn
     $response->assertInertia(fn (Assert $page) => $page->has('items.data', 1));
 });
 
+it('lets a kasubag placed in the kecamatan open the create form but not one without a unit', function () {
+    $withUnit = userWithRole('kasubag', $this->kec);
+
+    $this->actingAs($withUnit)->get(route('penerimaan-aset.create'))->assertOk();
+    $this->actingAs($this->kasubag)->get(route('penerimaan-aset.create'))->assertForbidden();
+});

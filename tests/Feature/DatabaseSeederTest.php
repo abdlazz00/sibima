@@ -20,7 +20,7 @@ it('seeds roles, units, and one demo user per role idempotently', function () {
         ->and($superAdmin->hasRole('super-admin'))->toBeTrue();
 
     $kasubag = User::where('email', 'kasubag@simaset.test')->firstOrFail();
-    expect($kasubag->unit_id)->toBeNull()
+    expect($kasubag->unit->isKecamatan())->toBeTrue()
         ->and($kasubag->hasRole('kasubag'))->toBeTrue();
 
     $lurah = User::where('email', 'lurah@simaset.test')->firstOrFail();
