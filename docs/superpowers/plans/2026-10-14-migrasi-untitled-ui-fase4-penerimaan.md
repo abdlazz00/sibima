@@ -235,13 +235,6 @@ npm run build 2>&1 | tail -5
 git add resources/js/Components/ui/base/input/input.tsx resources/js/lib/penerimaanStatus.ts resources/js/Components/CancelRequestModal.tsx resources/js/Components/ReassignApproverModal.tsx
 git commit -m "feat(ui): add the status color map and move the shared approval modals to Untitled UI"
 ```
-## Catatan Review (ponytail + impeccable, sudah diterapkan)
-
-- Tidak ada komponen baru; modal bersama dimigrasi di tempat (props tetap), timeline/riwayat tetap inline (ekstraksi ditunda sampai ada konsumen kedua).
-- Ponytail: `rupiahHint` dan peta `STEP_CIRCLE`/`ACTION_DOT` kecil dan dipakai; tidak ada abstraksi spekulatif. Tidak ada test frontend baru (hanya tampilan; logika backend sudah dicakup `PenerimaanAset*Test`).
-- Impeccable: hierarki heading formulir "1./2./3." konsisten; galat per field di `hint` + ringkasan di bilah lengket; aksi destruktif (Hapus Draft, Tolak) memakai dialog dengan alasan/konfirmasi; fokus terkelola oleh React Aria.
-- Asumsi terverifikasi: default urutan server `terbaru`; `Input icon`, `Tooltip title`, `ConfirmDialog` sesuai pemakaian di halaman Pengguna.
-
 ---
 
 ### Task 2: `Index`
@@ -408,7 +401,11 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                         </Table.Header>
                         <Table.Body
                             items={items.data}
-                            renderEmptyState={() => <p className="py-14 text-center text-sm text-slate-400">Belum ada pengajuan penerimaan aset.</p>}
+                            renderEmptyState={() => (
+                                <p className="py-14 text-center text-sm text-slate-400">
+                                    {hasFilter || filters.search ? 'Tidak ada penerimaan yang cocok dengan filter.' : 'Belum ada pengajuan penerimaan aset.'}
+                                </p>
+                            )}
                         >
                             {(ba) => {
                                 const status = penerimaanStatus(ba);
@@ -809,12 +806,8 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                     {/* Bilah aksi lengket */}
                     <div className="sticky bottom-0 z-20 -mx-6 border-t border-slate-200 bg-white/95 px-6 py-3 backdrop-blur-xs lg:-mx-8 lg:px-8">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm text-slate-600" aria-live="polite">
-                                {errorCount > 0 && (
-                                    <span role="alert" className="font-medium text-red-600">
-                                        {errorCount} isian perlu diperbaiki
-                                    </span>
-                                )}
+                            <p role="alert" className="text-sm font-medium text-red-600">
+                                {errorCount > 0 && `${errorCount} isian perlu diperbaiki`}
                             </p>
                             <div className="flex items-center gap-3">
                                 <Button color="secondary" size="md" isDisabled={form.processing} onPress={() => send('draft')}>
@@ -1008,11 +1001,11 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                 {req && (
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-4 text-sm font-semibold text-slate-900">Status Alur Persetujuan</p>
-                        <ol className="flex items-start">
+                        <ol className="flex items-start overflow-x-auto">
                             {steps.map((step, idx) => {
                                 const state = stepState(step.step_order);
                                 return (
-                                    <li key={step.step_order} className="flex flex-1 flex-col gap-2">
+                                    <li key={step.step_order} className="flex min-w-32 flex-1 flex-col gap-2">
                                         <div className="flex items-center gap-2">
                                             <div className={`flex size-6 items-center justify-center rounded-full ${STEP_CIRCLE[state]}`}>
                                                 {state === 'done' && <Check className="size-3.5 text-emerald-700" aria-hidden="true" />}
@@ -1188,3 +1181,12 @@ Laporkan hasil Task 1–4, `Ruling`, dan hal yang tak bisa diverifikasi tanpa br
 - **Modal bersama di modul lain** (Mutasi/Permohonan/Lapor): dialog Batalkan dan Alihkan tampil dengan gaya baru dan tetap berfungsi.
 - Keyboard (Tab/Spasi/Esc), layar 375 px, cincin fokus.
 **Jangan memulai modul berikutnya** sebelum pengguna menyatakan lolos.
+
+## Catatan Review (ponytail + impeccable, sudah diterapkan)
+
+- Tidak ada komponen baru; modal bersama dimigrasi di tempat (props tetap), timeline/riwayat tetap inline (ekstraksi ditunda sampai ada konsumen kedua).
+- Ponytail: `rupiahHint` dan peta `STEP_CIRCLE`/`ACTION_DOT` kecil dan dipakai; tidak ada abstraksi spekulatif. Tidak ada test frontend baru (hanya tampilan; logika backend sudah dicakup `PenerimaanAset*Test`).
+- Impeccable: hierarki heading formulir "1./2./3." konsisten; galat per field di `hint` + ringkasan di bilah lengket; aksi destruktif (Hapus Draft, Tolak) memakai dialog dengan alasan/konfirmasi; fokus terkelola oleh React Aria.
+- Asumsi terverifikasi: default urutan server `terbaru`; `Input icon`, `Tooltip title`, `ConfirmDialog` sesuai pemakaian di halaman Pengguna.
+- Review formal (ponytail): tidak ada yang layak dihapus; dua cangkang modal mirip tetap tidak diekstrak (satu halaman aksi per modal, tunda sampai konsumen kedua dimigrasi). Total nilai berjalan di formulir sengaja tidak ditambah (di luar lingkup migrasi).
+- Review formal (impeccable, mode Operate): diterapkan — pesan kosong berbeda saat ada filter/pencarian, stepper bisa digulir (`min-w-32`) di 375 px, `role="alert"` tunggal di bilah lengket. Dicek saat eksekusi: header kolom Nilai sebaiknya rata kanan seperti selnya (jika `Table.Head` menerima `className`); input angka tidak berubah oleh roda mouse.
