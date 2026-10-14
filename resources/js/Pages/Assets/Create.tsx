@@ -1,8 +1,8 @@
-import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AssetForm, { AssetFormData } from '@/Pages/Assets/Partials/AssetForm';
 import { AssetCategory, PageProps } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 
 interface CreateProps extends PageProps {
@@ -37,20 +37,10 @@ export default function Create({ categories, kondisiOptions, maxPhotos }: Create
             <Head title="Tambah Aset Baru" />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">
-                            Home
-                        </Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <Link href={route('assets.index')} className="hover:text-blue-700">
-                            Data Aset
-                        </Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Tambah Aset Baru</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Tambah Aset Baru</h1>
-                </div>
+                <PageHeader
+                    crumbs={[{ label: 'Data Aset', href: route('assets.index') }, { label: 'Tambah Aset Baru' }]}
+                    title="Tambah Aset Baru"
+                />
 
                 <AssetForm
                     form={form}

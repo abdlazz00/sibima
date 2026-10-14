@@ -1,9 +1,10 @@
-import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import ConfirmDialog from '@/Components/ConfirmDialog';
+import PageHeader from '@/Components/PageHeader';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AssetForm, { AssetFormData } from '@/Pages/Assets/Partials/AssetForm';
 import { Asset, AssetCategory, AssetPhoto, PageProps } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { FormEvent, useState } from 'react';
 
 interface EditProps extends PageProps {
     asset: Asset;
@@ -32,12 +33,20 @@ export default function Edit({ asset, categories, maxPhotos }: EditProps) {
         form.post(route('assets.update', asset.id), { forceFormData: true });
     };
 
-    const removeExistingPhoto = (photo: AssetPhoto) => {
-        if (confirm('Hapus foto ini?')) {
-            router.delete(route('assets.photos.destroy', { asset: asset.id, photo: photo.id }), {
-                preserveScroll: true,
-            });
-        }
+    const [photoToDelete, setPhotoToDelete] = useState<AssetPhoto | null>(null);
+    const [deletingPhoto, setDeletingPhoto] = useState(false);
+
+    const confirmDeletePhoto = () => {
+        if (!photoToDelete) return;
+        setDeletingPhoto(true);
+        router.delete(route('assets.photos.destroy', { asset: asset.id, photo: photoToDelete.id }), {
+            preserveScroll: true,
+            preserveState: true,
+            onFinish: () => {
+                setDeletingPhoto(false);
+                setPhotoToDelete(null);
+            },
+        });
     };
 
     return (
@@ -45,32 +54,34 @@ export default function Edit({ asset, categories, maxPhotos }: EditProps) {
             <Head title={`Ubah Aset — ${asset.nama_aset}`} />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">
-                            Home
-                        </Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <Link href={route('assets.index')} className="hover:text-blue-700">
-                            Data Aset
-                        </Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Ubah Aset</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Ubah Data Aset</h1>
-                </div>
+                <PageHeader
+                    crumbs={[{ label: 'Data Aset', href: route('assets.index') }, { label: 'Ubah Aset' }]}
+                    title="Ubah Data Aset"
+                />
 
                 <AssetForm
                     form={form}
                     categories={categories}
                     maxPhotos={maxPhotos}
                     existingPhotos={asset.photos ?? []}
-                    onRemoveExistingPhoto={removeExistingPhoto}
+                    onRemoveExistingPhoto={setPhotoToDelete}
                     submitLabel="Simpan Perubahan"
                     onSubmit={submit}
                     cancelHref={route('assets.show', asset.id)}
                 />
             </div>
+
+            {photoToDelete && (
+                <ConfirmDialog
+                    title="Hapus Foto Aset"
+                    confirmLabel="Ya, Hapus Foto"
+                    isLoading={deletingPhoto}
+                    onConfirm={confirmDeletePhoto}
+                    onClose={() => setPhotoToDelete(null)}
+                >
+                    Foto ini akan dihapus dari aset.
+                </ConfirmDialog>
+            )}
         </AuthenticatedLayout>
     );
 }
