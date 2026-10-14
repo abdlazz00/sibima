@@ -47,3 +47,9 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@utility transition-inherit-all {
+  transition-property: inherit;
+  transition-duration: inherit;
+  transition-timing-function: inherit;
+}

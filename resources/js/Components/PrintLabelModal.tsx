@@ -1,5 +1,7 @@
-import { PrinterIcon } from '@/Components/Icons';
-import { useEffect, useState } from 'react';
+import { Dialog, Modal, ModalOverlay } from '@/Components/ui/application/modals/modal';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Printer } from '@untitledui/icons';
+import { useState } from 'react';
 
 type LabelSize = 'kecil' | 'besar';
 
@@ -21,16 +23,6 @@ export default function PrintLabelModal({ assetIds, onClose }: PrintLabelModalPr
     const isExceeded = assetIds.length > 99;
     const isZero = assetIds.length === 0;
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onClose();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose]);
-
     const print = () => {
         if (isExceeded || isZero) return;
         const targetUrl = route('assets.labels', { ids: assetIds, size });
@@ -44,102 +36,99 @@ export default function PrintLabelModal({ assetIds, onClose }: PrintLabelModalPr
     };
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
-            onClick={onClose}
+        <ModalOverlay
+            isOpen
+            isDismissable
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
         >
-            <div
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="print-modal-title"
-                className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-                        <PrinterIcon className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <h3 id="print-modal-title" className="text-base font-bold text-slate-900">
-                            Cetak Label Aset BMD
-                        </h3>
-                        <p className="text-xs text-slate-600">
-                            {assetIds.length} aset dipilih. Pilih format ukuran label.
-                        </p>
-                    </div>
-                </div>
+            <Modal className="sm:max-w-md">
+                <Dialog aria-labelledby="print-modal-title">
+                    <div className="w-full p-6">
+                        <div className="mb-4 flex items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+                                <Printer className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h3 id="print-modal-title" className="text-base font-bold text-slate-900">
+                                    Cetak Label Aset BMD
+                                </h3>
+                                <p className="text-xs text-slate-600">
+                                    {assetIds.length} aset dipilih. Pilih format ukuran label.
+                                </p>
+                            </div>
+                        </div>
 
-                {isExceeded && (
-                    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-                        <p className="font-semibold">Batas Cetak Terlampaui</p>
-                        <p className="mt-0.5">
-                            Maksimal 99 label per cetak untuk menjaga performa. Saat ini Anda memilih {assetIds.length} aset. Harap kurangi jumlah pilihan.
-                        </p>
+                        {isExceeded && (
+                            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                                <p className="font-semibold">Batas Cetak Terlampaui</p>
+                                <p className="mt-0.5">
+                                    Maksimal 99 label per cetak untuk menjaga performa. Saat ini Anda memilih {assetIds.length} aset. Harap kurangi jumlah pilihan.
+                                </p>
+                            </div>
+                        )}
+
+                        <fieldset className="mb-6 space-y-2">
+                            <legend className="sr-only">Pilihan Ukuran Label</legend>
+                            {SIZE_OPTIONS.map((option) => (
+                                <label
+                                    key={option.value}
+                                    className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-1 ${
+                                        size === option.value
+                                            ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600'
+                                            : 'border-slate-200 hover:bg-slate-50'
+                                    }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="label-size"
+                                        value={option.value}
+                                        checked={size === option.value}
+                                        onChange={() => setSize(option.value)}
+                                        className="mt-0.5 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span>
+                                        <span className="block text-sm font-semibold text-slate-900">{option.label}</span>
+                                        <span className="block text-xs text-slate-600">{option.description}</span>
+                                    </span>
+                                </label>
+                            ))}
+                        </fieldset>
+
+                        {popupBlocked && printUrl && (
+                            <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
+                                <p className="font-semibold">Popup Diblokir Browser</p>
+                                <p className="mt-0.5">Browser Anda memblokir jendela baru. Klik tombol di bawah untuk membuka:</p>
+                                <a
+                                    href={printUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-1.5 inline-block font-bold text-blue-700 underline hover:text-blue-900"
+                                    onClick={onClose}
+                                >
+                                    Buka Label PDF &rarr;
+                                </a>
+                            </div>
+                        )}
+
+                        <div className="flex items-center justify-end gap-3">
+                            <Button color="secondary" size="md" onPress={onClose}>
+                                Batal
+                            </Button>
+                            <Button
+                                color="primary"
+                                size="md"
+                                iconLeading={Printer}
+                                isDisabled={isExceeded || isZero}
+                                onPress={print}
+                            >
+                                Cetak Label
+                            </Button>
+                        </div>
                     </div>
-                )}
-
-                <fieldset className="mb-6 space-y-2">
-                    <legend className="sr-only">Pilihan Ukuran Label</legend>
-                    {SIZE_OPTIONS.map((option) => (
-                        <label
-                            key={option.value}
-                            className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-1 ${
-                                size === option.value
-                                    ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600'
-                                    : 'border-slate-200 hover:bg-slate-50'
-                            }`}
-                        >
-                            <input
-                                type="radio"
-                                name="label-size"
-                                value={option.value}
-                                checked={size === option.value}
-                                onChange={() => setSize(option.value)}
-                                className="mt-0.5 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span>
-                                <span className="block text-sm font-semibold text-slate-900">{option.label}</span>
-                                <span className="block text-xs text-slate-600">{option.description}</span>
-                            </span>
-                        </label>
-                    ))}
-                </fieldset>
-
-                {popupBlocked && printUrl && (
-                    <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
-                        <p className="font-semibold">Popup Diblokir Browser</p>
-                        <p className="mt-0.5">Browser Anda memblokir jendela baru. Klik tombol di bawah untuk membuka:</p>
-                        <a
-                            href={printUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-1.5 inline-block font-bold text-blue-700 underline hover:text-blue-900"
-                            onClick={onClose}
-                        >
-                            Buka Label PDF &rarr;
-                        </a>
-                    </div>
-                )}
-
-                <div className="flex items-center justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-1"
-                    >
-                        Batal
-                    </button>
-                    <button
-                        type="button"
-                        onClick={print}
-                        disabled={isExceeded || isZero}
-                        className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        <PrinterIcon className="h-4 w-4" />
-                        Cetak Label
-                    </button>
-                </div>
-            </div>
-        </div>
+                </Dialog>
+            </Modal>
+        </ModalOverlay>
     );
 }

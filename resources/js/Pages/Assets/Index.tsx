@@ -1,21 +1,19 @@
-import {
-    ChevronDownIcon as ChevronDown,
-    ChevronLeftIcon as ChevronLeft,
-    ChevronRightIcon as ChevronRight,
-    EyeIcon as Eye,
-    PencilIcon as Pencil,
-    PlusIcon as Plus,
-    PrinterIcon as Printer,
-    SearchIcon as Search,
-    XIcon as X,
-} from '@/Components/Icons';
-import PrintLabelModal from '@/Components/PrintLabelModal';
+import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { Table } from '@/Components/ui/application/table/table';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import { ComboBox } from '@/Components/ui/base/select/combobox';
+import { Select } from '@/Components/ui/base/select/select';
+import { Tooltip } from '@/Components/ui/base/tooltip/tooltip';
 import ImportExportButtons from '@/Components/ImportExportButtons';
+import PrintLabelModal from '@/Components/PrintLabelModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { pageNumbersWithGaps } from '@/lib/pagination';
 import { Asset, AssetCategory, Paginated, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
+import { Edit01, Eye, Plus, Printer, SearchLg, XClose } from '@untitledui/icons';
 import { FormEvent, useEffect, useState } from 'react';
+import type { Selection } from 'react-aria-components';
 
 interface UnitOption {
     id: number;
@@ -50,11 +48,15 @@ interface IndexProps extends PageProps {
     };
 }
 
-const KONDISI_STYLE: Record<string, string> = {
-    baik: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    rusak_ringan: 'bg-amber-50 text-amber-700 border-amber-200',
-    rusak_berat: 'bg-red-50 text-red-700 border-red-200',
-    hilang: 'bg-slate-100 text-slate-600 border-slate-200',
+const ALL = '__all';
+const DEFAULT_SORT = 'nama_asc';
+const MAX_LABELS = 99;
+
+const KONDISI_BADGE: Record<string, 'success' | 'warning' | 'error' | 'gray'> = {
+    baik: 'success',
+    rusak_ringan: 'warning',
+    rusak_berat: 'error',
+    hilang: 'gray',
 };
 
 function formatRupiah(value: string | number): string {
@@ -74,17 +76,13 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [printIds, setPrintIds] = useState<number[] | null>(null);
 
-    const toggleRow = (id: number) => {
-        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-    };
-
     const pageIds = assets.data.map((a) => a.id);
-    const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+    const selectedOnPage = new Set<number>(selectedIds.filter((id) => pageIds.includes(id)));
+    const overLimit = selectedIds.length > MAX_LABELS;
 
-    const toggleAllOnPage = () => {
-        setSelectedIds((prev) =>
-            allOnPageSelected ? prev.filter((id) => !pageIds.includes(id)) : Array.from(new Set([...prev, ...pageIds])),
-        );
+    const onSelectionChange = (keys: Selection) => {
+        const onPage = keys === 'all' ? pageIds : pageIds.filter((id) => keys.has(id));
+        setSelectedIds((prev) => [...prev.filter((id) => !pageIds.includes(id)), ...onPage]);
     };
 
     const applyFilters = (next: Partial<Filters>) => {
@@ -111,8 +109,28 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
         applyFilters({ search: search || undefined });
     };
 
-    const subkategoris = categories.flatMap((c) => c.children ?? []);
-    const pages = pageNumbersWithGaps(assets.current_page, assets.last_page);
+    const hasActiveFilter = Boolean(filters.search || filters.category_id || filters.unit_id || filters.kondisi);
+
+    const resetFilters = () => {
+        setSearch('');
+        router.get(route('assets.index'), { urut: filters.urut }, { preserveState: true, preserveScroll: true, replace: true });
+    };
+
+    const categoryItems = [
+        { id: ALL, label: 'Semua Kategori' },
+        ...categories.flatMap((kategori) =>
+            (kategori.children ?? []).map((sub) => ({ id: String(sub.id), label: `${kategori.name} › ${sub.name}` })),
+        ),
+    ];
+    const unitItems = [{ id: ALL, label: 'Semua Unit' }, ...units.map((u) => ({ id: String(u.id), label: u.name }))];
+    const kondisiItems = [
+        { id: ALL, label: 'Semua Kondisi' },
+        ...kondisiOptions.map((o) => ({ id: o.value, label: o.label })),
+    ];
+    const sortItems = sortOptions.map((o) => ({ id: o.value, label: `Urutkan: ${o.label}` }));
+
+    const goToPage = (page: number) =>
+        router.get(route('assets.index'), { ...filters, page }, { preserveState: true, preserveScroll: true });
 
     return (
         <AuthenticatedLayout>
@@ -126,7 +144,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <Link href={route('dashboard')} className="hover:text-blue-700">
                                 Home
                             </Link>
-                            <ChevronRight className="h-3 w-3 text-slate-400" />
+                            <span aria-hidden="true">/</span>
                             <span className="font-medium text-slate-800">Data Aset</span>
                         </nav>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
@@ -134,33 +152,23 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         {selectedIds.length > 0 && Boolean(can.printLabel) && (
-                            <button
-                                type="button"
-                                onClick={() => setPrintIds(selectedIds)}
-                                className={`inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold shadow-xs transition ${
-                                    selectedIds.length > 99
-                                        ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                                }`}
+                            <Button
+                                color="secondary"
+                                size="md"
+                                iconLeading={Printer}
+                                className={overLimit ? 'bg-amber-50 text-amber-800 ring-amber-300 hover:bg-amber-100' : undefined}
+                                onPress={() => setPrintIds(selectedIds)}
                             >
-                                <Printer className="h-4 w-4" />
-                                <span>
-                                    Cetak Label ({selectedIds.length})
-                                    {selectedIds.length > 99 && ' · Maks 99'}
-                                </span>
-                            </button>
+                                Cetak Label ({selectedIds.length}){overLimit && ` · Maks ${MAX_LABELS}`}
+                            </Button>
                         )}
                         <ImportExportButtons modul="aset" query={filters} />
                         {can.create && (
-                            <Link
-                                href={route('assets.create')}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-3 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                            >
-                                <Plus className="h-4 w-4" />
-                                <span>Tambah Aset Baru</span>
-                            </Link>
+                            <Button color="primary" size="md" iconLeading={Plus} href={route('assets.create')}>
+                                Tambah Aset Baru
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -168,316 +176,210 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                 {/* Filter Toolbar */}
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <div className="relative">
-                            <select
-                                value={filters.category_id ?? ''}
-                                onChange={(e) => applyFilters({ category_id: e.target.value || undefined })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                            >
-                                <option value="">Semua Kategori</option>
-                                {categories.map((kategori) => (
-                                    <optgroup key={kategori.id} label={kategori.name}>
-                                        {(kategori.children ?? []).map((sub) => (
-                                            <option key={sub.id} value={sub.id}>
-                                                {sub.name}
-                                            </option>
-                                        ))}
-                                    </optgroup>
-                                ))}
-                            </select>
-                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        </div>
-
-                        <div className="relative">
-                            <select
-                                value={filters.unit_id ?? ''}
-                                onChange={(e) => applyFilters({ unit_id: e.target.value || undefined })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                            >
-                                <option value="">Semua Unit</option>
-                                {units.map((unit) => (
-                                    <option key={unit.id} value={unit.id}>
-                                        {unit.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        </div>
-
-                        <div className="relative">
-                            <select
-                                value={filters.kondisi ?? ''}
-                                onChange={(e) => applyFilters({ kondisi: e.target.value || undefined })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                            >
-                                <option value="">Semua Kondisi</option>
-                                {kondisiOptions.map((o) => (
-                                    <option key={o.value} value={o.value}>
-                                        {o.label}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        </div>
-
-                        <div className="relative">
-                            <select
-                                aria-label="Urutkan"
-                                value={filters.urut ?? 'nama_asc'}
-                                onChange={(e) => applyFilters({ urut: e.target.value === 'nama_asc' ? undefined : e.target.value })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                            >
-                                {sortOptions.map((o) => (
-                                    <option key={o.value} value={o.value}>
-                                        Urutkan: {o.label}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                        </div>
+                        <ComboBox
+                            aria-label="Kategori"
+                            size="md"
+                            shortcut={false}
+                            placeholder="Cari kategori..."
+                            items={categoryItems}
+                            selectedKey={filters.category_id ?? ALL}
+                            onSelectionChange={(key) =>
+                                applyFilters({ category_id: key == null || key === ALL ? undefined : String(key) })
+                            }
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </ComboBox>
+                        <Select
+                            aria-label="Unit"
+                            size="md"
+                            items={unitItems}
+                            selectedKey={filters.unit_id ?? ALL}
+                            onSelectionChange={(key) => applyFilters({ unit_id: key === ALL ? undefined : String(key) })}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
+                        <Select
+                            aria-label="Kondisi"
+                            size="md"
+                            items={kondisiItems}
+                            selectedKey={filters.kondisi ?? ALL}
+                            onSelectionChange={(key) => applyFilters({ kondisi: key === ALL ? undefined : String(key) })}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
+                        <Select
+                            aria-label="Urutkan"
+                            size="md"
+                            items={sortItems}
+                            selectedKey={filters.urut ?? DEFAULT_SORT}
+                            onSelectionChange={(key) =>
+                                applyFilters({ urut: key === DEFAULT_SORT ? undefined : String(key) })
+                            }
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
                     </div>
+                    {hasActiveFilter && (
+                        <div className="mt-3 flex justify-end">
+                            <Button color="tertiary" size="sm" iconLeading={XClose} onPress={resetFilters}>
+                                Hapus semua filter
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Data Table */}
-                <div className="shadow-2xs overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
                     <div className="border-b border-slate-200 p-4">
-                        <form onSubmit={submitSearch} className="relative max-w-sm">
-                            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                            <input
-                                type="text"
-                                aria-label="Cari aset"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Cari nama barang, kode BMD, atau dokumen..."
-                                className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-100"
-                            />
+                        <form onSubmit={submitSearch} className="flex max-w-md items-center gap-2">
+                            <div className="flex-1">
+                                <Input
+                                    aria-label="Cari aset"
+                                    size="md"
+                                    icon={SearchLg}
+                                    value={search}
+                                    onChange={setSearch}
+                                    placeholder="Cari nama barang, kode BMD, atau dokumen..."
+                                />
+                            </div>
                             {search && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
+                                <Button
+                                    color="tertiary"
+                                    size="md"
+                                    iconLeading={XClose}
+                                    aria-label="Hapus pencarian"
+                                    onPress={() => {
                                         setSearch('');
                                         applyFilters({ search: undefined });
                                     }}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
+                                />
                             )}
                         </form>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-left">
-                            <thead>
-                                <tr className="border-b border-slate-200 bg-slate-50">
-                                    <th className="w-10 px-4 py-3">
-                                        <input
-                                            type="checkbox"
-                                            checked={allOnPageSelected}
-                                            onChange={toggleAllOnPage}
-                                            aria-label="Pilih semua aset di halaman ini"
-                                            className="h-4 w-4 rounded-sm border-slate-300 text-blue-700 focus:ring-blue-600"
-                                        />
-                                    </th>
-                                    <th className="w-16 px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Foto
-                                    </th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Identitas Barang
-                                    </th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Kode Register BMD
-                                    </th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Unit Pemilik
-                                    </th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Pemegang
-                                    </th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Kondisi
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Nilai Perolehan
-                                    </th>
-                                    <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {assets.data.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={9} className="py-14 text-center text-sm text-slate-400">
-                                            Tidak ada aset yang cocok dengan pencarian/filter ini.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    assets.data.map((asset) => (
-                                        <tr key={asset.id} className="transition hover:bg-slate-50/60">
-                                            <td className="px-4 py-3">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedIds.includes(asset.id)}
-                                                    onChange={() => toggleRow(asset.id)}
-                                                    aria-label={`Pilih ${asset.nama_aset}`}
-                                                    className="h-4 w-4 rounded-sm border-slate-300 text-blue-700 focus:ring-blue-600"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <div className="h-12 w-12 overflow-hidden rounded-sm bg-slate-100">
-                                                    {asset.photos?.[0] && (
-                                                        <img
-                                                            src={asset.photos[0].url}
-                                                            alt=""
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <Link
+
+                    {/* onRowAction kosong: menekan baris atau tautan di dalamnya tidak memilih baris; seleksi hanya lewat checkbox. */}
+                    <Table
+                        aria-label="Daftar aset"
+                        selectionMode="multiple"
+                        selectionBehavior="toggle"
+                        onRowAction={() => {}}
+                        selectedKeys={selectedOnPage}
+                        onSelectionChange={onSelectionChange}
+                    >
+                        <Table.Header>
+                            <Table.Head id="foto" label="Foto" />
+                            <Table.Head id="identitas" label="Identitas Barang" isRowHeader />
+                            <Table.Head id="kode" label="Kode Register BMD" />
+                            <Table.Head id="unit" label="Unit Pemilik" />
+                            <Table.Head id="pemegang" label="Pemegang" />
+                            <Table.Head id="kondisi" label="Kondisi" />
+                            <Table.Head id="nilai" label="Nilai Perolehan" />
+                            <Table.Head id="aksi" label="Aksi" />
+                        </Table.Header>
+                        <Table.Body
+                            items={assets.data}
+                            renderEmptyState={() => (
+                                <div className="flex flex-col items-center gap-3 py-14 text-center">
+                                    <p className="text-sm text-slate-500">
+                                        Tidak ada aset yang cocok dengan pencarian/filter ini.
+                                    </p>
+                                    {hasActiveFilter && (
+                                        <Button color="secondary" size="sm" onPress={resetFilters}>
+                                            Hapus semua filter
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
+                        >
+                            {(asset) => (
+                                <Table.Row id={asset.id}>
+                                    <Table.Cell>
+                                        <div className="h-12 w-12 overflow-hidden rounded bg-slate-100">
+                                            {asset.photos?.[0] && (
+                                                <img src={asset.photos[0].url} alt="" className="h-full w-full object-cover" />
+                                            )}
+                                        </div>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Link
+                                            href={route('assets.show', asset.id)}
+                                            className="block max-w-[260px] truncate text-sm font-semibold text-slate-900 hover:text-blue-700"
+                                        >
+                                            {asset.nama_aset}
+                                        </Link>
+                                        <p className="max-w-[260px] truncate text-xs text-slate-500">{asset.merk_type ?? '—'}</p>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <p className="whitespace-nowrap font-mono text-[13px] text-slate-800">{asset.kode_barang}</p>
+                                        <p className="text-[11px] text-slate-400">Reg. {registerLabel(asset.nomor_register)}</p>
+                                    </Table.Cell>
+                                    <Table.Cell>{asset.unit?.name}</Table.Cell>
+                                    <Table.Cell>{asset.current_holder?.nama ?? '—'}</Table.Cell>
+                                    <Table.Cell>
+                                        <Badge type="color" color={KONDISI_BADGE[asset.kondisi] ?? 'gray'} size="sm" className="rounded-sm">
+                                            {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ?? asset.kondisi}
+                                        </Badge>
+                                    </Table.Cell>
+                                    <Table.Cell className="whitespace-nowrap text-right font-semibold tabular-nums text-slate-900">
+                                        {formatRupiah(asset.nilai_perolehan)}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <div className="flex items-center justify-center gap-1.5">
+                                            <Tooltip title="Lihat detail">
+                                                <Button
+                                                    color="secondary"
+                                                    size="sm"
+                                                    iconLeading={Eye}
+                                                    aria-label="Lihat detail"
                                                     href={route('assets.show', asset.id)}
-                                                    className="block max-w-[260px] truncate text-sm font-semibold text-slate-900 hover:text-blue-700"
-                                                >
-                                                    {asset.nama_aset}
-                                                </Link>
-                                                <p className="max-w-[260px] truncate text-xs text-slate-500">
-                                                    {asset.merk_type ?? '—'}
-                                                </p>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <p className="whitespace-nowrap font-mono text-[13px] text-slate-800">
-                                                    {asset.kode_barang}
-                                                </p>
-                                                <p className="text-[11px] text-slate-400">
-                                                    Reg. {registerLabel(asset.nomor_register)}
-                                                </p>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-slate-800">{asset.unit?.name}</td>
-                                            <td className="px-4 py-3 text-sm text-slate-800">
-                                                {asset.current_holder?.nama ?? '—'}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span
-                                                    className={`inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[asset.kondisi]}`}
-                                                >
-                                                    {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ??
-                                                        asset.kondisi}
-                                                </span>
-                                            </td>
-                                            <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-semibold text-slate-900">
-                                                {formatRupiah(asset.nilai_perolehan)}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center justify-center gap-1.5">
-                                                    <Link
-                                                        href={route('assets.show', asset.id)}
-                                                        title="Lihat detail"
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
-                                                    >
-                                                        <Eye className="h-4 w-4" />
-                                                    </Link>
-                                                    {can.update && (
-                                                        <Link
-                                                            href={route('assets.edit', asset.id)}
-                                                            title="Ubah aset"
-                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
-                                                        >
-                                                            <Pencil className="h-4 w-4" />
-                                                        </Link>
-                                                    )}
-                                                    {can.printLabel && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setPrintIds([asset.id])}
-                                                            title="Cetak label QR"
-                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-300 hover:text-blue-700"
-                                                        >
-                                                            <Printer className="h-4 w-4" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                                />
+                                            </Tooltip>
+                                            {can.update && (
+                                                <Tooltip title="Ubah aset">
+                                                    <Button
+                                                        color="secondary"
+                                                        size="sm"
+                                                        iconLeading={Edit01}
+                                                        aria-label="Ubah aset"
+                                                        href={route('assets.edit', asset.id)}
+                                                    />
+                                                </Tooltip>
+                                            )}
+                                            {can.printLabel && (
+                                                <Tooltip title="Cetak label QR">
+                                                    <Button
+                                                        color="secondary"
+                                                        size="sm"
+                                                        iconLeading={Printer}
+                                                        aria-label="Cetak label QR"
+                                                        onPress={() => setPrintIds([asset.id])}
+                                                    />
+                                                </Tooltip>
+                                            )}
+                                        </div>
+                                    </Table.Cell>
+                                </Table.Row>
+                            )}
+                        </Table.Body>
+                    </Table>
 
                     {/* Pagination */}
-                    <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row">
+                    <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
                         <p className="text-xs text-slate-500">
                             Menampilkan{' '}
-                            <span className="font-semibold text-slate-800">
+                            <span className="font-semibold tabular-nums text-slate-800">
                                 {assets.from ?? 0}-{assets.to ?? 0}
                             </span>{' '}
-                            dari <span className="font-semibold text-slate-800">{assets.total}</span> aset
+                            dari <span className="font-semibold tabular-nums text-slate-800">{assets.total}</span> aset
                         </p>
 
                         {assets.last_page > 1 && (
-                            <div className="flex items-center gap-1.5">
-                                <button
-                                    type="button"
-                                    disabled={assets.current_page <= 1}
-                                    onClick={() =>
-                                        router.get(
-                                            route('assets.index'),
-                                            { ...filters, page: assets.current_page - 1 },
-                                            { preserveState: true, preserveScroll: true },
-                                        )
-                                    }
-                                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                                >
-                                    <ChevronLeft className="h-3.5 w-3.5" />
-                                    <span>Sebelumnya</span>
-                                </button>
-
-                                <div className="flex items-center gap-1">
-                                    {pages.map((page, idx) =>
-                                        page === '...' ? (
-                                            <span key={`gap-${idx}`} className="px-1 text-xs text-slate-400">
-                                                ...
-                                            </span>
-                                        ) : (
-                                            <button
-                                                key={page}
-                                                type="button"
-                                                onClick={() =>
-                                                    router.get(
-                                                        route('assets.index'),
-                                                        { ...filters, page },
-                                                        { preserveState: true, preserveScroll: true },
-                                                    )
-                                                }
-                                                className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition ${
-                                                    page === assets.current_page
-                                                        ? 'bg-blue-800 text-white shadow-xs'
-                                                        : 'text-slate-700 hover:bg-slate-100'
-                                                }`}
-                                            >
-                                                {page}
-                                            </button>
-                                        ),
-                                    )}
-                                </div>
-
-                                <button
-                                    type="button"
-                                    disabled={assets.current_page >= assets.last_page}
-                                    onClick={() =>
-                                        router.get(
-                                            route('assets.index'),
-                                            { ...filters, page: assets.current_page + 1 },
-                                            { preserveState: true, preserveScroll: true },
-                                        )
-                                    }
-                                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                                >
-                                    <span>Berikutnya</span>
-                                    <ChevronRight className="h-3.5 w-3.5" />
-                                </button>
-                            </div>
+                            <PaginationPageDefault
+                                className="border-t-0 pt-0 md:pt-0"
+                                page={assets.current_page}
+                                total={assets.last_page}
+                                onPageChange={goToPage}
+                            />
                         )}
                     </div>
                 </div>

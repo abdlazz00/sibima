@@ -57,7 +57,7 @@ const MobilePagination = ({ page = 1, total = 10, className, onPageChange }: Mob
     return (
         <nav aria-label="Pagination" className={cx("flex items-center justify-between md:hidden", className)}>
             <Button
-                aria-label="Go to previous page"
+                aria-label="Halaman sebelumnya"
                 iconLeading={ArrowLeft}
                 color="secondary"
                 size="sm"
@@ -69,7 +69,7 @@ const MobilePagination = ({ page = 1, total = 10, className, onPageChange }: Mob
             </span>
 
             <Button
-                aria-label="Go to next page"
+                aria-label="Halaman berikutnya"
                 iconLeading={ArrowRight}
                 color="secondary"
                 size="sm"
@@ -92,14 +92,14 @@ export const PaginationPageDefault = ({ rounded, page = 1, total = 10, className
             <div className="hidden flex-1 justify-start md:flex">
                 <Pagination.PrevTrigger asChild>
                     <Button iconLeading={ArrowLeft} color="link-gray" size="sm">
-                        {isDesktop ? "Previous" : undefined}
+                        {isDesktop ? "Sebelumnya" : undefined}
                     </Button>
                 </Pagination.PrevTrigger>
             </div>
 
             <Pagination.PrevTrigger asChild className="md:hidden">
                 <Button iconLeading={ArrowLeft} color="secondary" size="sm">
-                    {isDesktop ? "Previous" : undefined}
+                    {isDesktop ? "Sebelumnya" : undefined}
                 </Button>
             </Pagination.PrevTrigger>
 
@@ -119,7 +119,7 @@ export const PaginationPageDefault = ({ rounded, page = 1, total = 10, className
                         </div>
 
                         <div className="flex justify-center text-sm whitespace-pre text-fg-secondary md:hidden">
-                            Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{total}</span>
+                            Halaman <span className="font-medium">{currentPage}</span> dari <span className="font-medium">{total}</span>
                         </div>
                     </>
                 )}
@@ -128,13 +128,13 @@ export const PaginationPageDefault = ({ rounded, page = 1, total = 10, className
             <div className="hidden flex-1 justify-end md:flex">
                 <Pagination.NextTrigger asChild>
                     <Button iconTrailing={ArrowRight} color="link-gray" size="sm">
-                        {isDesktop ? "Next" : undefined}
+                        {isDesktop ? "Berikutnya" : undefined}
                     </Button>
                 </Pagination.NextTrigger>
             </div>
             <Pagination.NextTrigger asChild className="md:hidden">
                 <Button iconTrailing={ArrowRight} color="secondary" size="sm">
-                    {isDesktop ? "Next" : undefined}
+                    {isDesktop ? "Berikutnya" : undefined}
                 </Button>
             </Pagination.NextTrigger>
         </Pagination.Root>
@@ -154,7 +154,7 @@ export const PaginationPageMinimalCenter = ({ rounded, page = 1, total = 10, cla
             <div className="flex flex-1 justify-start">
                 <Pagination.PrevTrigger asChild>
                     <Button iconLeading={ArrowLeft} color="secondary" size="sm">
-                        {isDesktop ? "Previous" : undefined}
+                        {isDesktop ? "Sebelumnya" : undefined}
                     </Button>
                 </Pagination.PrevTrigger>
             </div>
@@ -175,7 +175,7 @@ export const PaginationPageMinimalCenter = ({ rounded, page = 1, total = 10, cla
                         </div>
 
                         <div className="flex justify-center text-sm whitespace-pre text-fg-secondary md:hidden">
-                            Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{total}</span>
+                            Halaman <span className="font-medium">{currentPage}</span> dari <span className="font-medium">{total}</span>
                         </div>
                     </>
                 )}
@@ -184,7 +184,7 @@ export const PaginationPageMinimalCenter = ({ rounded, page = 1, total = 10, cla
             <div className="flex flex-1 justify-end">
                 <Pagination.NextTrigger asChild>
                     <Button iconTrailing={ArrowRight} color="secondary" size="sm">
-                        {isDesktop ? "Next" : undefined}
+                        {isDesktop ? "Berikutnya" : undefined}
                     </Button>
                 </Pagination.NextTrigger>
             </div>
@@ -205,7 +205,7 @@ export const PaginationCardDefault = ({ rounded, page = 1, total = 10, ...props 
             <div className="flex flex-1 justify-start">
                 <Pagination.PrevTrigger asChild>
                     <Button iconLeading={ArrowLeft} color="secondary" size="sm">
-                        {isDesktop ? "Previous" : undefined}
+                        {isDesktop ? "Sebelumnya" : undefined}
                     </Button>
                 </Pagination.PrevTrigger>
             </div>
@@ -226,7 +226,7 @@ export const PaginationCardDefault = ({ rounded, page = 1, total = 10, ...props 
                         </div>
 
                         <div className="flex justify-center text-sm whitespace-pre text-fg-secondary md:hidden">
-                            Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{total}</span>
+                            Halaman <span className="font-medium">{currentPage}</span> dari <span className="font-medium">{total}</span>
                         </div>
                     </>
                 )}
@@ -235,7 +235,7 @@ export const PaginationCardDefault = ({ rounded, page = 1, total = 10, ...props 
             <div className="flex flex-1 justify-end">
                 <Pagination.NextTrigger asChild>
                     <Button iconTrailing={ArrowRight} color="secondary" size="sm">
-                        {isDesktop ? "Next" : undefined}
+                        {isDesktop ? "Berikutnya" : undefined}
                     </Button>
                 </Pagination.NextTrigger>
             </div>
@@ -341,7 +341,7 @@ export const PaginationButtonGroup = ({ align = "left", page = 1, total = 10, ..
                     {({ pages }) => (
                         <ButtonGroup size="sm">
                             <Pagination.PrevTrigger asChild>
-                                <ButtonGroupItem iconLeading={ArrowLeft}>{isDesktop ? "Previous" : undefined}</ButtonGroupItem>
+                                <ButtonGroupItem iconLeading={ArrowLeft}>{isDesktop ? "Sebelumnya" : undefined}</ButtonGroupItem>
                             </Pagination.PrevTrigger>
 
                             {pages.map((page, index) =>
@@ -361,7 +361,7 @@ export const PaginationButtonGroup = ({ align = "left", page = 1, total = 10, ..
                             )}
 
                             <Pagination.NextTrigger asChild>
-                                <ButtonGroupItem iconTrailing={ArrowRight}>{isDesktop ? "Next" : undefined}</ButtonGroupItem>
+                                <ButtonGroupItem iconTrailing={ArrowRight}>{isDesktop ? "Berikutnya" : undefined}</ButtonGroupItem>
                             </Pagination.NextTrigger>
                         </ButtonGroup>
                     )}
@@ -466,7 +466,7 @@ export const PaginationCardAdvanced = ({
                                 </div>
 
                                 <div className="flex flex-1 justify-center text-sm whitespace-pre text-fg-secondary md:hidden">
-                                    Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{total}</span>
+                                    Halaman <span className="font-medium">{currentPage}</span> dari <span className="font-medium">{total}</span>
                                 </div>
                             </>
                         )}
