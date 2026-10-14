@@ -7,6 +7,13 @@ export const REPORT_STATUS_LABEL: Record<AssetReportStatus, string> = {
     cancelled: 'Dibatalkan',
 };
 
+export const REPORT_STATUS_COLOR: Record<AssetReportStatus, 'warning' | 'success' | 'error' | 'gray'> = {
+    pending: 'warning',
+    approved: 'success',
+    rejected: 'error',
+    cancelled: 'gray',
+};
+
 export const REPORT_STATUS_STYLE: Record<AssetReportStatus, string> = {
     pending: 'bg-amber-50 text-amber-700',
     approved: 'bg-emerald-50 text-emerald-700',

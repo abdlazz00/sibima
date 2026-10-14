@@ -1,10 +1,16 @@
-import { ChevronRightIcon as ChevronRight, EyeIcon as Eye, PlusIcon as Plus } from '@/Components/Icons';
-import { FilterCard, FilterSelect, TableSearch } from '@/Components/ListFilters';
+import PageHeader from '@/Components/PageHeader';
+import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { Table } from '@/Components/ui/application/table/table';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import { Select } from '@/Components/ui/base/select/select';
+import { Tooltip } from '@/Components/ui/base/tooltip/tooltip';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { KONDISI_LABEL, REPORT_STATUS_LABEL, REPORT_STATUS_STYLE, REPORT_TYPE_LABEL } from '@/lib/assetReport';
-import { pageNumbersWithGaps } from '@/lib/pagination';
-import { AssetReport, PageProps, Paginated } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { KONDISI_BADGE_COLOR, KONDISI_LABEL, REPORT_STATUS_COLOR, REPORT_STATUS_LABEL, REPORT_TYPE_LABEL } from '@/lib/assetReport';
+import { AssetReport, AssetReportStatus, AssetReportType, PageProps, Paginated } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { Eye, Plus, SearchLg, XClose } from '@untitledui/icons';
 import { FormEvent, useState } from 'react';
 
 interface IndexProps extends PageProps {
@@ -14,9 +20,21 @@ interface IndexProps extends PageProps {
     can: { create: boolean };
 }
 
+const ALL = '__all';
+
+const STATUS_ITEMS = [
+    { id: ALL, label: 'Semua status' },
+    ...(Object.keys(REPORT_STATUS_LABEL) as AssetReportStatus[]).map((key) => ({ id: key, label: REPORT_STATUS_LABEL[key] })),
+];
+
+const JENIS_ITEMS = [
+    { id: ALL, label: 'Semua jenis' },
+    ...(Object.keys(REPORT_TYPE_LABEL) as AssetReportType[]).map((key) => ({ id: key, label: REPORT_TYPE_LABEL[key] })),
+];
+
 export default function Index({ items, filters, sortOptions, can }: IndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
-    const pages = pageNumbersWithGaps(items.current_page, items.last_page);
+    const hasFilter = Boolean(filters.status || filters.jenis);
 
     const go = (changes: Record<string, string | number | undefined>) => {
         const params = { ...filters, search: search || undefined, ...changes };
@@ -34,107 +52,147 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
             <Head title="Lapor Rusak/Hilang" />
 
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                            <ChevronRight className="h-3 w-3 text-slate-400" />
-                            <span className="font-medium text-slate-800">Lapor Rusak/Hilang</span>
-                        </nav>
-                        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Lapor Rusak/Hilang</h1>
+                <PageHeader
+                    crumbs={[{ label: 'Lapor Rusak/Hilang' }]}
+                    title="Lapor Rusak/Hilang"
+                    actions={
+                        can.create && (
+                            <Button color="primary" size="md" iconLeading={Plus} href={route('asset-reports.create')}>
+                                Buat Laporan
+                            </Button>
+                        )
+                    }
+                />
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <Select
+                            label="Status"
+                            size="md"
+                            items={STATUS_ITEMS}
+                            selectedKey={filters.status ?? ALL}
+                            onSelectionChange={(key) => go({ status: key === ALL ? undefined : String(key), page: undefined })}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
+                        <Select
+                            label="Jenis"
+                            size="md"
+                            items={JENIS_ITEMS}
+                            selectedKey={filters.jenis ?? ALL}
+                            onSelectionChange={(key) => go({ jenis: key === ALL ? undefined : String(key), page: undefined })}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
+                        <Select
+                            label="Urutkan"
+                            size="md"
+                            items={sortOptions.map((o) => ({ id: o.value, label: o.label }))}
+                            selectedKey={filters.urut ?? 'terbaru'}
+                            onSelectionChange={(key) => go({ urut: key === 'terbaru' ? undefined : String(key), page: undefined })}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
                     </div>
-                    {can.create && (
-                        <Link href={route('asset-reports.create')} className="inline-flex items-center gap-2 rounded-lg bg-blue-800 px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800">
-                            <Plus className="h-4 w-4" /> Buat Laporan
-                        </Link>
-                    )}
                 </div>
 
-                <FilterCard>
-                    <FilterSelect ariaLabel="Status" value={filters.status ?? ''} onChange={(v) => go({ status: v || undefined, page: undefined })}>
-                        <option value="">Semua status</option>
-                        {Object.entries(REPORT_STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                    </FilterSelect>
-                    <FilterSelect ariaLabel="Jenis" value={filters.jenis ?? ''} onChange={(v) => go({ jenis: v || undefined, page: undefined })}>
-                        <option value="">Semua jenis</option>
-                        {Object.entries(REPORT_TYPE_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                    </FilterSelect>
-                    <FilterSelect ariaLabel="Urutkan" value={filters.urut ?? 'terbaru'} onChange={(v) => go({ urut: v === 'terbaru' ? undefined : v, page: undefined })}>
-                        {sortOptions.map((o) => <option key={o.value} value={o.value}>Urutkan: {o.label}</option>)}
-                    </FilterSelect>
-                </FilterCard>
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                    <form onSubmit={submitSearch} className="flex max-w-lg items-center gap-2 border-b border-slate-200 p-4">
+                        <div className="flex-1">
+                            <Input
+                                aria-label="Cari"
+                                size="md"
+                                icon={SearchLg}
+                                placeholder="Cari nomor laporan atau nama aset..."
+                                value={search}
+                                onChange={setSearch}
+                            />
+                        </div>
+                        {search && (
+                            <Button
+                                color="tertiary"
+                                size="md"
+                                iconLeading={XClose}
+                                aria-label="Hapus pencarian"
+                                onPress={() => {
+                                    setSearch('');
+                                    go({ search: undefined, page: undefined });
+                                }}
+                            />
+                        )}
+                        <Button type="submit" color="secondary" size="md">
+                            Cari
+                        </Button>
+                    </form>
 
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                    <TableSearch
-                        value={search}
-                        onChange={setSearch}
-                        onSubmit={submitSearch}
-                        onClear={() => {
-                            setSearch('');
-                            go({ search: undefined, page: undefined });
-                        }}
-                        placeholder="Cari nomor laporan atau nama aset..."
-                    />
-                    <table className="w-full border-collapse text-left">
-                        <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                <th className="px-4 py-3">No. Laporan</th>
-                                <th className="px-4 py-3">Aset</th>
-                                <th className="px-4 py-3">Jenis</th>
-                                <th className="px-4 py-3">Kondisi Baru</th>
-                                <th className="px-4 py-3">Unit</th>
-                                <th className="px-4 py-3">Tanggal</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 text-sm text-slate-800">
-                            {items.data.length === 0 ? (
-                                <tr><td colSpan={8} className="py-14 text-center text-sm text-slate-400">Belum ada laporan.</td></tr>
-                            ) : (
-                                items.data.map((r) => (
-                                    <tr key={r.id} className="hover:bg-slate-50/60">
-                                        <td className="px-4 py-3 font-medium">{r.nomor_laporan}</td>
-                                        <td className="px-4 py-3 font-semibold text-slate-900">{r.asset?.nama_aset}</td>
-                                        <td className="px-4 py-3">{REPORT_TYPE_LABEL[r.jenis]}</td>
-                                        <td className="px-4 py-3">{KONDISI_LABEL[r.kondisi_baru]}</td>
-                                        <td className="px-4 py-3">{r.unit?.name}</td>
-                                        <td className="px-4 py-3">{new Date(r.tanggal_kejadian).toLocaleDateString('id-ID')}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${REPORT_STATUS_STYLE[r.status]}`}>{REPORT_STATUS_LABEL[r.status]}</span>
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            <Link href={route('asset-reports.show', r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700">
-                                                <Eye className="h-4 w-4" />
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
+                    <Table aria-label="Daftar laporan rusak atau hilang" size="sm">
+                        <Table.Header>
+                            <Table.Head id="nomor" label="No. Laporan" isRowHeader />
+                            <Table.Head id="aset" label="Aset" />
+                            <Table.Head id="jenis" label="Jenis" />
+                            <Table.Head id="kondisi" label="Kondisi Baru" />
+                            <Table.Head id="unit" label="Unit" />
+                            <Table.Head id="tanggal" label="Tanggal" />
+                            <Table.Head id="status" label="Status" />
+                            <Table.Head id="aksi" label="Aksi" />
+                        </Table.Header>
+                        <Table.Body
+                            items={items.data}
+                            renderEmptyState={() => (
+                                <p className="py-14 text-center text-sm text-slate-400">
+                                    {hasFilter || filters.search ? 'Tidak ada laporan yang cocok dengan filter.' : 'Belum ada laporan.'}
+                                </p>
                             )}
-                        </tbody>
-                    </table>
+                        >
+                            {(r) => (
+                                <Table.Row id={r.id}>
+                                    <Table.Cell className="whitespace-nowrap font-medium text-slate-800">{r.nomor_laporan}</Table.Cell>
+                                    <Table.Cell className="font-semibold text-slate-900">{r.asset?.nama_aset}</Table.Cell>
+                                    <Table.Cell className="text-slate-800">{REPORT_TYPE_LABEL[r.jenis]}</Table.Cell>
+                                    <Table.Cell>
+                                        <Badge type="color" size="sm" color={KONDISI_BADGE_COLOR[r.kondisi_baru] ?? 'gray'} className="rounded-sm">
+                                            {KONDISI_LABEL[r.kondisi_baru]}
+                                        </Badge>
+                                    </Table.Cell>
+                                    <Table.Cell className="text-slate-800">{r.unit?.name}</Table.Cell>
+                                    <Table.Cell className="whitespace-nowrap text-slate-800">{new Date(r.tanggal_kejadian).toLocaleDateString('id-ID')}</Table.Cell>
+                                    <Table.Cell>
+                                        <Badge type="color" size="sm" color={REPORT_STATUS_COLOR[r.status]} className="rounded-sm">
+                                            {REPORT_STATUS_LABEL[r.status]}
+                                        </Badge>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Tooltip title="Lihat detail">
+                                            <Button
+                                                color="secondary-brand"
+                                                size="sm"
+                                                iconLeading={Eye}
+                                                aria-label={`Lihat laporan ${r.nomor_laporan}`}
+                                                href={route('asset-reports.show', r.id)}
+                                            />
+                                        </Tooltip>
+                                    </Table.Cell>
+                                </Table.Row>
+                            )}
+                        </Table.Body>
+                    </Table>
 
-                    <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row">
+                    <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
                         <p className="text-xs text-slate-500">
-                            Menampilkan <span className="font-semibold text-slate-800">{items.from ?? 0}-{items.to ?? 0}</span> dari <span className="font-semibold text-slate-800">{items.total}</span> laporan
+                            Menampilkan{' '}
+                            <span className="font-semibold tabular-nums text-slate-800">
+                                {items.from ?? 0}-{items.to ?? 0}
+                            </span>{' '}
+                            dari <span className="font-semibold tabular-nums text-slate-800">{items.total}</span> laporan
                         </p>
+
                         {items.last_page > 1 && (
-                            <div className="flex items-center gap-1">
-                                {pages.map((page, idx) =>
-                                    page === '...' ? (
-                                        <span key={`gap-${idx}`} className="px-1 text-xs text-slate-400">...</span>
-                                    ) : (
-                                        <button
-                                            key={page}
-                                            type="button"
-                                            onClick={() => go({ page })}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === items.current_page ? 'bg-blue-800 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'}`}
-                                        >
-                                            {page}
-                                        </button>
-                                    ),
-                                )}
-                            </div>
+                            <PaginationPageDefault
+                                className="border-t-0 pt-0 md:pt-0"
+                                page={items.current_page}
+                                total={items.last_page}
+                                onPageChange={(page) => go({ page })}
+                            />
                         )}
                     </div>
                 </div>
