@@ -33,7 +33,7 @@ it('never overwrites what was changed from the role menu when seeded again', fun
 
     Role::findByName('camat')->update(['display_name' => 'Camat Kustom', 'unit_scope' => 'all', 'description' => 'diubah']);
     Role::findByName('camat')->syncPermissions(['dashboard.view']);
-    Role::findByName('admin_kecamatan')->revokePermissionTo('aset.delete');
+    Role::findByName('admin_kecamatan')->revokePermissionTo('aset.print-label');
 
     pdSeed();
 
@@ -44,7 +44,7 @@ it('never overwrites what was changed from the role menu when seeded again', fun
         ->and($camat->description)->toBe('diubah')
         ->and($camat->is_system)->toBeTrue()
         ->and($camat->permissions->pluck('name')->all())->toBe(['dashboard.view'])
-        ->and(Role::findByName('admin_kecamatan')->hasPermissionTo('aset.delete'))->toBeFalse();
+        ->and(Role::findByName('admin_kecamatan')->hasPermissionTo('aset.print-label'))->toBeFalse();
 });
 
 it('still creates a permission that is missing from the database without touching existing roles', function () {

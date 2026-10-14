@@ -13,7 +13,7 @@ beforeEach(function () {
 it('seeds all core granular permissions', function () {
     $expected = [
         'dashboard.view', 'scan.view',
-        'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
+        'aset.view', 'aset.create', 'aset.update', 'aset.print-label', 'import-aset', 'export-aset',
         'kategori.view', 'kategori.create', 'kategori.update', 'kategori.delete', 'import-kategori', 'export-kategori',
         'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'pegawai.create-user', 'import-pegawai', 'export-pegawai',
         'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete',

@@ -26,9 +26,4 @@ class AssetPolicy
     {
         return $user->can('aset.update') && $user->canAccessUnit($asset->unit);
     }
-
-    public function delete(User $user, Asset $asset): bool
-    {
-        return $user->can('aset.delete') && $user->canAccessUnit($asset->unit);
-    }
 }

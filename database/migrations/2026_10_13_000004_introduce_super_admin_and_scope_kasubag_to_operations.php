@@ -1,10 +1,8 @@
 <?php
 
 use App\Models\Role;
-use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -49,22 +47,9 @@ return new class extends Migration
 
         $superAdmin->syncPermissions(Permission::all());
 
-        // 3. Pastikan ada akun super-admin aktif untuk memenuhi invariant AccessGuard
-        $superUser = User::firstOrCreate(
-            ['email' => 'superadmin@simaset.test'],
-            [
-                'name' => 'Super Admin Demo',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-            ]
-        );
+        // Akun super-admin pertama dibuat manual (docs/ops/deployment.md); migrasi tidak membuat akun berpassword bawaan.
 
-        if (! $superUser->hasRole('super-admin')) {
-            $superUser->assignRole('super-admin');
-        }
-
-        // 4. Cabut hak akses menu pengaturan dari role kasubag
+        // 3. Cabut hak akses menu pengaturan dari role kasubag
         $kasubag = Role::where('name', 'kasubag')->first();
         if ($kasubag) {
             $kasubag->update([

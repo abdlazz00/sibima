@@ -12,7 +12,7 @@ class PermissionSeeder extends Seeder
     public const PERMISSION_GROUPS = [
         'Dashboard' => ['dashboard.view'],
         'Data Aset' => [
-            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label',
+            'aset.view', 'aset.create', 'aset.update', 'aset.print-label',
             'import-aset', 'export-aset',
         ],
         'Scan QR' => ['scan.view'],
@@ -47,7 +47,7 @@ class PermissionSeeder extends Seeder
     public const DEFAULTS = [
         'kasubag' => [
             'dashboard.view', 'scan.view',
-            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
+            'aset.view', 'aset.create', 'aset.update', 'aset.print-label', 'import-aset', 'export-aset',
             'kategori.view', 'kategori.create', 'kategori.update', 'kategori.delete', 'import-kategori', 'export-kategori',
             'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'pegawai.create-user', 'import-pegawai', 'export-pegawai',
             'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete',
@@ -70,7 +70,7 @@ class PermissionSeeder extends Seeder
         ],
         'admin_kecamatan' => [
             'dashboard.view', 'scan.view',
-            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
+            'aset.view', 'aset.create', 'aset.update', 'aset.print-label', 'import-aset', 'export-aset',
             'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
             'penerimaan.view', 'penerimaan.create', 'penerimaan.update', 'penerimaan.delete',
             'mutasi.view', 'mutasi.create',
@@ -81,7 +81,7 @@ class PermissionSeeder extends Seeder
         ],
         'admin_kelurahan' => [
             'dashboard.view', 'scan.view',
-            'aset.view', 'aset.create', 'aset.update', 'aset.delete', 'aset.print-label', 'import-aset', 'export-aset',
+            'aset.view', 'aset.create', 'aset.update', 'aset.print-label', 'import-aset', 'export-aset',
             'pegawai.view', 'pegawai.create', 'pegawai.update', 'pegawai.delete', 'export-pegawai',
             'mutasi.view', 'mutasi.create',
             'permohonan.view', 'permohonan.create', 'permohonan.fulfill', 'permohonan.close',

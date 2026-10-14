@@ -92,10 +92,10 @@ docker compose -f compose.prod.yaml run --rm app php artisan db:seed --force
 `db:seed` hanya sekali: mengisi role, permission, unit, kategori aset, alur persetujuan. Data demo dan akun demo tidak dibuat di produksi. Buat akun pertama:
 
 ```bash
-docker compose -f compose.prod.yaml run --rm app php artisan tinker --execute='$u = App\Models\User::create(["name" => "Kasubag", "email" => "EMAIL_ANDA", "password" => "PASSWORD_KUAT", "unit_id" => null, "email_verified_at" => now()]); $u->assignRole("kasubag");'
+docker compose -f compose.prod.yaml run --rm app php artisan tinker --execute='$u = App\Models\User::create(["name" => "Super Admin", "email" => "EMAIL_ANDA", "password" => "PASSWORD_KUAT", "unit_id" => null, "email_verified_at" => now()]); $u->assignRole("super-admin");'
 ```
 
-Role `kasubag` (tanpa unit) adalah akun tingkat atas pada seeder; akun lain dibuat dari menu manajemen user di aplikasi. Ganti password dari aplikasi setelah login, lalu hapus riwayat shell (`history -c`).
+Role `super-admin` (tanpa unit) adalah akun tingkat atas: satu-satunya yang memegang menu Pengaturan (role, alur, pengguna) secara bawaan. Akun lain, termasuk kasubag, dibuat dari menu manajemen user di aplikasi. Ganti password dari aplikasi setelah login, lalu hapus riwayat shell (`history -c`). Bila server pernah menjalankan migrasi lama, hapus akun `superadmin@simaset.test` (password `password`) dari menu Pengaturan Pengguna.
 
 Cek: `curl -I https://si-bima.online/up` → `200`.
 

@@ -14,7 +14,6 @@ const PERMISSION_LABELS: Record<string, string> = {
     'aset.view': 'Lihat Data Aset',
     'aset.create': 'Tambah Aset Baru',
     'aset.update': 'Ubah / Edit Aset',
-    'aset.delete': 'Hapus Data Aset',
     'aset.print-label': 'Cetak Label & Barcode QR',
     'import-aset': 'Import Data Aset Excel',
     'export-aset': 'Export Data Aset Excel',
