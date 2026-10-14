@@ -116,7 +116,7 @@ export default function Create({ units }: CreateProps) {
 
                 {/* Form Card */}
                 <form onSubmit={submit} className="space-y-6">
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
                         {/* Top Section: Photo and Personal Data */}
                         <div className="flex flex-col gap-8 md:flex-row md:items-start">
                             {/* Left Column: Photo Upload Area */}
@@ -144,7 +144,7 @@ export default function Create({ units }: CreateProps) {
                                             <button
                                                 type="button"
                                                 onClick={handleRemovePhoto}
-                                                className="absolute right-2 top-2 rounded-full bg-slate-900/70 p-1.5 text-white backdrop-blur-sm transition hover:bg-rose-600"
+                                                className="absolute right-2 top-2 rounded-full bg-slate-900/70 p-1.5 text-white backdrop-blur-xs transition hover:bg-rose-600"
                                                 title="Hapus foto"
                                             >
                                                 <X className="h-4 w-4" />
@@ -157,7 +157,7 @@ export default function Create({ units }: CreateProps) {
                                             }
                                             className="aspect-3/4 group flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-6 text-center transition hover:border-blue-500 hover:bg-blue-50/30"
                                         >
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm transition group-hover:scale-105 group-hover:text-blue-600">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-500 shadow-xs transition group-hover:scale-105 group-hover:text-blue-600">
                                                 <Camera className="h-6 w-6" />
                                             </div>
                                             <div className="mt-4 text-sm font-semibold text-slate-800 group-hover:text-blue-700">
@@ -200,7 +200,7 @@ export default function Create({ units }: CreateProps) {
                                                 setData('nama', e.target.value)
                                             }
                                             placeholder="Masukkan nama lengkap pegawai"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                             required
                                         />
                                         <InputError
@@ -221,7 +221,7 @@ export default function Create({ units }: CreateProps) {
                                                 setData('nip', e.target.value)
                                             }
                                             placeholder="Masukkan NIP (18 digit)"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         />
                                         <p className="mt-1 text-[11px] text-slate-500">
                                             Kosongkan jika PPPK tanpa NIP
@@ -240,7 +240,7 @@ export default function Create({ units }: CreateProps) {
                                                 *
                                             </span>
                                         </label>
-                                        <div className="h-9.5 mt-1.5 flex items-center gap-4 rounded-lg border border-slate-200 bg-white px-3.5 py-2 shadow-sm">
+                                        <div className="h-9.5 mt-1.5 flex items-center gap-4 rounded-lg border border-slate-200 bg-white px-3.5 py-2 shadow-xs">
                                             <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-800">
                                                 <input
                                                     type="radio"
@@ -298,7 +298,7 @@ export default function Create({ units }: CreateProps) {
                                                 setData('no_hp', e.target.value)
                                             }
                                             placeholder="08xx-xxxx-xxxx"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         />
                                         <InputError
                                             message={errors.no_hp}
@@ -321,7 +321,7 @@ export default function Create({ units }: CreateProps) {
                                                 )
                                             }
                                             placeholder="nama@batam.go.id"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         />
                                         <InputError
                                             message={errors.email_dinas}
@@ -355,7 +355,7 @@ export default function Create({ units }: CreateProps) {
                                                 e.target.value,
                                             )
                                         }
-                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                     >
                                         <option value="">Pilih pangkat</option>
                                         {PANGKAT_OPTIONS.map((pangkat) => (
@@ -386,7 +386,7 @@ export default function Create({ units }: CreateProps) {
                                             setData('jabatan', e.target.value)
                                         }
                                         placeholder="Masukkan jabatan dinas"
-                                        className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         required
                                     />
                                     <InputError
@@ -406,7 +406,7 @@ export default function Create({ units }: CreateProps) {
                                         onChange={(e) =>
                                             setData('unit_id', e.target.value)
                                         }
-                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         required
                                     >
                                         <option value="">
@@ -438,14 +438,14 @@ export default function Create({ units }: CreateProps) {
                     <div className="flex items-center justify-end gap-3">
                         <Link
                             href={route('pegawais.index')}
-                            className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                            className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-200"
                         >
                             Batal
                         </Link>
                         <button
                             type="submit"
                             disabled={processing}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
                         >
                             <Upload className="h-4 w-4" />
                             <span>

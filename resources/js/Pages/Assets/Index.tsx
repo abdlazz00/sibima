@@ -139,7 +139,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <button
                                 type="button"
                                 onClick={() => setPrintIds(selectedIds)}
-                                className={`inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold shadow-sm transition ${
+                                className={`inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold shadow-xs transition ${
                                     selectedIds.length > 99
                                         ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
                                         : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
@@ -156,7 +156,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                         {can.create && (
                             <Link
                                 href={route('assets.create')}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-3 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                             >
                                 <Plus className="h-4 w-4" />
                                 <span>Tambah Aset Baru</span>
@@ -166,13 +166,13 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                 </div>
 
                 {/* Filter Toolbar */}
-                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="relative">
                             <select
                                 value={filters.category_id ?? ''}
                                 onChange={(e) => applyFilters({ category_id: e.target.value || undefined })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             >
                                 <option value="">Semua Kategori</option>
                                 {categories.map((kategori) => (
@@ -192,7 +192,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <select
                                 value={filters.unit_id ?? ''}
                                 onChange={(e) => applyFilters({ unit_id: e.target.value || undefined })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             >
                                 <option value="">Semua Unit</option>
                                 {units.map((unit) => (
@@ -208,7 +208,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                             <select
                                 value={filters.kondisi ?? ''}
                                 onChange={(e) => applyFilters({ kondisi: e.target.value || undefined })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             >
                                 <option value="">Semua Kondisi</option>
                                 {kondisiOptions.map((o) => (
@@ -225,7 +225,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                 aria-label="Urutkan"
                                 value={filters.urut ?? 'nama_asc'}
                                 onChange={(e) => applyFilters({ urut: e.target.value === 'nama_asc' ? undefined : e.target.value })}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             >
                                 {sortOptions.map((o) => (
                                     <option key={o.value} value={o.value}>
@@ -239,7 +239,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                 </div>
 
                 {/* Data Table */}
-                <div className="shadow-xs overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="shadow-2xs overflow-hidden rounded-xl border border-slate-200 bg-white">
                     <div className="border-b border-slate-200 p-4">
                         <form onSubmit={submitSearch} className="relative max-w-sm">
                             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -249,7 +249,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Cari nama barang, kode BMD, atau dokumen..."
-                                className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             />
                             {search && (
                                 <button
@@ -275,7 +275,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                             checked={allOnPageSelected}
                                             onChange={toggleAllOnPage}
                                             aria-label="Pilih semua aset di halaman ini"
-                                            className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+                                            className="h-4 w-4 rounded-sm border-slate-300 text-blue-700 focus:ring-blue-600"
                                         />
                                     </th>
                                     <th className="w-16 px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
@@ -320,11 +320,11 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                                     checked={selectedIds.includes(asset.id)}
                                                     onChange={() => toggleRow(asset.id)}
                                                     aria-label={`Pilih ${asset.nama_aset}`}
-                                                    className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+                                                    className="h-4 w-4 rounded-sm border-slate-300 text-blue-700 focus:ring-blue-600"
                                                 />
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="h-12 w-12 overflow-hidden rounded bg-slate-100">
+                                                <div className="h-12 w-12 overflow-hidden rounded-sm bg-slate-100">
                                                     {asset.photos?.[0] && (
                                                         <img
                                                             src={asset.photos[0].url}
@@ -359,7 +359,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span
-                                                    className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[asset.kondisi]}`}
+                                                    className={`inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[asset.kondisi]}`}
                                                 >
                                                     {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ??
                                                         asset.kondisi}
@@ -452,7 +452,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                                 }
                                                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition ${
                                                     page === assets.current_page
-                                                        ? 'bg-[#1E40AF] text-white shadow-sm'
+                                                        ? 'bg-primary text-white shadow-xs'
                                                         : 'text-slate-700 hover:bg-slate-100'
                                                 }`}
                                             >

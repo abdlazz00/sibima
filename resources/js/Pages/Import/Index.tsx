@@ -45,9 +45,9 @@ interface Props extends PageProps {
 
 const CARD = 'rounded-lg border border-slate-200 bg-white p-5';
 const PRIMARY =
-    'inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50';
+    'inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50';
 const SECONDARY =
-    'inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2';
+    'inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2';
 
 const STATUS: Record<string, { label: string; cls: string }> = {
     memeriksa: { label: 'Memeriksa', cls: 'bg-amber-50 text-amber-800' },
@@ -60,7 +60,7 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 
 function StatusBadge({ status }: { status: string }) {
     const s = STATUS[status] ?? { label: status, cls: 'bg-slate-100 text-slate-600' };
-    return <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${s.cls}`}>{s.label}</span>;
+    return <span className={`inline-block rounded-sm px-2 py-0.5 text-xs font-medium ${s.cls}`}>{s.label}</span>;
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
@@ -137,7 +137,7 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
 
                         {active && (
                             <div>
-                                <div className="h-2 overflow-hidden rounded bg-slate-100">
+                                <div className="h-2 overflow-hidden rounded-sm bg-slate-100">
                                     <div className="h-2 bg-blue-700 transition-all" style={{ width: `${percent}%` }} />
                                 </div>
                                 <p className="mt-1 text-xs tabular-nums text-slate-500">
@@ -158,7 +158,7 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
                                 </div>
 
                                 {Object.entries(preview.peringatan).map(([text, n]) => (
-                                    <p key={text} className="rounded bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                                    <p key={text} className="rounded-sm bg-amber-50 px-3 py-2 text-sm text-amber-900">
                                         {n.toLocaleString('id-ID')} baris — {text}
                                     </p>
                                 ))}

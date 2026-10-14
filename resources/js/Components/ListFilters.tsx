@@ -4,7 +4,7 @@ import { FormEvent, PropsWithChildren, ReactNode } from 'react';
 /** Kartu filter: grid dropdown rata (1/2/4 kolom). `action` tampil di bawah grid (mis. "Reset filter"). */
 export function FilterCard({ children, action }: PropsWithChildren<{ action?: ReactNode }>) {
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
             <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
             {action && <div className="mt-3">{action}</div>}
         </div>
@@ -23,7 +23,7 @@ export function FilterSelect({
                 aria-label={ariaLabel}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
             >
                 {children}
             </select>
@@ -56,7 +56,7 @@ export function TableSearch({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                 />
                 {value && (
                     <button

@@ -61,7 +61,7 @@ export default function AssetForm({
 
     return (
         <form onSubmit={onSubmit} className="space-y-6">
-            <div className="space-y-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <div className="space-y-8 rounded-xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
                 {/* Informasi Dasar Aset */}
                 <section className="space-y-4">
                     <div className="border-b border-slate-100 pb-2">
@@ -75,7 +75,7 @@ export default function AssetForm({
                             <select
                                 value={data.category_id}
                                 onChange={(e) => setData('category_id', e.target.value ? Number(e.target.value) : '')}
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 required
                             >
                                 <option value="">Pilih subkategori...</option>
@@ -100,7 +100,7 @@ export default function AssetForm({
                                 value={data.kode_barang}
                                 onChange={(e) => setData('kode_barang', e.target.value)}
                                 placeholder="1.3.2.05.02.04.xxx"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 font-mono text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 font-mono text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 required
                             />
                             <InputError message={errors.kode_barang} className="mt-1" />
@@ -114,7 +114,7 @@ export default function AssetForm({
                                 value={data.nama_aset}
                                 onChange={(e) => setData('nama_aset', e.target.value)}
                                 placeholder="Masukkan nama barang aset"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 required
                             />
                             <InputError message={errors.nama_aset} className="mt-1" />
@@ -126,7 +126,7 @@ export default function AssetForm({
                                 value={data.merk_type}
                                 onChange={(e) => setData('merk_type', e.target.value)}
                                 placeholder="Masukkan merk atau tipe"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             />
                             <InputError message={errors.merk_type} className="mt-1" />
                         </div>
@@ -138,7 +138,7 @@ export default function AssetForm({
                                 <select
                                     value={data.kondisi}
                                     onChange={(e) => setData('kondisi', e.target.value)}
-                                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                     required
                                 >
                                     {kondisiOptions.map((o) => (
@@ -167,7 +167,7 @@ export default function AssetForm({
                                 type="date"
                                 value={data.tanggal_perolehan}
                                 onChange={(e) => setData('tanggal_perolehan', e.target.value)}
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 required
                             />
                             <InputError message={errors.tanggal_perolehan} className="mt-1" />
@@ -179,7 +179,7 @@ export default function AssetForm({
                                 value={data.sumber_perolehan}
                                 onChange={(e) => setData('sumber_perolehan', e.target.value)}
                                 placeholder="mis. APBD, Hibah, Bantuan"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             />
                             <InputError message={errors.sumber_perolehan} className="mt-1" />
                         </div>
@@ -193,7 +193,7 @@ export default function AssetForm({
                                 value={data.nilai_perolehan}
                                 onChange={(e) => setData('nilai_perolehan', e.target.value)}
                                 placeholder="Masukkan nilai perolehan"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 required
                             />
                             <InputError message={errors.nilai_perolehan} className="mt-1" />
@@ -208,7 +208,7 @@ export default function AssetForm({
                                 value={data.nilai_buku}
                                 onChange={(e) => setData('nilai_buku', e.target.value)}
                                 placeholder="Masukkan nilai buku saat ini"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 required
                             />
                             <InputError message={errors.nilai_buku} className="mt-1" />
@@ -220,7 +220,7 @@ export default function AssetForm({
                                 value={data.no_dokumen}
                                 onChange={(e) => setData('no_dokumen', e.target.value)}
                                 placeholder="Masukkan nomor dokumen pengadaan atau berita acara serah terima"
-                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             />
                             <InputError message={errors.no_dokumen} className="mt-1" />
                         </div>
@@ -261,7 +261,7 @@ export default function AssetForm({
                         {(existingPhotos.length > 0 || data.photos.length > 0) && (
                             <div className="flex flex-wrap gap-3">
                                 {existingPhotos.map((photo) => (
-                                    <div key={photo.id} className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-slate-100">
+                                    <div key={photo.id} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-sm bg-slate-100">
                                         <img src={photo.url} alt="" className="h-full w-full object-cover" />
                                         {onRemoveExistingPhoto && (
                                             <button
@@ -276,7 +276,7 @@ export default function AssetForm({
                                     </div>
                                 ))}
                                 {data.photos.map((file, idx) => (
-                                    <div key={idx} className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-slate-100">
+                                    <div key={idx} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-sm bg-slate-100">
                                         <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
                                         <button
                                             type="button"
@@ -292,7 +292,7 @@ export default function AssetForm({
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="flex h-20 w-20 shrink-0 items-center justify-center rounded border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-blue-400 hover:text-blue-600"
+                                        className="flex h-20 w-20 shrink-0 items-center justify-center rounded-sm border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-blue-400 hover:text-blue-600"
                                     >
                                         <Plus className="h-5 w-5" />
                                     </button>
@@ -314,7 +314,7 @@ export default function AssetForm({
                             onChange={(e) => setData('keterangan', e.target.value)}
                             placeholder="Tambahkan catatan atau keterangan tambahan mengenai kondisi detail aset..."
                             rows={4}
-                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                         />
                         <InputError message={errors.keterangan} className="mt-1" />
                     </div>
@@ -324,14 +324,14 @@ export default function AssetForm({
             <div className="flex items-center justify-end gap-3">
                 <a
                     href={cancelHref}
-                    className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                    className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-200"
                 >
                     Batal
                 </a>
                 <button
                     type="submit"
                     disabled={processing}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
                 >
                     <span>{processing ? 'Menyimpan...' : submitLabel}</span>
                 </button>

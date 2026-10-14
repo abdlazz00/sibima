@@ -86,7 +86,7 @@ export default function Create({
 
                 {/* Form Card */}
                 <form onSubmit={submit} className="space-y-6">
-                    <div className="shadow-xs rounded-xl border border-gray-200 bg-white p-6 sm:p-8">
+                    <div className="shadow-2xs rounded-xl border border-gray-200 bg-white p-6 sm:p-8">
                         {/* Card Section Header */}
                         <div className="border-b border-gray-100 pb-4">
                             <h2 className="text-base font-semibold text-gray-900">
@@ -162,7 +162,7 @@ export default function Create({
                                                           ),
                                                 )
                                             }
-                                            className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                            className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                                             required
                                         >
                                             <option value="">
@@ -199,7 +199,7 @@ export default function Create({
                                                 setData('code', e.target.value)
                                             }
                                             placeholder="Contoh: 02.09.04"
-                                            className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                            className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                                         />
                                         <p className="mt-1.5 text-xs text-gray-500">
                                             Kode akan mengikuti format standar
@@ -227,7 +227,7 @@ export default function Create({
                                             setData('code', e.target.value)
                                         }
                                         placeholder="Contoh: 02.09"
-                                        className="h-11 w-full max-w-md rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                        className="h-11 w-full max-w-md rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                                     />
                                     <p className="mt-1.5 text-xs text-gray-500">
                                         Kode akan mengikuti format standar BMD
@@ -256,7 +256,7 @@ export default function Create({
                                         setData('name', e.target.value)
                                     }
                                     placeholder="Masukkan nama kategori (huruf kapital)"
-                                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                                     required
                                 />
                                 <InputError
@@ -281,7 +281,7 @@ export default function Create({
                                         setData('description', e.target.value)
                                     }
                                     placeholder="Tambahkan keterangan kategori jika diperlukan"
-                                    className="w-full rounded-lg border border-gray-300 bg-white p-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="w-full rounded-lg border border-gray-300 bg-white p-3.5 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                                 />
                                 <InputError
                                     message={errors.description}
@@ -295,14 +295,14 @@ export default function Create({
                     <div className="flex items-center justify-end gap-3">
                         <Link
                             href={route('asset-categories.index')}
-                            className="shadow-xs inline-flex h-11 items-center justify-center rounded-lg border border-gray-300 bg-white px-6 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                            className="shadow-2xs inline-flex h-11 items-center justify-center rounded-lg border border-gray-300 bg-white px-6 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                         >
                             Batal
                         </Link>
                         <button
                             type="submit"
                             disabled={processing}
-                            className="shadow-xs inline-flex h-11 items-center justify-center rounded-lg bg-[#1E40AF] px-6 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="shadow-2xs inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {processing ? 'Menyimpan...' : 'Simpan Kategori'}
                         </button>

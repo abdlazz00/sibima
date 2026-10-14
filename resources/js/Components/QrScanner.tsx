@@ -100,7 +100,7 @@ export default function QrScanner({ onDetect, onError }: QrScannerProps) {
     }, []);
 
     return (
-        <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-900 sm:aspect-[4/3]">
+        <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-900 sm:aspect-4/3">
             <video ref={videoRef} playsInline muted autoPlay className="h-full w-full object-cover" />
             <canvas ref={canvasRef} className="hidden" />
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

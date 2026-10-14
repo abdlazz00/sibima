@@ -4,7 +4,7 @@ import { Link, usePage } from '@inertiajs/react';
 type Modul = 'aset' | 'pegawai' | 'kategori';
 
 const BUTTON =
-    'inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2';
+    'inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2';
 
 export default function ImportExportButtons({ modul, query = {} }: { modul: Modul; query?: object }) {
     const permissions = usePage<PageProps>().props.auth.user?.permissions ?? [];

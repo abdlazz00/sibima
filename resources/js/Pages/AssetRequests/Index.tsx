@@ -45,7 +45,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Permohonan Aset</h1>
                     </div>
                     {can.create && (
-                        <Link href={route('asset-requests.create')} className="inline-flex items-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
+                        <Link href={route('asset-requests.create')} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800">
                             <Plus className="h-4 w-4" /> Buat Permohonan
                         </Link>
                     )}
@@ -67,7 +67,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                         type="button"
                         aria-pressed={waiting}
                         onClick={() => go({ menunggu_pemenuhan: waiting ? undefined : '1', page: undefined })}
-                        className={`rounded-lg border px-3.5 py-2.5 text-sm font-medium shadow-sm ${waiting ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
+                        className={`rounded-lg border px-3.5 py-2.5 text-sm font-medium shadow-xs ${waiting ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
                     >
                         Menunggu Pemenuhan
                     </button>
@@ -110,7 +110,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                         <td className="px-4 py-3 text-right">{r.jumlah}</td>
                                         <td className="px-4 py-3">{new Date(r.created_at).toLocaleDateString('id-ID')}</td>
                                         <td className="px-4 py-3">
-                                            <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${REQUEST_STATUS_STYLE[r.status]}`}>{REQUEST_STATUS_LABEL[r.status]}</span>
+                                            <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${REQUEST_STATUS_STYLE[r.status]}`}>{REQUEST_STATUS_LABEL[r.status]}</span>
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <Link href={route('asset-requests.show', r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700">
@@ -137,7 +137,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                             key={page}
                                             type="button"
                                             onClick={() => go({ page })}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === items.current_page ? 'bg-[#1E40AF] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100'}`}
+                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === items.current_page ? 'bg-primary text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'}`}
                                         >
                                             {page}
                                         </button>

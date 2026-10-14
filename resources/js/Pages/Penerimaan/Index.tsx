@@ -18,7 +18,7 @@ function formatRupiah(value: string | number): string {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value));
 }
 
-const DATE_INPUT = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100';
+const DATE_INPUT = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
 const DATE_LABEL = 'mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500';
 
 export default function Index({ items, filters, sortOptions, can }: IndexProps) {
@@ -51,7 +51,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Penerimaan Aset Baru</h1>
                     </div>
                     {can.create && (
-                        <Link href={route('penerimaan-aset.create')} className="inline-flex items-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
+                        <Link href={route('penerimaan-aset.create')} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800">
                             <Plus className="h-4 w-4" /> Ajukan Penerimaan
                         </Link>
                     )}
@@ -133,7 +133,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                             <td className="px-4 py-3 text-sm text-slate-800">{ba.creator?.name}</td>
                                             <td className="px-4 py-3 text-sm text-slate-800">{new Date(ba.tanggal_penerimaan).toLocaleDateString('id-ID')}</td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${PENERIMAAN_STATUS_STYLE[status]}`}>{PENERIMAAN_STATUS_LABEL[status]}</span>
+                                                <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${PENERIMAAN_STATUS_STYLE[status]}`}>{PENERIMAAN_STATUS_LABEL[status]}</span>
                                             </td>
                                             <td className="px-4 py-3 text-center">
                                                 <Link href={route('penerimaan-aset.show', ba.id)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700">
@@ -171,7 +171,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                                 key={page}
                                                 type="button"
                                                 onClick={() => router.get(route('penerimaan-aset.index'), { ...filters, page }, { preserveState: true, preserveScroll: true })}
-                                                className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition ${page === items.current_page ? 'bg-[#1E40AF] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100'}`}
+                                                className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition ${page === items.current_page ? 'bg-primary text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'}`}
                                             >
                                                 {page}
                                             </button>

@@ -239,7 +239,7 @@ export default function RoleModal({
                                     onChange={(e) => setDisplayName(e.target.value)}
                                     placeholder="Contoh: Auditor Aset Wilayah"
                                     required
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
                                 />
                                 {errors.display_name && (
                                     <p className="mt-1 text-xs text-red-600">{errors.display_name}</p>
@@ -257,7 +257,7 @@ export default function RoleModal({
                                     placeholder="contoh: auditor_aset"
                                     required
                                     disabled={isSystemRole}
-                                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
                                 />
                                 {isSystemRole ? (
                                     <p className="mt-1 text-[11px] text-amber-600 font-medium">
@@ -357,7 +357,7 @@ export default function RoleModal({
                             <select
                                 value={unitHeadOf}
                                 onChange={(e) => setUnitHeadOf(e.target.value as '' | 'kecamatan' | 'kelurahan')}
-                                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
                             >
                                 <option value="">Bukan pimpinan unit</option>
                                 <option value="kecamatan">Pimpinan Kecamatan</option>
@@ -379,7 +379,7 @@ export default function RoleModal({
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={2}
                                 placeholder="Jelaskan tujuan atau fungsi peran ini dalam tata kelola aset..."
-                                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
                             />
                         </div>
 
@@ -467,7 +467,7 @@ export default function RoleModal({
                                                                 type="checkbox"
                                                                 checked={isChecked}
                                                                 onChange={() => togglePermission(perm)}
-                                                                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                                className="mt-0.5 h-4 w-4 rounded-sm border-slate-300 text-blue-600 focus:ring-blue-500"
                                                             />
                                                             <div className="min-w-0">
                                                                 <p className="text-xs font-semibold text-slate-800">
@@ -503,7 +503,7 @@ export default function RoleModal({
                         type="submit"
                         form="role-form"
                         disabled={submitting}
-                        className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60"
+                        className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-60"
                     >
                         {submitting ? (
                             <>

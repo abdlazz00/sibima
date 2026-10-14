@@ -154,7 +154,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                             <button
                                 type="button"
                                 onClick={() => setIsCreateAccountOpen(true)}
-                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                             >
                                 <UserPlus className="h-4 w-4 text-blue-600" />
                                 <span>Buat Akun Login</span>
@@ -171,7 +171,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                         {can.update && (
                             <Link
                                 href={route('pegawais.edit', pegawai.id)}
-                                className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                             >
                                 <Pencil className="h-4 w-4" />
                                 <span>Edit Data</span>
@@ -184,7 +184,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                     {/* Left Column: Photo & Quick Profile Card */}
                     <div className="lg:col-span-4 xl:col-span-3">
-                        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
                             {/* Photo Area */}
                             <div className="aspect-4/3 flex w-full items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
                                 {pegawai.foto_profile ? (
@@ -247,7 +247,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
 
                     {/* Right Column: Kepegawaian & Akun SIBIMA Card */}
                     <div className="lg:col-span-8 xl:col-span-9">
-                        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
                             {/* Section: Data Kepegawaian */}
                             <div>
                                 <h3 className="text-base font-bold text-slate-900">
@@ -343,11 +343,11 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                                         </div>
                                         <div className="col-span-7">
                                             {hasAccount ? (
-                                                <span className="inline-flex items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                                                <span className="inline-flex items-center gap-1 rounded-sm border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
                                                     Aktif
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                                                <span className="inline-flex items-center rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
                                                     Belum Memiliki Akun
                                                 </span>
                                             )}
@@ -376,7 +376,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                 </div>
 
                 {/* Bottom Card: Daftar Aset yang Dipegang */}
-                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
                     <div className="flex items-center justify-between pb-4">
                         <div className="flex items-center gap-3">
                             <h3 className="text-base font-bold text-slate-900">
@@ -468,7 +468,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
 
             {/* Modal: Buat Akun Login */}
             {isCreateAccountOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
                     <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -520,7 +520,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                                             e.target.value,
                                         )
                                     }
-                                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50 disabled:text-slate-500"
+                                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50 disabled:text-slate-500"
                                     required
                                     disabled={roles.length === 0}
                                 >
@@ -558,7 +558,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                                         )
                                     }
                                     placeholder="nama@batam.go.id"
-                                    className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                     required
                                 />
                                 <InputError
@@ -586,7 +586,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                                             )
                                         }
                                         placeholder="••••••••"
-                                        className="w-full rounded-lg border border-slate-200 px-3.5 py-2 pr-10 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="w-full rounded-lg border border-slate-200 px-3.5 py-2 pr-10 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         required
                                     />
                                     <button
@@ -633,7 +633,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                                             )
                                         }
                                         placeholder="••••••••"
-                                        className="w-full rounded-lg border border-slate-200 px-3.5 py-2 pr-10 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="w-full rounded-lg border border-slate-200 px-3.5 py-2 pr-10 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         required
                                     />
                                     <button
@@ -673,7 +673,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                                 <button
                                     type="submit"
                                     disabled={createAccountForm.processing || roles.length === 0}
-                                    className="rounded-lg bg-blue-700 px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-800 disabled:opacity-50"
+                                    className="rounded-lg bg-blue-700 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-800 disabled:opacity-50"
                                 >
                                     {createAccountForm.processing
                                         ? 'Menyimpan...'

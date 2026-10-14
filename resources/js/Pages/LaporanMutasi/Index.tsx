@@ -13,7 +13,7 @@ import { Fragment, useState } from 'react';
 type Filters = Record<string, string | number | undefined>;
 
 const CARD = 'rounded-lg border border-slate-200 bg-white p-5';
-const FIELD = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100';
+const FIELD = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
 const TH = 'px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500';
 
 const STATUS_BADGE: Record<string, string> = {
@@ -51,7 +51,7 @@ const signature = (data: Filters) =>
 const tanggal = (value: string | null) => (value ? new Date(value).toLocaleDateString('id-ID') : '—');
 
 function Badge({ label, style }: { label: string; style: string }) {
-    return <span className={`inline-flex rounded border px-2 py-0.5 text-xs font-semibold ${style}`}>{label}</span>;
+    return <span className={`inline-flex rounded-sm border px-2 py-0.5 text-xs font-semibold ${style}`}>{label}</span>;
 }
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
@@ -70,7 +70,7 @@ function Legend({ items }: { items: { label: string; jumlah: number; persen: num
             {items.map((i) => (
                 <li key={i.label} className="flex items-center justify-between gap-3">
                     <span className="flex items-center gap-2 text-slate-800">
-                        <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: i.color }} aria-hidden="true" />
+                        <span className="h-3 w-3 rounded-xs" style={{ backgroundColor: i.color }} aria-hidden="true" />
                         {i.label}
                     </span>
                     <span className="tabular-nums text-slate-600">{i.jumlah.toLocaleString('id-ID')} mutasi · {i.persen.toLocaleString('id-ID')}%</span>
@@ -174,7 +174,7 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                                 {dirty && <span className="ml-2 text-amber-700">(terapkan filter dulu)</span>}
                             </p>
                             {mutasis.total > 0 && !dirty ? (
-                                <a href={downloadUrl} className="rounded-lg bg-[#1E40AF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                                <a href={downloadUrl} className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
                                     Unduh Excel
                                 </a>
                             ) : (
@@ -441,7 +441,7 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                                             key={page}
                                             type="button"
                                             onClick={() => visit({ page })}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === mutasis.current_page ? 'bg-[#1E40AF] text-white' : 'text-slate-700 hover:bg-slate-100'}`}
+                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === mutasis.current_page ? 'bg-primary text-white' : 'text-slate-700 hover:bg-slate-100'}`}
                                         >
                                             {page}
                                         </button>

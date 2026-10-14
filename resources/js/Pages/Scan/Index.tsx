@@ -28,7 +28,7 @@ const KONDISI_STYLE: Record<string, string> = {
     hilang: 'bg-slate-200 text-slate-700',
 };
 
-const BUTTON = 'rounded-lg bg-[#1E40AF] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800';
+const BUTTON = 'rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800';
 
 export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
     const [scanning, setScanning] = useState(summary === null && !notFound);
@@ -99,7 +99,7 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
                                 <button type="button" onClick={startScan} className={`${BUTTON} w-full sm:w-auto`}>Coba lagi</button>
                             </div>
                         ) : (
-                            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                                 <button type="button" onClick={startScan} className={`${BUTTON} w-full`}>
                                     {summary || notFound ? 'Scan aset lain' : 'Mulai scan'}
                                 </button>
@@ -109,23 +109,23 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
 
                     <div>
                         {notFound && (
-                            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                                 <p className="text-base font-semibold text-slate-900">Aset tidak ditemukan</p>
                                 <p className="mt-1 text-sm text-slate-600">Aset dengan QR ini sudah tidak ada di SIBIMA. Periksa label atau hubungi admin unit.</p>
                             </div>
                         )}
 
                         {summary && (
-                            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
                                 {summary.foto && <img src={summary.foto} alt={summary.nama_aset} className="h-48 w-full object-cover" />}
                                 <div className="space-y-4 p-5">
                                     <div>
                                         <p className="text-lg font-bold text-slate-900">{summary.nama_aset}</p>
                                         <div className="mt-2 flex flex-wrap gap-2">
-                                            <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[summary.kondisi] ?? KONDISI_STYLE.baik}`}>
+                                            <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[summary.kondisi] ?? KONDISI_STYLE.baik}`}>
                                                 {KONDISI_LABEL[summary.kondisi] ?? summary.kondisi}
                                             </span>
-                                            <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                            <span className="inline-flex rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
                                                 {summary.status === 'aktif' ? 'Aktif' : 'Dalam Proses'}
                                             </span>
                                         </div>
@@ -135,7 +135,7 @@ export default function Index({ summary, canViewDetail, notFound }: ScanProps) {
                                         {rows.map(([label, value], i) => (
                                             <div key={label} className={`flex gap-4 px-3 py-2.5 ${i % 2 === 0 ? 'bg-slate-50' : 'bg-white'}`}>
                                                 <dt className="w-32 shrink-0 font-medium text-slate-500">{label}</dt>
-                                                <dd className="break-words text-slate-900">{value}</dd>
+                                                <dd className="wrap-break-word text-slate-900">{value}</dd>
                                             </div>
                                         ))}
                                     </dl>

@@ -132,7 +132,7 @@ export default function Edit({ pegawai, units }: EditProps) {
 
                 {/* Form Card */}
                 <form onSubmit={submit} className="space-y-6">
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
                         {/* Top Section: Photo and Personal Data */}
                         <div className="flex flex-col gap-8 md:flex-row md:items-start">
                             {/* Left Column: Photo Upload Area */}
@@ -160,7 +160,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                             <button
                                                 type="button"
                                                 onClick={handleRemoveNewPhoto}
-                                                className="absolute right-2 top-2 rounded-full bg-slate-900/70 p-1.5 text-white backdrop-blur-sm transition hover:bg-rose-600"
+                                                className="absolute right-2 top-2 rounded-full bg-slate-900/70 p-1.5 text-white backdrop-blur-xs transition hover:bg-rose-600"
                                                 title="Hapus foto baru"
                                             >
                                                 <X className="h-4 w-4" />
@@ -173,13 +173,13 @@ export default function Edit({ pegawai, units }: EditProps) {
                                                 alt={pegawai.nama}
                                                 className="h-full w-full object-cover"
                                             />
-                                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/80 p-3 pt-6 text-center">
+                                            <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-900/80 p-3 pt-6 text-center">
                                                 <button
                                                     type="button"
                                                     onClick={() =>
                                                         fileInputRef.current?.click()
                                                     }
-                                                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm backdrop-blur-sm transition hover:bg-white"
+                                                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-xs backdrop-blur-xs transition hover:bg-white"
                                                 >
                                                     <Camera className="h-3.5 w-3.5 text-blue-700" />
                                                     <span>Ganti Foto</span>
@@ -193,7 +193,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                             }
                                             className="aspect-3/4 group flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-6 text-center transition hover:border-blue-500 hover:bg-blue-50/30"
                                         >
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm transition group-hover:scale-105 group-hover:text-blue-600">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-500 shadow-xs transition group-hover:scale-105 group-hover:text-blue-600">
                                                 <Camera className="h-6 w-6" />
                                             </div>
                                             <div className="mt-4 text-sm font-semibold text-slate-800 group-hover:text-blue-700">
@@ -236,7 +236,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                                 setData('nama', e.target.value)
                                             }
                                             placeholder="Masukkan nama lengkap pegawai"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                             required
                                         />
                                         <InputError
@@ -257,7 +257,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                                 setData('nip', e.target.value)
                                             }
                                             placeholder="Masukkan NIP (18 digit)"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         />
                                         <p className="mt-1 text-[11px] text-slate-500">
                                             Kosongkan jika PPPK tanpa NIP
@@ -276,7 +276,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                                 *
                                             </span>
                                         </label>
-                                        <div className="h-9.5 mt-1.5 flex items-center gap-4 rounded-lg border border-slate-200 bg-white px-3.5 py-2 shadow-sm">
+                                        <div className="h-9.5 mt-1.5 flex items-center gap-4 rounded-lg border border-slate-200 bg-white px-3.5 py-2 shadow-xs">
                                             <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-800">
                                                 <input
                                                     type="radio"
@@ -334,7 +334,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                                 setData('no_hp', e.target.value)
                                             }
                                             placeholder="08xx-xxxx-xxxx"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         />
                                         <InputError
                                             message={errors.no_hp}
@@ -357,7 +357,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                                 )
                                             }
                                             placeholder="nama@batam.go.id"
-                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         />
                                         <InputError
                                             message={errors.email_dinas}
@@ -391,7 +391,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                                 e.target.value,
                                             )
                                         }
-                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                     >
                                         <option value="">Pilih pangkat</option>
                                         {PANGKAT_OPTIONS.map((pangkat) => (
@@ -422,7 +422,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                             setData('jabatan', e.target.value)
                                         }
                                         placeholder="Masukkan jabatan dinas"
-                                        className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         required
                                     />
                                     <InputError
@@ -442,7 +442,7 @@ export default function Edit({ pegawai, units }: EditProps) {
                                         onChange={(e) =>
                                             setData('unit_id', e.target.value)
                                         }
-                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                         required
                                     >
                                         <option value="">
@@ -474,14 +474,14 @@ export default function Edit({ pegawai, units }: EditProps) {
                     <div className="flex items-center justify-end gap-3">
                         <Link
                             href={route('pegawais.show', pegawai.id)}
-                            className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                            className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-200"
                         >
                             Batal
                         </Link>
                         <button
                             type="submit"
                             disabled={processing}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
                         >
                             <Upload className="h-4 w-4" />
                             <span>

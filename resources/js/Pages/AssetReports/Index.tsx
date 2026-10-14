@@ -44,7 +44,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Lapor Rusak/Hilang</h1>
                     </div>
                     {can.create && (
-                        <Link href={route('asset-reports.create')} className="inline-flex items-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
+                        <Link href={route('asset-reports.create')} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-800">
                             <Plus className="h-4 w-4" /> Buat Laporan
                         </Link>
                     )}
@@ -101,7 +101,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                         <td className="px-4 py-3">{r.unit?.name}</td>
                                         <td className="px-4 py-3">{new Date(r.tanggal_kejadian).toLocaleDateString('id-ID')}</td>
                                         <td className="px-4 py-3">
-                                            <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${REPORT_STATUS_STYLE[r.status]}`}>{REPORT_STATUS_LABEL[r.status]}</span>
+                                            <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${REPORT_STATUS_STYLE[r.status]}`}>{REPORT_STATUS_LABEL[r.status]}</span>
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <Link href={route('asset-reports.show', r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700">
@@ -128,7 +128,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                             key={page}
                                             type="button"
                                             onClick={() => go({ page })}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === items.current_page ? 'bg-[#1E40AF] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100'}`}
+                                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium ${page === items.current_page ? 'bg-primary text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'}`}
                                         >
                                             {page}
                                         </button>

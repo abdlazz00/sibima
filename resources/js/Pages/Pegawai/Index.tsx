@@ -119,7 +119,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                         {can.create && (
                             <Link
                                 href={route('pegawais.create')}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                             >
                                 <Plus className="h-4 w-4" />
                                 <span>Tambah Pegawai Baru</span>
@@ -129,7 +129,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                 </div>
 
                 {/* Filter Toolbar */}
-                <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center">
+                <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs md:flex-row md:items-center">
                     {/* Search Input */}
                     <div className="relative flex-1">
                         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -141,7 +141,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                 setCurrentPage(1);
                             }}
                             placeholder="Cari nama atau NIP..."
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                         />
                         {searchQuery && (
                             <button
@@ -165,7 +165,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                     );
                                     setCurrentPage(1);
                                 }}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             >
                                 <option value="all">Semua Status</option>
                                 <option value="pns">PNS</option>
@@ -181,7 +181,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                     setUnitFilter(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3.5 pr-8 text-sm font-medium text-slate-700 shadow-xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             >
                                 <option value="all">Semua Unit</option>
                                 {units.map((unit) => (
@@ -208,7 +208,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                             return (
                                 <div
                                     key={pegawai.id}
-                                    className="flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                                    className="flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition hover:border-slate-300 hover:shadow-md"
                                 >
                                     {/* Photo Section */}
                                     <Link
@@ -324,7 +324,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                                     {hasAccount && can.manageAccess && (
                                                         <Link
                                                             href={route('users.edit', pegawai.user_id as number)}
-                                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:border-blue-300 hover:bg-slate-50 hover:text-blue-700"
+                                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-2xs transition hover:border-blue-300 hover:bg-slate-50 hover:text-blue-700"
                                                             title="Kelola hak akses & role akun"
                                                         >
                                                             <ShieldIcon className="h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                                             'pegawais.edit',
                                                             pegawai.id,
                                                         )}
-                                                        className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:border-blue-300 hover:bg-slate-50 hover:text-blue-700"
+                                                        className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-2xs transition hover:border-blue-300 hover:bg-slate-50 hover:text-blue-700"
                                                         title="Lihat detail dan edit pegawai"
                                                     >
                                                         <Pencil className="h-3.5 w-3.5" />
@@ -350,7 +350,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                                                     pegawai,
                                                                 )
                                                             }
-                                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:border-rose-300 hover:bg-slate-50 hover:text-rose-600"
+                                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-2xs transition hover:border-rose-300 hover:bg-slate-50 hover:text-rose-600"
                                                             title="Hapus data pegawai"
                                                         >
                                                             <Trash2 className="h-3.5 w-3.5" />
@@ -384,7 +384,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
 
                 {/* Pagination Bar */}
                 {filteredPegawais.length > 0 && (
-                    <div className="flex flex-col items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm sm:flex-row">
+                    <div className="flex flex-col items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-3.5 shadow-xs sm:flex-row">
                         <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
                             <div>
                                 Menampilkan{' '}
@@ -409,7 +409,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                             );
                                             setCurrentPage(1);
                                         }}
-                                        className="appearance-none rounded-lg border border-slate-200 bg-white py-1 pl-2.5 pr-7 text-xs font-semibold text-slate-700 shadow-xs focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        className="appearance-none rounded-lg border border-slate-200 bg-white py-1 pl-2.5 pr-7 text-xs font-semibold text-slate-700 shadow-2xs focus:border-blue-600 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
                                     >
                                         {PAGE_SIZE_OPTIONS.map((size) => (
                                             <option key={size} value={size}>
@@ -429,7 +429,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                     setCurrentPage((p) => Math.max(1, p - 1))
                                 }
                                 disabled={safeCurrentPage <= 1}
-                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                                 <ChevronLeft className="h-3.5 w-3.5" />
                                 <span>Sebelumnya</span>
@@ -446,7 +446,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                         onClick={() => setCurrentPage(page)}
                                         className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-medium transition ${
                                             page === safeCurrentPage
-                                                ? 'bg-blue-700 text-white shadow-sm'
+                                                ? 'bg-blue-700 text-white shadow-xs'
                                                 : 'text-slate-700 hover:bg-slate-100'
                                         }`}
                                     >
@@ -463,7 +463,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                     )
                                 }
                                 disabled={safeCurrentPage >= totalPages}
-                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                                 <span>Berikutnya</span>
                                 <ChevronRight className="h-3.5 w-3.5" />
@@ -475,7 +475,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
 
             {/* Modal Konfirmasi Hapus */}
             {deleteModalPegawai && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
                     <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                             <h3 className="text-base font-semibold text-slate-900">

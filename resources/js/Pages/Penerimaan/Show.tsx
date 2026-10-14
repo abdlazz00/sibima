@@ -101,7 +101,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                                 Penerimaan Aset #{beritaAcara.no_berita_acara}
                             </h1>
-                            <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${PENERIMAAN_STATUS_STYLE[status]}`}>
+                            <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${PENERIMAAN_STATUS_STYLE[status]}`}>
                                 {PENERIMAAN_STATUS_LABEL[status]}
                             </span>
                         </div>
@@ -113,7 +113,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                             </button>
                         )}
                         {can.edit && (
-                            <Link href={route('penerimaan-aset.edit', beritaAcara.id)} className="rounded-lg bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                            <Link href={route('penerimaan-aset.edit', beritaAcara.id)} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
                                 Edit &amp; Ajukan
                             </Link>
                         )}
@@ -132,7 +132,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                                 <button onClick={() => setShowReject(true)} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
                                     Tolak
                                 </button>
-                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
                                     {submitting ? 'Memproses...' : 'Setujui'}
                                 </button>
                             </>
@@ -147,7 +147,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                 )}
 
                 {req && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-4 text-sm font-semibold text-slate-900">Status Alur Persetujuan</p>
                         <div className="flex items-start">
                             {steps.map((step, idx) => {
@@ -172,7 +172,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                 )}
 
                 <div className="grid grid-cols-2 gap-6">
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-3 text-base font-semibold text-slate-900">Detail Penerimaan</p>
                         <dl className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200 text-sm">
                             {([
@@ -191,7 +191,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                         </dl>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-3 text-base font-semibold text-slate-900">Rincian Barang Diterima</p>
                         <div className="space-y-3">
                             {beritaAcara.items?.map((item) => (
@@ -213,17 +213,17 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                 </div>
 
                 {req && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-4 text-base font-semibold text-slate-900">Riwayat Aktivitas</p>
                         <ol className="space-y-4 border-l border-slate-200 pl-5">
                             <li className="relative">
-                                <span className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
+                                <span className="absolute left-[-25px] top-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
                                 <p className="text-sm font-semibold text-slate-900">Pengajuan Dibuat</p>
                                 <p className="text-xs text-slate-500">oleh {beritaAcara.creator?.name}</p>
                             </li>
                             {req.actions?.map((action) => (
                                 <li key={action.id} className="relative">
-                                    <span className={`absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full ${ACTION_DOT[action.action]}`} />
+                                    <span className={`absolute left-[-25px] top-1 h-2.5 w-2.5 rounded-full ${ACTION_DOT[action.action]}`} />
                                     <p className="text-sm font-semibold text-slate-900">
                                         {ACTION_LABEL[action.action]} oleh {action.user?.name}
                                     </p>
@@ -262,7 +262,7 @@ export default function Show({ beritaAcara, can, reassignCandidates }: ShowProps
                             onChange={(e) => setNote(e.target.value)}
                             rows={3}
                             placeholder="Alasan penolakan (wajib diisi)"
-                            className="mb-4 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-600 focus:outline-none"
+                            className="mb-4 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-600 focus:outline-hidden"
                         />
                         <div className="flex justify-end gap-3">
                             <button onClick={() => setShowReject(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</button>

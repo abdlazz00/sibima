@@ -90,7 +90,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                     <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{isEdit ? `Edit Draft #${beritaAcara.no_berita_acara}` : 'Formulir Penerimaan Aset Baru'}</h1>
                 </div>
 
-                <form className="space-y-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <form className="space-y-8 rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
                     <section className="space-y-4">
                         <h2 className="text-base font-semibold text-slate-900">Section 1: Informasi Berita Acara</h2>
                         <div className="grid grid-cols-2 gap-5">
@@ -100,7 +100,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                     type="text"
                                     value={form.data.no_berita_acara}
                                     onChange={(e) => form.setData('no_berita_acara', e.target.value)}
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                     placeholder="BA/xxx/xxx/2025"
                                 />
                                 {form.errors.no_berita_acara && <p className="mt-1 text-xs text-red-600">{form.errors.no_berita_acara}</p>}
@@ -111,7 +111,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                     type="date"
                                     value={form.data.tanggal_penerimaan}
                                     onChange={(e) => form.setData('tanggal_penerimaan', e.target.value)}
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 />
                                 {form.errors.tanggal_penerimaan && <p className="mt-1 text-xs text-red-600">{form.errors.tanggal_penerimaan}</p>}
                             </div>
@@ -123,7 +123,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                     type="text"
                                     value={form.data.sumber_perolehan}
                                     onChange={(e) => form.setData('sumber_perolehan', e.target.value)}
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                     placeholder="mis. APBD, Hibah"
                                 />
                             </div>
@@ -133,7 +133,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                     type="text"
                                     value={form.data.no_kontrak_spk}
                                     onChange={(e) => form.setData('no_kontrak_spk', e.target.value)}
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                                 />
                                 {form.errors.no_kontrak_spk && <p className="mt-1 text-xs text-red-600">{form.errors.no_kontrak_spk}</p>}
                             </div>
@@ -144,7 +144,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                 type="text"
                                 value={form.data.vendor}
                                 onChange={(e) => form.setData('vendor', e.target.value)}
-                                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             />
                         </div>
                     </section>
@@ -172,7 +172,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                             value={item.nama_aset}
                                             onChange={(e) => updateItem(index, 'nama_aset', e.target.value)}
                                             placeholder="Contoh: Lap Top, P.C Unit, Printer"
-                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
+                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden"
                                         />
                                         <p className="mt-1 text-[11px] text-slate-400">
                                             Ketik nama baru atau pilih saran dari aset yang sudah ada agar terstandar.
@@ -186,7 +186,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                             value={item.merk_type}
                                             onChange={(e) => updateItem(index, 'merk_type', e.target.value)}
                                             placeholder="Contoh: Asus Vivobook 14, Epson L3210"
-                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
+                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden"
                                         />
                                     </div>
                                 </div>
@@ -196,7 +196,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                         <select
                                             value={item.category_id}
                                             onChange={(e) => updateItem(index, 'category_id', e.target.value)}
-                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
+                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden"
                                         >
                                             <option value="">Pilih subkategori...</option>
                                             {categories.map((c) => (
@@ -210,7 +210,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                         <select
                                             value={item.kondisi_awal}
                                             onChange={(e) => updateItem(index, 'kondisi_awal', e.target.value)}
-                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
+                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden"
                                         >
                                             {kondisiOptions.map((o) => (
                                                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -226,7 +226,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                             min={1}
                                             value={item.jumlah_unit}
                                             onChange={(e) => updateItem(index, 'jumlah_unit', e.target.value)}
-                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
+                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden"
                                         />
                                         {itemError(index, 'jumlah_unit') && <p className="mt-1 text-xs text-red-600">{itemError(index, 'jumlah_unit')}</p>}
                                     </div>
@@ -237,7 +237,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                             min={0}
                                             value={item.nilai_per_unit}
                                             onChange={(e) => updateItem(index, 'nilai_per_unit', e.target.value)}
-                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none"
+                                            className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden"
                                         />
                                         {itemError(index, 'nilai_per_unit') && <p className="mt-1 text-xs text-red-600">{itemError(index, 'nilai_per_unit')}</p>}
                                     </div>
@@ -299,7 +299,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                 value={form.data.catatan}
                                 onChange={(e) => form.setData('catatan', e.target.value)}
                                 rows={3}
-                                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             />
                         </div>
                     </section>
@@ -317,7 +317,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                             type="button"
                             disabled={form.processing}
                             onClick={submit('submitted')}
-                            className="rounded-lg bg-[#1E40AF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+                            className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
                         >
                             Ajukan Penerimaan
                         </button>

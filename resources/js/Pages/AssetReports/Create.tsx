@@ -21,7 +21,7 @@ interface CreateProps extends PageProps {
     kondisiOptions: { value: string; label: string }[];
 }
 
-const FIELD = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100';
+const FIELD = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
 
 export default function Create({ assets, kondisiOptions }: CreateProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,7 +71,7 @@ export default function Create({ assets, kondisiOptions }: CreateProps) {
                     <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Buat Laporan Rusak/Hilang</h1>
                 </div>
 
-                <form onSubmit={submit} className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <form onSubmit={submit} className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
                     <div>
                         <label className="mb-1.5 block text-sm font-medium text-slate-900">Aset yang Dilaporkan *</label>
                         {assets.length === 0 ? (
@@ -89,7 +89,7 @@ export default function Create({ assets, kondisiOptions }: CreateProps) {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(true)}
-                                    className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-blue-800"
+                                    className="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800"
                                 >
                                     + Pilih Aset yang Dilaporkan
                                 </button>
@@ -100,7 +100,7 @@ export default function Create({ assets, kondisiOptions }: CreateProps) {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <span className="font-mono text-xs font-semibold text-slate-600">{asset.kode_barang}</span>
-                                            <span className="inline-flex rounded bg-slate-200/80 px-1.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                                            <span className="inline-flex rounded-sm bg-slate-200/80 px-1.5 py-0.5 text-[11px] font-semibold text-slate-700">
                                                 Reg. #{String(asset.nomor_register).padStart(4, '0')}
                                             </span>
                                         </div>
@@ -123,7 +123,7 @@ export default function Create({ assets, kondisiOptions }: CreateProps) {
                                         <button
                                             type="button"
                                             onClick={() => setIsModalOpen(true)}
-                                            className="ml-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-xs hover:bg-slate-50"
+                                            className="ml-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-2xs hover:bg-slate-50"
                                         >
                                             Ganti Aset
                                         </button>
@@ -190,7 +190,7 @@ export default function Create({ assets, kondisiOptions }: CreateProps) {
 
                     <div className="flex justify-end gap-3">
                         <Link href={route('asset-reports.index')} className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Batal</Link>
-                        <button type="submit" disabled={form.processing || !form.data.asset_id} className="rounded-lg bg-[#1E40AF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+                        <button type="submit" disabled={form.processing || !form.data.asset_id} className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
                             {form.processing ? 'Mengirim...' : 'Ajukan Laporan'}
                         </button>
                     </div>

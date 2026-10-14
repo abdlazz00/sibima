@@ -35,7 +35,7 @@ export default function CancelRequestModal({ approvalRequestId, onClose, descrip
                     onChange={(e) => setNote(e.target.value)}
                     rows={4}
                     maxLength={1000}
-                    className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                    className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-600/20"
                 />
                 <div className="mt-6 flex items-center justify-end gap-3">
                     <button type="button" onClick={onClose} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">

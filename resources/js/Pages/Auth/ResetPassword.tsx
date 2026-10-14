@@ -44,14 +44,14 @@ export default function ResetPassword({
 
                 <Link
                     href={route('password.request')}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark"
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-xs transition hover:bg-primary-hover focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark"
                 >
                     Minta Tautan Baru
                 </Link>
                 <div className="mt-4">
                     <Link
                         href={route('login')}
-                        className="inline-flex min-h-11 items-center rounded text-sm font-medium text-primary hover:text-primary-hover hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                        className="inline-flex min-h-11 items-center rounded-sm text-sm font-medium text-primary hover:text-primary-hover hover:underline focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-1"
                     >
                         Kembali ke Halaman Masuk
                     </Link>
@@ -87,7 +87,7 @@ export default function ResetPassword({
                         autoComplete="username"
                         readOnly
                         aria-readonly="true"
-                        className="h-11 w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3.5 text-sm text-gray-500 focus:outline-none"
+                        className="h-11 w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3.5 text-sm text-gray-500 focus:outline-hidden"
                     />
                 </div>
 
@@ -138,7 +138,7 @@ export default function ResetPassword({
                 <button
                     type="submit"
                     disabled={processing}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-white shadow-xs transition hover:bg-primary-hover focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 active:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {processing ? 'Menyimpan...' : 'Simpan Kata Sandi Baru'}
                 </button>

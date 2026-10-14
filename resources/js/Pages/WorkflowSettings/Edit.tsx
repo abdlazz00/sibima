@@ -58,7 +58,7 @@ const toStepForm = (s: ServerStep): StepForm => ({
     unit_scope: s.unit_scope,
 });
 
-const FIELD = 'w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-none';
+const FIELD = 'w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm focus:border-blue-600 focus:outline-hidden';
 
 export default function Edit({ workflow, options, logs }: EditProps) {
     const form = useForm({ steps: workflow.steps.map(toStepForm) });
@@ -135,13 +135,13 @@ export default function Edit({ workflow, options, logs }: EditProps) {
 
                 <div className="space-y-4">
                     {form.data.steps.map((step, index) => (
-                        <div key={index} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div key={index} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                             <div className="flex items-center justify-between">
                                 <p className="text-sm font-bold text-blue-700">Langkah {index + 1}</p>
                                 <div className="flex items-center gap-1 text-xs">
-                                    <button type="button" onClick={() => move(index, -1)} disabled={index === 0} className="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-40">Naik</button>
-                                    <button type="button" onClick={() => move(index, 1)} disabled={index === form.data.steps.length - 1} className="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-40">Turun</button>
-                                    <button type="button" onClick={() => remove(index)} className="flex items-center gap-1 rounded px-2 py-1 font-medium text-slate-500 hover:text-red-600">
+                                    <button type="button" onClick={() => move(index, -1)} disabled={index === 0} className="rounded-sm border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-40">Naik</button>
+                                    <button type="button" onClick={() => move(index, 1)} disabled={index === form.data.steps.length - 1} className="rounded-sm border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-40">Turun</button>
+                                    <button type="button" onClick={() => remove(index)} className="flex items-center gap-1 rounded-sm px-2 py-1 font-medium text-slate-500 hover:text-red-600">
                                         <Trash className="h-3.5 w-3.5" /> Hapus
                                     </button>
                                 </div>
@@ -217,12 +217,12 @@ export default function Edit({ workflow, options, logs }: EditProps) {
                     <button type="button" onClick={reset} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                         Kembalikan ke Default
                     </button>
-                    <button type="button" onClick={save} disabled={form.processing} className="rounded-lg bg-[#1E40AF] px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+                    <button type="button" onClick={save} disabled={form.processing} className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
                         {form.processing ? 'Menyimpan...' : 'Simpan Alur'}
                     </button>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                     <p className="mb-4 text-base font-semibold text-slate-900">Riwayat Perubahan</p>
                     {logs.length === 0 ? (
                         <p className="text-sm text-slate-400">Belum ada perubahan.</p>

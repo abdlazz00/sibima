@@ -32,13 +32,13 @@ const JENIS_LABEL: Record<Transaksi['jenis'], string> = {
 };
 
 const CARD = 'rounded-lg border border-slate-200 bg-white p-5';
-const SELECT = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100';
+const SELECT = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
 const ACTION = 'flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:border-blue-300 hover:text-blue-700';
 
 const percent = (part: number, total: number) => (total > 0 ? Math.round((part / total) * 100) : 0);
 
 function Badge({ label, style }: { label: string; style: string }) {
-    return <span className={`inline-flex rounded border px-2 py-0.5 text-xs font-semibold ${style}`}>{label}</span>;
+    return <span className={`inline-flex rounded-sm border px-2 py-0.5 text-xs font-semibold ${style}`}>{label}</span>;
 }
 
 function Kpi({ label, value, caption, badge }: { label: string; value: string; caption?: string; badge?: { label: string; style: string } }) {
@@ -145,7 +145,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                         <h1 className="text-[32px] font-bold leading-10 tracking-tight text-slate-900">Dashboard</h1>
                         <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
                             <span>Selamat datang, {auth.user?.name}. Anda login sebagai <strong>{role}</strong> di</span>
-                            <span className="inline-flex rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">
+                            <span className="inline-flex rounded-sm border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">
                                 {auth.user?.unit?.name ?? 'Kecamatan Sagulung'}
                             </span>
                         </p>
@@ -166,7 +166,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                                 <span className="tabular-nums">{d.antrean.persetujuan_menunggu}</span> persetujuan menunggu Anda.
                             </p>
                         </div>
-                        <Link href={route('persetujuan.index')} className="rounded-lg bg-[#1E40AF] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+                        <Link href={route('persetujuan.index')} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
                             Buka Kotak Persetujuan
                         </Link>
                     </div>
@@ -218,7 +218,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                             <DonutChart data={kondisiSlices} ariaLabel="Grafik proporsi kondisi fisik aset" unit="aset" />
                             <div className="mt-4 grid w-full grid-cols-2 gap-2 text-xs">
                                 {kondisiSlices.map((s) => (
-                                    <div key={s.label} className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-2.5 py-1.5">
+                                    <div key={s.label} className="flex items-center justify-between rounded-sm border border-slate-100 bg-slate-50 px-2.5 py-1.5">
                                         <div className="flex items-center gap-1.5 truncate">
                                             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
                                             <span className="truncate font-medium text-slate-600">{s.label}</span>
@@ -316,7 +316,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                                     {filteredTransaksi.map((t) => (
                                         <tr key={`${t.jenis}-${t.nomor}`} className="hover:bg-slate-50/50">
                                             <td className="px-4 py-3">
-                                                <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                                                <span className="inline-flex rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
                                                     {JENIS_LABEL[t.jenis]}
                                                 </span>
                                             </td>
@@ -349,7 +349,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                                 {filteredTransaksi.map((t) => (
                                     <li key={`${t.jenis}-${t.nomor}`} className="space-y-1.5 px-5 py-3 text-sm">
                                         <div className="flex items-center justify-between gap-2">
-                                            <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                                            <span className="inline-flex rounded-sm bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
                                                 {JENIS_LABEL[t.jenis]}
                                             </span>
                                             <Badge {...STATUS_BADGE[t.status]} />

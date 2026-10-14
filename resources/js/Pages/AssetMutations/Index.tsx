@@ -86,7 +86,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                     {can.create && (
                         <Link
                             href={route('asset-mutations.create')}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                         >
                             <Plus className="h-4 w-4" /> Ajukan Mutasi Aset
                         </Link>
@@ -106,7 +106,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                 </FilterCard>
 
                 {/* Table Section */}
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
                     <TableSearch
                         value={search}
                         onChange={setSearch}
@@ -240,7 +240,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                                                 <td className="px-4 py-3.5 text-center">
                                                     <Link
                                                         href={route('asset-mutations.show', mutation.id)}
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
                                                         title="Lihat Detail Mutasi"
                                                     >
                                                         <Eye className="h-4 w-4" />
@@ -293,7 +293,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                                             })}
                                             className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold ${
                                                 p === mutations.current_page
-                                                    ? 'bg-[#1E40AF] text-white shadow-xs'
+                                                    ? 'bg-primary text-white shadow-2xs'
                                                     : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
                                             }`}
                                         >

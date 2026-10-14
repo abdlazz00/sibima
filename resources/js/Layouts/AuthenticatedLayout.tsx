@@ -156,7 +156,7 @@ export default function AuthenticatedLayout({
                                         }
                                         className={`flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium transition ${
                                             active
-                                                ? 'bg-[#1E40AF] text-white shadow-sm'
+                                                ? 'bg-primary text-white shadow-xs'
                                                 : 'text-slate-300 hover:bg-white/5 hover:text-white'
                                         }`}
                                     >
@@ -265,7 +265,7 @@ export default function AuthenticatedLayout({
                             <button
                                 type="button"
                                 onClick={() => setIsNotifOpen(!isNotifOpen)}
-                                className="relative rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none"
+                                className="relative rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-hidden"
                                 aria-label="Notifikasi"
                             >
                                 <svg
@@ -282,7 +282,7 @@ export default function AuthenticatedLayout({
                                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                                 </svg>
                                 {notifications.unread_count > 0 && (
-                                    <span className="shadow-xs absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                                    <span className="shadow-2xs absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                                         {notifications.unread_count}
                                     </span>
                                 )}
@@ -309,7 +309,7 @@ export default function AuthenticatedLayout({
                                                     key={item.id}
                                                     type="button"
                                                     onClick={() => router.post(route('notifications.read', item.id))}
-                                                    className="block w-full rounded p-2 text-left hover:bg-gray-50"
+                                                    className="block w-full rounded-sm p-2 text-left hover:bg-gray-50"
                                                 >
                                                     <p className="font-medium text-gray-800">{item.message}</p>
                                                     <p className="mt-0.5 text-[11px] text-gray-500">{item.created_at}</p>
@@ -329,7 +329,7 @@ export default function AuthenticatedLayout({
                             <button
                                 type="button"
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="flex items-center gap-3 rounded-lg p-1.5 text-left transition hover:bg-gray-50 focus:outline-none"
+                                className="flex items-center gap-3 rounded-lg p-1.5 text-left transition hover:bg-gray-50 focus:outline-hidden"
                                 aria-expanded={isProfileOpen}
                                 aria-haspopup="true"
                             >
@@ -337,10 +337,10 @@ export default function AuthenticatedLayout({
                                     <img
                                         src={auth.user.foto_profile_url}
                                         alt={auth.user.name}
-                                        className="shadow-xs h-8 w-8 shrink-0 rounded-full object-cover border border-gray-200"
+                                        className="shadow-2xs h-8 w-8 shrink-0 rounded-full object-cover border border-gray-200"
                                     />
                                 ) : (
-                                    <div className="shadow-xs flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-[#1E40AF] text-xs font-bold text-white">
+                                    <div className="shadow-2xs flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                                         {userInitials}
                                     </div>
                                 )}
@@ -381,7 +381,7 @@ export default function AuthenticatedLayout({
                                     <div className="py-1">
                                         <Link
                                             href={route('profile.edit')}
-                                            className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             onClick={() =>
                                                 setIsProfileOpen(false)
                                             }
@@ -408,7 +408,7 @@ export default function AuthenticatedLayout({
                                                 setIsProfileOpen(false);
                                                 router.post(route('logout'));
                                             }}
-                                            className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                                            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
                                         >
                                             <svg
                                                 className="h-4 w-4 text-red-500"

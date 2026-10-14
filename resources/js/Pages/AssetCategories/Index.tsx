@@ -184,7 +184,7 @@ export default function Index({
                         {can.create && (
                             <Link
                                 href={route('asset-categories.create')}
-                                className="shadow-xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#1E40AF] px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                                className="shadow-2xs inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 <span>Tambah Kategori</span>
@@ -201,7 +201,7 @@ export default function Index({
                 )}
 
                 {/* Data Table Card */}
-                <div className="shadow-xs overflow-hidden rounded-xl border border-gray-200 bg-white">
+                <div className="shadow-2xs overflow-hidden rounded-xl border border-gray-200 bg-white">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left">
                             <thead>
@@ -262,7 +262,7 @@ export default function Index({
                                                                         ? 'Tutup subkategori'
                                                                         : 'Buka subkategori'
                                                                 }
-                                                                className="rounded p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none"
+                                                                className="rounded-sm p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-hidden"
                                                             >
                                                                 <div
                                                                     className={`transition-transform duration-150 ${
@@ -296,7 +296,7 @@ export default function Index({
                                                                         category.id,
                                                                     )}
                                                                     title="Ubah kategori"
-                                                                    className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                    className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                                                                 >
                                                                     <PencilIcon className="h-3.5 w-3.5" />
                                                                 </Link>
@@ -310,7 +310,7 @@ export default function Index({
                                                                         )
                                                                     }
                                                                     title="Hapus kategori"
-                                                                    className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-1 focus:ring-red-500"
+                                                                    className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-hidden focus:ring-1 focus:ring-red-500"
                                                                 >
                                                                     <TrashIcon className="h-3.5 w-3.5" />
                                                                 </button>
@@ -370,7 +370,7 @@ export default function Index({
                                                                                     child.id,
                                                                                 )}
                                                                                 title="Ubah subkategori"
-                                                                                className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                                className="rounded-md border border-blue-200 p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                                                                             >
                                                                                 <PencilIcon className="h-3.5 w-3.5" />
                                                                             </Link>
@@ -384,7 +384,7 @@ export default function Index({
                                                                                     )
                                                                                 }
                                                                                 title="Hapus subkategori"
-                                                                                className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-1 focus:ring-red-500"
+                                                                                className="rounded-md border border-red-200 p-1.5 text-red-600 transition hover:bg-red-50 focus:outline-hidden focus:ring-1 focus:ring-red-500"
                                                                             >
                                                                                 <TrashIcon className="h-3.5 w-3.5" />
                                                                             </button>
@@ -441,7 +441,7 @@ export default function Index({
                                         onClick={() => setCurrentPage(page)}
                                         className={`flex h-8 min-w-8 items-center justify-center rounded-lg text-xs font-medium transition ${
                                             currentPage === page
-                                                ? 'bg-[#1E40AF] text-white'
+                                                ? 'bg-primary text-white'
                                                 : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                                         }`}
                                     >
@@ -511,7 +511,7 @@ export default function Index({
                             <button
                                 type="button"
                                 onClick={confirmDelete}
-                                className="shadow-xs rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                                className="shadow-2xs rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
                             >
                                 Ya, Hapus Kategori
                             </button>

@@ -125,7 +125,7 @@ export default function PrintLabelModal({ assetIds, onClose }: PrintLabelModalPr
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-1"
+                        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-1"
                     >
                         Batal
                     </button>
@@ -133,7 +133,7 @@ export default function PrintLabelModal({ assetIds, onClose }: PrintLabelModalPr
                         type="button"
                         onClick={print}
                         disabled={isExceeded || isZero}
-                        className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <PrinterIcon className="h-4 w-4" />
                         Cetak Label

@@ -232,7 +232,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                         <button
                             type="button"
                             onClick={() => window.print()}
-                            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-300"
                         >
                             <Printer className="h-4 w-4 text-slate-500" />
                             Cetak
@@ -242,7 +242,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                             <button
                                 type="button"
                                 onClick={() => setShowCancel(true)}
-                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-300"
                             >
                                 Batalkan Pengajuan
                             </button>
@@ -252,7 +252,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                             <button
                                 type="button"
                                 onClick={() => setShowReassign(true)}
-                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-slate-300"
                             >
                                 Alihkan Approver
                             </button>
@@ -264,7 +264,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                     type="button"
                                     onClick={() => setShowReject(true)}
                                     disabled={submitting}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-xs transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 focus:outline-hidden focus:ring-2 focus:ring-red-400 disabled:opacity-50"
                                 >
                                     Tolak
                                 </button>
@@ -272,7 +272,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                     type="button"
                                     onClick={approve}
                                     disabled={submitting}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-[#1E40AF] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50"
                                 >
                                     {submitting ? 'Memproses...' : 'Setujui'}
                                 </button>
@@ -301,7 +301,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
 
                 {/* Rejection Alert Banner if Rejected */}
                 {mutation.status === 'rejected' && rejectionAction && (
-                    <div className="rounded-xl border border-red-200 bg-red-50/70 p-4 text-sm text-red-900 shadow-xs">
+                    <div className="rounded-xl border border-red-200 bg-red-50/70 p-4 text-sm text-red-900 shadow-2xs">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
                                 <X className="h-3.5 w-3.5" />
@@ -328,7 +328,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                 )}
 
                 {mutation.status === 'cancelled' && cancelAction && (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-800 shadow-xs">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-800 shadow-2xs">
                         <h3 className="font-semibold">Pengajuan Mutasi Ini Dibatalkan</h3>
                         <p className="text-xs text-slate-600">
                             Dibatalkan oleh{' '}
@@ -345,7 +345,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
 
                 {/* Workflow Stepper */}
                 {req && steps.length > 0 && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs print:hidden">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs print:hidden">
                         <div className="mb-5 flex items-center justify-between">
                             <div>
                                 <h2 className="text-sm font-bold text-slate-900">
@@ -443,7 +443,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                 {/* Transaction Summary Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {/* Card 1: Informasi Dokumen */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
                         <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
                             <h2 className="text-sm font-bold text-slate-900">
                                 Informasi Pengajuan Dokumen
@@ -509,7 +509,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                     </div>
 
                     {/* Card 2: Alur Perpindahan Unit */}
-                    <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+                    <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
                         <div>
                             <div className="mb-4 border-b border-slate-100 pb-3">
                                 <h2 className="text-sm font-bold text-slate-900">
@@ -535,7 +535,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                 </div>
 
                                 {/* Arrow Divider */}
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 shadow-xs">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 shadow-2xs">
                                     <svg
                                         className="h-5 w-5"
                                         viewBox="0 0 24 24"
@@ -588,7 +588,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                 </div>
 
                 {/* Table of Items */}
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
                     <div className="border-b border-slate-200 px-6 py-4">
                         <h2 className="text-base font-bold text-slate-900">
                             Daftar Aset yang Dimutasi
@@ -755,7 +755,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
 
                 {/* Lampiran Foto Fisik Aset */}
                 {mutation.photos && mutation.photos.length > 0 && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
                         <h2 className="mb-1 text-base font-bold text-slate-900">
                             Lampiran Dokumentasi Fisik & Berkas
                         </h2>
@@ -786,7 +786,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
 
                 {/* Riwayat Aktivitas & Catatan Persetujuan */}
                 {req && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
                         <h2 className="mb-1 text-base font-bold text-slate-900">
                             Riwayat Persetujuan & Log Aktivitas
                         </h2>
@@ -797,7 +797,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                         <ol className="relative space-y-6 border-l border-slate-200 pl-6">
                             {/* Created event */}
                             <li className="relative">
-                                <span className="absolute -left-[31px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white" />
+                                <span className="absolute left-[-31px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white" />
                                 <div className="space-y-0.5">
                                     <p className="text-sm font-bold text-slate-900">
                                         Pengajuan Mutasi Dibuat
@@ -820,7 +820,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                 return (
                                     <li key={action.id} className="relative">
                                         <span
-                                            className={`absolute -left-[31px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-white ${
+                                            className={`absolute left-[-31px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-white ${
                                                 isApprove
                                                     ? 'bg-emerald-600'
                                                     : isReassign
@@ -933,7 +933,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                 rows={4}
                                 maxLength={1000}
                                 placeholder="Contoh: Dokumen pendukung belum lengkap / unit penerima belum siap..."
-                                className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                                className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 transition focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-600/20"
                             />
                             <div className="flex justify-between text-[11px] text-slate-400">
                                 <span>Wajib diisi</span>
@@ -954,7 +954,7 @@ export default function Show({ mutation, can, reassignCandidates }: ShowProps) {
                                 type="button"
                                 onClick={reject}
                                 disabled={!note.trim() || submitting}
-                                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-2xs transition hover:bg-red-700 focus:outline-hidden focus:ring-2 focus:ring-red-500 disabled:opacity-50"
                             >
                                 {submitting ? 'Memproses...' : 'Ya, Tolak Mutasi'}
                             </button>

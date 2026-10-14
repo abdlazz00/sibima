@@ -90,12 +90,12 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                         <div className="mt-1 flex flex-wrap items-center gap-3">
                             <h1 className="text-2xl font-bold tracking-tight text-slate-900">{asset.nama_aset}</h1>
                             <span
-                                className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[asset.kondisi]}`}
+                                className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-semibold ${KONDISI_STYLE[asset.kondisi]}`}
                             >
                                 {kondisiOptions.find((o) => o.value === asset.kondisi)?.label ?? asset.kondisi}
                             </span>
                             <span
-                                className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[asset.status] ?? STATUS_STYLE.aktif}`}
+                                className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[asset.status] ?? STATUS_STYLE.aktif}`}
                             >
                                 {asset.status === 'aktif' ? 'Aktif' : 'Dalam Proses'}
                             </span>
@@ -106,7 +106,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                         <button
                             type="button"
                             onClick={() => setShowPrintModal(true)}
-                            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
                         >
                             <Printer className="h-4 w-4" />
                             <span>Cetak Label QR</span>
@@ -114,7 +114,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                         {can.update && (
                             <Link
                                 href={route('assets.edit', asset.id)}
-                                className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                                className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                             >
                                 <Pencil className="h-4 w-4" />
                                 <span>Edit Data</span>
@@ -125,7 +125,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
 
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     {/* Galeri Foto */}
-                    <div className="w-full shrink-0 space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:w-[420px]">
+                    <div className="w-full shrink-0 space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs lg:w-[420px]">
                         <p className="text-sm font-semibold text-slate-900">Galeri Foto Aset</p>
 
                         <div className="flex h-64 items-center justify-center rounded-lg bg-slate-100">
@@ -171,7 +171,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                     </div>
 
                     {/* Informasi Aset */}
-                    <div className="flex-1 space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex-1 space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="text-base font-semibold text-slate-900">Informasi Aset</p>
                         <div className="overflow-hidden rounded-lg border border-slate-200">
                             <DetailRow label="Nama Barang" value={asset.nama_aset} striped />
@@ -203,7 +203,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                 </div>
 
                 {/* Riwayat */}
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                     <div className="mb-4 flex items-center gap-2">
                         <p className="text-base font-semibold text-slate-900">Riwayat Mutasi &amp; Perubahan</p>
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
@@ -217,7 +217,7 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                         <ol className="space-y-5 border-l border-slate-200 pl-5">
                             {histories.map((h) => (
                                 <li key={h.id} className="relative">
-                                    <span className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
+                                    <span className="absolute left-[-25px] top-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
                                     <p className="text-sm font-semibold text-slate-900">{h.event}</p>
                                     {h.keterangan && <p className="mt-0.5 text-sm text-slate-600">{h.keterangan}</p>}
                                     <p className="mt-0.5 text-xs text-slate-400">

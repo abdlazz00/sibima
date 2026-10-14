@@ -129,7 +129,7 @@ export default function AssetSelectModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none"
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-hidden"
                     >
                         <X className="h-5 w-5" />
                     </button>
@@ -147,7 +147,7 @@ export default function AssetSelectModal({
                                 setPage(1);
                             }}
                             placeholder="Cari berdasarkan nama aset, kode barang, no. register, merk..."
-                            className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100"
                             autoFocus
                         />
                         {search && (
@@ -210,12 +210,12 @@ export default function AssetSelectModal({
                                                         checked={isSelected}
                                                         disabled={isDisabled}
                                                         onChange={() => toggleAsset(asset.id)}
-                                                        className="h-4.5 w-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                        className="h-4.5 w-4.5 rounded-sm border-slate-300 text-blue-600 focus:ring-blue-500"
                                                     />
                                                 </td>
                                                 <td className="py-3.5 px-3 whitespace-nowrap">
                                                     <div className="font-mono text-xs text-slate-700">{asset.kode_barang}</div>
-                                                    <div className="mt-0.5 inline-flex rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                                                    <div className="mt-0.5 inline-flex rounded-sm bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">
                                                         Reg. #{String(asset.nomor_register).padStart(4, '0')}
                                                     </div>
                                                 </td>
@@ -293,7 +293,7 @@ export default function AssetSelectModal({
                             type="button"
                             onClick={handleConfirm}
                             disabled={isConfirmDisabled}
-                            className="rounded-xl bg-[#1E40AF] px-5 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-800 disabled:opacity-50"
+                            className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-2xs hover:bg-blue-800 disabled:opacity-50"
                         >
                             Gunakan {tempSelected.length > 0 ? `(${tempSelected.length}) ` : ''}Aset Terpilih
                         </button>

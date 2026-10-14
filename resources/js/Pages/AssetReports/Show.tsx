@@ -100,7 +100,7 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                         </nav>
                         <div className="mt-1 flex items-center gap-3">
                             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Laporan {REPORT_TYPE_LABEL[report.jenis]} #{report.nomor_laporan}</h1>
-                            <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${REPORT_STATUS_STYLE[report.status]}`}>{REPORT_STATUS_LABEL[report.status]}</span>
+                            <span className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-semibold ${REPORT_STATUS_STYLE[report.status]}`}>{REPORT_STATUS_LABEL[report.status]}</span>
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-3">
@@ -113,14 +113,14 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                         {can.act && (
                             <>
                                 <button onClick={() => setShowReject(true)} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Tolak</button>
-                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{submitting ? 'Memproses...' : 'Setujui'}</button>
+                                <button onClick={approve} disabled={submitting} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{submitting ? 'Memproses...' : 'Setujui'}</button>
                             </>
                         )}
                     </div>
                 </div>
 
                 {req && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-4 text-sm font-semibold text-slate-900">Status Alur Persetujuan</p>
                         <div className="flex items-start">
                             {steps.map((step, idx) => {
@@ -145,7 +145,7 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                 )}
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-3 text-base font-semibold text-slate-900">Detail Laporan</p>
                         <dl className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200 text-sm">
                             {rows.map(([label, value], i) => (
@@ -159,7 +159,7 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                         <p className="whitespace-pre-line text-sm text-slate-700">{report.kronologi}</p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-3 text-base font-semibold text-slate-900">Aset</p>
                         {report.asset && (
                             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
@@ -184,17 +184,17 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                 </div>
 
                 {req && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
                         <p className="mb-4 text-base font-semibold text-slate-900">Riwayat Aktivitas</p>
                         <ol className="space-y-4 border-l border-slate-200 pl-5">
                             <li className="relative">
-                                <span className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
+                                <span className="absolute left-[-25px] top-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
                                 <p className="text-sm font-semibold text-slate-900">Laporan Dibuat</p>
                                 <p className="text-xs text-slate-500">oleh {report.creator?.name}</p>
                             </li>
                             {req.actions?.map((action) => (
                                 <li key={action.id} className="relative">
-                                    <span className={`absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full ${ACTION_DOT[action.action]}`} />
+                                    <span className={`absolute left-[-25px] top-1 h-2.5 w-2.5 rounded-full ${ACTION_DOT[action.action]}`} />
                                     <p className="text-sm font-semibold text-slate-900">{ACTION_LABEL[action.action]} oleh {action.user?.name}</p>
                                     {action.note && <p className="text-xs text-slate-500">{action.note}</p>}
                                 </li>
@@ -226,7 +226,7 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowReject(false)}>
                     <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
                         <h3 className="mb-3 text-base font-bold text-gray-900">Tolak Laporan</h3>
-                        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="Alasan penolakan (wajib diisi)" className="mb-4 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-600 focus:outline-none" />
+                        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="Alasan penolakan (wajib diisi)" className="mb-4 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-600 focus:outline-hidden" />
                         <div className="flex justify-end gap-3">
                             <button onClick={() => setShowReject(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</button>
                             <button onClick={reject} disabled={!note.trim() || submitting} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">Ya, Tolak</button>

@@ -70,7 +70,7 @@ export default function PasswordInput({
                 autoFocus={autoFocus}
                 placeholder={placeholder}
                 onChange={(e) => onChange(e.target.value)}
-                className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-3.5 pr-11 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-3.5 pr-11 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-transparent focus:outline-hidden focus:ring-2 focus:ring-primary"
                 required={required}
                 aria-describedby={describedBy}
             />
@@ -80,7 +80,7 @@ export default function PasswordInput({
                 aria-label={
                     show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'
                 }
-                className="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-r-lg text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                className="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-r-lg text-gray-500 hover:text-gray-700 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
             >
                 {show ? (
                     <EyeOffIcon className="h-5 w-5" />
