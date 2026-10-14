@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengaturan/alur/{workflow}', [WorkflowSettingsController::class, 'edit'])->name('workflow-settings.edit');
     Route::put('/pengaturan/alur/{workflow}', [WorkflowSettingsController::class, 'update'])->name('workflow-settings.update');
     Route::post('/pengaturan/alur/{workflow}/reset', [WorkflowSettingsController::class, 'reset'])->name('workflow-settings.reset');
-    Route::resource('pengaturan/roles', RoleController::class)->except(['create', 'edit', 'show'])->names('roles');
+    Route::resource('pengaturan/roles', RoleController::class)->except(['show'])->names('roles');
     Route::prefix('pengaturan/users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/{user}', [UserController::class, 'show'])->name('show');

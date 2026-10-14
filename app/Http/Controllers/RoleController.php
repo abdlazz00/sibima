@@ -20,21 +20,29 @@ class RoleController extends Controller
         $roles = Role::withCount('users')
             ->with('permissions')
             ->get()
-            ->map(fn ($r) => [
-                'id' => $r->id,
-                'name' => $r->name,
-                'display_name' => $r->display_name ?? $r->name,
-                'unit_scope' => $r->unit_scope,
-                'unit_head_of' => $r->unit_head_of,
-                'is_system' => (bool) $r->is_system,
-                'description' => $r->description,
-                'users_count' => $r->users_count,
-                'permissions_count' => $r->permissions->count(),
-                'permissions' => $r->permissions->pluck('name')->all(),
-            ]);
+            ->map(fn ($r) => $this->rolePayload($r));
 
         return Inertia::render('Roles/Index', [
             'roles' => $roles,
+            'permissionGroups' => PermissionSeeder::PERMISSION_GROUPS,
+        ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        abort_unless($request->user()->can('pengaturan.role'), 403);
+
+        return Inertia::render('Roles/Create', [
+            'permissionGroups' => PermissionSeeder::PERMISSION_GROUPS,
+        ]);
+    }
+
+    public function edit(Request $request, Role $role): Response
+    {
+        abort_unless($request->user()->can('pengaturan.role') && $request->user()->canManageRole($role), 403);
+
+        return Inertia::render('Roles/Edit', [
+            'role' => $this->rolePayload($role->loadCount('users')->load('permissions')),
             'permissionGroups' => PermissionSeeder::PERMISSION_GROUPS,
         ]);
     }
@@ -94,5 +102,24 @@ class RoleController extends Controller
         $role->delete();
 
         return redirect()->route('roles.index')->with('success', 'Role berhasil dihapus.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function rolePayload(Role $role): array
+    {
+        return [
+            'id' => $role->id,
+            'name' => $role->name,
+            'display_name' => $role->display_name ?? $role->name,
+            'unit_scope' => $role->unit_scope,
+            'unit_head_of' => $role->unit_head_of,
+            'is_system' => (bool) $role->is_system,
+            'description' => $role->description,
+            'users_count' => $role->users_count,
+            'permissions_count' => $role->permissions->count(),
+            'permissions' => $role->permissions->pluck('name')->all(),
+        ];
     }
 }
