@@ -1,16 +1,19 @@
-import { ChevronRightIcon as ChevronRight } from '@/Components/Icons';
+import PageHeader from '@/Components/PageHeader';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
+import { Label } from '@/Components/ui/base/input/label';
+import { RadioButton, RadioGroup } from '@/Components/ui/base/radio-buttons/radio-buttons';
+import { Select } from '@/Components/ui/base/select/select';
+import { TextArea } from '@/Components/ui/base/textarea/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { AssetRequestType, PageProps } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { Head, useForm } from '@inertiajs/react';
 
 interface CreateProps extends PageProps {
     pegawais: { id: number; nama: string; jabatan: string | null }[];
     categories: { id: number; name: string }[];
     canUnit: boolean;
 }
-
-const FIELD = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
 
 export default function Create({ pegawais, categories, canUnit }: CreateProps) {
     const form = useForm({
@@ -21,8 +24,7 @@ export default function Create({ pegawais, categories, canUnit }: CreateProps) {
         keterangan: '',
     });
 
-    const submit = (e: FormEvent) => {
-        e.preventDefault();
+    const submit = () => {
         form.transform((data) => (data.jenis === 'pegawai' ? { ...data, jumlah: '' } : { ...data, pegawai_id: '' }));
         form.post(route('asset-requests.store'));
     };
@@ -32,72 +34,85 @@ export default function Create({ pegawais, categories, canUnit }: CreateProps) {
             <Head title="Buat Permohonan Aset" />
 
             <div className="space-y-6">
-                <div>
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Link href={route('dashboard')} className="hover:text-blue-700">Home</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <Link href={route('asset-requests.index')} className="hover:text-blue-700">Permohonan Aset</Link>
-                        <ChevronRight className="h-3 w-3 text-slate-400" />
-                        <span className="font-medium text-slate-800">Buat Permohonan</span>
-                    </nav>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Buat Permohonan Aset</h1>
-                </div>
+                <PageHeader
+                    crumbs={[{ label: 'Permohonan Aset', href: route('asset-requests.index') }, { label: 'Buat Permohonan' }]}
+                    title="Buat Permohonan Aset"
+                />
 
-                <form onSubmit={submit} className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
-                    <div>
-                        <label className="mb-1.5 block text-sm font-medium text-slate-900">Jenis Permohonan *</label>
-                        <div className="flex flex-col gap-2 text-sm">
-                            <label className="flex items-center gap-2">
-                                <input type="radio" name="jenis" checked={form.data.jenis === 'pegawai'} onChange={() => form.setData('jenis', 'pegawai')} />
-                                Untuk pegawai (aset diserahkan ke pegawai dari stok unit)
-                            </label>
-                            {canUnit && (
-                                <label className="flex items-center gap-2">
-                                    <input type="radio" name="jenis" checked={form.data.jenis === 'unit'} onChange={() => form.setData('jenis', 'unit')} />
-                                    Untuk unit (minta stok dari kecamatan)
-                                </label>
-                            )}
-                        </div>
-                        {form.errors.jenis && <p className="mt-1 text-xs text-red-600">{form.errors.jenis}</p>}
-                    </div>
+                <form onSubmit={(e) => e.preventDefault()} className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+                    <RadioGroup
+                        isRequired
+                        className="gap-2"
+                        value={form.data.jenis}
+                        onChange={(v) => form.setData('jenis', v as AssetRequestType)}
+                        isInvalid={Boolean(form.errors.jenis)}
+                    >
+                        <Label isRequired>Jenis Permohonan</Label>
+                        <RadioButton value="pegawai" label="Untuk pegawai (aset diserahkan ke pegawai dari stok unit)" />
+                        {canUnit && <RadioButton value="unit" label="Untuk unit (minta stok dari kecamatan)" />}
+                        {form.errors.jenis && <p className="text-xs text-red-600">{form.errors.jenis}</p>}
+                    </RadioGroup>
 
                     {form.data.jenis === 'pegawai' ? (
-                        <div>
-                            <label className="mb-1.5 block text-sm font-medium text-slate-900">Pegawai *</label>
-                            <select value={form.data.pegawai_id} onChange={(e) => form.setData('pegawai_id', e.target.value)} className={FIELD}>
-                                <option value="">Pilih pegawai...</option>
-                                {pegawais.map((p) => <option key={p.id} value={p.id}>{p.nama}{p.jabatan ? ` — ${p.jabatan}` : ''}</option>)}
-                            </select>
-                            {form.errors.pegawai_id && <p className="mt-1 text-xs text-red-600">{form.errors.pegawai_id}</p>}
-                        </div>
+                        <Select
+                            label="Pegawai"
+                            isRequired
+                            placeholder="Pilih pegawai..."
+                            items={pegawais.map((p) => ({ id: String(p.id), label: `${p.nama}${p.jabatan ? ` — ${p.jabatan}` : ''}` }))}
+                            selectedKey={form.data.pegawai_id || null}
+                            onSelectionChange={(key) => form.setData('pegawai_id', String(key))}
+                            isInvalid={Boolean(form.errors.pegawai_id)}
+                            hint={form.errors.pegawai_id}
+                        >
+                            {(item) => <Select.Item id={item.id} label={item.label} />}
+                        </Select>
                     ) : (
                         <div className="max-w-xs">
-                            <label className="mb-1.5 block text-sm font-medium text-slate-900">Jumlah Barang *</label>
-                            <input type="number" min={1} value={form.data.jumlah} onChange={(e) => form.setData('jumlah', e.target.value)} className={FIELD} />
-                            {form.errors.jumlah && <p className="mt-1 text-xs text-red-600">{form.errors.jumlah}</p>}
+                            <Input
+                                label="Jumlah Barang"
+                                type="number"
+                                inputMode="numeric"
+                                isRequired
+                                inputClassName="tabular-nums"
+                                value={form.data.jumlah}
+                                onChange={(v) => form.setData('jumlah', v)}
+                                isInvalid={Boolean(form.errors.jumlah)}
+                                hint={form.errors.jumlah}
+                            />
                         </div>
                     )}
 
-                    <div>
-                        <label className="mb-1.5 block text-sm font-medium text-slate-900">Subkategori Aset yang Diminta *</label>
-                        <select value={form.data.category_id} onChange={(e) => form.setData('category_id', e.target.value)} className={FIELD}>
-                            <option value="">Pilih subkategori...</option>
-                            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
-                        {form.errors.category_id && <p className="mt-1 text-xs text-red-600">{form.errors.category_id}</p>}
-                    </div>
+                    <Select
+                        label="Subkategori Aset yang Diminta"
+                        isRequired
+                        placeholder="Pilih subkategori..."
+                        items={categories.map((c) => ({ id: String(c.id), label: c.name }))}
+                        selectedKey={form.data.category_id || null}
+                        onSelectionChange={(key) => form.setData('category_id', String(key))}
+                        isInvalid={Boolean(form.errors.category_id)}
+                        hint={form.errors.category_id}
+                    >
+                        {(item) => <Select.Item id={item.id} label={item.label} />}
+                    </Select>
 
-                    <div>
-                        <label className="mb-1.5 block text-sm font-medium text-slate-900">Keterangan / Alasan *</label>
-                        <textarea value={form.data.keterangan} onChange={(e) => form.setData('keterangan', e.target.value)} rows={4} className={FIELD} placeholder="Jelaskan kebutuhan dan alasan permohonan." />
-                        {form.errors.keterangan && <p className="mt-1 text-xs text-red-600">{form.errors.keterangan}</p>}
-                    </div>
+                    <TextArea
+                        label="Keterangan / Alasan"
+                        isRequired
+                        rows={4}
+                        placeholder="Jelaskan kebutuhan dan alasan permohonan."
+                        value={form.data.keterangan}
+                        onChange={(v) => form.setData('keterangan', v)}
+                        isInvalid={Boolean(form.errors.keterangan)}
+                        hint={form.errors.keterangan}
+                    />
 
-                    <div className="flex justify-end gap-3">
-                        <Link href={route('asset-requests.index')} className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Batal</Link>
-                        <button type="submit" disabled={form.processing} className="rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
-                            {form.processing ? 'Mengirim...' : 'Ajukan Permohonan'}
-                        </button>
+                    <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
+                        <Button color="secondary" size="md" href={route('asset-requests.index')}>
+                            Batal
+                        </Button>
+                        <Button color="primary" size="md" isLoading={form.processing} onPress={submit}>
+                            Ajukan Permohonan
+                        </Button>
                     </div>
                 </form>
             </div>
