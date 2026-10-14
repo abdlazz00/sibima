@@ -1,5 +1,5 @@
-import InputError from '@/Components/InputError';
-import PasswordInput from '@/Components/PasswordInput';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Input } from '@/Components/ui/base/input/input';
 import AuthSplitLayout from '@/Layouts/AuthSplitLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -42,12 +42,9 @@ export default function ResetPassword({
                     {errors.email}
                 </div>
 
-                <Link
-                    href={route('password.request')}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-800 text-sm font-medium text-white shadow-xs transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:ring-offset-2 active:bg-blue-950"
-                >
+                <Button color="primary" size="lg" className="w-full" href={route('password.request')}>
                     Minta Tautan Baru
-                </Link>
+                </Button>
                 <div className="mt-4">
                     <Link
                         href={route('login')}
@@ -72,76 +69,50 @@ export default function ResetPassword({
             </p>
 
             <form onSubmit={submit} className="space-y-5">
-                <div>
-                    <label
-                        htmlFor="email"
-                        className="mb-1.5 block text-sm font-medium text-gray-700"
-                    >
-                        Email
-                    </label>
-                    <input
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        autoComplete="username"
-                        readOnly
-                        aria-readonly="true"
-                        className="h-11 w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3.5 text-sm text-gray-500 focus:outline-hidden"
-                    />
-                </div>
+                <Input
+                    label="Email"
+                    name="email"
+                    type="email"
+                    size="lg"
+                    autoComplete="username"
+                    isReadOnly
+                    wrapperClassName="bg-gray-50"
+                    inputClassName="cursor-not-allowed text-gray-500"
+                    value={data.email}
+                />
 
-                <div>
-                    <label
-                        htmlFor="password"
-                        className="mb-1.5 block text-sm font-medium text-gray-700"
-                    >
-                        Kata Sandi Baru
-                    </label>
-                    <PasswordInput
-                        id="password"
-                        name="password"
-                        value={data.password}
-                        autoComplete="new-password"
-                        autoFocus
-                        placeholder=""
-                        describedBy="password-hint"
-                        onChange={(v) => setData('password', v)}
-                    />
-                    <p id="password-hint" className="mt-1.5 text-xs text-gray-500">
-                        Minimal 8 karakter.
-                    </p>
-                    <InputError message={errors.password} className="mt-1.5" />
-                </div>
+                <Input
+                    label="Kata Sandi Baru"
+                    name="password"
+                    type="password"
+                    size="lg"
+                    autoComplete="new-password"
+                    autoFocus
+                    isRequired
+                    hideRequiredIndicator
+                    value={data.password}
+                    onChange={(v) => setData('password', v)}
+                    isInvalid={Boolean(errors.password)}
+                    hint={errors.password ?? 'Minimal 8 karakter.'}
+                />
 
-                <div>
-                    <label
-                        htmlFor="password_confirmation"
-                        className="mb-1.5 block text-sm font-medium text-gray-700"
-                    >
-                        Konfirmasi Kata Sandi Baru
-                    </label>
-                    <PasswordInput
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        autoComplete="new-password"
-                        placeholder=""
-                        onChange={(v) => setData('password_confirmation', v)}
-                    />
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-1.5"
-                    />
-                </div>
+                <Input
+                    label="Konfirmasi Kata Sandi Baru"
+                    name="password_confirmation"
+                    type="password"
+                    size="lg"
+                    autoComplete="new-password"
+                    isRequired
+                    hideRequiredIndicator
+                    value={data.password_confirmation}
+                    onChange={(v) => setData('password_confirmation', v)}
+                    isInvalid={Boolean(errors.password_confirmation)}
+                    hint={errors.password_confirmation}
+                />
 
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-800 text-sm font-medium text-white shadow-xs transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:ring-offset-2 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    {processing ? 'Menyimpan...' : 'Simpan Kata Sandi Baru'}
-                </button>
+                <Button type="submit" color="primary" size="lg" className="w-full" isLoading={processing}>
+                    Simpan Kata Sandi Baru
+                </Button>
             </form>
         </AuthSplitLayout>
     );
