@@ -1442,16 +1442,7 @@ class ProfileSessionController extends Controller
                 ->values(),
 ```
 
-- [ ] **Step 7: Percayai IP klien hanya dari proxy privat** — tulis dulu `tests/Feature/TrustedProxyTest.php` (tiga tes: rantai `X-Forwarded-For` dari proxy privat menghasilkan alamat tak-terpercaya pertama dari kanan; header dari alamat publik diabaikan; `X-Forwarded-Host` tidak pernah dipercaya) dan pastikan gagal terhadap konfigurasi lama. Lalu di `bootstrap/app.php` ganti baris `trustProxies`:
-```php
-        // Hanya proxy di jaringan privat (nginx/cloudflared di Docker, host, loopback) yang dipercaya, dan hanya
-        // header IP + protokol. X-Forwarded-Host/Port sengaja tidak dipercaya agar Host tidak bisa dipalsukan.
-        $middleware->trustProxies(
-            at: ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'],
-            headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO,
-        );
-```
-Alasan: `at: '*'` bersama header `X-Forwarded-For` membuat bagian kiri rantai (yang bisa dikirim klien) terbaca sebagai IP klien; itu memalsukan log IP **dan** melewati throttle login yang memakai `$request->ip()`. Catat di laporan: IP asli di produksi tetap harus diverifikasi (nginx dan cloudflared harus terhubung dari alamat privat; bila tidak, IP yang tampil adalah alamat proxy dan itu aman tetapi kurang informatif).
+- [ ] **Step 7: Jangan ubah `trustProxies`** — konfigurasi yang ada (`at: '*'`, hanya `X-Forwarded-Proto`) sengaja begitu dan dijaga `tests/Feature/TrustProxiesTest.php`: Host dan For tidak dipercaya, IP klien asli sudah ada di `REMOTE_ADDR` karena Nginx yang menghadap klien. IP di daftar sesi dan log login memakai `$request->ip()` apa adanya. (Percobaan mempercayai `X-Forwarded-For` dari proxy privat sempat dibuat lalu dibatalkan karena melanggar keputusan itu.) Verifikasi di produksi setelah deploy bahwa IP yang tampil adalah IP klien, bukan IP kontainer Nginx.
 
 - [ ] **Step 8: Jalankan tes sampai hijau**
 
