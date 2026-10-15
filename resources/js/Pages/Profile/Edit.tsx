@@ -4,10 +4,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ActivityEntry, PageProps, Paginated, ProfileAkun, ProfileSession } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import AccountInfoCard from './Partials/AccountInfoCard';
 import ActivityTab from './Partials/ActivityTab';
-import CredentialsCard from './Partials/CredentialsCard';
-import ProfileHeader from './Partials/ProfileHeader';
+import ProfileDetails from './Partials/ProfileDetails';
+import ProfilePhoto from './Partials/ProfilePhoto';
 import SessionsCard from './Partials/SessionsCard';
 
 export default function Edit({
@@ -15,7 +14,7 @@ export default function Edit({
     sessions,
     aktivitas,
 }: PageProps<{ akun: ProfileAkun; sessions: ProfileSession[]; aktivitas?: Paginated<ActivityEntry> }>) {
-    const [tab, setTab] = useState('akun');
+    const [tab, setTab] = useState('keamanan');
 
     return (
         <AuthenticatedLayout>
@@ -23,19 +22,17 @@ export default function Edit({
 
             <div className="space-y-6">
                 <PageHeader crumbs={[{ label: 'Profil' }]} title="Profil Saya" />
-                <ProfileHeader akun={akun} />
+                <div className="grid gap-8 rounded-xl border border-slate-200 bg-white p-6 shadow-xs md:grid-cols-[16rem_1fr]">
+                    <ProfilePhoto akun={akun} />
+                    <ProfileDetails akun={akun} />
+                </div>
 
                 <Tabs selectedKey={tab} onSelectionChange={(key) => setTab(String(key))} keyboardActivation="automatic">
                     <Tabs.List type="underline" size="md" aria-label="Bagian profil">
-                        <Tabs.Item id="akun" label="Akun" />
                         <Tabs.Item id="keamanan" label="Keamanan" />
                         <Tabs.Item id="aktivitas" label="Aktivitas" />
                     </Tabs.List>
 
-                    <Tabs.Panel id="akun" className="space-y-6 pt-6">
-                        <AccountInfoCard akun={akun} />
-                        <CredentialsCard akun={akun} />
-                    </Tabs.Panel>
                     <Tabs.Panel id="keamanan" className="space-y-6 pt-6">
                         <SessionsCard sessions={sessions} />
                     </Tabs.Panel>

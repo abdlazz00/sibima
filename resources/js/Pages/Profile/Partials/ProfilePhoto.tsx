@@ -1,5 +1,4 @@
 import ConfirmDialog from '@/Components/ConfirmDialog';
-import { Badge } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
 import { PageProps, ProfileAkun } from '@/types';
 import { router, usePage } from '@inertiajs/react';
@@ -16,7 +15,7 @@ const initials = (name: string) =>
         .join('')
         .toUpperCase();
 
-export default function ProfileHeader({ akun }: { akun: ProfileAkun }) {
+export default function ProfilePhoto({ akun }: { akun: ProfileAkun }) {
     const user = usePage<PageProps>().props.auth.user;
     const name = user?.name ?? 'Pengguna';
     const [changing, setChanging] = useState(false);
@@ -24,38 +23,28 @@ export default function ProfileHeader({ akun }: { akun: ProfileAkun }) {
     const [busy, setBusy] = useState(false);
 
     return (
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-xs sm:flex-row sm:items-center">
-            {user?.foto_profile_url ? (
-                <img src={user.foto_profile_url} alt={name} className="size-16 shrink-0 rounded-full border border-slate-200 object-cover" />
-            ) : (
-                <div className="flex size-16 shrink-0 select-none items-center justify-center rounded-full bg-blue-800 text-xl font-bold text-white">
-                    {initials(name)}
-                </div>
-            )}
-            <div className="min-w-0 flex-1">
-                <h2 className="truncate text-xl font-bold text-slate-900">{name}</h2>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                    {akun.role && (
-                        <Badge type="color" size="sm" color="blue" className="rounded-sm">
-                            {akun.role}
-                        </Badge>
-                    )}
-                    {akun.unit && <span>{akun.unit}</span>}
-                    <Badge type="color" size="sm" color={akun.aktif ? 'success' : 'gray'} className="rounded-sm">
-                        {akun.aktif ? 'Aktif' : 'Nonaktif'}
-                    </Badge>
+        <div className="mx-auto w-full max-w-56 md:max-w-none">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                {user?.foto_profile_url ? (
+                    <img src={user.foto_profile_url} alt={name} className="size-full object-cover" />
+                ) : (
+                    <div className="flex size-full select-none items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 text-6xl font-bold text-blue-800">
+                        {initials(name)}
+                    </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/30 to-transparent p-4 pt-10">
+                    <Button color="secondary" size="md" iconLeading={Camera01} onPress={() => setChanging(true)}>
+                        Ganti foto
+                    </Button>
                 </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-                <Button color="secondary" size="md" iconLeading={Camera01} onPress={() => setChanging(true)}>
-                    Ganti foto
-                </Button>
-                {akun.punya_foto && (
-                    <Button color="secondary-destructive" size="md" onPress={() => setRemoving(true)}>
+            {akun.punya_foto && (
+                <div className="mt-3 text-center">
+                    <Button color="link-destructive" size="sm" onPress={() => setRemoving(true)}>
                         Hapus foto
                     </Button>
-                )}
-            </div>
+                </div>
+            )}
 
             {changing && <ChangePhotoDialog onClose={() => setChanging(false)} />}
             {removing && (
