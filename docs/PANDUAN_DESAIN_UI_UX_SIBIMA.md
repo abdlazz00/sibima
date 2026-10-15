@@ -567,7 +567,7 @@ flowchart TD
 
 ## 9. TOKEN DAN KOMPONEN UI (UNTITLED UI)
 
-Halaman yang sudah dimigrasi memakai komponen Untitled UI (versi gratis, berbasis React Aria Components). Halaman lain masih memakai komponen Breeze lama; **jangan mencampur keduanya dalam satu halaman**.
+Seluruh halaman memakai komponen Untitled UI (versi gratis, berbasis React Aria Components) di atas React 19 dan Tailwind 4. Komponen Breeze lama sudah dihapus; jangan menambah komponen formulir/tombol buatan sendiri bila Untitled UI atau komponen bersama di bawah sudah menyediakannya.
 
 * **Lokasi**: komponen di `resources/js/Components/ui/` (`base/`, `application/`, `foundations/`), helper di `resources/js/lib/` (`cx`, `use-breakpoint`, dll.), token di `resources/css/theme.css`, titik masuk CSS di `resources/css/app.css`.
 * **Menambah komponen**: `npx untitledui@latest add <nama> -y --path resources/js/Components/ui --lib-version 8`. Setelah itu: (1) ganti alias hasil CLI `@/resources/js/Components/ui/` menjadi `@/Components/ui/`, `@/utils/` dan `@/hooks/` menjadi `@/lib/`; (2) pastikan tidak ada `@/components/` huruf kecil (Docker berjalan di Linux yang membedakan huruf besar-kecil); (3) buang berkas yang tidak dipakai yang ikut terbawa CLI; (4) cantumkan paket baru di `package.json` hanya bila benar-benar diimpor.
@@ -577,3 +577,8 @@ Halaman yang sudah dimigrasi memakai komponen Untitled UI (versi gratis, berbasi
 * **Navigasi**: `RouterProvider` di `app.tsx` meneruskan `href` komponen ke `router.visit` Inertia. Unduhan berkas (mis. Ekspor) memakai `window.location.href`, bukan `href`.
 * **Filter "semua"**: kunci kosong tidak valid di Select React Aria; pakai penanda (mis. `__all`) lalu petakan kembali ke `undefined` untuk URL.
 * **Mode gelap** tidak dipakai: varian `dark` terikat ke class `.dark-mode` yang tidak pernah dipasang.
+
+* **Warna tombol**: aksi utama `primary`; Lihat/Detail `secondary-brand`; Ubah/Edit `secondary-green` (di Profil: `secondary`); Cetak `secondary-violet`; hapus `secondary-destructive`; Batal `secondary`; unduhan, Impor, dan Ekspor `secondary-brand`; amber hanya untuk peringatan. Badge: `Badge type="color" size="sm" className="rounded-sm"`.
+* **Komponen bersama** (`resources/js/Components/`): `PageHeader` (breadcrumb + judul + aksi), `ConfirmDialog`, `FormDialog`, `TextArea`, `ApprovalStepper`, `ApprovalTimeline`, `RejectRequestModal`, `AssetSelectModal`, kelompok laporan (`ReportFilterBar`, `StatCard`, `ChartLegend`, `ReportCard`, `SummaryTable`, `ReportDetailTable`) dengan `lib/use-laporan-filters.ts`, dan `Tabs` di `Components/ui/application/tabs/`. Format angka dan tanggal lewat `lib/format.ts` (`rupiah`, `tanggal`, `tanggalWaktu`, `tanggalSingkat`).
+* **Kunci tabel**: kunci baris dan kolom `Table` React Aria berbagi ruang kunci; id baris tidak boleh sama dengan id kolom (mis. baris total memakai `__total`).
+* **Halaman Profil**: kartu atas berisi foto potret (kiri, tombol Ganti/Hapus foto di bawahnya) dan detail (kanan, baca dulu, perubahan lewat dialog); tab Keamanan (sesi aktif) dan Aktivitas (riwayat kerja dan login, dimuat lazy) di bawah kartu.
