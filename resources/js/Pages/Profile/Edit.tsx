@@ -1,15 +1,20 @@
 import PageHeader from '@/Components/PageHeader';
 import { Tabs } from '@/Components/ui/application/tabs/tabs';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { PageProps, ProfileAkun, ProfileSession } from '@/types';
+import { ActivityEntry, PageProps, Paginated, ProfileAkun, ProfileSession } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import AccountInfoCard from './Partials/AccountInfoCard';
+import ActivityTab from './Partials/ActivityTab';
 import CredentialsCard from './Partials/CredentialsCard';
 import ProfileHeader from './Partials/ProfileHeader';
 import SessionsCard from './Partials/SessionsCard';
 
-export default function Edit({ akun, sessions }: PageProps<{ akun: ProfileAkun; sessions: ProfileSession[] }>) {
+export default function Edit({
+    akun,
+    sessions,
+    aktivitas,
+}: PageProps<{ akun: ProfileAkun; sessions: ProfileSession[]; aktivitas?: Paginated<ActivityEntry> }>) {
     const [tab, setTab] = useState('akun');
 
     return (
@@ -24,6 +29,7 @@ export default function Edit({ akun, sessions }: PageProps<{ akun: ProfileAkun; 
                     <Tabs.List type="underline" size="md" aria-label="Bagian profil">
                         <Tabs.Item id="akun" label="Akun" />
                         <Tabs.Item id="keamanan" label="Keamanan" />
+                        <Tabs.Item id="aktivitas" label="Aktivitas" />
                     </Tabs.List>
 
                     <Tabs.Panel id="akun" className="space-y-6 pt-6">
@@ -32,6 +38,9 @@ export default function Edit({ akun, sessions }: PageProps<{ akun: ProfileAkun; 
                     </Tabs.Panel>
                     <Tabs.Panel id="keamanan" className="space-y-6 pt-6">
                         <SessionsCard sessions={sessions} />
+                    </Tabs.Panel>
+                    <Tabs.Panel id="aktivitas" className="pt-6">
+                        <ActivityTab aktivitas={aktivitas} />
                     </Tabs.Panel>
                 </Tabs>
             </div>

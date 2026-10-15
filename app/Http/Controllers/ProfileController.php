@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\ActivityFeed;
 use App\Support\SessionDevice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,6 +45,11 @@ class ProfileController extends Controller
                     'ini' => $s->id === $request->session()->getId(),
                 ])
                 ->values(),
+            'aktivitas' => Inertia::optional(fn () => app(ActivityFeed::class)->paginate(
+                $user,
+                in_array($request->query('filter'), ['pekerjaan', 'login'], true) ? $request->query('filter') : 'semua',
+                max(1, (int) $request->query('halaman', 1)),
+            )),
         ]);
     }
 

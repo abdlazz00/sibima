@@ -554,3 +554,13 @@ export interface ProfileSession {
     terakhir_aktif: string;
     ini: boolean;
 }
+
+export interface ActivityEntry {
+    id: string;
+    tipe: 'pekerjaan' | 'login';
+    judul: string;
+    keterangan: string | null;
+    waktu: string;
+    url: string | null;
+    hasil: 'berhasil' | 'gagal' | 'keluar' | null;
+}

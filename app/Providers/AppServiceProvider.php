@@ -12,6 +12,11 @@ use App\Repositories\EloquentAssetCategoryRepository;
 use App\Repositories\EloquentAssetRepository;
 use App\Repositories\EloquentPegawaiRepository;
 use App\Repositories\EloquentUnitRepository;
+use App\Support\LoginActivityRecorder;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -38,5 +43,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        Event::listen(Login::class, [LoginActivityRecorder::class, 'login']);
+        Event::listen(Failed::class, [LoginActivityRecorder::class, 'failed']);
+        Event::listen(Logout::class, [LoginActivityRecorder::class, 'logout']);
     }
 }
