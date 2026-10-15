@@ -216,6 +216,15 @@ export interface NotificationItem {
     created_at: string;
 }
 
+export interface NotificationRow {
+    id: string;
+    message: string;
+    url: string | null;
+    dibaca: boolean;
+    waktu: string;
+    relatif: string;
+}
+
 export interface Flash {
     success: string | null;
     error: string | null;

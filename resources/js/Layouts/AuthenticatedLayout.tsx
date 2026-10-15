@@ -14,6 +14,7 @@ import { PageProps } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Bell01,
+    CheckCircle,
     ChevronDown,
     ChevronLeftDouble,
     ChevronRightDouble,
@@ -329,7 +330,7 @@ export default function AuthenticatedLayout({
                                 placement="bottom end"
                                 offset={8}
                                 className={({ isEntering, isExiting }) =>
-                                    `w-72 rounded-lg border border-gray-100 bg-white p-3 shadow-lg ${
+                                    `w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-gray-100 bg-white p-3 shadow-lg ${
                                         isEntering ? 'duration-150 ease-out animate-in fade-in' : ''
                                     } ${isExiting ? 'duration-100 ease-in animate-out fade-out' : ''}`
                                 }
@@ -340,37 +341,57 @@ export default function AuthenticatedLayout({
                                 >
                                     {({ close }) => (
                                         <>
-                                            <div className="mb-2 flex items-center justify-between border-b border-gray-100 pb-2">
-                                                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-900">
-                                                    Notifikasi
-                                                </h3>
+                                            <div className="mb-2 flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
+                                                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-900">Notifikasi</h3>
                                                 {unread > 0 && (
-                                                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-600">
-                                                        {unread} Baru
-                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => router.post(route('notifications.read-all'), {}, { preserveScroll: true })}
+                                                        className="inline-flex min-h-9 items-center gap-1 rounded-sm px-1.5 text-sm font-semibold text-emerald-700 outline-hidden hover:bg-emerald-50 focus-visible:ring-2 focus-visible:ring-blue-600"
+                                                    >
+                                                        <CheckCircle className="size-4" aria-hidden="true" />
+                                                        Tandai semua dibaca
+                                                    </button>
                                                 )}
                                             </div>
-                                            <div className="space-y-2 text-xs text-gray-600">
+                                            <div className="space-y-1 text-sm text-gray-600">
                                                 {notifications.items.length === 0 ? (
-                                                    <p className="p-2 text-center text-gray-400">
-                                                        Tidak ada notifikasi baru.
-                                                    </p>
+                                                    <p className="p-2 text-center text-gray-400">Tidak ada notifikasi baru.</p>
                                                 ) : (
                                                     notifications.items.map((item) => (
-                                                        <button
-                                                            key={item.id}
-                                                            type="button"
-                                                            onClick={() => {
-                                                                close();
-                                                                router.post(route('notifications.read', item.id));
-                                                            }}
-                                                            className="block w-full rounded-sm p-2 text-left outline-hidden hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-blue-600"
-                                                        >
-                                                            <p className="font-medium text-gray-800">{item.message}</p>
-                                                            <p className="mt-0.5 text-[11px] text-gray-500">{item.created_at}</p>
-                                                        </button>
+                                                        <div key={item.id} className="rounded-sm p-1 hover:bg-gray-50">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    close();
+                                                                    router.post(route('notifications.read', item.id));
+                                                                }}
+                                                                className="block w-full rounded-sm p-2 text-left outline-hidden focus-visible:ring-2 focus-visible:ring-blue-600"
+                                                            >
+                                                                <p className="font-medium text-gray-800">{item.message}</p>
+                                                                <p className="mt-0.5 text-xs text-gray-500">{item.created_at}</p>
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                aria-label={`Tandai dibaca: ${item.message}`}
+                                                                onClick={() => router.post(route('notifications.mark', item.id), { dibaca: true }, { preserveScroll: true, preserveState: true })}
+                                                                className="ml-2 inline-flex min-h-9 items-center gap-1.5 rounded-sm px-2 text-sm font-semibold text-emerald-700 outline-hidden hover:bg-emerald-50 focus-visible:ring-2 focus-visible:ring-blue-600"
+                                                            >
+                                                                <CheckCircle className="size-4" aria-hidden="true" />
+                                                                Tandai dibaca
+                                                            </button>
+                                                        </div>
                                                     ))
                                                 )}
+                                            </div>
+                                            <div className="mt-2 border-t border-gray-100 pt-2 text-center">
+                                                <Link
+                                                    href={route('notifications.index')}
+                                                    onClick={() => close()}
+                                                    className="text-sm font-semibold text-blue-700 hover:underline focus-visible:ring-2 focus-visible:ring-blue-600"
+                                                >
+                                                    Lihat semua notifikasi
+                                                </Link>
                                             </div>
                                         </>
                                     )}
