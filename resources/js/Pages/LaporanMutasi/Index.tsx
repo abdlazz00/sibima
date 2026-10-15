@@ -16,6 +16,7 @@ import { MUTATION_STATUS_COLOR } from '@/lib/mutasi';
 import { useLaporanFilters } from '@/lib/use-laporan-filters';
 import { LaporanMutasiData, LaporanMutasiRow, PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
+import { ArrowsRight, CheckCircle, Clock, Coins01, File05, LineChartUp01, PieChart01, SwitchHorizontal01 } from '@untitledui/icons';
 import { useState } from 'react';
 
 type MasihBerjalan = LaporanMutasiData['masih_berjalan'][number];
@@ -103,30 +104,30 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                     <ReportSelect label="Unit Tujuan" allLabel="Semua unit tujuan" value={form.tujuan_id} onChange={(v) => set('tujuan_id', v)} options={unitOpts} />
                 </ReportFilterBar>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                    <StatCard label="Jumlah Mutasi" value={ringkasan.jumlah_mutasi.toLocaleString('id-ID')} note="Semua status" />
-                    <StatCard label="Mutasi Disetujui" value={ringkasan.disetujui.toLocaleString('id-ID')} />
-                    <StatCard label="Aset Berpindah" value={ringkasan.aset_berpindah.toLocaleString('id-ID')} note="Hanya mutasi Disetujui" />
-                    <StatCard label="Nilai Perolehan Aset Berpindah" value={rupiah(ringkasan.nilai_perolehan)} note="Hanya mutasi Disetujui" />
-                    <StatCard label="Rata-rata Lama Proses" value={rataProses} />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                    <StatCard label="Jumlah Mutasi" icon={File05} tone="blue" value={ringkasan.jumlah_mutasi.toLocaleString('id-ID')} note="Semua status" />
+                    <StatCard label="Mutasi Disetujui" icon={CheckCircle} tone="green" value={ringkasan.disetujui.toLocaleString('id-ID')} />
+                    <StatCard label="Aset Berpindah" icon={SwitchHorizontal01} tone="violet" value={ringkasan.aset_berpindah.toLocaleString('id-ID')} note="Hanya mutasi Disetujui" />
+                    <StatCard label="Nilai Perolehan Aset Berpindah" icon={Coins01} tone="green" value={rupiah(ringkasan.nilai_perolehan)} note="Hanya mutasi Disetujui" />
+                    <StatCard label="Rata-rata Lama Proses" icon={Clock} tone="teal" value={rataProses} />
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <ReportCard title="Komposisi per Status">
+                    <ReportCard title="Komposisi per Status" icon={PieChart01} tone="blue">
                         <DonutChart unit="mutasi" ariaLabel="Grafik komposisi mutasi menurut status" data={statusItems} />
                         <ChartLegend unit="mutasi" items={statusItems} />
                     </ReportCard>
-                    <ReportCard title="Komposisi per Jenis Mutasi">
+                    <ReportCard title="Komposisi per Jenis Mutasi" icon={PieChart01} tone="violet">
                         <DonutChart unit="mutasi" ariaLabel="Grafik komposisi mutasi menurut jenis" data={jenisItems} />
                         <ChartLegend unit="mutasi" items={jenisItems} />
                     </ReportCard>
                 </div>
 
-                <ReportCard title="Tren Mutasi per Bulan" description="Hanya mutasi Disetujui, menurut tanggal mutasi.">
+                <ReportCard title="Tren Mutasi per Bulan" icon={LineChartUp01} tone="green" description="Hanya mutasi Disetujui, menurut tanggal mutasi.">
                     <TrenMutasiChart data={tren} />
                 </ReportCard>
 
-                <ReportCard title="Arus Antar Unit" flush>
+                <ReportCard title="Arus Antar Unit" icon={ArrowsRight} tone="teal" flush>
                     <SummaryTable
                         ariaLabel="Arus mutasi antar unit"
                         columns={arusColumns}
@@ -138,6 +139,8 @@ export default function Index(props: PageProps & LaporanMutasiData) {
 
                 <ReportCard
                     title="Kinerja Persetujuan"
+                    icon={Clock}
+                    tone="teal"
                     flush
                     aside={
                         <p className="text-sm tabular-nums text-slate-600">
@@ -154,7 +157,7 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                     )}
                 </ReportCard>
 
-                <ReportCard title="Daftar Rinci" flush>
+                <ReportCard title="Daftar Rinci" icon={File05} tone="slate" flush>
                     <ReportDetailTable
                         ariaLabel="Daftar rinci mutasi"
                         columns={columns}

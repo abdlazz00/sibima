@@ -24,3 +24,14 @@ export const tanggalWaktu = (value?: string | null): string =>
 
 /** "2026-10-14" -> "14/10/2026"; kosong -> "—". */
 export const tanggalSingkat = (value?: string | null): string => (value ? new Date(value).toLocaleDateString('id-ID') : '—');
+
+/** Sapaan menurut jam: "Selamat pagi" … "Selamat malam". */
+export const sapaan = (date: Date = new Date()): string => {
+    const h = date.getHours();
+
+    return h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 18 ? 'Selamat sore' : 'Selamat malam';
+};
+
+/** "Kamis, 15 Oktober 2026". */
+export const tanggalLengkap = (date: Date = new Date()): string =>
+    date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });

@@ -12,11 +12,29 @@ import { Button } from '@/Components/ui/base/buttons/button';
 import { Select } from '@/Components/ui/base/select/select';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { KONDISI_COLOR } from '@/lib/chartColors';
-import { rupiah, tanggalSingkat } from '@/lib/format';
+import { rupiah, sapaan, tanggalLengkap, tanggalSingkat } from '@/lib/format';
+import { Tone, TONE } from '@/lib/tone';
 import { DashboardData, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowRight, Bell01 } from '@untitledui/icons';
-import { useState } from 'react';
+import {
+    AlertTriangle,
+    ArrowRight,
+    BarChart01,
+    BarChartSquare02,
+    Bell01,
+    Building01,
+    CheckCircle,
+    Inbox01,
+    LineChartUp01,
+    Package,
+    PieChart01,
+    PlusCircle,
+    QrCode01,
+    Send01,
+    SwitchHorizontal01,
+    Wallet02,
+} from '@untitledui/icons';
+import { ComponentType, useState } from 'react';
 
 interface DashboardProps extends PageProps {
     dashboard: DashboardData;
@@ -92,30 +110,30 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
     const filterUnit = (unitId: string) =>
         router.get(route('dashboard'), unitId ? { unit_id: unitId } : {}, { preserveState: true, preserveScroll: true, replace: true });
 
-    const candidateActions: { label: string; href: string; permission: string }[] = isApprover
+    const candidateActions: { label: string; href: string; permission: string; icon: ComponentType<{ className?: string }>; tone: Tone }[] = isApprover
         ? [
-              { label: 'Kotak Persetujuan', href: route('persetujuan.index'), permission: 'persetujuan.view' },
-              { label: 'Scan QR', href: route('scan.index'), permission: 'scan.view' },
-              { label: 'Data Aset', href: route('assets.index'), permission: 'aset.view' },
-              { label: 'Laporan', href: route('laporan-aset.index'), permission: 'laporan.aset' },
-              { label: 'Catat Aset', href: route('assets.create'), permission: 'aset.create' },
+              { label: 'Kotak Persetujuan', href: route('persetujuan.index'), permission: 'persetujuan.view', icon: Inbox01, tone: 'violet' },
+              { label: 'Scan QR', href: route('scan.index'), permission: 'scan.view', icon: QrCode01, tone: 'teal' },
+              { label: 'Data Aset', href: route('assets.index'), permission: 'aset.view', icon: Package, tone: 'blue' },
+              { label: 'Laporan', href: route('laporan-aset.index'), permission: 'laporan.aset', icon: BarChart01, tone: 'green' },
+              { label: 'Catat Aset', href: route('assets.create'), permission: 'aset.create', icon: PlusCircle, tone: 'blue' },
           ]
         : [
-              { label: 'Catat Aset', href: route('assets.create'), permission: 'aset.create' },
-              { label: 'Scan QR', href: route('scan.index'), permission: 'scan.view' },
-              { label: 'Buat Permohonan', href: route('asset-requests.create'), permission: 'permohonan.create' },
-              { label: 'Lapor Rusak/Hilang', href: route('asset-reports.create'), permission: 'laporan-insiden.create' },
-              { label: 'Data Aset', href: route('assets.index'), permission: 'aset.view' },
-              { label: 'Laporan', href: route('laporan-aset.index'), permission: 'laporan.aset' },
+              { label: 'Catat Aset', href: route('assets.create'), permission: 'aset.create', icon: PlusCircle, tone: 'blue' },
+              { label: 'Scan QR', href: route('scan.index'), permission: 'scan.view', icon: QrCode01, tone: 'teal' },
+              { label: 'Buat Permohonan', href: route('asset-requests.create'), permission: 'permohonan.create', icon: Send01, tone: 'violet' },
+              { label: 'Lapor Rusak/Hilang', href: route('asset-reports.create'), permission: 'laporan-insiden.create', icon: AlertTriangle, tone: 'green' },
+              { label: 'Data Aset', href: route('assets.index'), permission: 'aset.view', icon: Package, tone: 'blue' },
+              { label: 'Laporan', href: route('laporan-aset.index'), permission: 'laporan.aset', icon: BarChart01, tone: 'green' },
           ];
 
     const actions = candidateActions.filter((a) => permissions.length === 0 || permissions.includes(a.permission)).slice(0, 4);
 
-    const queueCandidates: { label: string; value: number; href: string; permission: string }[] = [
-        { label: 'Persetujuan menunggu saya', value: d.antrean.persetujuan_menunggu, href: route('persetujuan.index'), permission: 'persetujuan.view' },
-        { label: 'Permohonan menunggu pemenuhan', value: d.antrean.permohonan_menunggu_pemenuhan, href: '/asset-requests?menunggu_pemenuhan=1', permission: 'permohonan.view' },
-        { label: 'Laporan rusak/hilang pending', value: d.antrean.laporan_pending, href: '/asset-reports?status=pending', permission: 'laporan-insiden.view' },
-        { label: 'Mutasi pending', value: d.antrean.mutasi_pending, href: '/asset-mutations', permission: 'mutasi.view' },
+    const queueCandidates: { label: string; value: number; href: string; permission: string; icon: ComponentType<{ className?: string }>; tone: Tone }[] = [
+        { label: 'Persetujuan menunggu saya', value: d.antrean.persetujuan_menunggu, href: route('persetujuan.index'), permission: 'persetujuan.view', icon: Inbox01, tone: 'amber' },
+        { label: 'Permohonan menunggu pemenuhan', value: d.antrean.permohonan_menunggu_pemenuhan, href: '/asset-requests?menunggu_pemenuhan=1', permission: 'permohonan.view', icon: Send01, tone: 'blue' },
+        { label: 'Laporan rusak/hilang pending', value: d.antrean.laporan_pending, href: '/asset-reports?status=pending', permission: 'laporan-insiden.view', icon: AlertTriangle, tone: 'red' },
+        { label: 'Mutasi pending', value: d.antrean.mutasi_pending, href: '/asset-mutations', permission: 'mutasi.view', icon: SwitchHorizontal01, tone: 'violet' },
     ];
 
     const queue = queueCandidates.filter((q) => permissions.length === 0 || permissions.includes(q.permission));
@@ -125,18 +143,22 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
             <Head title="Dashboard" />
 
             <div className="space-y-6">
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                        <h1 className="text-[32px] font-bold leading-10 tracking-tight text-slate-900">Dashboard</h1>
-                        <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                            <span>
-                                Selamat datang, {auth.user?.name}. Anda login sebagai <strong>{role}</strong> di
-                            </span>
-                            <Badge type="color" size="sm" color="blue" className="rounded-sm">
-                                {auth.user?.unit?.name ?? 'Kecamatan Sagulung'}
-                            </Badge>
-                        </p>
-                    </div>
+                <div className="rounded-2xl bg-gradient-to-r from-blue-800 to-blue-950 p-6 text-white shadow-sm">
+                    <div className="flex flex-wrap items-end justify-between gap-4">
+                        <div className="min-w-0">
+                            <h1 className="text-3xl font-bold leading-9 tracking-tight">
+                                {sapaan()}, {auth.user?.name}
+                            </h1>
+                            <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-blue-100">
+                                <span>
+                                    Login sebagai <strong className="text-white">{role}</strong>
+                                </span>
+                                <span aria-hidden="true">·</span>
+                                <span>{auth.user?.unit?.name ?? 'Kecamatan Sagulung'}</span>
+                                <span aria-hidden="true">·</span>
+                                <span>{tanggalLengkap()}</span>
+                            </p>
+                        </div>
                     {d.units.length > 0 && (
                         <div className="w-full sm:w-64">
                             <Select
@@ -150,6 +172,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                             </Select>
                         </div>
                     )}
+                    </div>
                 </div>
 
                 {isApprover && d.antrean.persetujuan_menunggu > 0 && (
@@ -167,20 +190,32 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                 )}
 
                 {actions.length > 0 && (
-                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                        {actions.map((a) => (
-                            <Button key={a.label} className="w-full" color="secondary" size="lg" href={a.href}>
-                                {a.label}
-                            </Button>
-                        ))}
-                    </div>
+                    <section aria-labelledby="pintasan">
+                        <h2 id="pintasan" className="mb-3 text-xl font-semibold text-slate-900">
+                            Pintasan
+                        </h2>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            {actions.map((a) => (
+                                <Link
+                                    key={a.label}
+                                    href={a.href}
+                                    className={`flex items-center gap-3 rounded-xl px-5 py-4 text-lg font-semibold text-white shadow-md outline-hidden transition focus-visible:ring-2 focus-visible:ring-offset-2 ${TONE[a.tone].solid}`}
+                                >
+                                    <a.icon className="size-7 shrink-0" aria-hidden="true" />
+                                    <span className="min-w-0">{a.label}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
                 )}
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard label="Total Aset" value={total.toLocaleString('id-ID')} note={scopeLabel} />
-                    <StatCard label="Total Nilai Aset" value={rupiah(d.totals.nilai_perolehan)} note={`Nilai buku ${rupiah(d.totals.nilai_buku)}`} />
+                    <StatCard label="Total Aset" value={total.toLocaleString('id-ID')} note={scopeLabel} icon={Package} tone="blue" />
+                    <StatCard label="Total Nilai Aset" value={rupiah(d.totals.nilai_perolehan)} note={`Nilai buku ${rupiah(d.totals.nilai_buku)}`} icon={Wallet02} tone="teal" />
                     <StatCard
                         label="Aset Kondisi Baik"
+                        icon={CheckCircle}
+                        tone="green"
                         value={baik.toLocaleString('id-ID')}
                         badge={
                             <Badge type="color" size="sm" color="success" className="rounded-sm">
@@ -190,6 +225,8 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                     />
                     <StatCard
                         label="Aset Rusak / Hilang"
+                        icon={AlertTriangle}
+                        tone="red"
                         value={bermasalah.toLocaleString('id-ID')}
                         badge={
                             <Badge type="color" size="sm" color="error" className="rounded-sm">
@@ -205,23 +242,31 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                             <Link
                                 key={q.label}
                                 href={q.href}
-                                className="block rounded-xl border border-slate-200 bg-white p-5 shadow-xs outline-hidden transition hover:border-blue-300 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
+                                className={`flex items-center gap-4 rounded-xl border p-5 shadow-xs outline-hidden transition hover:shadow-md focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 ${TONE[q.tone].card}`}
                             >
-                                <p className="text-3xl font-bold tabular-nums text-slate-900">{q.value}</p>
-                                <p className="mt-1 text-sm text-slate-600">{q.label}</p>
+                                <span className={`flex size-12 shrink-0 items-center justify-center rounded-full ${TONE[q.tone].chip}`}>
+                                    <q.icon className="size-6" aria-hidden="true" />
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                    <span className={`block text-3xl font-bold tabular-nums ${TONE[q.tone].value}`}>{q.value}</span>
+                                    <span className="block text-sm font-medium text-slate-700">{q.label}</span>
+                                </span>
+                                <ArrowRight className="size-5 shrink-0 text-slate-500" aria-hidden="true" />
                             </Link>
                         ))}
                     </div>
                 )}
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <ReportCard title="Proporsi Kondisi Aset" aside={<span className="text-xs tabular-nums text-slate-500">{total} total aset</span>}>
+                    <ReportCard title="Proporsi Kondisi Aset" icon={PieChart01} tone="blue" aside={<span className="text-sm tabular-nums text-slate-600">{total} total aset</span>}>
                         <DonutChart data={kondisiSlices} ariaLabel="Grafik proporsi kondisi fisik aset" unit="aset" />
                         <ChartLegend unit="aset" items={kondisiSlices} />
                     </ReportCard>
 
                     <ReportCard
                         title="Aset per Kategori"
+                        icon={BarChartSquare02}
+                        tone="violet"
                         aside={
                             <Button color="link-color" size="sm" iconTrailing={ArrowRight} href={route('assets.index')}>
                                 Lihat Semua
@@ -231,11 +276,11 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                         <KategoriAsetChart data={d.per_kategori} />
                     </ReportCard>
 
-                    <ReportCard title="Sebaran Aset per Unit" aside={<span className="text-xs text-slate-500">Kondisi fisik</span>}>
+                    <ReportCard title="Sebaran Aset per Unit" icon={Building01} tone="teal" aside={<span className="text-sm text-slate-600">Kondisi fisik</span>}>
                         <SebaranUnitChart data={d.per_unit} />
                     </ReportCard>
 
-                    <ReportCard title="Tren Aktivitas (6 Bulan Terakhir)" aside={<span className="text-xs text-slate-500">Volume transaksi</span>}>
+                    <ReportCard title="Tren Aktivitas (6 Bulan Terakhir)" icon={LineChartUp01} tone="green" aside={<span className="text-sm text-slate-600">Volume transaksi</span>}>
                         <TrenAktivitasChart data={d.tren_aktivitas} />
                     </ReportCard>
                 </div>

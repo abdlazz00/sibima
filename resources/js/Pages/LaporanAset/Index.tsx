@@ -15,6 +15,7 @@ import { rupiah } from '@/lib/format';
 import { useLaporanFilters } from '@/lib/use-laporan-filters';
 import { LaporanAsetData, LaporanAsetRow, PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
+import { BarChart01, Building01, Coins01, File05, Grid01, Package, PieChart01, Wallet02 } from '@untitledui/icons';
 import { useState } from 'react';
 
 interface RekapRow {
@@ -127,22 +128,22 @@ export default function Index(props: PageProps & LaporanAsetData) {
                 </ReportFilterBar>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <StatCard label="Jumlah Aset" value={ringkasan.jumlah.toLocaleString('id-ID')} />
-                    <StatCard label="Total Nilai Perolehan" value={rupiah(ringkasan.nilai_perolehan)} />
-                    <StatCard label="Total Nilai Buku" value={rupiah(ringkasan.nilai_buku)} />
+                    <StatCard label="Jumlah Aset" icon={Package} tone="blue" value={ringkasan.jumlah.toLocaleString('id-ID')} />
+                    <StatCard label="Total Nilai Perolehan" icon={Coins01} tone="green" value={rupiah(ringkasan.nilai_perolehan)} />
+                    <StatCard label="Total Nilai Buku" icon={Wallet02} tone="teal" value={rupiah(ringkasan.nilai_buku)} />
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <ReportCard title="Persentase per Kondisi">
+                    <ReportCard title="Persentase per Kondisi" icon={PieChart01} tone="blue">
                         <DonutChart ariaLabel="Grafik persentase aset menurut kondisi" data={legendItems} />
                         <ChartLegend unit="aset" items={legendItems} />
                     </ReportCard>
-                    <ReportCard title="Tren per Tahun Perolehan" className="lg:col-span-2">
+                    <ReportCard title="Tren per Tahun Perolehan" icon={BarChart01} tone="teal" className="lg:col-span-2">
                         <TrenAsetChart data={tren} />
                     </ReportCard>
                 </div>
 
-                <ReportCard title="Rekap per Kategori" flush>
+                <ReportCard title="Rekap per Kategori" icon={Grid01} tone="violet" flush>
                     <SummaryTable
                         ariaLabel="Rekap aset per kategori"
                         columns={rekapColumns('Kategori')}
@@ -153,7 +154,7 @@ export default function Index(props: PageProps & LaporanAsetData) {
                 </ReportCard>
 
                 {rekapUnit && (
-                    <ReportCard title="Rekap per Unit" flush>
+                    <ReportCard title="Rekap per Unit" icon={Building01} tone="teal" flush>
                         <SummaryTable
                             ariaLabel="Rekap aset per unit"
                             columns={rekapColumns('Unit')}
@@ -164,7 +165,7 @@ export default function Index(props: PageProps & LaporanAsetData) {
                     </ReportCard>
                 )}
 
-                <ReportCard title="Daftar Rinci" flush>
+                <ReportCard title="Daftar Rinci" icon={File05} tone="slate" flush>
                     <ReportDetailTable
                         ariaLabel="Daftar rinci aset"
                         columns={asetColumns}
