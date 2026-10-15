@@ -20,10 +20,7 @@ export default function TrenMutasiChart({ data }: { data: Tren }) {
             color="#6D28D9"
             ariaLabel="Grafik jumlah mutasi disetujui per bulan"
             minPerItem={96}
-            labelLines={(i) => [
-                `${data[i].jumlah_mutasi} mutasi`,
-                `${data[i].aset_berpindah} aset`,
-            ]}
+            labelLines={(i) => (data[i].jumlah_mutasi === 0 ? [] : [`${data[i].jumlah_mutasi} mutasi`, `${data[i].aset_berpindah} aset`])}
             tooltipTitle={(i) => bulanLabel(data[i].bulan)}
             tooltipLines={(i) => [
                 `${data[i].jumlah_mutasi} mutasi disetujui`,

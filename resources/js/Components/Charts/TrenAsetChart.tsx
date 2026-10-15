@@ -20,10 +20,7 @@ export default function TrenAsetChart({ data }: { data: Tren }) {
             color="#1E40AF"
             ariaLabel="Grafik jumlah aset per tahun perolehan"
             minPerItem={96}
-            labelLines={(i) => [
-                `${data[i].jumlah} aset`,
-                rupiahRingkas(data[i].nilai_perolehan),
-            ]}
+            labelLines={(i) => (data[i].jumlah === 0 ? [] : [`${data[i].jumlah} aset`, rupiahRingkas(data[i].nilai_perolehan)])}
             tooltipTitle={(i) => `Tahun ${data[i].tahun}`}
             tooltipLines={(i) => [
                 `${data[i].jumlah} aset`,

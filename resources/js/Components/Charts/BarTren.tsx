@@ -15,6 +15,13 @@ export interface BarTrenProps {
     table: { caption: string; head: string[]; rows: (string | number)[][] };
 }
 
+/** Langkah sumbu yang bulat (1, 2, 5, 10, 20, 50, ...) paling kecil yang tidak kurang dari `x`. */
+const niceStep = (x: number) => {
+    const p = 10 ** Math.floor(Math.log10(x));
+
+    return ([1, 2, 5, 10].find((m) => m * p >= x) ?? 10) * p;
+};
+
 export default function BarTren({
     categories,
     values,
@@ -26,6 +33,11 @@ export default function BarTren({
     tooltipLines,
     table,
 }: BarTrenProps) {
+    // Ruang kosong di atas batang tertinggi: ApexCharts menahan label tetap di dalam area plot, jadi tanpa ruang
+    // ini label dua baris terdesak masuk ke batang tertinggi.
+    const rawTop = Math.max(2, Math.ceil(Math.max(...values, 1) * 1.3));
+    const step = rawTop <= 5 ? 1 : niceStep(rawTop / 6);
+    const top = Math.ceil(rawTop / step) * step;
     const options = chartOptions({
         colors: [color],
         plotOptions: {
@@ -38,14 +50,14 @@ export default function BarTren({
         },
         dataLabels: {
             enabled: true,
-            offsetY: -38,
-            style: { fontSize: '12px', fontWeight: 600, colors: ['#0F172A'] },
+            offsetY: -52,
+            style: { fontSize: '13px', fontWeight: 600, colors: ['#0F172A'] },
             formatter: (_v, opts) =>
                 labelLines(opts?.dataPointIndex ?? 0) as unknown as string,
         },
-        grid: { padding: { top: 36 } },
+        grid: { padding: { top: 62 } },
         xaxis: { categories },
-        yaxis: { min: 0, forceNiceScale: true },
+        yaxis: { min: 0, max: top, tickAmount: top / step },
         tooltip: {
             custom: ({ dataPointIndex }) =>
                 tooltipHtml(
