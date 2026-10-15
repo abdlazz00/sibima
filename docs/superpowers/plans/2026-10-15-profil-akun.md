@@ -1222,6 +1222,7 @@ it('falls back for an empty or unknown user agent', function () {
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 function insertSession(string $id, ?int $userId, string $ua = 'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0 Safari/537.36', string $ip = '10.0.0.5', ?int $last = null): void
 {
@@ -1285,19 +1286,21 @@ test('a session of another user cannot be revoked', function () {
     expect(DB::table('sessions')->where('id', 'theirs-1')->exists())->toBeTrue();
 });
 
-test('the running session is excluded from revocation', function () {
+test('the running session is marked, excluded from revocation, and spared by revoke-all', function () {
     $user = User::factory()->create();
-
-    $this->startSession();
-    $current = session()->getId();
+    $current = Str::random(40);
+    $cookie = config('session.cookie');
     insertSession($current, $user->id);
     insertSession('mine-2', $user->id);
 
-    $this->actingAs($user)
+    $this->actingAs($user)->withCookie($cookie, $current)->get('/profile')->assertInertia(fn ($page) => $page
+        ->where('sessions', fn ($sessions) => collect($sessions)->firstWhere('ref', hash('sha256', $current))['ini'] === true));
+
+    $this->actingAs($user)->withCookie($cookie, $current)
         ->delete('/profile/sessions/'.hash('sha256', $current), ['current_password' => 'password'])
         ->assertNotFound();
 
-    $this->actingAs($user)
+    $this->actingAs($user)->withCookie($cookie, $current)
         ->delete('/profile/sessions', ['current_password' => 'password'])
         ->assertSessionHasNoErrors();
 
@@ -1320,7 +1323,7 @@ test('revoking all other sessions requires the password and spares other users',
         ->and(DB::table('sessions')->where('id', 'theirs-1')->exists())->toBeTrue();
 });
 ```
-Catatan: bila pengelolaan id sesi tes (`startSession`) berperilaku lain di versi Laravel ini, sesuaikan cara mendapatkan id sesi berjalan tetapi **pertahankan asersinya** (sesi berjalan tidak dapat dicabut, "semua lain" tidak menghapusnya).
+Catatan: id sesi yang dipakai request di tes ditentukan lewat cookie sesi (`withCookie`) dengan id 40 karakter; `startSession()` tidak menjamin id yang sama.
 
 - [ ] **Step 2: Jalankan, pastikan gagal** — `php artisan test --compact tests/Unit/SessionDeviceTest.php tests/Feature/ProfileSessionTest.php` → FAIL.
 

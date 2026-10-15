@@ -22,6 +22,7 @@ use App\Http\Controllers\PersetujuanController;
 use App\Http\Controllers\WorkflowSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePhotoController;
+use App\Http\Controllers\ProfileSessionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/photo', [ProfilePhotoController::class, 'store'])->name('profile.photo.store');
     Route::delete('/profile/photo', [ProfilePhotoController::class, 'destroy'])->name('profile.photo.destroy');
+    Route::delete('/profile/sessions', [ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy-others');
+    Route::delete('/profile/sessions/{ref}', [ProfileSessionController::class, 'destroy'])->name('profile.sessions.destroy');
 
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 

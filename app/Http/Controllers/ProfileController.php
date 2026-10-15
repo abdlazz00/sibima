@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Support\SessionDevice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,6 +32,18 @@ class ProfileController extends Controller
                 'sandi_diubah' => $user->password_changed_at?->toIso8601String(),
                 'punya_foto' => filled($user->foto_profile),
             ],
+            'sessions' => DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->orderByDesc('last_activity')
+                ->get()
+                ->map(fn ($s) => [
+                    'ref' => hash('sha256', $s->id),
+                    'perangkat' => SessionDevice::label($s->user_agent),
+                    'ip' => $s->ip_address,
+                    'terakhir_aktif' => Carbon::createFromTimestamp($s->last_activity)->toIso8601String(),
+                    'ini' => $s->id === $request->session()->getId(),
+                ])
+                ->values(),
         ]);
     }
 

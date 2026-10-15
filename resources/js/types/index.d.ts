@@ -546,3 +546,11 @@ export interface ProfileAkun {
     sandi_diubah: string | null;
     punya_foto: boolean;
 }
+
+export interface ProfileSession {
+    ref: string;
+    perangkat: string;
+    ip: string | null;
+    terakhir_aktif: string;
+    ini: boolean;
+}
