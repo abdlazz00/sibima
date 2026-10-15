@@ -38,6 +38,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'password_changed_at' => 'datetime',
             'unit_id' => 'integer',
             'is_active' => 'boolean',
         ];
@@ -46,6 +47,15 @@ class User extends Authenticatable
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (User $user): void {
+            if ($user->isDirty('password')) {
+                $user->password_changed_at = now();
+            }
+        });
     }
 
     public function unit(): BelongsTo
@@ -68,6 +78,7 @@ class User extends Authenticatable
         return Attribute::make(
             get: function () {
                 $path = $this->pegawai?->foto_profile;
+
                 return $path ? Storage::disk('public')->url($path) : null;
             }
         );

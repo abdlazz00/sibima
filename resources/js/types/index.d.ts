@@ -537,3 +537,11 @@ export interface LaporanRusakHilangData {
     statusOptions: { value: string; label: string }[];
 }
 
+export interface ProfileAkun {
+    nip: string | null;
+    role: string | null;
+    unit: string | null;
+    cakupan: string;
+    aktif: boolean;
+    sandi_diubah: string | null;
+}

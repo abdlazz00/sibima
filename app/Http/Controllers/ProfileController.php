@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -13,29 +12,39 @@ use Inertia\Response;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Display the account page.
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user()->loadMissing(['pegawai', 'unit', 'roles']);
+        $role = $user->roles->first();
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
+            'akun' => [
+                'nip' => $user->pegawai?->nip,
+                'role' => $role?->display_name ?? $role?->name,
+                'unit' => $user->unit?->name,
+                'cakupan' => $user->resolveUnitScope(),
+                'aktif' => (bool) $user->is_active,
+                'sandi_diubah' => $user->password_changed_at?->toIso8601String(),
+            ],
         ]);
     }
 
     /**
-     * Update the user's profile information.
+     * Update the user's name and email.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->safe()->only(['name', 'email']));
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return Redirect::route('profile.edit');
+        return Redirect::route('profile.edit')->with('success', 'Profil diperbarui.');
     }
 }

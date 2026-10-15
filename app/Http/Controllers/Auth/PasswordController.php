@@ -18,12 +18,18 @@ class PasswordController extends Controller
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],
+        ], [
+            'current_password.required' => 'Sandi saat ini wajib diisi.',
+            'current_password.current_password' => 'Sandi saat ini salah.',
+            'password.required' => 'Sandi baru wajib diisi.',
+            'password.min' => 'Sandi minimal :min karakter.',
+            'password.confirmed' => 'Konfirmasi sandi tidak cocok.',
         ]);
 
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
 
-        return back();
+        return back()->with('success', 'Kata sandi diperbarui.');
     }
 }
