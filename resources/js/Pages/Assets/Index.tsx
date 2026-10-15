@@ -1,4 +1,4 @@
-import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { PAGE_SIZES, PaginationCardMinimal } from '@/Components/ui/application/pagination/pagination';
 import { Table } from '@/Components/ui/application/table/table';
 import { Badge } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
@@ -33,6 +33,7 @@ interface Filters {
     unit_id?: string;
     kondisi?: string;
     urut?: string;
+    per_page?: number;
 }
 
 interface IndexProps extends PageProps {
@@ -107,7 +108,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
 
     const resetFilters = () => {
         setSearch('');
-        router.get(route('assets.index'), { urut: filters.urut }, { preserveState: true, preserveScroll: true, replace: true });
+        router.get(route('assets.index'), { urut: filters.urut, per_page: filters.per_page }, { preserveState: true, preserveScroll: true, replace: true });
     };
 
     const categoryItems = [
@@ -125,6 +126,9 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
 
     const goToPage = (page: number) =>
         router.get(route('assets.index'), { ...filters, page }, { preserveState: true, preserveScroll: true });
+
+    const changePageSize = (per_page: number) =>
+        router.get(route('assets.index'), { ...filters, per_page, page: undefined }, { preserveState: true, preserveScroll: true });
 
     return (
         <AuthenticatedLayout>
@@ -152,7 +156,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                     Cetak Label ({selectedIds.length}){overLimit && ` · Maks ${MAX_LABELS}`}
                                 </Button>
                             )}
-                            <ImportExportButtons modul="aset" query={filters} />
+                            <ImportExportButtons modul="aset" query={{ ...filters, per_page: undefined }} />
                             {can.create && (
                                 <Button color="primary" size="md" iconLeading={Plus} href={route('assets.create')}>
                                     Tambah Aset Baru
@@ -349,25 +353,18 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                         </Table.Body>
                     </Table>
 
-                    {/* Pagination */}
-                    <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
-                        <p className="text-xs text-slate-500">
-                            Menampilkan{' '}
-                            <span className="font-semibold tabular-nums text-slate-800">
-                                {assets.from ?? 0}-{assets.to ?? 0}
-                            </span>{' '}
-                            dari <span className="font-semibold tabular-nums text-slate-800">{assets.total}</span> aset
-                        </p>
-
-                        {assets.last_page > 1 && (
-                            <PaginationPageDefault
-                                className="border-t-0 pt-0 md:pt-0"
-                                page={assets.current_page}
-                                total={assets.last_page}
-                                onPageChange={goToPage}
-                            />
-                        )}
-                    </div>
+                    {assets.total > 0 && (
+                        <PaginationCardMinimal
+                            page={assets.current_page}
+                            total={assets.last_page}
+                            pageSize={assets.per_page}
+                            pageSizes={PAGE_SIZES}
+                            totalItems={assets.total}
+                            itemLabel="aset"
+                            onPageChange={goToPage}
+                            onPageSizeChange={changePageSize}
+                        />
+                    )}
                 </div>
             </div>
 

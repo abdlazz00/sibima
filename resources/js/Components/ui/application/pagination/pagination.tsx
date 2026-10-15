@@ -8,6 +8,9 @@ import { cx } from "@/lib/cx";
 import type { PaginationRootProps } from "./pagination-base";
 import { Pagination } from "./pagination-base";
 
+/** Jumlah baris per halaman yang ditawarkan di pemilih (selaras dengan `PerPage::OPTIONS` di backend). */
+export const PAGE_SIZES = [10, 15, 25, 50, 100];
+
 interface PaginationProps extends Partial<Omit<PaginationRootProps, "children">> {
     /** Whether the pagination buttons are rounded. */
     rounded?: boolean;
@@ -55,25 +58,27 @@ interface MobilePaginationProps {
 
 const MobilePagination = ({ page = 1, total = 10, className, onPageChange }: MobilePaginationProps) => {
     return (
-        <nav aria-label="Pagination" className={cx("flex items-center justify-between md:hidden", className)}>
+        <nav aria-label="Navigasi halaman" className={cx("flex items-center justify-between md:hidden", className)}>
             <Button
                 aria-label="Halaman sebelumnya"
                 iconLeading={ArrowLeft}
                 color="secondary"
-                size="sm"
-                onClick={() => onPageChange?.(Math.max(0, page - 1))}
+                size="md"
+                isDisabled={page <= 1}
+                onPress={() => onPageChange?.(Math.max(1, page - 1))}
             />
 
             <span className="text-sm text-fg-secondary">
-                Page <span className="font-medium">{page}</span> of <span className="font-medium">{total}</span>
+                Halaman <span className="font-medium">{page}</span> dari <span className="font-medium">{total}</span>
             </span>
 
             <Button
                 aria-label="Halaman berikutnya"
                 iconLeading={ArrowRight}
                 color="secondary"
-                size="sm"
-                onClick={() => onPageChange?.(Math.min(total, page + 1))}
+                size="md"
+                isDisabled={page >= total}
+                onPress={() => onPageChange?.(Math.min(total, page + 1))}
             />
         </nav>
     );
@@ -248,10 +253,14 @@ interface PaginationCardMinimalProps {
     page?: number;
     /** The total number of pages. */
     total?: number;
-    /** The number of items per page. */
+    /** The current page size. */
     pageSize?: number;
-    /** The alignment of the pagination. */
-    align?: "left" | "center" | "right";
+    /** Page sizes offered in the selector; the selector is hidden when omitted. */
+    pageSizes?: number[];
+    /** Total number of items, shown next to the page info. */
+    totalItems?: number;
+    /** Noun for the items, e.g. "aset". */
+    itemLabel?: string;
     /** The class name of the pagination component. */
     className?: string;
     /** The function to call when the page changes. */
@@ -262,56 +271,55 @@ interface PaginationCardMinimalProps {
 
 export const PaginationCardMinimal = ({
     page = 1,
-    total = 10,
+    total = 1,
     pageSize = 10,
-    align = "left",
-    onPageChange,
+    pageSizes,
+    totalItems,
+    itemLabel = "data",
     className,
+    onPageChange,
     onPageSizeChange,
 }: PaginationCardMinimalProps) => {
+    const pages = Math.max(total, 1);
+    const summary = totalItems !== undefined && (
+        <span className="text-base text-secondary tabular-nums">
+            · {totalItems.toLocaleString("id-ID")} {itemLabel}
+        </span>
+    );
+    const sizeSelect = pageSizes && (
+        <Select
+            aria-label="Jumlah per halaman"
+            size="sm"
+            className="w-36"
+            items={pageSizes.map((size) => ({ id: size, label: `${size} per halaman` }))}
+            selectedKey={pageSize}
+            onSelectionChange={(key) => onPageSizeChange?.(Number(key))}
+        >
+            {(item) => <Select.Item id={item.id} label={item.label} />}
+        </Select>
+    );
+
     return (
         <div className={cx("border-t border-secondary px-4 py-3 md:px-6 md:pt-3 md:pb-4", className)}>
-            <MobilePagination page={page} total={total} onPageChange={onPageChange} />
+            <MobilePagination page={page} total={pages} onPageChange={onPageChange} />
+            <div className="mt-3 flex flex-wrap items-center gap-3 md:hidden">
+                {summary}
+                {sizeSelect}
+            </div>
 
-            <nav aria-label="Pagination" className={cx("hidden items-center gap-3 md:flex", align === "center" && "justify-between")}>
-                <div className={cx(align === "center" && "flex flex-1 justify-start")}>
-                    <Button isDisabled={page === 1} color="secondary" size="sm" onClick={() => onPageChange?.(Math.max(0, page - 1))}>
-                        Previous
+            <nav aria-label="Navigasi halaman" className="hidden items-center gap-3 md:flex">
+                <span className="text-base font-medium text-secondary">
+                    Halaman {page} dari {pages}
+                </span>
+                {summary}
+                {sizeSelect}
+
+                <div className="ml-auto flex items-center gap-3">
+                    <Button isDisabled={page <= 1} color="secondary" size="md" iconLeading={ArrowLeft} onPress={() => onPageChange?.(Math.max(1, page - 1))}>
+                        Sebelumnya
                     </Button>
-                </div>
-
-                <div
-                    className={cx(
-                        "flex items-center gap-3",
-                        align === "right" && "order-first mr-auto",
-                        align === "left" && "order-last ml-auto flex-row-reverse",
-                    )}
-                >
-                    <span className="text-sm font-medium text-fg-secondary">
-                        Page {page} of {total}
-                    </span>
-                    <Select
-                        aria-label="Page Size"
-                        value={pageSize}
-                        onChange={(value) => onPageSizeChange?.(value as number)}
-                        size="sm"
-                        items={[
-                            { label: "10 per page", id: 10 },
-                            { label: "25 per page", id: 25 },
-                            { label: "50 per page", id: 50 },
-                            { label: "100 per page", id: 100 },
-                        ]}
-                    >
-                        {(item) => (
-                            <Select.Item id={item.id} key={item.id}>
-                                {item.label?.split(" ")[0]}
-                            </Select.Item>
-                        )}
-                    </Select>
-                </div>
-                <div className={cx(align === "center" && "flex flex-1 justify-end")}>
-                    <Button isDisabled={page === total} color="secondary" size="sm" onClick={() => onPageChange?.(Math.min(total, page + 1))}>
-                        Next
+                    <Button isDisabled={page >= pages} color="secondary" size="md" iconTrailing={ArrowRight} onPress={() => onPageChange?.(Math.min(pages, page + 1))}>
+                        Berikutnya
                     </Button>
                 </div>
             </nav>
