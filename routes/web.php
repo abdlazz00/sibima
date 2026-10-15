@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile/sessions/{ref}', [ProfileSessionController::class, 'destroy'])->middleware('throttle:6,1')->name('profile.sessions.destroy');
 
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAll'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/mark', [NotificationController::class, 'mark'])->name('notifications.mark');
 
     Route::get('/penerimaan-aset', [PenerimaanAsetController::class, 'index'])->name('penerimaan-aset.index');
     Route::get('/penerimaan-aset/create', [PenerimaanAsetController::class, 'create'])->name('penerimaan-aset.create');
