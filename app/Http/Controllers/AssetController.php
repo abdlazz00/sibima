@@ -11,6 +11,7 @@ use App\Repositories\Contracts\AssetRepositoryInterface;
 use App\Repositories\Contracts\UnitRepositoryInterface;
 use App\Services\AssetService;
 use App\Services\QrCodeService;
+use App\Support\PerPage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -32,10 +33,11 @@ class AssetController extends Controller
         Gate::authorize('viewAny', Asset::class);
 
         $filters = $request->only(['search', 'category_id', 'unit_id', 'kondisi', 'urut']);
+        $perPage = PerPage::resolve($request);
 
         return Inertia::render('Assets/Index', [
-            'assets' => $this->assets->paginateVisibleTo($request->user(), $filters),
-            'filters' => $filters,
+            'assets' => $this->assets->paginateVisibleTo($request->user(), $filters, $perPage),
+            'filters' => [...$filters, 'per_page' => $perPage],
             'categories' => $this->categories->tree(),
             'units' => $this->units->accessibleBy($request->user()),
             'sortOptions' => Asset::sortOptions(),

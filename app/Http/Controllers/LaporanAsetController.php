@@ -10,6 +10,7 @@ use App\Models\Unit;
 use App\Services\AssetRecapService;
 use App\Services\AssetRecapWorkbook;
 use App\Services\ReportQuery;
+use App\Support\PerPage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -33,7 +34,7 @@ class LaporanAsetController extends Controller
         $asets = (new ReportQuery($user))->build('aset', $filters)
             ->reorder($sort['urut'], $sort['arah'])
             ->orderBy('id')
-            ->paginate(self::PER_PAGE)
+            ->paginate(PerPage::resolve($request, self::PER_PAGE))
             ->withQueryString()
             ->through(fn (Asset $a) => $this->row($a));
 

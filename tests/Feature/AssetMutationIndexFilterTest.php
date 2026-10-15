@@ -94,7 +94,7 @@ it('keeps search, jenis and urut on the next page and sends filters and sort opt
 
     $this->actingAs($this->kasubag)->get('/asset-mutations?search=Genset&jenis=kec_ke_kel&urut=terlama')
         ->assertInertia(fn ($page) => $page
-            ->where('filters', ['search' => 'Genset', 'jenis' => 'kec_ke_kel', 'urut' => 'terlama'])
+            ->where('filters', ['search' => 'Genset', 'jenis' => 'kec_ke_kel', 'urut' => 'terlama', 'per_page' => 15])
             ->has('sortOptions', 2)
             ->where('mutations.next_page_url', fn ($url) => str_contains($url, 'urut=terlama') && str_contains($url, 'search=Genset') && str_contains($url, 'jenis=kec_ke_kel')));
 

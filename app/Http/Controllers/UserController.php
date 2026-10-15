@@ -8,6 +8,7 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Services\PegawaiService;
 use App\Support\AccessGuard;
+use App\Support\PerPage;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,7 +53,8 @@ class UserController extends Controller
             }
         }
 
-        $users = $query->latest('id')->paginate(15)->withQueryString()->through(fn ($u) => [
+        $perPage = PerPage::resolve($request);
+        $users = $query->latest('id')->paginate($perPage)->withQueryString()->through(fn ($u) => [
             'id' => $u->id,
             'name' => $u->name,
             'email' => $u->email,
@@ -85,7 +87,7 @@ class UserController extends Controller
             'units' => Unit::orderBy('name')
                 ->when($accessibleUnitIds !== null, fn ($q) => $q->whereIn('id', $accessibleUnitIds))
                 ->get(['id', 'name', 'type']),
-            'filters' => $request->only(['search', 'role', 'unit_id', 'status']),
+            'filters' => [...$request->only(['search', 'role', 'unit_id', 'status']), 'per_page' => $perPage],
             'can' => [
                 'manageAccess' => $request->user()->can('user.manage-access'),
                 'toggleStatus' => $request->user()->can('user.toggle-status'),

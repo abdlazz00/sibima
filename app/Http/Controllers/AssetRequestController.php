@@ -13,9 +13,10 @@ use App\Models\Pegawai;
 use App\Models\Unit;
 use App\Services\ApprovalWorkflowService;
 use App\Services\AssetRequestService;
+use App\Support\ListSort;
+use App\Support\PerPage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -58,11 +59,12 @@ class AssetRequestController extends Controller
                 ->orWhere('keterangan', 'like', "%{$search}%")
             ));
 
-        $items = ListSort::apply($query, self::SORTS, $request->input('urut'))->paginate(15)->withQueryString();
+        $perPage = PerPage::resolve($request);
+        $items = ListSort::apply($query, self::SORTS, $request->input('urut'))->paginate($perPage)->withQueryString();
 
         return Inertia::render('AssetRequests/Index', [
             'items' => $items,
-            'filters' => $request->only('search', 'status', 'jenis', 'menunggu_pemenuhan', 'urut'),
+            'filters' => [...$request->only('search', 'status', 'jenis', 'menunggu_pemenuhan', 'urut'), 'per_page' => $perPage],
             'sortOptions' => ListSort::options(self::SORTS),
             'can' => ['create' => $user->can('create', AssetRequest::class)],
         ]);

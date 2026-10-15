@@ -11,6 +11,7 @@ use App\Models\Unit;
 use App\Services\MutationExcel;
 use App\Services\MutationRecapService;
 use App\Services\ReportQuery;
+use App\Support\PerPage;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,7 +50,7 @@ class LaporanMutasiController extends Controller
             )
             ->reorder(self::SORT_COLUMNS[$sort['urut']], $sort['arah'])
             ->orderByDesc('asset_mutations.id')
-            ->paginate(self::PER_PAGE)
+            ->paginate(PerPage::resolve($request, self::PER_PAGE))
             ->withQueryString()
             ->through(fn (AssetMutation $m) => $this->row($m));
 

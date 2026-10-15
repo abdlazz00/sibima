@@ -11,6 +11,7 @@ use App\Models\Unit;
 use App\Services\AssetReportExcel;
 use App\Services\AssetReportRecapService;
 use App\Services\ReportQuery;
+use App\Support\PerPage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -42,7 +43,7 @@ class LaporanRusakHilangController extends Controller
             ->select('asset_reports.*')
             ->reorder(self::SORT_COLUMNS[$sort['urut']] ?? 'asset_reports.tanggal_kejadian', $sort['arah'])
             ->orderByDesc('asset_reports.id')
-            ->paginate(self::PER_PAGE)
+            ->paginate(PerPage::resolve($request, self::PER_PAGE))
             ->withQueryString()
             ->through(fn (AssetReport $r) => $this->row($r));
 

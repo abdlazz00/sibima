@@ -10,9 +10,10 @@ use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\BeritaAcaraPenerimaan;
 use App\Services\ApprovalWorkflowService;
+use App\Support\ListSort;
+use App\Support\PerPage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -52,10 +53,11 @@ class PenerimaanAsetController extends Controller
             ->when($request->sampai, fn (Builder $q, $sampai) => $q->whereDate('tanggal_penerimaan', '<=', $sampai));
 
         ListSort::apply($query, self::SORTS, $request->input('urut'));
+        $perPage = PerPage::resolve($request);
 
         return Inertia::render('Penerimaan/Index', [
-            'items' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only('search', 'status', 'dari', 'sampai', 'urut'),
+            'items' => $query->paginate($perPage)->withQueryString(),
+            'filters' => [...$request->only('search', 'status', 'dari', 'sampai', 'urut'), 'per_page' => $perPage],
             'sortOptions' => ListSort::options(self::SORTS),
             'can' => ['create' => $user->can('create', BeritaAcaraPenerimaan::class)],
         ]);
