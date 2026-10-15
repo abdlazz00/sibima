@@ -23,8 +23,8 @@ class ActivityFeed
         $total = 0;
 
         if ($filter !== 'login') {
-            $total += ApprovalRequest::where('created_by', $user->id)->count();
-            $total += ApprovalAction::where('user_id', $user->id)->count();
+            $total += ApprovalRequest::where('created_by', $user->id)->whereHasMorph('approvable', '*')->count();
+            $total += ApprovalAction::where('user_id', $user->id)->whereHas('request', fn ($q) => $q->whereHasMorph('approvable', '*'))->count();
             $entries = $entries->merge($this->requestEntries($user, $limit))->merge($this->actionEntries($user, $limit));
         }
 
@@ -47,6 +47,7 @@ class ActivityFeed
     {
         return ApprovalRequest::with('approvable')
             ->where('created_by', $user->id)
+            ->whereHasMorph('approvable', '*')
             ->latest()
             ->limit($limit)
             ->get()
@@ -67,6 +68,7 @@ class ActivityFeed
     {
         return ApprovalAction::with('request.approvable')
             ->where('user_id', $user->id)
+            ->whereHas('request', fn ($q) => $q->whereHasMorph('approvable', '*'))
             ->latest()
             ->limit($limit)
             ->get()

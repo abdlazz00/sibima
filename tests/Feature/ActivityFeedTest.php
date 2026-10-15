@@ -122,5 +122,5 @@ test('a request whose document was deleted is skipped without failing', function
 
     $page = app(ActivityFeed::class)->paginate($pengaju, 'pekerjaan', 1);
 
-    expect($page->items())->toBe([]);
+    expect($page->items())->toBe([])->and($page->total())->toBe(0);
 });

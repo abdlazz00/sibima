@@ -12,6 +12,7 @@ use Database\Seeders\PermissionSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -260,6 +261,10 @@ class UserController extends Controller
             $user->syncPermissions([]);
             $user->delete();
         });
+
+        if (filled($user->foto_profile)) {
+            Storage::disk('public')->delete($user->foto_profile);
+        }
 
         return redirect()->route('users.index')->with('success', 'Akun pengguna berhasil dihapus.');
     }

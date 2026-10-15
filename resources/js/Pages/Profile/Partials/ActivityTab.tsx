@@ -33,6 +33,7 @@ export default function ActivityTab({ aktivitas }: { aktivitas?: Paginated<Activ
             only: ['aktivitas'],
             data: { filter: nextFilter, halaman },
             replace: true,
+            preserveUrl: true,
             onFinish: () => setLoading(false),
         });
     };

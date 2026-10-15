@@ -39,11 +39,11 @@ Route::middleware('auth')->group(function () {
         ->name('assets.photos.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:6,1')->name('profile.update');
     Route::post('/profile/photo', [ProfilePhotoController::class, 'store'])->name('profile.photo.store');
     Route::delete('/profile/photo', [ProfilePhotoController::class, 'destroy'])->name('profile.photo.destroy');
-    Route::delete('/profile/sessions', [ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy-others');
-    Route::delete('/profile/sessions/{ref}', [ProfileSessionController::class, 'destroy'])->name('profile.sessions.destroy');
+    Route::delete('/profile/sessions', [ProfileSessionController::class, 'destroyOthers'])->middleware('throttle:6,1')->name('profile.sessions.destroy-others');
+    Route::delete('/profile/sessions/{ref}', [ProfileSessionController::class, 'destroy'])->middleware('throttle:6,1')->name('profile.sessions.destroy');
 
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 

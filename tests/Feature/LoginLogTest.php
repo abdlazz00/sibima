@@ -34,3 +34,23 @@ test('login logs older than 90 days are pruned', function () {
 
     expect(LoginLog::pluck('id')->all())->toEqual([$recent->id]);
 });
+
+test('an over-long login identifier is rejected by validation instead of failing at the database', function () {
+    $this->post('/login', ['email' => str_repeat('a', 300), 'password' => 'x'])->assertSessionHasErrors('email');
+
+    expect(LoginLog::count())->toBe(0);
+});
+
+test('an identifier that is neither an email nor a nip is not stored in plain text', function () {
+    $this->post('/login', ['email' => 'rahasia-sandi-123', 'password' => 'x']);
+
+    expect(LoginLog::first()->identifier)->toBe('[input tidak valid]');
+});
+
+test('a login refused because the account is inactive is logged as a failure only', function () {
+    $user = User::factory()->create(['email' => 'nonaktif@example.com', 'is_active' => false]);
+
+    $this->post('/login', ['email' => 'nonaktif@example.com', 'password' => 'password']);
+
+    expect(LoginLog::where('user_id', $user->id)->pluck('event')->all())->toEqual(['gagal']);
+});

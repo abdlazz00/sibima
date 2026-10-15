@@ -102,3 +102,26 @@ test('revoking all other sessions requires the password and spares other users',
     expect(DB::table('sessions')->where('id', 'mine-1')->exists())->toBeFalse()
         ->and(DB::table('sessions')->where('id', 'theirs-1')->exists())->toBeTrue();
 });
+
+test('revoking sessions rotates the remember token so remembered devices cannot log back in', function () {
+    $user = User::factory()->create();
+    $user->forceFill(['remember_token' => 'old-token'])->saveQuietly();
+    insertSession('mine-2', $user->id);
+
+    $this->actingAs($user)->delete('/profile/sessions/'.hash('sha256', 'mine-2'), ['current_password' => 'password'])->assertSessionHasNoErrors();
+    expect($user->fresh()->remember_token)->not->toBe('old-token')->not->toBeEmpty();
+
+    $user->forceFill(['remember_token' => 'old-token'])->saveQuietly();
+    $this->actingAs($user)->delete('/profile/sessions', ['current_password' => 'password'])->assertSessionHasNoErrors();
+    expect($user->fresh()->remember_token)->not->toBe('old-token')->not->toBeEmpty();
+});
+
+test('password confirmation attempts on the profile endpoints are throttled', function () {
+    $user = User::factory()->create();
+
+    foreach (range(1, 6) as $i) {
+        $this->actingAs($user)->delete('/profile/sessions', ['current_password' => 'salah'])->assertSessionHasErrors('current_password');
+    }
+
+    $this->actingAs($user)->delete('/profile/sessions', ['current_password' => 'salah'])->assertStatus(429);
+});
