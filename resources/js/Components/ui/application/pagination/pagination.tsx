@@ -281,9 +281,9 @@ export const PaginationCardMinimal = ({
     onPageSizeChange,
 }: PaginationCardMinimalProps) => {
     const pages = Math.max(total, 1);
-    const summary = totalItems !== undefined && (
+    const count = totalItems !== undefined && (
         <span className="text-base text-secondary tabular-nums">
-            · {totalItems.toLocaleString("id-ID")} {itemLabel}
+            {totalItems.toLocaleString("id-ID")} {itemLabel}
         </span>
     );
     const sizeSelect = pageSizes && (
@@ -303,7 +303,7 @@ export const PaginationCardMinimal = ({
         <div className={cx("border-t border-secondary px-4 py-3 md:px-6 md:pt-3 md:pb-4", className)}>
             <MobilePagination page={page} total={pages} onPageChange={onPageChange} />
             <div className="mt-3 flex flex-wrap items-center gap-3 md:hidden">
-                {summary}
+                {count}
                 {sizeSelect}
             </div>
 
@@ -311,7 +311,8 @@ export const PaginationCardMinimal = ({
                 <span className="text-base font-medium text-secondary">
                     Halaman {page} dari {pages}
                 </span>
-                {summary}
+                {count && <span className="text-base text-secondary" aria-hidden="true">·</span>}
+                {count}
                 {sizeSelect}
 
                 <div className="ml-auto flex items-center gap-3">
