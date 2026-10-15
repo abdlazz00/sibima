@@ -179,7 +179,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                     crumbs={[{ label: 'Manajemen Pengguna' }]}
                     title="Manajemen Pengguna & Hak Akses"
                     actions={
-                        <Button color="secondary" size="md" iconLeading={Users01} href={route('pegawais.index')}>
+                        <Button color="primary-sky" size="md" iconLeading={Users01} href={route('pegawais.index')}>
                             Buka Data Pegawai
                         </Button>
                     }
@@ -222,7 +222,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                     onChange={setSearch}
                                 />
                             </div>
-                            <Button type="submit" color="secondary" size="md">
+                            <Button type="submit" color="primary-sky" size="md">
                                 Cari
                             </Button>
                         </div>
@@ -385,7 +385,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                         <div className="flex items-center gap-1.5">
                                             <Tooltip title="Lihat Detail Profil & Hak Akses">
                                                 <Button
-                                                    color="secondary-brand"
+                                                    color="primary-sky"
                                                     size="sm"
                                                     iconLeading={Eye}
                                                     aria-label={`Lihat detail ${user.name}`}
@@ -395,7 +395,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                             {can.manageAccess && (
                                                 <Tooltip title="Edit Hak Akses & Peran">
                                                     <Button
-                                                        color="secondary-green"
+                                                        color="primary-green"
                                                         size="sm"
                                                         iconLeading={Edit01}
                                                         aria-label={`Edit hak akses ${user.name}`}
@@ -405,7 +405,7 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                             )}
                                             {can.toggleStatus && user.id !== auth.user?.id && (
                                                 <Button
-                                                    color={user.is_active ? 'secondary-destructive' : 'secondary'}
+                                                    color={user.is_active ? 'primary-destructive' : 'primary-green'}
                                                     size="sm"
                                                     aria-label={`${user.is_active ? 'Nonaktifkan' : 'Aktifkan'} akun ${user.name}`}
                                                     onPress={() => setStatusTarget(user)}

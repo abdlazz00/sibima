@@ -30,6 +30,10 @@ class LoginActivityRecorder
     /** Hanya email atau NIP yang disimpan; isian lain (mis. sandi yang salah ketik) tidak dicatat apa adanya. */
     private function identifier(string $input): string
     {
+        if ($input === '') {
+            return '';
+        }
+
         $valid = filter_var($input, FILTER_VALIDATE_EMAIL) || preg_match('/^\d{8,20}$/', $input);
 
         return $valid ? mb_substr($input, 0, 255) : '[input tidak valid]';

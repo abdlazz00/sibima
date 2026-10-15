@@ -74,7 +74,7 @@ export default function ReportFilterBar({
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                    <Button type="submit" color="secondary" size="md">
+                    <Button type="submit" color="primary-sky" size="md">
                         Terapkan filter
                     </Button>
                     <div className="flex flex-wrap items-center gap-4">
@@ -83,7 +83,7 @@ export default function ReportFilterBar({
                             {dirty && <span className="ml-2 text-amber-700">(terapkan filter dulu)</span>}
                         </p>
                         <Button
-                            color="primary"
+                            color="primary-teal"
                             size="md"
                             iconLeading={Download01}
                             isDisabled={total === 0 || dirty}

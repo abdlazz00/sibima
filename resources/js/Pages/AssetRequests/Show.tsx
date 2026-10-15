@@ -100,23 +100,23 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
                     actions={
                         <>
                             {can.cancel && (
-                                <Button color="secondary" size="md" onPress={() => setShowCancel(true)}>
+                                <Button color="primary-destructive" size="md" onPress={() => setShowCancel(true)}>
                                     Batalkan Pengajuan
                                 </Button>
                             )}
                             {can.reassign && (
-                                <Button color="secondary" size="md" onPress={() => setShowReassign(true)}>
+                                <Button color="primary-violet" size="md" onPress={() => setShowReassign(true)}>
                                     Alihkan Approver
                                 </Button>
                             )}
                             {can.close && (
-                                <Button color="secondary" size="md" onPress={() => setShowClose(true)}>
+                                <Button color="primary-destructive" size="md" onPress={() => setShowClose(true)}>
                                     Tutup Permohonan
                                 </Button>
                             )}
                             {can.act && (
                                 <>
-                                    <Button color="secondary-destructive" size="md" isDisabled={submitting} onPress={() => setShowReject(true)}>
+                                    <Button color="primary-destructive" size="md" isDisabled={submitting} onPress={() => setShowReject(true)}>
                                         Tolak
                                     </Button>
                                     <Button color="primary" size="md" isLoading={submitting} onPress={() => req && post('approval-requests.approve', req.id, {})}>
@@ -226,7 +226,7 @@ export default function Show({ assetRequest: r, can, reassignCandidates, eligibl
                                                             </Table.Cell>
                                                             <Table.Cell>
                                                                 <Button
-                                                                    color="secondary-destructive"
+                                                                    color="primary-destructive"
                                                                     size="sm"
                                                                     iconLeading={XClose}
                                                                     aria-label={`Hapus pilihan ${asset.nama_aset}`}

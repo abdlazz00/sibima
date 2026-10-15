@@ -80,27 +80,6 @@ export const styles = sortCx({
                 "*:data-icon:text-fg-quaternary hover:*:data-icon:text-fg-quaternary_hover",
             ].join(" "),
         },
-        "secondary-brand": {
-            root: [
-                "bg-brand-50 text-brand-700 shadow-xs ring-1 ring-brand-200 ring-inset hover:bg-brand-100 hover:text-brand-800 data-loading:bg-brand-100",
-                // Icon styles
-                "*:data-icon:text-brand-600 hover:*:data-icon:text-brand-700",
-            ].join(" "),
-        },
-        "secondary-green": {
-            root: [
-                "bg-emerald-50 text-emerald-700 shadow-xs ring-1 ring-emerald-200 ring-inset hover:bg-emerald-100 hover:text-emerald-800 data-loading:bg-emerald-100",
-                // Icon styles
-                "*:data-icon:text-emerald-600 hover:*:data-icon:text-emerald-700",
-            ].join(" "),
-        },
-        "secondary-violet": {
-            root: [
-                "bg-violet-50 text-violet-700 shadow-xs ring-1 ring-violet-200 ring-inset hover:bg-violet-100 hover:text-violet-800 data-loading:bg-violet-100",
-                // Icon styles
-                "*:data-icon:text-violet-600 hover:*:data-icon:text-violet-700",
-            ].join(" "),
-        },
         tertiary: {
             root: [
                 "text-tertiary hover:bg-primary_hover hover:text-tertiary_hover data-loading:bg-primary_hover",
@@ -133,13 +112,6 @@ export const styles = sortCx({
                 "before:absolute before:inset-px before:border before:border-white/12 before:mask-b-from-0%",
                 // Icon styles
                 "*:data-icon:text-white/60 hover:*:data-icon:text-white/70",
-            ].join(" "),
-        },
-        "secondary-destructive": {
-            root: [
-                "bg-primary text-error-primary shadow-xs-skeuomorphic ring-1 ring-error_subtle outline-error ring-inset hover:bg-error-primary hover:text-error-primary_hover data-loading:bg-error-primary",
-                // Icon styles
-                "*:data-icon:text-fg-error-secondary hover:*:data-icon:text-fg-error-primary",
             ].join(" "),
         },
         "tertiary-destructive": {

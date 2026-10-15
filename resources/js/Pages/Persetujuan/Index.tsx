@@ -46,7 +46,7 @@ export default function Index({ items }: IndexProps) {
                                             Diajukan oleh {item.submitted_by} · {item.created_at}
                                         </p>
                                     </div>
-                                    <Button color="secondary-brand" size="md" href={item.show_url} aria-label={`Tinjau ${item.title}`} className="shrink-0">
+                                    <Button color="primary-sky" size="md" href={item.show_url} aria-label={`Tinjau ${item.title}`} className="shrink-0">
                                         Tinjau
                                     </Button>
                                 </li>

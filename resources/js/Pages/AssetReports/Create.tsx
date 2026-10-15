@@ -113,7 +113,7 @@ export default function Create({ assets, kondisiOptions }: CreateProps) {
                                             <p className="text-[11px] font-medium text-slate-500">Pemegang</p>
                                             <span className="mt-0.5 inline-block text-xs font-semibold text-slate-800">{asset.holder ?? 'Inventaris Unit'}</span>
                                         </div>
-                                        <Button color="secondary-brand" size="sm" onPress={() => setIsModalOpen(true)}>
+                                        <Button color="primary-sky" size="sm" onPress={() => setIsModalOpen(true)}>
                                             Ganti Aset
                                         </Button>
                                     </div>

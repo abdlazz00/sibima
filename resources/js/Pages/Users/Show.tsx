@@ -114,7 +114,7 @@ export default function Show({ auth, user, effectivePermissions, can }: ShowProp
                                 Kembali
                             </Button>
                             {can.manageAccess && (
-                                <Button color="secondary-green" size="md" iconLeading={Edit01} href={route('users.edit', user.id)}>
+                                <Button color="primary-green" size="md" iconLeading={Edit01} href={route('users.edit', user.id)}>
                                     Edit Hak Akses
                                 </Button>
                             )}

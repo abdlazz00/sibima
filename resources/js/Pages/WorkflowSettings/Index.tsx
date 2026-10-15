@@ -44,7 +44,7 @@ export default function Index({ workflows }: IndexProps) {
                                             {w.last_changed_at ? ` · diubah ${new Date(w.last_changed_at).toLocaleDateString('id-ID')}` : ''}
                                         </p>
                                     </div>
-                                    <Button color="secondary-green" size="md" className="shrink-0" href={route('workflow-settings.edit', w.id)}>
+                                    <Button color="primary-green" size="md" className="shrink-0" href={route('workflow-settings.edit', w.id)}>
                                         Atur
                                     </Button>
                                 </li>

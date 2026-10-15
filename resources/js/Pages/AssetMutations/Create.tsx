@@ -337,7 +337,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                 </p>
                             </div>
                             {hasSelectedAssets && (
-                                <Button color="secondary-brand" size="md" iconLeading={Plus} onPress={() => setIsModalOpen(true)}>
+                                <Button color="primary-sky" size="md" iconLeading={Plus} onPress={() => setIsModalOpen(true)}>
                                     Tambah / Ubah Pilihan Aset
                                 </Button>
                             )}
@@ -418,7 +418,7 @@ export default function Create({ units, allUnits, assets, pegawais, auth }: Crea
                                                     </Table.Cell>
                                                     <Table.Cell>
                                                         <Button
-                                                            color="secondary-destructive"
+                                                            color="primary-destructive"
                                                             size="sm"
                                                             iconLeading={Trash01}
                                                             aria-label={`Hapus ${selectedAsset.nama_aset} dari mutasi`}

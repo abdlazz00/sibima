@@ -122,7 +122,7 @@ export default function Index({ roles }: IndexProps) {
                                             <div className="flex items-center gap-2">
                                                 <Tooltip title="Ubah role">
                                                     <Button
-                                                        color="secondary-green"
+                                                        color="primary-green"
                                                         size="sm"
                                                         iconLeading={Edit01}
                                                         aria-label={`Ubah role ${r.display_name}`}
@@ -131,7 +131,7 @@ export default function Index({ roles }: IndexProps) {
                                                 </Tooltip>
                                                 <span title={deleteReason}>
                                                     <Button
-                                                        color="secondary-destructive"
+                                                        color="primary-destructive"
                                                         size="sm"
                                                         iconLeading={Trash01}
                                                         aria-label={`Hapus role ${r.display_name}. ${deleteReason}`}

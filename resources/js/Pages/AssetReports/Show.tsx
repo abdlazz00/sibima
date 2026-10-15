@@ -62,18 +62,18 @@ export default function Show({ report, can, reassignCandidates }: ShowProps) {
                     actions={
                         <>
                             {can.cancel && (
-                                <Button color="secondary" size="md" onPress={() => setShowCancel(true)}>
+                                <Button color="primary-destructive" size="md" onPress={() => setShowCancel(true)}>
                                     Batalkan Pengajuan
                                 </Button>
                             )}
                             {can.reassign && (
-                                <Button color="secondary" size="md" onPress={() => setShowReassign(true)}>
+                                <Button color="primary-violet" size="md" onPress={() => setShowReassign(true)}>
                                     Alihkan Approver
                                 </Button>
                             )}
                             {can.act && (
                                 <>
-                                    <Button color="secondary-destructive" size="md" isDisabled={submitting} onPress={() => setShowReject(true)}>
+                                    <Button color="primary-destructive" size="md" isDisabled={submitting} onPress={() => setShowReject(true)}>
                                         Tolak
                                     </Button>
                                     <Button color="primary" size="md" isLoading={submitting} onPress={approve}>

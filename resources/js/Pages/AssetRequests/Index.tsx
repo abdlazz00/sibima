@@ -129,7 +129,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                 }}
                             />
                         )}
-                        <Button type="submit" color="secondary" size="md">
+                        <Button type="submit" color="primary-sky" size="md">
                             Cari
                         </Button>
                     </form>
@@ -169,7 +169,7 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                                     <Table.Cell>
                                         <Tooltip title="Lihat detail">
                                             <Button
-                                                color="secondary-brand"
+                                                color="primary-sky"
                                                 size="sm"
                                                 iconLeading={Eye}
                                                 aria-label={`Lihat permohonan ${r.nomor_permohonan}`}

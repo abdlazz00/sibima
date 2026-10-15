@@ -11,7 +11,8 @@ test('a successful login, a failed attempt, and a logout are recorded', function
     $this->post('/login', ['email' => 'budi@example.com', 'password' => 'salah']);
 
     expect(LoginLog::where('user_id', $user->id)->pluck('event')->all())->toEqual(['login', 'logout', 'gagal']);
-    expect(LoginLog::where('event', 'login')->first()->identifier)->toBe('budi@example.com');
+    expect(LoginLog::where('event', 'login')->first()->identifier)->toBe('budi@example.com')
+        ->and(LoginLog::where('event', 'logout')->first()->identifier)->toBe('');
 });
 
 test('a failed attempt for an unknown account is recorded without a user', function () {

@@ -433,7 +433,7 @@ export default function Edit({ auth, user, roles, permissionGroups, canResetPass
                                 </p>
                             </div>
 
-                            <Button color="secondary-destructive" size="md" iconLeading={Trash01} className="shrink-0" onPress={() => setConfirmingDelete(true)}>
+                            <Button color="primary-destructive" size="md" iconLeading={Trash01} className="shrink-0" onPress={() => setConfirmingDelete(true)}>
                                 Hapus Akun Login
                             </Button>
                         </div>

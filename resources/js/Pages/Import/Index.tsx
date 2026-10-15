@@ -117,7 +117,7 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
                     <Label>Berkas Excel (.xlsx)</Label>
                     <div className="flex flex-wrap items-center gap-3">
                         <FileTrigger acceptedFileTypes={['.xlsx']} onSelect={(files) => form.setData('berkas', files?.[0] ?? null)}>
-                            <Button color="secondary" size="md" iconLeading={UploadCloud02}>
+                            <Button color="primary-teal" size="md" iconLeading={UploadCloud02}>
                                 Pilih berkas
                             </Button>
                         </FileTrigger>
@@ -131,7 +131,7 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
                         <Button type="submit" color="primary" size="md" isDisabled={!form.data.berkas} isLoading={form.processing}>
                             Unggah &amp; periksa
                         </Button>
-                        <Button color="secondary-brand" size="md" iconLeading={Download01} onPress={() => download(route('import.template', modul))}>
+                        <Button color="primary-teal" size="md" iconLeading={Download01} onPress={() => download(route('import.template', modul))}>
                             Unduh template
                         </Button>
                     </div>
@@ -222,7 +222,7 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
                                     )}
                                     {batch.jumlah_error > 0 && (
                                         <Button
-                                            color="secondary-brand"
+                                            color="primary-teal"
                                             size="md"
                                             iconLeading={Download01}
                                             onPress={() => download(route('import.errors', { modul, batch: batch.id }))}

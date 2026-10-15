@@ -105,7 +105,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                                 }}
                             />
                         )}
-                        <Button type="submit" color="secondary" size="md">
+                        <Button type="submit" color="primary-sky" size="md">
                             Cari
                         </Button>
                     </form>
@@ -184,7 +184,7 @@ export default function Index({ mutations, filters = {}, sortOptions, can }: Ind
                                         <Table.Cell>
                                             <Tooltip title="Lihat detail mutasi">
                                                 <Button
-                                                    color="secondary-brand"
+                                                    color="primary-sky"
                                                     size="sm"
                                                     iconLeading={Eye}
                                                     aria-label={`Lihat mutasi ${mutation.nomor_mutasi}`}

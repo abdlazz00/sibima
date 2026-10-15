@@ -181,7 +181,7 @@ export default function Edit({ workflow, options, logs }: EditProps) {
                                             onPress={() => move(index, 1)}
                                         />
                                         <Button
-                                            color="secondary-destructive"
+                                            color="primary-destructive"
                                             size="sm"
                                             iconLeading={Trash01}
                                             aria-label={`Hapus langkah ${index + 1}`}
@@ -278,7 +278,7 @@ export default function Edit({ workflow, options, logs }: EditProps) {
                     })}
                 </div>
 
-                <Button color="secondary-brand" size="md" iconLeading={Plus} onPress={add}>
+                <Button color="primary-sky" size="md" iconLeading={Plus} onPress={add}>
                     Tambah Langkah
                 </Button>
 
