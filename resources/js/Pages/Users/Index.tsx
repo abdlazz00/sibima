@@ -1,6 +1,6 @@
 import ConfirmDialog from '@/Components/ConfirmDialog';
 import PageHeader from '@/Components/PageHeader';
-import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { PAGE_SIZES, PaginationCardMinimal } from '@/Components/ui/application/pagination/pagination';
 import { Table } from '@/Components/ui/application/table/table';
 import { Badge, BadgeWithDot } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
@@ -146,6 +146,10 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
 
     const goToPage = (page: number) => {
         router.get(route('users.index'), { ...filters, page }, { preserveState: true, preserveScroll: true });
+    };
+
+    const changePageSize = (per_page: number) => {
+        router.get(route('users.index'), { ...filters, per_page, page: undefined }, { preserveState: true, preserveScroll: true });
     };
 
     const confirmToggleStatus = () => {
@@ -420,21 +424,17 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                         </Table.Body>
                     </Table>
 
-                    {/* Pagination */}
-                    {users.total > users.per_page && (
-                        <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
-                            <p className="text-xs text-slate-500">
-                                Menampilkan <span className="font-semibold tabular-nums text-slate-700">{users.from ?? 0}</span> sampai{' '}
-                                <span className="font-semibold tabular-nums text-slate-700">{users.to ?? 0}</span> dari{' '}
-                                <span className="font-semibold tabular-nums text-slate-700">{users.total}</span> pengguna
-                            </p>
-                            <PaginationPageDefault
-                                className="border-t-0 pt-0 md:pt-0"
-                                page={users.current_page}
-                                total={users.last_page}
-                                onPageChange={goToPage}
-                            />
-                        </div>
+                    {users.total > 0 && (
+                        <PaginationCardMinimal
+                            page={users.current_page}
+                            total={users.last_page}
+                            pageSize={users.per_page}
+                            pageSizes={PAGE_SIZES}
+                            totalItems={users.total}
+                            itemLabel="pengguna"
+                            onPageChange={goToPage}
+                            onPageSizeChange={changePageSize}
+                        />
                     )}
                 </div>
             </div>

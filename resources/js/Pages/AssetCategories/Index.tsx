@@ -1,7 +1,7 @@
 import ConfirmDialog from '@/Components/ConfirmDialog';
 import ImportExportButtons from '@/Components/ImportExportButtons';
 import PageHeader from '@/Components/PageHeader';
-import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { PaginationCardMinimal } from '@/Components/ui/application/pagination/pagination';
 import { Table } from '@/Components/ui/application/table/table';
 import { Badge } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
@@ -216,21 +216,15 @@ export default function Index({
                     </Table>
 
                     {/* Table Footer with Pagination */}
-                    <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
-                        <p className="text-xs text-slate-500">
-                            Menampilkan <span className="font-semibold tabular-nums text-slate-800">{displayedCategories.length}</span>{' '}
-                            dari <span className="font-semibold tabular-nums text-slate-800">{categories.length}</span> kategori
-                        </p>
-
-                        {totalPages > 1 && (
-                            <PaginationPageDefault
-                                className="border-t-0 pt-0 md:pt-0"
-                                page={currentPage}
-                                total={totalPages}
-                                onPageChange={setCurrentPage}
-                            />
-                        )}
-                    </div>
+                    {categories.length > 0 && (
+                        <PaginationCardMinimal
+                            page={currentPage}
+                            total={totalPages}
+                            totalItems={categories.length}
+                            itemLabel="kategori"
+                            onPageChange={setCurrentPage}
+                        />
+                    )}
                 </div>
             </div>
 

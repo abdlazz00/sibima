@@ -90,7 +90,7 @@ function DetailItem({ label, children, wide = false }: { label: string; children
 
 export default function Index(props: PageProps & LaporanAsetData) {
     const { filters, sort, ringkasan, kondisi, tren, rekap_kategori: rekapKategori, rekap_unit: rekapUnit, asets, units, categories, kondisiOptions } = props;
-    const { form, set, dirty, visit, sortBy, apply, downloadUrl } = useLaporanFilters('laporan-aset.index', 'laporan-aset.download', filters, sort);
+    const { form, set, dirty, visit, sortBy, apply, downloadUrl } = useLaporanFilters('laporan-aset.index', 'laporan-aset.download', filters, sort, asets.per_page);
     const [open, setOpen] = useState<number | null>(null);
 
     const legendItems = kondisi.map((k) => ({ label: KONDISI_LABEL[k.kondisi] ?? k.label, jumlah: k.jumlah, persen: k.persen, color: KONDISI_COLOR[k.kondisi] }));
@@ -175,6 +175,7 @@ export default function Index(props: PageProps & LaporanAsetData) {
                         sort={sort}
                         onSort={sortBy}
                         onPage={(page) => visit({ page })}
+                        onPageSize={(per_page) => visit({ per_page, page: undefined })}
                         openId={open}
                         onToggle={(id) => setOpen(open === id ? null : id)}
                         rowLabel={(a) => a.nama_aset}

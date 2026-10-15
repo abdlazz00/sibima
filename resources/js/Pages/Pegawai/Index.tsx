@@ -1,7 +1,7 @@
 import ConfirmDialog from '@/Components/ConfirmDialog';
 import ImportExportButtons from '@/Components/ImportExportButtons';
 import PageHeader from '@/Components/PageHeader';
-import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { PaginationCardMinimal } from '@/Components/ui/application/pagination/pagination';
 import { Badge, BadgeWithDot } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
 import { Input } from '@/Components/ui/base/input/input';
@@ -310,38 +310,21 @@ export default function Index({ pegawais, units, can }: IndexProps) {
 
                 {/* Pagination Bar */}
                 {filteredPegawais.length > 0 && (
-                    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-xs">
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
-                            <p>
-                                Menampilkan <span className="font-semibold tabular-nums text-slate-900">{paginatedPegawais.length}</span> dari{' '}
-                                <span className="font-semibold tabular-nums text-slate-900">{filteredPegawais.length}</span> pegawai
-                            </p>
-                            <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
-                                <span className="text-slate-500">Per halaman:</span>
-                                <Select
-                                    aria-label="Jumlah per halaman"
-                                    size="sm"
-                                    className="w-24"
-                                    items={PAGE_SIZE_OPTIONS.map((size) => ({ id: size, label: String(size) }))}
-                                    selectedKey={itemsPerPage}
-                                    onSelectionChange={(key) => {
-                                        setItemsPerPage(Number(key));
-                                        setCurrentPage(1);
-                                    }}
-                                >
-                                    {(item) => <Select.Item id={item.id} label={item.label} />}
-                                </Select>
-                            </div>
-                        </div>
-
-                        {totalPages > 1 && (
-                            <PaginationPageDefault
-                                className="border-t-0 pt-0 md:pt-0"
-                                page={safeCurrentPage}
-                                total={totalPages}
-                                onPageChange={setCurrentPage}
-                            />
-                        )}
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                        <PaginationCardMinimal
+                            className="border-t-0"
+                            page={safeCurrentPage}
+                            total={totalPages}
+                            pageSize={itemsPerPage}
+                            pageSizes={PAGE_SIZE_OPTIONS}
+                            totalItems={filteredPegawais.length}
+                            itemLabel="pegawai"
+                            onPageChange={setCurrentPage}
+                            onPageSizeChange={(size) => {
+                                setItemsPerPage(size);
+                                setCurrentPage(1);
+                            }}
+                        />
                     </div>
                 )}
             </div>

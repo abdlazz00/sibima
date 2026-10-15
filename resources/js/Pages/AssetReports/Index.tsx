@@ -1,5 +1,5 @@
 import PageHeader from '@/Components/PageHeader';
-import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { PAGE_SIZES, PaginationCardMinimal } from '@/Components/ui/application/pagination/pagination';
 import { Table } from '@/Components/ui/application/table/table';
 import { Badge } from '@/Components/ui/base/badges/badges';
 import { Button } from '@/Components/ui/base/buttons/button';
@@ -177,24 +177,18 @@ export default function Index({ items, filters, sortOptions, can }: IndexProps) 
                         </Table.Body>
                     </Table>
 
-                    <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
-                        <p className="text-xs text-slate-500">
-                            Menampilkan{' '}
-                            <span className="font-semibold tabular-nums text-slate-800">
-                                {items.from ?? 0}-{items.to ?? 0}
-                            </span>{' '}
-                            dari <span className="font-semibold tabular-nums text-slate-800">{items.total}</span> laporan
-                        </p>
-
-                        {items.last_page > 1 && (
-                            <PaginationPageDefault
-                                className="border-t-0 pt-0 md:pt-0"
-                                page={items.current_page}
-                                total={items.last_page}
-                                onPageChange={(page) => go({ page })}
-                            />
-                        )}
-                    </div>
+                    {items.total > 0 && (
+                        <PaginationCardMinimal
+                            page={items.current_page}
+                            total={items.last_page}
+                            pageSize={items.per_page}
+                            pageSizes={PAGE_SIZES}
+                            totalItems={items.total}
+                            itemLabel="laporan"
+                            onPageChange={(page) => go({ page })}
+                            onPageSizeChange={(per_page) => go({ per_page, page: undefined })}
+                        />
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>

@@ -17,12 +17,12 @@ const signature = (data: ReportFilters) =>
             .sort(),
     );
 
-export function useLaporanFilters(routeName: string, downloadRouteName: string, filters: ReportFilters, sort: ReportSort) {
+export function useLaporanFilters(routeName: string, downloadRouteName: string, filters: ReportFilters, sort: ReportSort, perPage?: number) {
     const [form, setForm] = useState<ReportFilters>(filters);
     const dirty = signature(form) !== signature(filters);
 
     const visit = (extra: ReportFilters, base: ReportFilters = filters) =>
-        router.get(route(routeName), clean({ ...base, urut: sort.urut, arah: sort.arah, ...extra }), {
+        router.get(route(routeName), clean({ ...base, urut: sort.urut, arah: sort.arah, per_page: perPage, ...extra }), {
             preserveScroll: true,
             preserveState: 'errors',
             replace: true,

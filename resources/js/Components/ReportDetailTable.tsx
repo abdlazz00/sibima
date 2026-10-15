@@ -1,4 +1,4 @@
-import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { PAGE_SIZES, PaginationCardMinimal } from '@/Components/ui/application/pagination/pagination';
 import { Table } from '@/Components/ui/application/table/table';
 import { Button } from '@/Components/ui/base/buttons/button';
 import { cx } from '@/lib/cx';
@@ -21,6 +21,7 @@ interface Paginator {
     total: number;
     current_page: number;
     last_page: number;
+    per_page: number;
 }
 
 type Item<T> = { id: string; kind: 'row'; row: T; no: number } | { id: string; kind: 'detail'; row: T };
@@ -34,6 +35,7 @@ export default function ReportDetailTable<T extends { id: number }>({
     sort,
     onSort,
     onPage,
+    onPageSize,
     openId,
     onToggle,
     rowLabel,
@@ -49,6 +51,7 @@ export default function ReportDetailTable<T extends { id: number }>({
     sort: ReportSort;
     onSort: (column: string) => void;
     onPage: (page: number) => void;
+    onPageSize: (perPage: number) => void;
     openId: number | null;
     onToggle: (id: number) => void;
     rowLabel: (row: T) => string;
@@ -115,18 +118,18 @@ export default function ReportDetailTable<T extends { id: number }>({
                 </Table.Body>
             </Table>
 
-            <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4">
-                <p className="text-xs text-slate-500">
-                    Menampilkan{' '}
-                    <span className="font-semibold tabular-nums text-slate-800">
-                        {paginator.from ?? 0}-{paginator.to ?? 0}
-                    </span>{' '}
-                    dari <span className="font-semibold tabular-nums text-slate-800">{paginator.total}</span> {unit}
-                </p>
-                {paginator.last_page > 1 && (
-                    <PaginationPageDefault className="border-t-0 pt-0 md:pt-0" page={paginator.current_page} total={paginator.last_page} onPageChange={onPage} />
-                )}
-            </div>
+            {paginator.total > 0 && (
+                <PaginationCardMinimal
+                    page={paginator.current_page}
+                    total={paginator.last_page}
+                    pageSize={paginator.per_page}
+                    pageSizes={PAGE_SIZES}
+                    totalItems={paginator.total}
+                    itemLabel={unit}
+                    onPageChange={onPage}
+                    onPageSizeChange={onPageSize}
+                />
+            )}
         </>
     );
 }

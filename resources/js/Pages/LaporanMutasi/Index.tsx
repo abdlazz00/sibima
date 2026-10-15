@@ -57,7 +57,7 @@ const berjalanColumns: SummaryColumn<MasihBerjalan>[] = [
 
 export default function Index(props: PageProps & LaporanMutasiData) {
     const { filters, sort, ringkasan, status, jenis, tren, arus, masih_berjalan: masihBerjalan, jumlah_masih_berjalan: jumlahBerjalan, mutasis, unitOptions, jenisOptions, statusOptions } = props;
-    const { form, set, dirty, visit, sortBy, apply, downloadUrl } = useLaporanFilters('laporan-mutasi.index', 'laporan-mutasi.download', filters, sort);
+    const { form, set, dirty, visit, sortBy, apply, downloadUrl } = useLaporanFilters('laporan-mutasi.index', 'laporan-mutasi.download', filters, sort, mutasis.per_page);
     const [open, setOpen] = useState<number | null>(null);
 
     const statusLabel = Object.fromEntries(statusOptions.map((s) => [s.value, s.label]));
@@ -167,6 +167,7 @@ export default function Index(props: PageProps & LaporanMutasiData) {
                         sort={sort}
                         onSort={sortBy}
                         onPage={(page) => visit({ page })}
+                        onPageSize={(per_page) => visit({ per_page, page: undefined })}
                         openId={open}
                         onToggle={(id) => setOpen(open === id ? null : id)}
                         rowLabel={(m) => m.nomor_mutasi}

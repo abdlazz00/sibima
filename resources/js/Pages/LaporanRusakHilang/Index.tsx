@@ -67,7 +67,7 @@ export default function Index(props: PageProps & LaporanRusakHilangData) {
         kondisiOptions,
         statusOptions,
     } = props;
-    const { form, set, dirty, visit, sortBy, apply, downloadUrl } = useLaporanFilters('laporan-rusak-hilang.index', 'laporan-rusak-hilang.download', filters, sort);
+    const { form, set, dirty, visit, sortBy, apply, downloadUrl } = useLaporanFilters('laporan-rusak-hilang.index', 'laporan-rusak-hilang.download', filters, sort, reports.per_page);
     const [open, setOpen] = useState<number | null>(null);
 
     const statusLabel = Object.fromEntries(statusOptions.map((s) => [s.value, s.label]));
@@ -213,6 +213,7 @@ export default function Index(props: PageProps & LaporanRusakHilangData) {
                         sort={sort}
                         onSort={sortBy}
                         onPage={(page) => visit({ page })}
+                        onPageSize={(per_page) => visit({ per_page, page: undefined })}
                         openId={open}
                         onToggle={(id) => setOpen(open === id ? null : id)}
                         rowLabel={(r) => r.nomor_laporan}

@@ -1,4 +1,4 @@
-import { PaginationPageDefault } from '@/Components/ui/application/pagination/pagination';
+import { PaginationCardMinimal } from '@/Components/ui/application/pagination/pagination';
 import { Tabs } from '@/Components/ui/application/tabs/tabs';
 import { tanggalWaktu } from '@/lib/format';
 import { ActivityEntry, Paginated } from '@/types';
@@ -103,15 +103,15 @@ export default function ActivityTab({ aktivitas }: { aktivitas?: Paginated<Activ
                 </ul>
             )}
 
-            {aktivitas && aktivitas.last_page > 1 && (
-                <div className="mt-4 border-t border-slate-100 pt-4">
-                    <PaginationPageDefault
-                        className="border-t-0 pt-0 md:pt-0"
-                        page={aktivitas.current_page}
-                        total={aktivitas.last_page}
-                        onPageChange={(page) => load(filter, page)}
-                    />
-                </div>
+            {aktivitas && aktivitas.total > 0 && (
+                <PaginationCardMinimal
+                    className="mt-4 px-0 md:px-0 md:pb-0"
+                    page={aktivitas.current_page}
+                    total={aktivitas.last_page}
+                    totalItems={aktivitas.total}
+                    itemLabel="aktivitas"
+                    onPageChange={(page) => load(filter, page)}
+                />
             )}
         </div>
     );
