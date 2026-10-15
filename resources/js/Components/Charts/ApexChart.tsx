@@ -15,8 +15,22 @@ export default function ApexChart({
     height: number | string;
 }) {
     return (
-        <Suspense fallback={<div className="animate-pulse rounded-lg bg-slate-100" style={{ height }} aria-hidden="true" />}>
-            <Chart type={type} series={series} options={options} height={height} width="100%" />
+        <Suspense
+            fallback={
+                <div
+                    className="animate-pulse rounded-lg bg-slate-100"
+                    style={{ height }}
+                    aria-hidden="true"
+                />
+            }
+        >
+            <Chart
+                type={type}
+                series={series}
+                options={options}
+                height={height}
+                width="100%"
+            />
         </Suspense>
     );
 }
