@@ -7,6 +7,7 @@ export default function FormDialog({
     description,
     submitLabel = 'Simpan',
     destructive = false,
+    submitDisabled = false,
     processing,
     onSubmit,
     onClose,
@@ -16,6 +17,7 @@ export default function FormDialog({
     description?: string;
     submitLabel?: string;
     destructive?: boolean;
+    submitDisabled?: boolean;
     processing: boolean;
     onSubmit: () => void;
     onClose: () => void;
@@ -47,7 +49,7 @@ export default function FormDialog({
                             <Button color="secondary" size="md" isDisabled={processing} onPress={onClose}>
                                 Batal
                             </Button>
-                            <Button type="submit" color={destructive ? 'primary-destructive' : 'primary'} size="md" isLoading={processing}>
+                            <Button type="submit" color={destructive ? 'primary-destructive' : 'primary'} size="md" isLoading={processing} isDisabled={submitDisabled}>
                                 {submitLabel}
                             </Button>
                         </div>

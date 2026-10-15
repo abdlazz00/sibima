@@ -25,6 +25,7 @@ export default function ChangePhotoDialog({ onClose }: { onClose: () => void }) 
             title="Ganti foto profil"
             description="Format JPG, PNG, atau WEBP, maksimal 2 MB."
             processing={form.processing}
+            submitDisabled={!form.data.foto}
             onClose={onClose}
             onSubmit={() => {
                 if (!form.data.foto) return;
