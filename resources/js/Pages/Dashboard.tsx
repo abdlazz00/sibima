@@ -1,10 +1,21 @@
+import ChartLegend from '@/Components/ChartLegend';
 import DonutChart, { DonutSlice } from '@/Components/Charts/DonutChart';
 import KategoriAsetChart from '@/Components/Charts/KategoriAsetChart';
 import SebaranUnitChart from '@/Components/Charts/SebaranUnitChart';
 import TrenAktivitasChart from '@/Components/Charts/TrenAktivitasChart';
+import ReportCard from '@/Components/ReportCard';
+import StatCard from '@/Components/StatCard';
+import { Table } from '@/Components/ui/application/table/table';
+import { Tabs } from '@/Components/ui/application/tabs/tabs';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Select } from '@/Components/ui/base/select/select';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { KONDISI_COLOR } from '@/lib/chartColors';
+import { rupiah, tanggalSingkat } from '@/lib/format';
 import { DashboardData, PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
+import { ArrowRight, Bell01 } from '@untitledui/icons';
 import { useState } from 'react';
 
 interface DashboardProps extends PageProps {
@@ -14,14 +25,13 @@ interface DashboardProps extends PageProps {
 type Transaksi = DashboardData['transaksi'][number];
 type TabKey = 'semua' | 'penerimaan' | 'mutasi' | 'rusak_hilang' | 'permohonan';
 
-const rupiah = (n: number) =>
-    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+const ALL = '__all';
 
-const STATUS_BADGE: Record<Transaksi['status'], { label: string; style: string }> = {
-    berjalan: { label: 'Berjalan', style: 'bg-amber-50 text-amber-700 border-amber-200' },
-    selesai: { label: 'Selesai', style: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    ditolak: { label: 'Ditolak', style: 'bg-red-50 text-red-700 border-red-200' },
-    dibatalkan: { label: 'Dibatalkan', style: 'bg-gray-100 text-gray-600 border-gray-300' },
+const STATUS_BADGE: Record<Transaksi['status'], { label: string; color: 'warning' | 'success' | 'error' | 'gray' }> = {
+    berjalan: { label: 'Berjalan', color: 'warning' },
+    selesai: { label: 'Selesai', color: 'success' },
+    ditolak: { label: 'Ditolak', color: 'error' },
+    dibatalkan: { label: 'Dibatalkan', color: 'gray' },
 };
 
 const JENIS_LABEL: Record<Transaksi['jenis'], string> = {
@@ -31,35 +41,13 @@ const JENIS_LABEL: Record<Transaksi['jenis'], string> = {
     permohonan: 'Permohonan',
 };
 
-const CARD = 'rounded-lg border border-slate-200 bg-white p-5';
-const SELECT = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100';
-const ACTION = 'flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:border-blue-300 hover:text-blue-700';
-
 const percent = (part: number, total: number) => (total > 0 ? Math.round((part / total) * 100) : 0);
 
-function Badge({ label, style }: { label: string; style: string }) {
-    return <span className={`inline-flex rounded-sm border px-2 py-0.5 text-xs font-semibold ${style}`}>{label}</span>;
-}
-
-function Kpi({ label, value, caption, badge }: { label: string; value: string; caption?: string; badge?: { label: string; style: string } }) {
+function StatusBadge({ status }: { status: Transaksi['status'] }) {
     return (
-        <div className={CARD}>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 tabular-nums">{value}</p>
-            <div className="mt-2 flex min-h-[22px] items-center gap-2 text-xs text-slate-500">
-                {badge && <Badge {...badge} />}
-                {caption && <span className="tabular-nums">{caption}</span>}
-            </div>
-        </div>
-    );
-}
-
-function BellIcon() {
-    return (
-        <svg className="h-5 w-5 shrink-0 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-        </svg>
+        <Badge type="color" size="sm" color={STATUS_BADGE[status].color} className="rounded-sm">
+            {STATUS_BADGE[status].label}
+        </Badge>
     );
 }
 
@@ -76,10 +64,10 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
     const scopeLabel = selectedUnit?.name ?? (d.units.length > 0 ? 'Seluruh cakupan' : (auth.user?.unit?.name ?? 'Seluruh unit'));
 
     const kondisiSlices: DonutSlice[] = [
-        { label: 'Baik', jumlah: d.per_kondisi.baik, persen: percent(d.per_kondisi.baik, total), color: '#047857' },
-        { label: 'Rusak Ringan', jumlah: d.per_kondisi.rusak_ringan, persen: percent(d.per_kondisi.rusak_ringan, total), color: '#B45309' },
-        { label: 'Rusak Berat', jumlah: d.per_kondisi.rusak_berat, persen: percent(d.per_kondisi.rusak_berat, total), color: '#B91C1C' },
-        { label: 'Hilang', jumlah: d.per_kondisi.hilang, persen: percent(d.per_kondisi.hilang, total), color: '#4B5563' },
+        { label: 'Baik', jumlah: d.per_kondisi.baik, persen: percent(d.per_kondisi.baik, total), color: KONDISI_COLOR.baik },
+        { label: 'Rusak Ringan', jumlah: d.per_kondisi.rusak_ringan, persen: percent(d.per_kondisi.rusak_ringan, total), color: KONDISI_COLOR.rusak_ringan },
+        { label: 'Rusak Berat', jumlah: d.per_kondisi.rusak_berat, persen: percent(d.per_kondisi.rusak_berat, total), color: KONDISI_COLOR.rusak_berat },
+        { label: 'Hilang', jumlah: d.per_kondisi.hilang, persen: percent(d.per_kondisi.hilang, total), color: KONDISI_COLOR.hilang },
     ];
 
     const tabCounts: Record<TabKey, number> = {
@@ -99,6 +87,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
     ];
 
     const filteredTransaksi = activeTab === 'semua' ? d.transaksi : d.transaksi.filter((t) => t.jenis === activeTab);
+    const transaksiRows = filteredTransaksi.map((t) => ({ ...t, id: `${t.jenis}-${t.nomor}` }));
 
     const filterUnit = (unitId: string) =>
         router.get(route('dashboard'), unitId ? { unit_id: unitId } : {}, { preserveState: true, preserveScroll: true, replace: true });
@@ -120,9 +109,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
               { label: 'Laporan', href: route('laporan-aset.index'), permission: 'laporan.aset' },
           ];
 
-    const actions = candidateActions
-        .filter((a) => permissions.length === 0 || permissions.includes(a.permission))
-        .slice(0, 4);
+    const actions = candidateActions.filter((a) => permissions.length === 0 || permissions.includes(a.permission)).slice(0, 4);
 
     const queueCandidates: { label: string; value: number; href: string; permission: string }[] = [
         { label: 'Persetujuan menunggu saya', value: d.antrean.persetujuan_menunggu, href: route('persetujuan.index'), permission: 'persetujuan.view' },
@@ -131,9 +118,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
         { label: 'Mutasi pending', value: d.antrean.mutasi_pending, href: '/asset-mutations', permission: 'mutasi.view' },
     ];
 
-    const queue = queueCandidates.filter(
-        (q) => permissions.length === 0 || permissions.includes(q.permission),
-    );
+    const queue = queueCandidates.filter((q) => permissions.length === 0 || permissions.includes(q.permission));
 
     return (
         <AuthenticatedLayout>
@@ -144,233 +129,201 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                     <div>
                         <h1 className="text-[32px] font-bold leading-10 tracking-tight text-slate-900">Dashboard</h1>
                         <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                            <span>Selamat datang, {auth.user?.name}. Anda login sebagai <strong>{role}</strong> di</span>
-                            <span className="inline-flex rounded-sm border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">
-                                {auth.user?.unit?.name ?? 'Kecamatan Sagulung'}
+                            <span>
+                                Selamat datang, {auth.user?.name}. Anda login sebagai <strong>{role}</strong> di
                             </span>
+                            <Badge type="color" size="sm" color="blue" className="rounded-sm">
+                                {auth.user?.unit?.name ?? 'Kecamatan Sagulung'}
+                            </Badge>
                         </p>
                     </div>
                     {d.units.length > 0 && (
-                        <select value={d.selected_unit_id ?? ''} onChange={(e) => filterUnit(e.target.value)} className={SELECT} aria-label="Filter unit">
-                            <option value="">Semua unit</option>
-                            {d.units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-                        </select>
+                        <div className="w-full sm:w-64">
+                            <Select
+                                aria-label="Filter unit"
+                                size="md"
+                                items={[{ id: ALL, label: 'Semua unit' }, ...d.units.map((u) => ({ id: String(u.id), label: u.name }))]}
+                                selectedKey={d.selected_unit_id ? String(d.selected_unit_id) : ALL}
+                                onSelectionChange={(key) => filterUnit(key === ALL ? '' : String(key))}
+                            >
+                                {(item) => <Select.Item id={item.id} label={item.label} />}
+                            </Select>
+                        </div>
                     )}
                 </div>
 
                 {isApprover && d.antrean.persetujuan_menunggu > 0 && (
-                    <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                         <div className="flex items-center gap-3">
-                            <BellIcon />
+                            <Bell01 className="size-5 shrink-0 text-amber-700" aria-hidden="true" />
                             <p className="text-sm font-medium text-amber-900">
                                 <span className="tabular-nums">{d.antrean.persetujuan_menunggu}</span> persetujuan menunggu Anda.
                             </p>
                         </div>
-                        <Link href={route('persetujuan.index')} className="rounded-lg bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+                        <Button color="primary" size="md" href={route('persetujuan.index')}>
                             Buka Kotak Persetujuan
-                        </Link>
+                        </Button>
                     </div>
                 )}
 
                 {actions.length > 0 && (
                     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                         {actions.map((a) => (
-                            <Link key={a.label} href={a.href} className={ACTION}>{a.label}</Link>
+                            <Button key={a.label} className="w-full" color="secondary" size="lg" href={a.href}>
+                                {a.label}
+                            </Button>
                         ))}
                     </div>
                 )}
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Kpi label="Total Aset" value={total.toLocaleString('id-ID')} caption={scopeLabel} />
-                    <Kpi label="Total Nilai Aset" value={rupiah(d.totals.nilai_perolehan)} caption={`Nilai buku ${rupiah(d.totals.nilai_buku)}`} />
-                    <Kpi
+                    <StatCard label="Total Aset" value={total.toLocaleString('id-ID')} note={scopeLabel} />
+                    <StatCard label="Total Nilai Aset" value={rupiah(d.totals.nilai_perolehan)} note={`Nilai buku ${rupiah(d.totals.nilai_buku)}`} />
+                    <StatCard
                         label="Aset Kondisi Baik"
                         value={baik.toLocaleString('id-ID')}
-                        badge={{ label: `${percent(baik, total)}% dari total`, style: 'bg-emerald-50 text-emerald-700 border-emerald-200' }}
+                        badge={
+                            <Badge type="color" size="sm" color="success" className="rounded-sm">
+                                {percent(baik, total)}% dari total
+                            </Badge>
+                        }
                     />
-                    <Kpi
+                    <StatCard
                         label="Aset Rusak / Hilang"
                         value={bermasalah.toLocaleString('id-ID')}
-                        badge={{ label: `${percent(bermasalah, total)}% dari total`, style: 'bg-red-50 text-red-700 border-red-200' }}
+                        badge={
+                            <Badge type="color" size="sm" color="error" className="rounded-sm">
+                                {percent(bermasalah, total)}% dari total
+                            </Badge>
+                        }
                     />
                 </div>
 
                 {queue.length > 0 && (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {queue.map((q) => (
-                            <Link key={q.label} href={q.href} className={`${CARD} block hover:border-blue-300`}>
-                                <p className="text-3xl font-bold text-slate-900 tabular-nums">{q.value}</p>
+                            <Link
+                                key={q.label}
+                                href={q.href}
+                                className="block rounded-xl border border-slate-200 bg-white p-5 shadow-xs outline-hidden transition hover:border-blue-300 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
+                            >
+                                <p className="text-3xl font-bold tabular-nums text-slate-900">{q.value}</p>
                                 <p className="mt-1 text-sm text-slate-600">{q.label}</p>
                             </Link>
                         ))}
                     </div>
                 )}
 
-                {/* 2x2 Interactive Charts Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    {/* 1. Proporsi Kondisi Aset */}
-                    <div className={CARD}>
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-base font-semibold text-slate-900">Proporsi Kondisi Aset</h2>
-                            <span className="text-xs text-slate-500 tabular-nums">{total} total aset</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <DonutChart data={kondisiSlices} ariaLabel="Grafik proporsi kondisi fisik aset" unit="aset" />
-                            <div className="mt-4 grid w-full grid-cols-2 gap-2 text-xs">
-                                {kondisiSlices.map((s) => (
-                                    <div key={s.label} className="flex items-center justify-between rounded-sm border border-slate-100 bg-slate-50 px-2.5 py-1.5">
-                                        <div className="flex items-center gap-1.5 truncate">
-                                            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
-                                            <span className="truncate font-medium text-slate-600">{s.label}</span>
-                                        </div>
-                                        <span className="ml-1 shrink-0 font-semibold tabular-nums text-slate-900">{s.jumlah} ({s.persen}%)</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                    <ReportCard title="Proporsi Kondisi Aset" aside={<span className="text-xs tabular-nums text-slate-500">{total} total aset</span>}>
+                        <DonutChart data={kondisiSlices} ariaLabel="Grafik proporsi kondisi fisik aset" unit="aset" />
+                        <ChartLegend unit="aset" items={kondisiSlices} />
+                    </ReportCard>
 
-                    {/* 2. Top Kategori Aset */}
-                    <div className={CARD}>
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-base font-semibold text-slate-900">Aset per Kategori</h2>
-                            <Link href={route('assets.index')} className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline">
-                                Lihat Semua &rarr;
-                            </Link>
-                        </div>
+                    <ReportCard
+                        title="Aset per Kategori"
+                        aside={
+                            <Button color="link-color" size="sm" iconTrailing={ArrowRight} href={route('assets.index')}>
+                                Lihat Semua
+                            </Button>
+                        }
+                    >
                         <KategoriAsetChart data={d.per_kategori} />
-                    </div>
+                    </ReportCard>
 
-                    {/* 3. Sebaran Aset per Unit */}
-                    <div className={CARD}>
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-base font-semibold text-slate-900">Sebaran Aset per Unit</h2>
-                            <span className="text-xs text-slate-500">Kondisi fisik</span>
-                        </div>
+                    <ReportCard title="Sebaran Aset per Unit" aside={<span className="text-xs text-slate-500">Kondisi fisik</span>}>
                         <SebaranUnitChart data={d.per_unit} />
-                    </div>
+                    </ReportCard>
 
-                    {/* 4. Tren Transaksi 6 Bulan */}
-                    <div className={CARD}>
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-base font-semibold text-slate-900">Tren Aktivitas (6 Bulan Terakhir)</h2>
-                            <span className="text-xs text-slate-500">Volume transaksi</span>
-                        </div>
+                    <ReportCard title="Tren Aktivitas (6 Bulan Terakhir)" aside={<span className="text-xs text-slate-500">Volume transaksi</span>}>
                         <TrenAktivitasChart data={d.tren_aktivitas} />
-                    </div>
+                    </ReportCard>
                 </div>
 
-                {/* Tabbed Activity Feed */}
-                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-                    <div className="border-b border-slate-200 px-5 pt-4">
-                        <h2 className="text-lg font-semibold text-slate-900">Aktivitas Transaksi Terbaru</h2>
-                        <div className="mt-3 -mb-px flex flex-wrap gap-2 sm:gap-6">
-                            {tabs.map((tab) => {
-                                const isActive = activeTab === tab.key;
-                                const count = tabCounts[tab.key];
-                                return (
-                                    <button
-                                        key={tab.key}
-                                        type="button"
-                                        onClick={() => setActiveTab(tab.key)}
-                                        className={`flex items-center gap-2 border-b-2 py-2.5 text-sm transition-colors ${
-                                            isActive
-                                                ? 'border-blue-600 font-semibold text-blue-600'
-                                                : 'border-transparent font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700'
-                                        }`}
-                                    >
-                                        <span>{tab.label}</span>
-                                        <span
-                                            className={`rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
-                                                isActive ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'
-                                            }`}
-                                        >
-                                            {count}
-                                        </span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                    <h2 className="px-5 pt-4 text-lg font-semibold text-slate-900">Aktivitas Transaksi Terbaru</h2>
 
-                    {filteredTransaksi.length === 0 ? (
-                        <p className="px-5 py-10 text-center text-sm text-slate-400">
-                            {activeTab === 'semua'
-                                ? 'Belum ada transaksi.'
-                                : `Belum ada transaksi ${tabs.find((t) => t.key === activeTab)?.label ?? ''} terbaru.`}
-                        </p>
-                    ) : (
-                        <>
-                            <table className="hidden w-full border-collapse text-left text-sm md:table">
-                                <thead>
-                                    <tr className="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                        <th className="px-4 py-3">Jenis</th>
-                                        <th className="px-4 py-3">Nomor</th>
-                                        <th className="px-4 py-3">Ringkasan</th>
-                                        <th className="px-4 py-3">Tanggal</th>
-                                        <th className="px-4 py-3">Status</th>
-                                        <th className="px-4 py-3 text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 text-slate-800">
-                                    {filteredTransaksi.map((t) => (
-                                        <tr key={`${t.jenis}-${t.nomor}`} className="hover:bg-slate-50/50">
-                                            <td className="px-4 py-3">
-                                                <span className="inline-flex rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                                                    {JENIS_LABEL[t.jenis]}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 font-medium tabular-nums">
-                                                <Link href={t.url} className="text-blue-700 hover:underline">
+                    <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(key as TabKey)} keyboardActivation="automatic">
+                        <Tabs.List type="underline" size="sm" className="mt-3 px-5" aria-label="Jenis transaksi">
+                            {tabs.map((tab) => (
+                                <Tabs.Item key={tab.key} id={tab.key} label={tab.label} badge={String(tabCounts[tab.key])} />
+                            ))}
+                        </Tabs.List>
+
+                        <Tabs.Panel id={activeTab}>
+                            {transaksiRows.length === 0 ? (
+                                <p className="px-5 py-10 text-center text-sm text-slate-400">
+                                    {activeTab === 'semua'
+                                        ? 'Belum ada transaksi.'
+                                        : `Belum ada transaksi ${tabs.find((t) => t.key === activeTab)?.label ?? ''} terbaru.`}
+                                </p>
+                            ) : (
+                                <>
+                                    <div className="hidden md:block">
+                                        <Table aria-label="Aktivitas transaksi terbaru" size="sm">
+                                            <Table.Header>
+                                                <Table.Head id="jenis" label="Jenis" />
+                                                <Table.Head id="nomor" label="Nomor" isRowHeader />
+                                                <Table.Head id="ringkasan" label="Ringkasan" />
+                                                <Table.Head id="tanggal" label="Tanggal" />
+                                                <Table.Head id="status" label="Status" />
+                                                <Table.Head id="aksi" label="Aksi" />
+                                            </Table.Header>
+                                            <Table.Body items={transaksiRows}>
+                                                {(t) => (
+                                                    <Table.Row id={t.id}>
+                                                        <Table.Cell>
+                                                            <Badge type="color" size="sm" color="gray" className="rounded-sm">
+                                                                {JENIS_LABEL[t.jenis]}
+                                                            </Badge>
+                                                        </Table.Cell>
+                                                        <Table.Cell className="whitespace-nowrap font-medium tabular-nums">
+                                                            <Link href={t.url} className="text-blue-700 hover:underline">
+                                                                {t.nomor}
+                                                            </Link>
+                                                        </Table.Cell>
+                                                        <Table.Cell className="text-slate-700">{t.ringkasan ?? '—'}</Table.Cell>
+                                                        <Table.Cell className="whitespace-nowrap tabular-nums text-slate-500">{tanggalSingkat(t.tanggal)}</Table.Cell>
+                                                        <Table.Cell>
+                                                            <StatusBadge status={t.status} />
+                                                        </Table.Cell>
+                                                        <Table.Cell>
+                                                            <Button color="secondary-brand" size="sm" href={t.url}>
+                                                                Detail
+                                                            </Button>
+                                                        </Table.Cell>
+                                                    </Table.Row>
+                                                )}
+                                            </Table.Body>
+                                        </Table>
+                                    </div>
+
+                                    <ul className="divide-y divide-slate-100 md:hidden">
+                                        {transaksiRows.map((t) => (
+                                            <li key={t.id} className="space-y-1.5 px-5 py-3 text-sm">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <Badge type="color" size="sm" color="gray" className="rounded-sm">
+                                                        {JENIS_LABEL[t.jenis]}
+                                                    </Badge>
+                                                    <StatusBadge status={t.status} />
+                                                </div>
+                                                <Link href={t.url} className="block font-semibold tabular-nums text-blue-700">
                                                     {t.nomor}
                                                 </Link>
-                                            </td>
-                                            <td className="px-4 py-3 text-slate-700">{t.ringkasan ?? '—'}</td>
-                                            <td className="px-4 py-3 tabular-nums text-slate-500">
-                                                {t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '—'}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <Badge {...STATUS_BADGE[t.status]} />
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <Link
-                                                    href={t.url}
-                                                    className="inline-flex items-center text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline"
-                                                >
-                                                    Detail &rarr;
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-
-                            <ul className="divide-y divide-slate-100 md:hidden">
-                                {filteredTransaksi.map((t) => (
-                                    <li key={`${t.jenis}-${t.nomor}`} className="space-y-1.5 px-5 py-3 text-sm">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className="inline-flex rounded-sm bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                                                {JENIS_LABEL[t.jenis]}
-                                            </span>
-                                            <Badge {...STATUS_BADGE[t.status]} />
-                                        </div>
-                                        <Link href={t.url} className="block font-semibold tabular-nums text-blue-700">
-                                            {t.nomor}
-                                        </Link>
-                                        <p className="text-slate-600">{t.ringkasan ?? '—'}</p>
-                                        <div className="flex items-center justify-between pt-1 text-xs text-slate-500">
-                                            <span className="tabular-nums">
-                                                {t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '—'}
-                                            </span>
-                                            <Link href={t.url} className="font-semibold text-blue-700 hover:underline">
-                                                Lihat Detail &rarr;
-                                            </Link>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </>
-                    )}
+                                                <p className="text-slate-600">{t.ringkasan ?? '—'}</p>
+                                                <div className="flex items-center justify-between pt-1 text-xs text-slate-500">
+                                                    <span className="tabular-nums">{tanggalSingkat(t.tanggal)}</span>
+                                                    <Link href={t.url} className="font-semibold text-blue-700 hover:underline">
+                                                        Lihat Detail &rarr;
+                                                    </Link>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                        </Tabs.Panel>
+                    </Tabs>
                 </div>
             </div>
         </AuthenticatedLayout>
