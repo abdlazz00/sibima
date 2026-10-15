@@ -1,7 +1,14 @@
+import PageHeader from '@/Components/PageHeader';
+import { Table } from '@/Components/ui/application/table/table';
+import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
+import { Label } from '@/Components/ui/base/input/label';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEvent, useEffect } from 'react';
+import { Download01, UploadCloud02 } from '@untitledui/icons';
+import { FileTrigger } from 'react-aria-components';
+import { FormEvent, useEffect, useState } from 'react';
 
 interface Batch {
     id: number;
@@ -43,25 +50,30 @@ interface Props extends PageProps {
     maxRows: number;
 }
 
-const CARD = 'rounded-lg border border-slate-200 bg-white p-5';
-const PRIMARY =
-    'inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50';
-const SECONDARY =
-    'inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:ring-offset-2';
+type StatusColor = 'warning' | 'blue' | 'success' | 'error' | 'gray';
 
-const STATUS: Record<string, { label: string; cls: string }> = {
-    memeriksa: { label: 'Memeriksa', cls: 'bg-amber-50 text-amber-800' },
-    siap: { label: 'Siap dikonfirmasi', cls: 'bg-blue-50 text-blue-800' },
-    memproses: { label: 'Memproses', cls: 'bg-amber-50 text-amber-800' },
-    selesai: { label: 'Selesai', cls: 'bg-green-50 text-green-800' },
-    gagal: { label: 'Gagal', cls: 'bg-red-50 text-red-800' },
-    kedaluwarsa: { label: 'Kedaluwarsa', cls: 'bg-slate-100 text-slate-600' },
+const STATUS: Record<string, { label: string; color: StatusColor }> = {
+    memeriksa: { label: 'Memeriksa', color: 'warning' },
+    siap: { label: 'Siap dikonfirmasi', color: 'blue' },
+    memproses: { label: 'Memproses', color: 'warning' },
+    selesai: { label: 'Selesai', color: 'success' },
+    gagal: { label: 'Gagal', color: 'error' },
+    kedaluwarsa: { label: 'Kedaluwarsa', color: 'gray' },
 };
 
 function StatusBadge({ status }: { status: string }) {
-    const s = STATUS[status] ?? { label: status, cls: 'bg-slate-100 text-slate-600' };
-    return <span className={`inline-block rounded-sm px-2 py-0.5 text-xs font-medium ${s.cls}`}>{s.label}</span>;
+    const s = STATUS[status] ?? { label: status, color: 'gray' as const };
+
+    return (
+        <Badge type="color" size="sm" color={s.color} className="rounded-sm">
+            {s.label}
+        </Badge>
+    );
 }
+
+const download = (url: string) => {
+    window.location.href = url;
+};
 
 function Stat({ label, value }: { label: string; value: number }) {
     return (
@@ -74,6 +86,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 export default function Index({ modul, label, batch, preview, riwayat, maxKb, maxRows }: Props) {
     const form = useForm<{ berkas: File | null }>({ berkas: null });
+    const [confirming, setConfirming] = useState(false);
     const active = batch !== null && (batch.status === 'memeriksa' || batch.status === 'memproses');
     const percent = batch && batch.total_baris > 0 ? Math.min(100, Math.round((batch.progres / batch.total_baris) * 100)) : 0;
 
@@ -88,45 +101,44 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
         form.post(route('import.store', modul), { forceFormData: true, onSuccess: () => form.reset() });
     };
 
+    const errorRows = preview.errors.flatMap((row) => row.detail.map((d, i) => ({ id: `${row.baris}-${i}`, baris: row.baris, kolom: d.kolom, alasan: d.alasan })));
+
     return (
         <AuthenticatedLayout>
             <Head title={`Impor ${label}`} />
 
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Impor {label}</h1>
-                    <p className="mt-1 text-sm text-slate-500">
-                        Unggah berkas Excel, periksa pratinjau, lalu konfirmasi. Baris yang sudah ada dilewati.
-                    </p>
+                <div className="space-y-1">
+                    <PageHeader crumbs={[{ label: `Impor ${label}` }]} title={`Impor ${label}`} />
+                    <p className="text-sm text-slate-500">Unggah berkas Excel, periksa pratinjau, lalu konfirmasi. Baris yang sudah ada dilewati.</p>
                 </div>
 
-                <form onSubmit={submit} className={`${CARD} space-y-3`}>
-                    <label htmlFor="berkas" className="block text-sm font-medium text-slate-900">
-                        Berkas Excel (.xlsx)
-                    </label>
-                    <input
-                        id="berkas"
-                        type="file"
-                        accept=".xlsx"
-                        onChange={(e) => form.setData('berkas', e.target.files?.[0] ?? null)}
-                        className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-semibold"
-                    />
+                <form onSubmit={submit} className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+                    <Label>Berkas Excel (.xlsx)</Label>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <FileTrigger acceptedFileTypes={['.xlsx']} onSelect={(files) => form.setData('berkas', files?.[0] ?? null)}>
+                            <Button color="secondary" size="md" iconLeading={UploadCloud02}>
+                                Pilih berkas
+                            </Button>
+                        </FileTrigger>
+                        <span className="text-sm text-slate-600">{form.data.berkas ? form.data.berkas.name : 'Belum ada berkas dipilih'}</span>
+                    </div>
                     {form.errors.berkas && <p className="text-sm text-red-700">{form.errors.berkas}</p>}
                     <p className="text-xs text-slate-500">
                         Maksimal {maxKb / 1024} MB dan {maxRows.toLocaleString('id-ID')} baris per berkas.
                     </p>
                     <div className="flex flex-wrap gap-2">
-                        <button type="submit" disabled={!form.data.berkas || form.processing} className={PRIMARY}>
-                            {form.processing ? 'Mengunggah…' : 'Unggah & periksa'}
-                        </button>
-                        <a href={route('import.template', modul)} className={SECONDARY}>
+                        <Button type="submit" color="primary" size="md" isDisabled={!form.data.berkas} isLoading={form.processing}>
+                            Unggah &amp; periksa
+                        </Button>
+                        <Button color="secondary-brand" size="md" iconLeading={Download01} onPress={() => download(route('import.template', modul))}>
                             Unduh template
-                        </a>
+                        </Button>
                     </div>
                 </form>
 
                 {batch && (
-                    <section className={`${CARD} space-y-4`} aria-live="polite">
+                    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs" aria-live="polite">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <div>
                                 <p className="text-sm font-semibold text-slate-900">{batch.nama_berkas}</p>
@@ -137,8 +149,15 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
 
                         {active && (
                             <div>
-                                <div className="h-2 overflow-hidden rounded-sm bg-slate-100">
-                                    <div className="h-2 bg-blue-700 transition-all" style={{ width: `${percent}%` }} />
+                                <div
+                                    role="progressbar"
+                                    aria-label="Progres impor"
+                                    aria-valuemin={0}
+                                    aria-valuemax={100}
+                                    aria-valuenow={percent}
+                                    className="h-2 overflow-hidden rounded-sm bg-slate-100"
+                                >
+                                    <div className="h-2 bg-blue-800 transition-all" style={{ width: `${percent}%` }} />
                                 </div>
                                 <p className="mt-1 text-xs tabular-nums text-slate-500">
                                     {batch.progres.toLocaleString('id-ID')} / {batch.total_baris.toLocaleString('id-ID')} baris
@@ -158,53 +177,58 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
                                 </div>
 
                                 {Object.entries(preview.peringatan).map(([text, n]) => (
-                                    <p key={text} className="rounded-sm bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                                    <p key={text} className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
                                         {n.toLocaleString('id-ID')} baris — {text}
                                     </p>
                                 ))}
 
-                                {preview.errors.length > 0 && (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left text-sm">
-                                            <caption className="mb-2 text-left text-sm font-semibold text-slate-900">
-                                                Baris bermasalah (menampilkan {preview.errors.length} pertama)
-                                            </caption>
-                                            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                                                <tr>
-                                                    <th className="px-3 py-2">Baris</th>
-                                                    <th className="px-3 py-2">Kolom</th>
-                                                    <th className="px-3 py-2">Alasan</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {preview.errors.flatMap((row) =>
-                                                    row.detail.map((d, i) => (
-                                                        <tr key={`${row.baris}-${i}`} className="border-t border-slate-100">
-                                                            <td className="px-3 py-2 tabular-nums">{row.baris}</td>
-                                                            <td className="px-3 py-2">{d.kolom}</td>
-                                                            <td className="px-3 py-2">{d.alasan}</td>
-                                                        </tr>
-                                                    )),
+                                {errorRows.length > 0 && (
+                                    <div className="overflow-hidden rounded-xl border border-slate-200">
+                                        <p className="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-900">
+                                            Baris bermasalah (menampilkan {preview.errors.length} pertama)
+                                        </p>
+                                        <Table aria-label="Baris bermasalah pada berkas" size="sm">
+                                            <Table.Header>
+                                                <Table.Head id="baris" label="Baris" isRowHeader />
+                                                <Table.Head id="kolom" label="Kolom" />
+                                                <Table.Head id="alasan" label="Alasan" />
+                                            </Table.Header>
+                                            <Table.Body items={errorRows}>
+                                                {(r) => (
+                                                    <Table.Row id={r.id}>
+                                                        <Table.Cell className="tabular-nums text-slate-800">{r.baris}</Table.Cell>
+                                                        <Table.Cell className="text-slate-800">{r.kolom}</Table.Cell>
+                                                        <Table.Cell className="whitespace-normal text-slate-800">{r.alasan}</Table.Cell>
+                                                    </Table.Row>
                                                 )}
-                                            </tbody>
-                                        </table>
+                                            </Table.Body>
+                                        </Table>
                                     </div>
                                 )}
 
                                 <div className="flex flex-wrap gap-2">
                                     {batch.status === 'siap' && batch.jumlah_baru > 0 && (
-                                        <button
-                                            type="button"
-                                            className={PRIMARY}
-                                            onClick={() => router.post(route('import.confirm', { modul, batch: batch.id }))}
+                                        <Button
+                                            color="primary"
+                                            size="md"
+                                            isLoading={confirming}
+                                            onPress={() => {
+                                                setConfirming(true);
+                                                router.post(route('import.confirm', { modul, batch: batch.id }), {}, { onFinish: () => setConfirming(false) });
+                                            }}
                                         >
                                             Konfirmasi impor {batch.jumlah_baru.toLocaleString('id-ID')} baris
-                                        </button>
+                                        </Button>
                                     )}
                                     {batch.jumlah_error > 0 && (
-                                        <a href={route('import.errors', { modul, batch: batch.id })} className={SECONDARY}>
+                                        <Button
+                                            color="secondary-brand"
+                                            size="md"
+                                            iconLeading={Download01}
+                                            onPress={() => download(route('import.errors', { modul, batch: batch.id }))}
+                                        >
                                             Unduh laporan error
-                                        </a>
+                                        </Button>
                                     )}
                                 </div>
                             </>
@@ -212,50 +236,42 @@ export default function Index({ modul, label, batch, preview, riwayat, maxKb, ma
                     </section>
                 )}
 
-                <section className={CARD}>
-                    <h2 className="mb-3 text-sm font-semibold text-slate-900">Riwayat impor</h2>
-                    {riwayat.length === 0 ? (
-                        <p className="text-sm text-slate-500">Belum ada impor.</p>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                                    <tr>
-                                        <th className="px-3 py-2">Waktu</th>
-                                        <th className="px-3 py-2">Berkas</th>
-                                        <th className="px-3 py-2">Oleh</th>
-                                        <th className="px-3 py-2">Status</th>
-                                        <th className="px-3 py-2 text-right">Baru</th>
-                                        <th className="px-3 py-2 text-right">Dilewati</th>
-                                        <th className="px-3 py-2 text-right">Error</th>
-                                        <th className="px-3 py-2 text-right">Masuk</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {riwayat.map((r) => (
-                                        <tr key={r.id} className="border-t border-slate-100">
-                                            <td className="whitespace-nowrap px-3 py-2">
-                                                {new Date(r.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-                                            </td>
-                                            <td className="px-3 py-2">
-                                                <Link href={route('import.show', { modul, batch: r.id })} className="text-blue-700 hover:underline">
-                                                    {r.nama_berkas}
-                                                </Link>
-                                            </td>
-                                            <td className="px-3 py-2">{r.pengunggah ?? '—'}</td>
-                                            <td className="px-3 py-2">
-                                                <StatusBadge status={r.status} />
-                                            </td>
-                                            <td className="px-3 py-2 text-right tabular-nums">{r.jumlah_baru}</td>
-                                            <td className="px-3 py-2 text-right tabular-nums">{r.jumlah_duplikat}</td>
-                                            <td className="px-3 py-2 text-right tabular-nums">{r.jumlah_error}</td>
-                                            <td className="px-3 py-2 text-right tabular-nums">{r.jumlah_masuk}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+                    <h2 className="border-b border-slate-200 px-5 py-4 text-base font-semibold text-slate-900">Riwayat impor</h2>
+                    <Table aria-label="Riwayat impor" size="sm">
+                        <Table.Header>
+                            <Table.Head id="waktu" label="Waktu" isRowHeader />
+                            <Table.Head id="berkas" label="Berkas" />
+                            <Table.Head id="oleh" label="Oleh" />
+                            <Table.Head id="status" label="Status" />
+                            <Table.Head id="baru" label="Baru" className="[&>div]:justify-end" />
+                            <Table.Head id="dilewati" label="Dilewati" className="[&>div]:justify-end" />
+                            <Table.Head id="error" label="Error" className="[&>div]:justify-end" />
+                            <Table.Head id="masuk" label="Masuk" className="[&>div]:justify-end" />
+                        </Table.Header>
+                        <Table.Body items={riwayat} renderEmptyState={() => <p className="py-8 text-center text-sm text-slate-500">Belum ada impor.</p>}>
+                            {(r) => (
+                                <Table.Row id={r.id}>
+                                    <Table.Cell className="whitespace-nowrap text-slate-800">
+                                        {new Date(r.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Link href={route('import.show', { modul, batch: r.id })} className="text-blue-700 hover:underline">
+                                            {r.nama_berkas}
+                                        </Link>
+                                    </Table.Cell>
+                                    <Table.Cell className="text-slate-800">{r.pengunggah ?? '—'}</Table.Cell>
+                                    <Table.Cell>
+                                        <StatusBadge status={r.status} />
+                                    </Table.Cell>
+                                    <Table.Cell className="text-right tabular-nums text-slate-800">{r.jumlah_baru}</Table.Cell>
+                                    <Table.Cell className="text-right tabular-nums text-slate-800">{r.jumlah_duplikat}</Table.Cell>
+                                    <Table.Cell className="text-right tabular-nums text-slate-800">{r.jumlah_error}</Table.Cell>
+                                    <Table.Cell className="text-right tabular-nums text-slate-800">{r.jumlah_masuk}</Table.Cell>
+                                </Table.Row>
+                            )}
+                        </Table.Body>
+                    </Table>
                 </section>
             </div>
         </AuthenticatedLayout>
