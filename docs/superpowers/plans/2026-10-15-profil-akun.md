@@ -434,7 +434,7 @@ import { ReactNode } from 'react';
 export default function InfoRow({ label, children, action }: { label: string; children: ReactNode; action?: ReactNode }) {
     return (
         <div className="flex items-center justify-between gap-4 py-3.5">
-            <dt className="w-36 shrink-0 text-sm font-medium text-slate-500">{label}</dt>
+            <dt className="w-28 shrink-0 text-sm font-medium text-slate-500 sm:w-36">{label}</dt>
             <dd className="min-w-0 flex-1 truncate text-sm text-slate-900">{children}</dd>
             {action && <div className="shrink-0">{action}</div>}
         </div>
@@ -697,7 +697,6 @@ export default function AccountInfoCard({ akun }: { akun: ProfileAkun }) {
                 <InfoRow label="Role">{akun.role ?? '—'}</InfoRow>
                 <InfoRow label="Unit">{akun.unit ?? '—'}</InfoRow>
                 <InfoRow label="Cakupan data">{UNIT_SCOPE_LABEL[akun.cakupan] ?? akun.cakupan}</InfoRow>
-                <InfoRow label="Status">{akun.aktif ? 'Aktif' : 'Nonaktif'}</InfoRow>
             </dl>
         </div>
     );
@@ -2313,3 +2312,10 @@ Expected: bersih; tes hijau.
 Jalankan suite penuh di latar belakang (`php artisan test --compact`, ±12 menit) dan laporkan hasilnya. Cek runtime singkat: tab Aktivitas memuat (skeleton lalu daftar), filter berganti, paginasi bila ada > 15 entri. Verifikasi di laporan: (a) penjadwal `schedule:work` sudah ada di `compose.prod.yaml`; (b) `php artisan migrate` harus dijalankan di produksi untuk tiga migrasi; (c) `php artisan storage:link` diperlukan untuk foto.
 
 Minta pengguna menilai: tab Aktivitas (ikon, judul, keterangan perangkat · IP, waktu, tautan ke dokumen), filter Semua/Pekerjaan/Login, paginasi, login lalu keluar lalu coba sandi salah dan lihat entri baru, keadaan kosong, layar 375 px, keyboard/fokus. Setelah lolos: perbarui memori proyek (`project-sibima-progress`) dan tanyakan persetujuan sebelum push.
+
+---
+
+## Catatan Review (ponytail + impeccable, sudah diterapkan)
+
+- Ponytail: baris "Status" dihapus dari kartu Info akun karena sudah ditampilkan sebagai badge Aktif/Nonaktif di kepala profil (duplikat). Tidak ada abstraksi spekulatif: `FormDialog` dipakai oleh enam dialog, `InfoRow` oleh delapan baris, `PasswordConfirmDialog` oleh dua aksi sesi. `ActivityFeed` menggabung di PHP karena hanya tiga sumber kecil; tabel log aktivitas umum sengaja tidak dibuat.
+- Impeccable (Operate): label `InfoRow` menyempit di layar kecil (`w-28`) agar nilai dan tombol Ubah muat di 375 px; aksi destruktif (Keluarkan, Hapus foto) memakai warna merah dan dialog konfirmasi sandi/penegasan; tombol hanya muncul bila berlaku (Hapus foto hanya bila ada foto sendiri; Keluar dari semua perangkat lain hanya bila ada sesi lain); keadaan memuat riwayat memakai kerangka berdenyut dan keadaan kosong tertulis; `aria-busy`, `time dateTime`, dan label tombol berisi nama sesi/aksi dipakai untuk pembaca layar. Dicek saat eksekusi: nilai email panjang terpotong (`truncate`) masih terbaca di 375 px, dan tab bertingkat (tab utama + filter Aktivitas) tidak membingungkan fokus keyboard.
