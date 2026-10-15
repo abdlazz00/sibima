@@ -32,19 +32,17 @@ export default function ProfilePhoto({ akun }: { akun: ProfileAkun }) {
                         {initials(name)}
                     </div>
                 )}
-                <div className="absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/30 to-transparent p-4 pt-10">
-                    <Button color="secondary" size="md" iconLeading={Camera01} onPress={() => setChanging(true)}>
-                        Ganti foto
-                    </Button>
-                </div>
             </div>
-            {akun.punya_foto && (
-                <div className="mt-3 text-center">
-                    <Button color="link-destructive" size="sm" onPress={() => setRemoving(true)}>
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+                <Button color="secondary" size="sm" iconLeading={Camera01} onPress={() => setChanging(true)}>
+                    Ganti foto
+                </Button>
+                {akun.punya_foto && (
+                    <Button color="secondary-destructive" size="sm" onPress={() => setRemoving(true)}>
                         Hapus foto
                     </Button>
-                </div>
-            )}
+                )}
+            </div>
 
             {changing && <ChangePhotoDialog onClose={() => setChanging(false)} />}
             {removing && (
