@@ -17,7 +17,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'unit_id', 'unit_scope_override', 'is_active'])]
+#[Fillable(['name', 'email', 'password', 'unit_id', 'unit_scope_override', 'is_active', 'foto_profile'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -77,7 +77,7 @@ class User extends Authenticatable
     {
         return Attribute::make(
             get: function () {
-                $path = $this->pegawai?->foto_profile;
+                $path = $this->foto_profile ?: $this->pegawai?->foto_profile;
 
                 return $path ? Storage::disk('public')->url($path) : null;
             }

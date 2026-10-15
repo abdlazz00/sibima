@@ -27,6 +27,7 @@ class ProfileController extends Controller
                 'cakupan' => $user->resolveUnitScope(),
                 'aktif' => (bool) $user->is_active,
                 'sandi_diubah' => $user->password_changed_at?->toIso8601String(),
+                'punya_foto' => filled($user->foto_profile),
             ],
         ]);
     }

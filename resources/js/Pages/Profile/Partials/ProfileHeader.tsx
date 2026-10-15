@@ -1,6 +1,11 @@
+import ConfirmDialog from '@/Components/ConfirmDialog';
 import { Badge } from '@/Components/ui/base/badges/badges';
+import { Button } from '@/Components/ui/base/buttons/button';
 import { PageProps, ProfileAkun } from '@/types';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
+import { Camera01 } from '@untitledui/icons';
+import { useState } from 'react';
+import ChangePhotoDialog from './ChangePhotoDialog';
 
 const initials = (name: string) =>
     name
@@ -14,6 +19,9 @@ const initials = (name: string) =>
 export default function ProfileHeader({ akun }: { akun: ProfileAkun }) {
     const user = usePage<PageProps>().props.auth.user;
     const name = user?.name ?? 'Pengguna';
+    const [changing, setChanging] = useState(false);
+    const [removing, setRemoving] = useState(false);
+    const [busy, setBusy] = useState(false);
 
     return (
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-xs sm:flex-row sm:items-center">
@@ -38,6 +46,38 @@ export default function ProfileHeader({ akun }: { akun: ProfileAkun }) {
                     </Badge>
                 </div>
             </div>
+            <div className="flex flex-wrap gap-2">
+                <Button color="secondary" size="md" iconLeading={Camera01} onPress={() => setChanging(true)}>
+                    Ganti foto
+                </Button>
+                {akun.punya_foto && (
+                    <Button color="secondary-destructive" size="md" onPress={() => setRemoving(true)}>
+                        Hapus foto
+                    </Button>
+                )}
+            </div>
+
+            {changing && <ChangePhotoDialog onClose={() => setChanging(false)} />}
+            {removing && (
+                <ConfirmDialog
+                    title="Hapus foto profil"
+                    confirmLabel="Ya, Hapus Foto"
+                    isLoading={busy}
+                    onConfirm={() => {
+                        setBusy(true);
+                        router.delete(route('profile.photo.destroy'), {
+                            preserveScroll: true,
+                            onFinish: () => {
+                                setBusy(false);
+                                setRemoving(false);
+                            },
+                        });
+                    }}
+                    onClose={() => setRemoving(false)}
+                >
+                    Foto profil akan dihapus. Bila akun terhubung ke data pegawai yang punya foto, foto itulah yang tampil.
+                </ConfirmDialog>
+            )}
         </div>
     );
 }

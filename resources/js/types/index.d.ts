@@ -544,4 +544,5 @@ export interface ProfileAkun {
     cakupan: string;
     aktif: boolean;
     sandi_diubah: string | null;
+    punya_foto: boolean;
 }
