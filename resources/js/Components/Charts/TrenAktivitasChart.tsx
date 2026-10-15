@@ -1,9 +1,7 @@
+import { chartOptions } from '@/lib/apex';
 import { bulanLabel } from '@/lib/format';
 import { DashboardData } from '@/types';
-import { BarElement, CategoryScale, Chart as ChartJS, ChartOptions, Legend, LinearScale, Tooltip } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+import ApexChart from './ApexChart';
 
 type TrenAktivitas = DashboardData['tren_aktivitas'];
 
@@ -12,85 +10,31 @@ export default function TrenAktivitasChart({ data }: { data: TrenAktivitas }) {
         return <p className="py-12 text-center text-sm text-slate-400">Belum ada transaksi dalam 6 bulan terakhir.</p>;
     }
 
-    const options: ChartOptions<'bar'> = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                    boxWidth: 12,
-                    boxHeight: 12,
-                    padding: 12,
-                    color: '#334155',
-                    font: { size: 11, weight: 500 },
-                },
-            },
-            tooltip: {
-                callbacks: {
-                    title: (items) => items[0]?.label ?? '',
-                    label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} transaksi`,
-                },
-            },
-        },
-        scales: {
-            x: {
-                grid: { display: false },
-                ticks: { color: '#475569', font: { size: 11 } },
-            },
-            y: {
-                beginAtZero: true,
-                ticks: { precision: 0, color: '#64748B', font: { size: 11 } },
-                grid: { color: '#F1F5F9' },
-            },
-        },
-    };
+    const options = chartOptions({
+        colors: ['#2563EB', '#4F46E5', '#DC2626', '#D97706'],
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.02, stops: [0, 95, 100] } },
+        markers: { size: 4, strokeWidth: 2, strokeColors: '#FFFFFF' },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom' },
+        xaxis: { categories: data.map((d) => bulanLabel(d.bulan)) },
+        yaxis: { min: 0, forceNiceScale: true },
+        tooltip: { shared: true, intersect: false, y: { formatter: (v: number) => `${v} transaksi` } },
+    });
 
     return (
         <div>
-            <div className="h-64 w-full">
-                <Bar
-                    data={{
-                        labels: data.map((d) => bulanLabel(d.bulan)),
-                        datasets: [
-                            {
-                                label: 'Penerimaan',
-                                data: data.map((d) => d.penerimaan),
-                                backgroundColor: '#2563EB',
-                                borderRadius: 2,
-                                barPercentage: 0.8,
-                                categoryPercentage: 0.8,
-                            },
-                            {
-                                label: 'Mutasi',
-                                data: data.map((d) => d.mutasi),
-                                backgroundColor: '#4F46E5',
-                                borderRadius: 2,
-                                barPercentage: 0.8,
-                                categoryPercentage: 0.8,
-                            },
-                            {
-                                label: 'Rusak/Hilang',
-                                data: data.map((d) => d.rusak_hilang),
-                                backgroundColor: '#DC2626',
-                                borderRadius: 2,
-                                barPercentage: 0.8,
-                                categoryPercentage: 0.8,
-                            },
-                            {
-                                label: 'Permohonan',
-                                data: data.map((d) => d.permohonan),
-                                backgroundColor: '#D97706',
-                                borderRadius: 2,
-                                barPercentage: 0.8,
-                                categoryPercentage: 0.8,
-                            },
-                        ],
-                    }}
+            <div role="img" aria-label="Grafik volume transaksi per bulan selama 6 bulan terakhir">
+                <ApexChart
+                    type="area"
+                    series={[
+                        { name: 'Penerimaan', data: data.map((d) => d.penerimaan) },
+                        { name: 'Mutasi', data: data.map((d) => d.mutasi) },
+                        { name: 'Rusak/Hilang', data: data.map((d) => d.rusak_hilang) },
+                        { name: 'Permohonan', data: data.map((d) => d.permohonan) },
+                    ]}
                     options={options}
-                    aria-label="Grafik volume transaksi per bulan selama 6 bulan terakhir"
-                    role="img"
+                    height={300}
                 />
             </div>
             <table className="sr-only">

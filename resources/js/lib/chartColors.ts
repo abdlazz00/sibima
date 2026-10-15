@@ -19,3 +19,5 @@ export const JENIS_COLOR: Record<string, string> = {
     internal: '#334155',
     pengembalian: '#B45309',
 };
+
+export const KATEGORI_PALETTE = ['#1E40AF', '#6D28D9', '#0F766E', '#047857', '#0369A1', '#4338CA', '#BE185D'];

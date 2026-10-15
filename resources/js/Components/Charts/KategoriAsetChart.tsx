@@ -1,9 +1,8 @@
+import { chartOptions, tooltipHtml } from '@/lib/apex';
+import { KATEGORI_PALETTE } from '@/lib/chartColors';
 import { rupiah } from '@/lib/format';
 import { DashboardData } from '@/types';
-import { BarElement, CategoryScale, Chart as ChartJS, ChartOptions, LinearScale, Tooltip } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
+import ApexChart from './ApexChart';
 
 type PerKategori = DashboardData['per_kategori'];
 
@@ -12,65 +11,24 @@ export default function KategoriAsetChart({ data }: { data: PerKategori }) {
         return <p className="py-12 text-center text-sm text-slate-400">Belum ada aset.</p>;
     }
 
-    // Ambil maksimal 7 kategori teratas agar tampilan tetap proporsional dan rapi
+    // Maksimal 7 kategori teratas agar proporsional
     const displayData = data.slice(0, 7);
 
-    const options: ChartOptions<'bar'> = {
-        responsive: true,
-        maintainAspectRatio: false,
-        indexAxis: 'y',
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    title: (items) => items[0]?.label ?? '',
-                    label: (ctx) => {
-                        const row = displayData[ctx.dataIndex];
-                        if (!row) return '';
-                        return [`Jumlah: ${row.jumlah} aset`, `Nilai buku: ${rupiah(row.nilai_buku)}`];
-                    },
-                },
-            },
-        },
-        scales: {
-            x: {
-                beginAtZero: true,
-                ticks: { precision: 0, color: '#64748B', font: { size: 11 } },
-                grid: { color: '#F1F5F9' },
-            },
-            y: {
-                grid: { display: false },
-                ticks: {
-                    color: '#334155',
-                    font: { size: 12, weight: 500 },
-                    callback: function (val, index) {
-                        const label = this.getLabelForValue(Number(val));
-                        return label.length > 20 ? label.slice(0, 18) + '...' : label;
-                    },
-                },
-            },
-        },
-    };
+    const options = chartOptions({
+        colors: KATEGORI_PALETTE,
+        plotOptions: { bar: { horizontal: true, distributed: true, barHeight: '68%', borderRadius: 6, borderRadiusApplication: 'end' } },
+        legend: { show: false },
+        dataLabels: { enabled: true, style: { fontSize: '13px', fontWeight: 700, colors: ['#FFFFFF'] }, formatter: (v: number) => `${v}` },
+        grid: { padding: { left: 4, right: 8 } },
+        xaxis: { categories: displayData.map((k) => k.nama), labels: { formatter: (v: string) => String(Math.round(Number(v))) } },
+        yaxis: { labels: { style: { fontSize: '13px', colors: '#334155', fontWeight: 500 }, maxWidth: 160, formatter: (v: string | number) => { const s = String(v); return s.length > 20 ? `${s.slice(0, 18)}…` : s; } } },
+        tooltip: { custom: ({ dataPointIndex }) => { const k = displayData[dataPointIndex]; return tooltipHtml(k.nama, [`Jumlah: ${k.jumlah} aset`, `Nilai buku: ${rupiah(k.nilai_buku)}`]); } },
+    });
 
     return (
         <div>
-            <div className="h-64 w-full">
-                <Bar
-                    data={{
-                        labels: displayData.map((k) => k.nama),
-                        datasets: [
-                            {
-                                data: displayData.map((k) => k.jumlah),
-                                backgroundColor: '#2563EB',
-                                borderRadius: 4,
-                                barPercentage: 0.7,
-                            },
-                        ],
-                    }}
-                    options={options}
-                    aria-label="Grafik jumlah aset berdasarkan kategori"
-                    role="img"
-                />
+            <div role="img" aria-label="Grafik jumlah aset berdasarkan kategori">
+                <ApexChart type="bar" series={[{ name: 'Aset', data: displayData.map((k) => k.jumlah) }]} options={options} height={displayData.length * 46 + 40} />
             </div>
             <table className="sr-only">
                 <caption>Aset per Kategori</caption>

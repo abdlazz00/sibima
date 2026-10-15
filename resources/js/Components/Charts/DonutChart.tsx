@@ -1,7 +1,5 @@
-import { ArcElement, Chart as ChartJS, Tooltip } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
-
-ChartJS.register(ArcElement, Tooltip);
+import { chartOptions } from '@/lib/apex';
+import ApexChart from './ApexChart';
 
 export interface DonutSlice {
     label: string;
@@ -17,25 +15,31 @@ export default function DonutChart({ data, ariaLabel, unit = 'aset' }: { data: D
         return <p className="py-10 text-center text-sm text-slate-400">Belum ada data.</p>;
     }
 
-    return (
-        <div className="mx-auto h-56 w-56">
-            <Doughnut
-                data={{
-                    labels: data.map((s) => s.label),
-                    datasets: [{ data: data.map((s) => s.jumlah), backgroundColor: data.map((s) => s.color), borderWidth: 2, borderColor: '#FFFFFF' }],
-                }}
-                options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '62%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${data[ctx.dataIndex].jumlah} ${unit} (${data[ctx.dataIndex].persen}%)` } },
+    const options = chartOptions({
+        labels: data.map((s) => s.label),
+        colors: data.map((s) => s.color),
+        stroke: { width: 3, colors: ['#FFFFFF'] },
+        legend: { show: false },
+        dataLabels: { enabled: false },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '68%',
+                    labels: {
+                        show: true,
+                        name: { show: true, fontSize: '14px', fontWeight: 500, color: '#475569', offsetY: 18 },
+                        value: { show: true, fontSize: '28px', fontWeight: 700, color: '#0F172A', offsetY: -14, formatter: (v: string) => Number(v).toLocaleString('id-ID') },
+                        total: { show: true, label: `Total ${unit}`, fontSize: '14px', color: '#475569', formatter: () => total.toLocaleString('id-ID') },
                     },
-                }}
-                aria-label={ariaLabel}
-                role="img"
-            />
+                },
+            },
+        },
+        tooltip: { y: { formatter: (v: number | null, opts?: { seriesIndex: number }) => `${(v ?? 0).toLocaleString('id-ID')} ${unit} (${data[opts?.seriesIndex ?? 0].persen}%)` } },
+    });
+
+    return (
+        <div role="img" aria-label={ariaLabel} className="mx-auto max-w-72">
+            <ApexChart type="donut" series={data.map((s) => s.jumlah)} options={options} height={280} />
         </div>
     );
 }

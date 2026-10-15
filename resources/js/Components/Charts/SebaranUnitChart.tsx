@@ -1,10 +1,10 @@
+import { chartOptions, tooltipHtml } from '@/lib/apex';
 import { DashboardData } from '@/types';
-import { BarElement, CategoryScale, Chart as ChartJS, ChartOptions, Legend, LinearScale, Tooltip } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+import ApexChart from './ApexChart';
 
 type PerUnit = DashboardData['per_unit'];
+
+const singkat = (nama: string) => nama.replace('Kelurahan ', 'Kel. ').replace('Kecamatan ', 'Kec. ');
 
 export default function SebaranUnitChart({ data }: { data: PerUnit }) {
     if (!data || data.length === 0) {
@@ -15,79 +15,31 @@ export default function SebaranUnitChart({ data }: { data: PerUnit }) {
         );
     }
 
-    const options: ChartOptions<'bar'> = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                    boxWidth: 12,
-                    boxHeight: 12,
-                    padding: 12,
-                    color: '#334155',
-                    font: { size: 11, weight: 500 },
-                },
-            },
-            tooltip: {
-                callbacks: {
-                    title: (items) => items[0]?.label ?? '',
-                    label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} aset`,
-                },
-            },
-        },
-        scales: {
-            x: {
-                stacked: true,
-                grid: { display: false },
-                ticks: {
-                    color: '#475569',
-                    font: { size: 11 },
-                    callback: function (val) {
-                        const label = this.getLabelForValue(Number(val));
-                        // Singkat nama unit jika panjang (misal 'Kelurahan Sagulung Kota' -> 'Sagulung Kota')
-                        return label.replace('Kelurahan ', 'Kel. ').replace('Kecamatan ', 'Kec. ');
-                    },
-                },
-            },
-            y: {
-                stacked: true,
-                beginAtZero: true,
-                ticks: { precision: 0, color: '#64748B', font: { size: 11 } },
-                grid: { color: '#F1F5F9' },
-            },
-        },
-    };
+    const baik = data.map((u) => u.kondisi?.baik ?? 0);
+    const bermasalah = data.map((u) => (u.kondisi?.rusak_ringan ?? 0) + (u.kondisi?.rusak_berat ?? 0) + (u.kondisi?.hilang ?? 0));
+
+    const options = chartOptions({
+        colors: ['#047857', '#DC2626'],
+        chart: { stacked: true },
+        plotOptions: { bar: { columnWidth: '55%', borderRadius: 4, borderRadiusApplication: 'end', borderRadiusWhenStacked: 'last' } },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom' },
+        xaxis: { categories: data.map((u) => singkat(u.name)), labels: { trim: true, hideOverlappingLabels: false, rotate: -30, rotateAlways: false } },
+        yaxis: { min: 0, forceNiceScale: true },
+        tooltip: { shared: true, intersect: false, custom: ({ dataPointIndex }) => tooltipHtml(data[dataPointIndex].name, [`Baik: ${baik[dataPointIndex]} aset`, `Bermasalah: ${bermasalah[dataPointIndex]} aset`, `Total: ${data[dataPointIndex].jumlah} aset`]) },
+    });
 
     return (
         <div>
-            <div className="h-64 w-full">
-                <Bar
-                    data={{
-                        labels: data.map((u) => u.name),
-                        datasets: [
-                            {
-                                label: 'Kondisi Baik',
-                                data: data.map((u) => u.kondisi?.baik ?? 0),
-                                backgroundColor: '#047857',
-                                borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 2, bottomRight: 2 },
-                                barPercentage: 0.6,
-                                stack: 'unit',
-                            },
-                            {
-                                label: 'Bermasalah (Rusak/Hilang)',
-                                data: data.map((u) => (u.kondisi?.rusak_ringan ?? 0) + (u.kondisi?.rusak_berat ?? 0) + (u.kondisi?.hilang ?? 0)),
-                                backgroundColor: '#DC2626',
-                                borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
-                                barPercentage: 0.6,
-                                stack: 'unit',
-                            },
-                        ],
-                    }}
+            <div role="img" aria-label="Grafik sebaran aset per unit kerja berdasarkan kondisi fisik">
+                <ApexChart
+                    type="bar"
+                    series={[
+                        { name: 'Kondisi Baik', data: baik },
+                        { name: 'Bermasalah (Rusak/Hilang)', data: bermasalah },
+                    ]}
                     options={options}
-                    aria-label="Grafik sebaran aset per unit kerja berdasarkan kondisi fisik"
-                    role="img"
+                    height={300}
                 />
             </div>
             <table className="sr-only">
@@ -101,18 +53,14 @@ export default function SebaranUnitChart({ data }: { data: PerUnit }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((u) => {
-                        const baik = u.kondisi?.baik ?? 0;
-                        const bermasalah = (u.kondisi?.rusak_ringan ?? 0) + (u.kondisi?.rusak_berat ?? 0) + (u.kondisi?.hilang ?? 0);
-                        return (
-                            <tr key={u.id}>
-                                <td>{u.name}</td>
-                                <td>{baik} aset</td>
-                                <td>{bermasalah} aset</td>
-                                <td>{u.jumlah} aset</td>
-                            </tr>
-                        );
-                    })}
+                    {data.map((u, i) => (
+                        <tr key={u.id}>
+                            <td>{u.name}</td>
+                            <td>{baik[i]} aset</td>
+                            <td>{bermasalah[i]} aset</td>
+                            <td>{u.jumlah} aset</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>
