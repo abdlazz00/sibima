@@ -333,7 +333,7 @@ export default function Dashboard({ dashboard: d, auth }: DashboardProps) {
                                                             <StatusBadge status={t.status} />
                                                         </Table.Cell>
                                                         <Table.Cell>
-                                                            <Button color="secondary-brand" size="sm" href={t.url}>
+                                                            <Button color="primary-sky" size="sm" href={t.url}>
                                                                 Detail
                                                             </Button>
                                                         </Table.Cell>

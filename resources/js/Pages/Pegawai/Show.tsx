@@ -98,7 +98,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                     actions={
                         <>
                             {can.createUser && !hasAccount && (
-                                <Button color="secondary-brand" size="md" iconLeading={UserPlus01} onPress={() => setIsCreateAccountOpen(true)}>
+                                <Button color="primary-sky" size="md" iconLeading={UserPlus01} onPress={() => setIsCreateAccountOpen(true)}>
                                     Buat Akun Login
                                 </Button>
                             )}
@@ -109,7 +109,7 @@ export default function Show({ pegawai, roles = [], can }: ShowProps) {
                                 </div>
                             )}
                             {can.update && (
-                                <Button color="secondary-green" size="md" iconLeading={Edit01} href={route('pegawais.edit', pegawai.id)}>
+                                <Button color="primary-green" size="md" iconLeading={Edit01} href={route('pegawais.edit', pegawai.id)}>
                                     Edit Data
                                 </Button>
                             )}

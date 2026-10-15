@@ -75,11 +75,11 @@ export default function Show({ asset, kondisiOptions, can, qr }: ShowProps) {
                     }
                     actions={
                         <>
-                            <Button color="secondary-violet" size="md" iconLeading={Printer} onPress={() => setShowPrintModal(true)}>
+                            <Button color="primary-violet" size="md" iconLeading={Printer} onPress={() => setShowPrintModal(true)}>
                                 Cetak Label QR
                             </Button>
                             {can.update && (
-                                <Button color="secondary-green" size="md" iconLeading={Edit01} href={route('assets.edit', asset.id)}>
+                                <Button color="primary-green" size="md" iconLeading={Edit01} href={route('assets.edit', asset.id)}>
                                     Edit Data
                                 </Button>
                             )}

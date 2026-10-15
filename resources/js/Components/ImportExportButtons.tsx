@@ -18,13 +18,13 @@ export default function ImportExportButtons({ modul, query = {} }: { modul: Modu
     return (
         <>
             {canImport && (
-                <Button color="secondary-brand" size="md" href={route('import.show', modul)}>
+                <Button color="primary-teal" size="md" href={route('import.show', modul)}>
                     Impor
                 </Button>
             )}
             {canExport && (
                 <Button
-                    color="secondary-brand"
+                    color="primary-teal"
                     size="md"
                     onPress={() => {
                         window.location.href = route('export', { modul, ...params });

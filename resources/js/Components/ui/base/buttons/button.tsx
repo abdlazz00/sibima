@@ -5,6 +5,14 @@ import { Button as AriaButton, Link as AriaLink } from "react-aria-components";
 import { cx, sortCx } from "@/lib/cx";
 import { isReactComponent } from "@/lib/is-react-component";
 
+const SOLID = [
+    "text-white shadow-xs-skeuomorphic ring-1 ring-transparent ring-inset",
+    // Inner border gradient
+    "before:absolute before:inset-px before:border before:border-white/12 before:mask-b-from-0%",
+    // Icon styles
+    "*:data-icon:text-white",
+].join(" ");
+
 export const styles = sortCx({
     common: {
         root: [
@@ -61,6 +69,10 @@ export const styles = sortCx({
                 "*:data-icon:text-white/60 hover:*:data-icon:text-white/70",
             ].join(" "),
         },
+        "primary-sky": { root: `${SOLID} bg-sky-700 outline-sky-700 hover:bg-sky-800 data-loading:bg-sky-800` },
+        "primary-green": { root: `${SOLID} bg-emerald-700 outline-emerald-700 hover:bg-emerald-800 data-loading:bg-emerald-800` },
+        "primary-violet": { root: `${SOLID} bg-violet-700 outline-violet-700 hover:bg-violet-800 data-loading:bg-violet-800` },
+        "primary-teal": { root: `${SOLID} bg-teal-700 outline-teal-700 hover:bg-teal-800 data-loading:bg-teal-800` },
         secondary: {
             root: [
                 "bg-primary text-secondary shadow-xs-skeuomorphic ring-1 ring-primary ring-inset hover:bg-primary_hover hover:text-secondary_hover data-loading:bg-primary_hover",

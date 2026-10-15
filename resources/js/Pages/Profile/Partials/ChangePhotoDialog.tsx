@@ -41,7 +41,7 @@ export default function ChangePhotoDialog({ onClose }: { onClose: () => void }) 
                     </div>
                 )}
                 <FileTrigger acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp']} onSelect={(files) => form.setData('foto', files?.[0] ?? null)}>
-                    <Button color="secondary" size="md">
+                    <Button color="primary-teal" size="md">
                         Pilih foto
                     </Button>
                 </FileTrigger>

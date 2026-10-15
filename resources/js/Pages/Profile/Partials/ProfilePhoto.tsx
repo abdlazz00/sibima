@@ -34,11 +34,11 @@ export default function ProfilePhoto({ akun }: { akun: ProfileAkun }) {
                 )}
             </div>
             <div className="mt-3 flex flex-wrap justify-center gap-2">
-                <Button color="secondary" size="sm" iconLeading={Camera01} onPress={() => setChanging(true)}>
+                <Button color="primary-teal" size="sm" iconLeading={Camera01} onPress={() => setChanging(true)}>
                     Ganti foto
                 </Button>
                 {akun.punya_foto && (
-                    <Button color="secondary-destructive" size="sm" onPress={() => setRemoving(true)}>
+                    <Button color="primary-destructive" size="sm" onPress={() => setRemoving(true)}>
                         Hapus foto
                     </Button>
                 )}

@@ -125,7 +125,7 @@ export default function PegawaiForm({ form, units, existingPhotoUrl, submitLabel
                                 <div className={photoFrame}>
                                     <img src={existingPhotoUrl} alt="Foto pegawai saat ini" className="h-full w-full object-cover" />
                                     <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-900/80 p-3 pt-6 text-center">
-                                        <Button color="secondary" size="sm" iconLeading={Camera01} onPress={pickPhoto}>
+                                        <Button color="primary-teal" size="sm" iconLeading={Camera01} onPress={pickPhoto}>
                                             Ganti Foto
                                         </Button>
                                     </div>

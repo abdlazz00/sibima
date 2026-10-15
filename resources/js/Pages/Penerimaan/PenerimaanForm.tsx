@@ -153,7 +153,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                         <p className="text-sm font-bold text-blue-700">Aset #{index + 1}</p>
                                         {form.data.items.length > 1 && (
                                             <Button
-                                                color="secondary-destructive"
+                                                color="primary-destructive"
                                                 size="sm"
                                                 iconLeading={Trash01}
                                                 aria-label={`Hapus aset ${index + 1}`}
@@ -230,7 +230,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                     </div>
                                 </div>
                             ))}
-                            <Button color="secondary-brand" size="md" iconLeading={Plus} onPress={addItem}>
+                            <Button color="primary-sky" size="md" iconLeading={Plus} onPress={addItem}>
                                 Tambah Barang Lain
                             </Button>
 
@@ -309,7 +309,7 @@ export default function PenerimaanForm({ categories, kondisiOptions, beritaAcara
                                 {errorCount > 0 && `${errorCount} isian perlu diperbaiki`}
                             </p>
                             <div className="flex items-center gap-3">
-                                <Button color="secondary" size="md" isDisabled={form.processing} onPress={() => send('draft')}>
+                                <Button color="primary-sky" size="md" isDisabled={form.processing} onPress={() => send('draft')}>
                                     Simpan Draft
                                 </Button>
                                 <Button color="primary" size="md" isLoading={form.processing} onPress={() => send('submitted')}>

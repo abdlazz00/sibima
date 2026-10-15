@@ -18,7 +18,7 @@ export default function SessionsCard({ sessions }: { sessions: ProfileSession[] 
                     <p className="text-xs text-slate-500">Perangkat yang sedang masuk ke akun Anda.</p>
                 </div>
                 {others.length > 0 && (
-                    <Button color="secondary-destructive" size="md" onPress={() => setTarget('semua')}>
+                    <Button color="primary-destructive" size="md" onPress={() => setTarget('semua')}>
                         Keluar dari semua perangkat lain
                     </Button>
                 )}
@@ -43,7 +43,7 @@ export default function SessionsCard({ sessions }: { sessions: ProfileSession[] 
                             </p>
                         </div>
                         {!s.ini && (
-                            <Button color="secondary-destructive" size="sm" aria-label={`Keluarkan ${s.perangkat}`} onPress={() => setTarget(s)}>
+                            <Button color="primary-destructive" size="sm" aria-label={`Keluarkan ${s.perangkat}`} onPress={() => setTarget(s)}>
                                 Keluarkan
                             </Button>
                         )}

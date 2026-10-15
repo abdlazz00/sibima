@@ -139,7 +139,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                         <>
                             {selectedIds.length > 0 && Boolean(can.printLabel) && (
                                 <Button
-                                    color="secondary-brand"
+                                    color="primary-violet"
                                     size="md"
                                     iconLeading={Printer}
                                     className={
@@ -313,7 +313,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                         <div className="flex items-center justify-center gap-1.5">
                                             <Tooltip title="Lihat detail">
                                                 <Button
-                                                    color="secondary-brand"
+                                                    color="primary-sky"
                                                     size="sm"
                                                     iconLeading={Eye}
                                                     aria-label="Lihat detail"
@@ -323,7 +323,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                             {can.update && (
                                                 <Tooltip title="Ubah aset">
                                                     <Button
-                                                        color="secondary-green"
+                                                        color="primary-green"
                                                         size="sm"
                                                         iconLeading={Edit01}
                                                         aria-label="Ubah aset"
@@ -334,7 +334,7 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                             {can.printLabel && (
                                                 <Tooltip title="Cetak label QR">
                                                     <Button
-                                                        color="secondary-violet"
+                                                        color="primary-violet"
                                                         size="sm"
                                                         iconLeading={Printer}
                                                         aria-label="Cetak label QR"

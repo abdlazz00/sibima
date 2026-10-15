@@ -141,7 +141,7 @@ export default function Index({
                                 <div className="flex flex-col items-center gap-3 py-12 text-center">
                                     <p className="text-sm text-slate-400">Belum ada data kategori aset.</p>
                                     {can.create && (
-                                        <Button color="secondary-brand" size="sm" iconLeading={Plus} href={route('asset-categories.create')}>
+                                        <Button color="primary-sky" size="sm" iconLeading={Plus} href={route('asset-categories.create')}>
                                             Tambah Kategori
                                         </Button>
                                     )}
@@ -188,7 +188,7 @@ export default function Index({
                                                 {can.update && (
                                                     <Tooltip title={`Ubah ${noun}`}>
                                                         <Button
-                                                            color="secondary-green"
+                                                            color="primary-green"
                                                             size="sm"
                                                             iconLeading={Edit01}
                                                             aria-label={`Ubah ${noun}`}
@@ -199,7 +199,7 @@ export default function Index({
                                                 {can.delete && (
                                                     <Tooltip title={`Hapus ${noun}`}>
                                                         <Button
-                                                            color="secondary-destructive"
+                                                            color="primary-destructive"
                                                             size="sm"
                                                             iconLeading={Trash01}
                                                             aria-label={`Hapus ${noun}`}

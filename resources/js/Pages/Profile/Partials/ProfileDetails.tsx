@@ -40,7 +40,7 @@ export default function ProfileDetails({ akun }: { akun: ProfileAkun }) {
     const email = user?.email ?? '';
 
     const change = (key: DialogKey, label: string) => (
-        <Button color="secondary" size="sm" aria-label={`Ubah ${label}`} onPress={() => setDialog(key)}>
+        <Button color="primary-green" size="sm" aria-label={`Ubah ${label}`} onPress={() => setDialog(key)}>
             Ubah
         </Button>
     );

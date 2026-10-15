@@ -253,7 +253,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                                     {hasAccount && can.manageAccess && (
                                                         <Tooltip title="Kelola hak akses & role akun">
                                                             <Button
-                                                                color="secondary-brand"
+                                                                color="primary-sky"
                                                                 size="sm"
                                                                 iconLeading={Shield01}
                                                                 aria-label="Kelola hak akses & role akun"
@@ -263,7 +263,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                                     )}
                                                     <Tooltip title="Lihat detail dan edit pegawai">
                                                         <Button
-                                                            color="secondary-green"
+                                                            color="primary-green"
                                                             size="sm"
                                                             iconLeading={Edit01}
                                                             aria-label="Lihat detail dan edit pegawai"
@@ -273,7 +273,7 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                                     {can.delete && (
                                                         <Tooltip title="Hapus data pegawai">
                                                             <Button
-                                                                color="secondary-destructive"
+                                                                color="primary-destructive"
                                                                 size="sm"
                                                                 iconLeading={Trash01}
                                                                 aria-label="Hapus data pegawai"
