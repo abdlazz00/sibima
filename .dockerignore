@@ -2,7 +2,7 @@
 .github
 .env
 .env.*
-!.env.production.example
+!.env.example
 node_modules
 vendor
 public/build
@@ -12,9 +12,6 @@ storage/logs/*
 storage/framework/cache/data/*
 storage/framework/sessions/*
 storage/framework/views/*
-backups
-certbot
-cloudflared
 docs
 tests
 .idea

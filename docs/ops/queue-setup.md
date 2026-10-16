@@ -21,7 +21,7 @@ Cek cepat: unggah template kategori di halaman Impor; status harus berubah dari 
 
 ## Produksi (Ubuntu, Nginx + PHP-FPM, Supervisor)
 
-> Deployment standar memakai Docker (worker dan scheduler sudah berupa container): lihat `docs/ops/deployment.md`. Langkah Supervisor dan cron di bawah hanya untuk instalasi non-Docker.
+> Deployment standar memakai Docker (PHP-FPM, Nginx, Supervisor worker, dan cron scheduler sudah berjalan otomatis di dalam container): lihat `docs/deployment-guide.md`. Langkah Supervisor dan cron di bawah hanya untuk instalasi non-Docker.
 
 1. Pasang Supervisor: `sudo apt install supervisor`.
 2. `/etc/supervisor/conf.d/sibima-queue.conf`:

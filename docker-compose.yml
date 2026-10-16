@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sibima-uat
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./storage:/var/www/html/storage
+    environment:
+      - AUTO_MIGRATE=true
+    networks:
+      - sibima-network
+
+networks:
+  sibima-network:
+    external: true
