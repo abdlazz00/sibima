@@ -15,6 +15,7 @@ class AssetCategorySeeder extends Seeder
         'ALAT ANGKUTAN DARAT BERMOTOR' => [
             'KENDARAAN BERMOTOR ANGKUTAN BARANG' => '1.3.2.02.01.03',
             'KENDARAAN BERMOTOR BERODA DUA' => '1.3.2.02.01.04',
+            'KENDARAAN BERMOTOR BERODA TIGA' => '1.3.2.02.01.05',
             'KENDARAAN DINAS BERMOTOR PERORANGAN' => '1.3.2.02.01.01',
         ],
         'ALAT KANTOR' => [
