@@ -12,10 +12,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class AssetReport extends Model implements Approvable, HandlesApprovalOutcome
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('laporan')
+            ->logOnly(['nomor_laporan', 'asset_id', 'unit_id', 'pegawai_id', 'jenis', 'kondisi_baru', 'tanggal_kejadian', 'status'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'nomor_laporan', 'asset_id', 'unit_id', 'pegawai_id', 'jenis', 'kondisi_baru',

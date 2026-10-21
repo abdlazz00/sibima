@@ -22,6 +22,7 @@ docker compose -p sibima-prod -f docker-compose.yml up -d --build
 echo "⚡ Menjalankan migrasi database & seeder alur..."
 docker compose -p sibima-prod -f docker-compose.yml exec -T app php artisan migrate --force
 docker compose -p sibima-prod -f docker-compose.yml exec -T app php artisan db:seed --class=WorkflowDefinitionSeeder --force
+docker compose -p sibima-prod -f docker-compose.yml exec -T app php artisan db:seed --class=AssetCategorySeeder --force
 
 echo "🔄 Me-restart worker antrean (queue)..."
 docker compose -p sibima-prod -f docker-compose.yml exec -T app php artisan queue:restart

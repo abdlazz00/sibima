@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'is_active' => (bool) $request->user()->is_active,
                     'foto_profile_url' => $request->user()->foto_profile_url,
+                    'foto_profile_thumbnail_url' => $request->user()->foto_profile_thumbnail_url,
                     'roles' => $request->user()->getRoleNames()->toArray(),
                     'permissions' => $request->user()->getAllPermissions()->pluck('name')->values()->all(),
                     'unit' => $request->user()->unit ? [

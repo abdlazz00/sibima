@@ -60,6 +60,7 @@ class UserController extends Controller
             'email' => $u->email,
             'is_active' => (bool) $u->is_active,
             'foto_profile_url' => $u->foto_profile_url,
+            'foto_profile_thumbnail_url' => $u->foto_profile_thumbnail_url,
             'pegawai' => $u->pegawai ? [
                 'id' => $u->pegawai->id,
                 'nama' => $u->pegawai->nama,

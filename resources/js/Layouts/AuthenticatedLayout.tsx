@@ -45,7 +45,8 @@ export default function AuthenticatedLayout({
         usePage<PageProps>().props;
     const { url } = usePage();
     const role = auth.user?.roles?.[0] as Role | undefined;
-    const navGroups = navGroupsForPermissions(auth.user?.permissions ?? []);
+    const userRoles = auth.user?.roles?.map((r: any) => typeof r === 'string' ? r : r.name) ?? [];
+    const navGroups = navGroupsForPermissions(auth.user?.permissions ?? [], userRoles);
 
     const badgeFor = (item: { href: string; badge?: string | number }) =>
         item.href === '/persetujuan' ? pending_approvals || undefined : item.badge;
@@ -410,8 +411,10 @@ export default function AuthenticatedLayout({
                             >
                                 {auth.user?.foto_profile_url ? (
                                     <img
-                                        src={auth.user.foto_profile_url}
+                                        src={auth.user.foto_profile_thumbnail_url || auth.user.foto_profile_url}
                                         alt={auth.user.name}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="shadow-2xs h-8 w-8 shrink-0 rounded-full border border-gray-200 object-cover"
                                     />
                                 ) : (

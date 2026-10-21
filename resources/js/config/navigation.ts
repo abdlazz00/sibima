@@ -8,6 +8,7 @@ export interface NavItem {
     badge?: string | number;
     disabled?: boolean;
     permission?: string;
+    role?: string;
 }
 
 export interface NavGroup {
@@ -55,16 +56,23 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
             { label: 'Pengaturan Pengguna', href: '/pengaturan/users', icon: 'users', permission: 'user.view' },
             { label: 'Pengaturan Alur', href: '/pengaturan/alur', icon: 'settings', permission: 'pengaturan.alur' },
             { label: 'Pengaturan Role', href: '/pengaturan/roles', icon: 'shield', permission: 'pengaturan.role' },
+            { label: 'Log Aktivitas', href: '/pengaturan/log-aktivitas', icon: 'clock-rewind', role: 'super-admin' },
         ],
     },
 ];
 
-export function navGroupsForPermissions(permissions: string[] = []): NavGroup[] {
+export function navGroupsForPermissions(permissions: string[] = [], roles: string[] = []): NavGroup[] {
     return SIDEBAR_NAV_GROUPS.map((group) => ({
         ...group,
-        items: group.items.filter(
-            (item) => !item.permission || permissions.includes(item.permission),
-        ),
+        items: group.items.filter((item) => {
+            if (item.role && !roles.includes(item.role)) {
+                return false;
+            }
+            if (item.permission && !permissions.includes(item.permission)) {
+                return false;
+            }
+            return true;
+        }),
     })).filter((group) => group.items.length > 0);
 }
 

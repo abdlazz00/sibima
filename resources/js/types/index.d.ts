@@ -4,6 +4,7 @@ export interface AuthUser {
     email: string;
     is_active?: boolean;
     foto_profile_url?: string | null;
+    foto_profile_thumbnail_url?: string | null;
     roles: string[];
     permissions: string[];
     unit: { id: number; name: string; type: 'kecamatan' | 'kelurahan' } | null;
@@ -52,6 +53,7 @@ export interface Pegawai {
     status_kepegawaian: 'pns' | 'pppk';
     unit_id: number;
     foto_profile: string | null;
+    foto_profile_thumbnail_url?: string | null;
     no_hp?: string | null;
     email_dinas?: string | null;
     user_id: number | null;
@@ -71,6 +73,7 @@ export interface AssetPhoto {
     id: number;
     path: string;
     url: string;
+    thumbnail_url?: string;
 }
 
 export interface AssetHistory {

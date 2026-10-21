@@ -12,10 +12,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Asset extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('asset')
+            ->logOnly([
+                'nama_aset', 'kode_barang', 'nomor_register', 'category_id', 'unit_id',
+                'current_holder_id', 'merk_type', 'kondisi', 'status', 'tanggal_perolehan',
+                'sumber_perolehan', 'nilai_perolehan', 'nilai_buku', 'no_dokumen', 'keterangan',
+            ])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'qr_token',

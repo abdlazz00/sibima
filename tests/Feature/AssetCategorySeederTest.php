@@ -9,6 +9,7 @@ it('seeds official BMD codes for every known subkategori', function () {
     $expected = [
         'KENDARAAN BERMOTOR ANGKUTAN BARANG' => '1.3.2.02.01.03',
         'KENDARAAN BERMOTOR BERODA DUA' => '1.3.2.02.01.04',
+        'KENDARAAN BERMOTOR BERODA TIGA' => '1.3.2.02.01.05',
         'KENDARAAN DINAS BERMOTOR PERORANGAN' => '1.3.2.02.01.01',
         'ALAT KANTOR LAINNYA' => '1.3.2.05.01.05',
         'ALAT PENYIMPAN PERLENGKAPAN KANTOR' => '1.3.2.05.01.04',

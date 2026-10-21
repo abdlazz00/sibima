@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('import:prune')->daily();
 Schedule::command('model:prune', ['--model' => [LoginLog::class]])->daily();
+Schedule::command('activitylog:clean')->dailyAt('02:00');

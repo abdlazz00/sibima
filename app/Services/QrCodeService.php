@@ -7,6 +7,7 @@ use BaconQrCode\Common\ErrorCorrectionLevel;
 use BaconQrCode\Encoder\Encoder;
 use BaconQrCode\Renderer\GDLibRenderer;
 use BaconQrCode\Writer;
+use Illuminate\Support\Facades\Cache;
 
 class QrCodeService
 {
@@ -27,8 +28,12 @@ class QrCodeService
         return rtrim(config('app.url'), '/').route('scan.show', ['token' => $asset->qr_token], false);
     }
 
-    public function forAsset(Asset $asset): string
+    public function forAsset(Asset $asset, int $size = 120): string
     {
-        return $this->pngDataUri($this->urlForAsset($asset));
+        $cacheKey = "asset_qr_{$asset->qr_token}_{$size}_".md5((string) config('app.url'));
+
+        return Cache::remember($cacheKey, now()->addDays(30), function () use ($asset, $size) {
+            return $this->pngDataUri($this->urlForAsset($asset), $size);
+        });
     }
 }

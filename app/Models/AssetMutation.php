@@ -14,10 +14,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class AssetMutation extends Model implements Approvable, HandlesApprovalOutcome, HasWorkflowUnits
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('mutasi')
+            ->logOnly(['nomor_mutasi', 'jenis_mutasi', 'origin_unit_id', 'destination_unit_id', 'tanggal_mutasi', 'status', 'keterangan'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'nomor_mutasi',

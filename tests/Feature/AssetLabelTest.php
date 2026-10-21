@@ -4,6 +4,7 @@ use App\Models\Asset;
 use App\Models\User;
 use App\Services\QrCodeService;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     $this->kec = makeKecamatan();
@@ -96,7 +97,7 @@ it('returns a guest scanning the new QR straight back to the summary after login
 });
 
 it('forbids a user without aset.print-label permission from printing labels', function () {
-    $role = \Spatie\Permission\Models\Role::create(['name' => 'pegawai_tanpa_cetak', 'guard_name' => 'web']);
+    $role = Role::create(['name' => 'pegawai_tanpa_cetak', 'guard_name' => 'web']);
     $role->givePermissionTo('aset.view');
     $user = userWithRole('pegawai_tanpa_cetak', $this->kel);
 
@@ -105,3 +106,52 @@ it('forbids a user without aset.print-label permission from printing labels', fu
         ->assertForbidden();
 });
 
+it('prepares a short ticket and prints via the ticket URL', function () {
+    $prepareRes = $this->actingAs($this->admin)
+        ->postJson('/assets/labels/prepare', [
+            'ids' => [$this->own->id, $this->own2->id],
+            'size' => 'kecil',
+        ]);
+
+    $prepareRes->assertOk()
+        ->assertJsonStructure(['ticket', 'url']);
+
+    $ticket = $prepareRes->json('ticket');
+    expect($ticket)->toBeString()->toHaveLength(16);
+
+    // Print with the ticket URL
+    $printRes = $this->actingAs($this->admin)
+        ->get("/assets/labels/print/{$ticket}");
+
+    $printRes->assertOk()->assertHeader('Content-Type', 'application/pdf');
+    expect(substr($printRes->getContent(), 0, 5))->toBe('%PDF-');
+});
+
+it('rejects an invalid or different user ticket', function () {
+    // 404 on nonexistent ticket
+    $this->actingAs($this->admin)
+        ->get('/assets/labels/print/invalidticket123')
+        ->assertNotFound();
+
+    // Prepare ticket with user A
+    $prepareRes = $this->actingAs($this->admin)
+        ->postJson('/assets/labels/prepare', [
+            'ids' => [$this->own->id],
+            'size' => 'kecil',
+        ]);
+    $ticket = $prepareRes->json('ticket');
+
+    // Access with user B
+    $otherUser = userWithRole('admin_kelurahan', makeKelurahan($this->kec, 'Kelurahan Lain'));
+    $this->actingAs($otherUser)
+        ->get("/assets/labels/print/{$ticket}")
+        ->assertNotFound();
+});
+
+it('supports comma-separated id string in GET /assets/labels', function () {
+    $res = $this->actingAs($this->admin)
+        ->get("/assets/labels?ids={$this->own->id},{$this->own2->id}&size=kecil");
+
+    $res->assertOk()->assertHeader('Content-Type', 'application/pdf');
+    expect(substr($res->getContent(), 0, 5))->toBe('%PDF-');
+});

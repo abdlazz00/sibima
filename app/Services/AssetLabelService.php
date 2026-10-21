@@ -42,7 +42,7 @@ class AssetLabelService
             'asset' => $asset,
             'name' => Str::limit($asset->nama_aset, $dims['name_limit']),
             'tahun' => $asset->tanggal_perolehan ? date('Y', strtotime((string) $asset->tanggal_perolehan)) : '-',
-            'qr' => $this->qr->forAsset($asset),
+            'qr' => $this->qr->forAsset($asset, $size === 'besar' ? 150 : 120),
         ]);
 
         $html = view('pdf.asset-labels', [
