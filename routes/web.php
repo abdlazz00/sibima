@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ApprovalActionController;
 use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
@@ -14,17 +15,17 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LaporanAsetController;
 use App\Http\Controllers\LaporanMutasiController;
 use App\Http\Controllers\LaporanRusakHilangController;
-use App\Http\Controllers\ScanController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenerimaanAsetController;
 use App\Http\Controllers\PersetujuanController;
-use App\Http\Controllers\WorkflowSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePhotoController;
 use App\Http\Controllers\ProfileSessionController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ScanController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkflowSettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -78,6 +79,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
+    Route::get('/pengaturan/log-aktivitas', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::get('/asset-categories/create', [AssetCategoryController::class, 'create'])->name('asset-categories.create');
