@@ -43,6 +43,11 @@ class PegawaiService
 
     public function delete(Pegawai $pegawai): void
     {
+        if ($pegawai->foto_profile) {
+            app(ThumbnailService::class)->deleteThumbnails($pegawai->foto_profile);
+            Storage::disk('public')->delete($pegawai->foto_profile);
+        }
+
         $this->pegawais->delete($pegawai);
     }
 
@@ -84,10 +89,13 @@ class PegawaiService
         }
 
         if ($pegawai->foto_profile) {
+            app(ThumbnailService::class)->deleteThumbnails($pegawai->foto_profile);
             Storage::disk('public')->delete($pegawai->foto_profile);
         }
 
-        $pegawai->update(['foto_profile' => $foto->store("pegawais/{$pegawai->id}", 'public')]);
+        $path = $foto->store("pegawais/{$pegawai->id}", 'public');
+        app(ThumbnailService::class)->generate($path);
+        $pegawai->update(['foto_profile' => $path]);
 
         return $pegawai;
     }

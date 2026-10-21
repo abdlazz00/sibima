@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ThumbnailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,9 +25,12 @@ class ProfilePhotoController extends Controller
         $user = $request->user();
         $old = $user->foto_profile;
 
-        $user->update(['foto_profile' => $request->file('foto')->store('profile-photos', 'public')]);
+        $path = $request->file('foto')->store('profile-photos', 'public');
+        app(ThumbnailService::class)->generate($path);
+        $user->update(['foto_profile' => $path]);
 
         if ($old) {
+            app(ThumbnailService::class)->deleteThumbnails($old);
             Storage::disk('public')->delete($old);
         }
 
@@ -38,6 +42,7 @@ class ProfilePhotoController extends Controller
         $user = $request->user();
 
         if ($user->foto_profile) {
+            app(ThumbnailService::class)->deleteThumbnails($user->foto_profile);
             Storage::disk('public')->delete($user->foto_profile);
             $user->update(['foto_profile' => null]);
         }

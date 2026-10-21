@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Asset;
+use App\Services\ThumbnailService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -130,10 +131,12 @@ class SyncAssetPhotos extends Command
                     $storagePath = "assets/{$asset->id}/{$filename}";
 
                     Storage::disk('public')->put($storagePath, $body);
+                    app(ThumbnailService::class)->generate($storagePath);
 
                     if ($this->option('overwrite')) {
                         // Hapus foto lama jika overwrite
                         foreach ($asset->photos as $oldPhoto) {
+                            app(ThumbnailService::class)->deleteThumbnails($oldPhoto->path);
                             Storage::disk('public')->delete($oldPhoto->path);
                             $oldPhoto->delete();
                         }

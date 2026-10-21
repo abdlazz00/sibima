@@ -411,8 +411,10 @@ export default function AuthenticatedLayout({
                             >
                                 {auth.user?.foto_profile_url ? (
                                     <img
-                                        src={auth.user.foto_profile_url}
+                                        src={auth.user.foto_profile_thumbnail_url || auth.user.foto_profile_url}
                                         alt={auth.user.name}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="shadow-2xs h-8 w-8 shrink-0 rounded-full border border-gray-200 object-cover"
                                     />
                                 ) : (

@@ -81,6 +81,7 @@ class AssetService
     public function deletePhoto(AssetPhoto $photo): void
     {
         $photo->delete();
+        app(ThumbnailService::class)->deleteThumbnails($photo->path);
         Storage::disk('public')->delete($photo->path);
     }
 
@@ -88,7 +89,9 @@ class AssetService
     private function storePhotos(Asset $asset, array $photos): void
     {
         foreach ($photos as $photo) {
-            $asset->photos()->create(['path' => $photo->store("assets/{$asset->id}", 'public')]);
+            $path = $photo->store("assets/{$asset->id}", 'public');
+            app(ThumbnailService::class)->generate($path);
+            $asset->photos()->create(['path' => $path]);
         }
     }
 }

@@ -20,6 +20,7 @@ interface UserListItem {
     email: string;
     is_active: boolean;
     foto_profile_url: string | null;
+    foto_profile_thumbnail_url?: string | null;
     pegawai: {
         id: number;
         nama: string;
@@ -322,8 +323,10 @@ export default function Index({ auth, users, roles, units, filters, can }: Index
                                         <div className="flex items-center gap-3">
                                             {user.foto_profile_url ? (
                                                 <img
-                                                    src={user.foto_profile_url}
+                                                    src={user.foto_profile_thumbnail_url || user.foto_profile_url}
                                                     alt=""
+                                                    loading="lazy"
+                                                    decoding="async"
                                                     className="size-10 shrink-0 rounded-full border border-slate-200 object-cover"
                                                 />
                                             ) : (

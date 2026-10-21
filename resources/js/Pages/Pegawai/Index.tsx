@@ -199,8 +199,10 @@ export default function Index({ pegawais, units, can }: IndexProps) {
                                     >
                                         {pegawai.foto_profile ? (
                                             <img
-                                                src={`/storage/${pegawai.foto_profile}`}
+                                                src={pegawai.foto_profile_thumbnail_url || `/storage/${pegawai.foto_profile}`}
                                                 alt=""
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="h-full max-h-36 w-full rounded-lg object-cover"
                                             />
                                         ) : (

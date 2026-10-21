@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\StatusKepegawaian;
+use App\Services\ThumbnailService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +16,8 @@ use Spatie\Activitylog\Support\LogOptions;
 class Pegawai extends Model
 {
     use HasFactory, LogsActivity;
+
+    protected $appends = ['foto_profile_thumbnail_url'];
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -68,5 +72,10 @@ class Pegawai extends Model
         if ($ids !== null) {
             $query->whereIn('unit_id', $ids);
         }
+    }
+
+    protected function fotoProfileThumbnailUrl(): Attribute
+    {
+        return Attribute::get(fn () => app(ThumbnailService::class)->url($this->foto_profile));
     }
 }

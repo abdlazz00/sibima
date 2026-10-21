@@ -286,7 +286,13 @@ export default function Index({ assets, filters, categories, units, kondisiOptio
                                     <Table.Cell>
                                         <div className="h-12 w-12 overflow-hidden rounded bg-slate-100">
                                             {asset.photos?.[0] && (
-                                                <img src={asset.photos[0].url} alt="" className="h-full w-full object-cover" />
+                                                <img
+                                                    src={asset.photos[0].thumbnail_url || asset.photos[0].url}
+                                                    alt=""
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    className="h-full w-full object-cover"
+                                                />
                                             )}
                                         </div>
                                     </Table.Cell>

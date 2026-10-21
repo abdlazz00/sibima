@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\ResetPasswordNotification;
+use App\Services\ThumbnailService;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -92,6 +93,17 @@ class User extends Authenticatable
                 $path = $this->foto_profile ?: $this->pegawai?->foto_profile;
 
                 return $path ? Storage::disk('public')->url($path) : null;
+            }
+        );
+    }
+
+    protected function fotoProfileThumbnailUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $path = $this->foto_profile ?: $this->pegawai?->foto_profile;
+
+                return $path ? app(ThumbnailService::class)->url($path) : null;
             }
         );
     }
