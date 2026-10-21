@@ -11,10 +11,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class BeritaAcaraPenerimaan extends Model implements Approvable, HandlesApprovalOutcome
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('berita-acara')
+            ->logOnly(['no_berita_acara', 'tanggal_penerimaan', 'sumber_perolehan', 'no_kontrak_spk', 'vendor', 'unit_id', 'status', 'catatan'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'no_berita_acara', 'tanggal_penerimaan', 'sumber_perolehan',
