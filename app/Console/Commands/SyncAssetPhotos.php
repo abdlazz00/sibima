@@ -22,50 +22,56 @@ class SyncAssetPhotos extends Command
     {
         ini_set('memory_limit', '1024M');
 
-        $filePath = base_path((string) $this->option('file'));
-        if (! file_exists($filePath)) {
-            $this->error("Berkas Excel tidak ditemukan di: {$filePath}");
+        $jsonPath = database_path('seeders/data/asset_photos_mapping.json');
+        $customFile = (string) $this->option('file');
+        $excelPath = base_path($customFile);
+
+        $photoEntries = [];
+
+        if (file_exists($jsonPath) && ($customFile === 'docs/PHOTO BARANG.xlsx' || ! file_exists($excelPath))) {
+            $this->info("Membaca pemetaan foto dari: {$jsonPath}...");
+            $photoEntries = json_decode((string) file_get_contents($jsonPath), true) ?: [];
+        } elseif (file_exists($excelPath)) {
+            $this->info("Membaca berkas foto Excel: {$excelPath}...");
+
+            $reader = IOFactory::createReaderForFile($excelPath);
+            $reader->setLoadSheetsOnly(['DATA MASTER']);
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($excelPath);
+
+            $sheet = $spreadsheet->getActiveSheet();
+            $highestRow = $sheet->getHighestRow();
+
+            for ($r = 2; $r <= $highestRow; $r++) {
+                $kib = trim((string) $sheet->getCell("A{$r}")->getValue());
+                $regRaw = trim((string) $sheet->getCell("M{$r}")->getValue());
+                $url = trim((string) $sheet->getCell("N{$r}")->getValue());
+
+                if ($kib === '' || $regRaw === '' || $url === '') {
+                    continue;
+                }
+
+                if (preg_match('/id=([a-zA-Z0-9_-]+)/', $url, $m)) {
+                    $photoEntries[] = [
+                        'row' => $r,
+                        'kode_barang' => $kib,
+                        'nomor_register' => (int) $regRaw,
+                        'drive_id' => $m[1],
+                        'url' => $url,
+                    ];
+                }
+            }
+
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet);
+        } else {
+            $this->error("Berkas foto tidak ditemukan di {$jsonPath} maupun {$excelPath}");
 
             return self::FAILURE;
         }
 
-        $this->info("Membaca berkas foto: {$filePath}...");
-
-        $reader = IOFactory::createReaderForFile($filePath);
-        $reader->setLoadSheetsOnly(['DATA MASTER']);
-        $reader->setReadDataOnly(true);
-        $spreadsheet = $reader->load($filePath);
-
-        $sheet = $spreadsheet->getActiveSheet();
-        $highestRow = $sheet->getHighestRow();
-
-        $photoEntries = [];
-
-        for ($r = 2; $r <= $highestRow; $r++) {
-            $kib = trim((string) $sheet->getCell("A{$r}")->getValue());
-            $regRaw = trim((string) $sheet->getCell("M{$r}")->getValue());
-            $url = trim((string) $sheet->getCell("N{$r}")->getValue());
-
-            if ($kib === '' || $regRaw === '' || $url === '') {
-                continue;
-            }
-
-            if (preg_match('/id=([a-zA-Z0-9_-]+)/', $url, $m)) {
-                $photoEntries[] = [
-                    'row' => $r,
-                    'kib' => $kib,
-                    'reg' => (int) $regRaw,
-                    'drive_id' => $m[1],
-                    'url' => $url,
-                ];
-            }
-        }
-
-        $spreadsheet->disconnectWorksheets();
-        unset($spreadsheet);
-
         $totalFound = count($photoEntries);
-        $this->info("Ditemukan {$totalFound} tautan foto Google Drive di sheet DATA MASTER.");
+        $this->info("Ditemukan {$totalFound} tautan foto Google Drive siap diproses.");
 
         $limit = (int) $this->option('limit');
         if ($limit > 0 && $limit < $totalFound) {
@@ -82,8 +88,11 @@ class SyncAssetPhotos extends Command
         $bar->start();
 
         foreach ($photoEntries as $entry) {
-            $asset = Asset::where('kode_barang', $entry['kib'])
-                ->where('nomor_register', $entry['reg'])
+            $kodeBarang = $entry['kode_barang'] ?? $entry['kib'] ?? null;
+            $reg = (int) ($entry['nomor_register'] ?? $entry['reg'] ?? 0);
+
+            $asset = Asset::where('kode_barang', $kodeBarang)
+                ->where('nomor_register', $reg)
                 ->first();
 
             if (! $asset) {
