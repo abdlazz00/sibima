@@ -33,6 +33,8 @@ Route::redirect('/', '/dashboard');
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/assets/labels/prepare', [AssetLabelController::class, 'prepare'])->name('assets.labels.prepare');
+    Route::get('/assets/labels/print/{ticket}', [AssetLabelController::class, 'printTicket'])->name('assets.labels.print');
     Route::get('/assets/labels', [AssetLabelController::class, 'show'])->name('assets.labels');
     Route::resource('assets', AssetController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::delete('/assets/{asset}/photos/{photo}', [AssetPhotoController::class, 'destroy'])

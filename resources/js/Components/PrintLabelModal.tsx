@@ -19,19 +19,57 @@ export default function PrintLabelModal({ assetIds, onClose }: PrintLabelModalPr
     const [size, setSize] = useState<LabelSize>('kecil');
     const [popupBlocked, setPopupBlocked] = useState(false);
     const [printUrl, setPrintUrl] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const isExceeded = assetIds.length > 99;
     const isZero = assetIds.length === 0;
 
-    const print = () => {
-        if (isExceeded || isZero) return;
-        const targetUrl = route('assets.labels', { ids: assetIds, size });
-        const win = window.open(targetUrl, '_blank');
-        if (!win || win.closed || typeof win.closed === 'undefined') {
-            setPopupBlocked(true);
-            setPrintUrl(targetUrl);
-        } else {
-            onClose();
+    const print = async () => {
+        if (isExceeded || isZero || isLoading) return;
+        setIsLoading(true);
+
+        const win = window.open('about:blank', '_blank');
+
+        try {
+            const csrfToken =
+                (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+
+            const res = await fetch(route('assets.labels.prepare'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ ids: assetIds, size }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Gagal menyiapkan tiket cetak');
+            }
+
+            const data = await res.json();
+            const targetUrl = data.url;
+
+            if (win && !win.closed) {
+                win.location.href = targetUrl;
+                onClose();
+            } else {
+                setPopupBlocked(true);
+                setPrintUrl(targetUrl);
+            }
+        } catch {
+            const fallbackUrl = route('assets.labels', { ids: assetIds.join(','), size });
+            if (win && !win.closed) {
+                win.location.href = fallbackUrl;
+                onClose();
+            } else {
+                setPopupBlocked(true);
+                setPrintUrl(fallbackUrl);
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -120,10 +158,11 @@ export default function PrintLabelModal({ assetIds, onClose }: PrintLabelModalPr
                                 color="primary"
                                 size="md"
                                 iconLeading={Printer}
-                                isDisabled={isExceeded || isZero}
+                                isDisabled={isExceeded || isZero || isLoading}
+                                isLoading={isLoading}
                                 onPress={print}
                             >
-                                Cetak Label
+                                {isLoading ? 'Menyiapkan...' : 'Cetak Label'}
                             </Button>
                         </div>
                     </div>
