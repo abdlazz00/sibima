@@ -52,6 +52,6 @@ it('seeds the client asset categories idempotently in every environment', functi
     }
 
     expect(AssetCategory::whereNull('parent_id')->count())->toBe(7)
-        ->and(AssetCategory::whereNotNull('parent_id')->count())->toBe(15)
+        ->and(AssetCategory::whereNotNull('parent_id')->count())->toBe(16)
         ->and(AssetCategory::where('name', 'ALAT PENDINGIN')->first()->parent->name)->toBe('ALAT RUMAH TANGGA');
 });
