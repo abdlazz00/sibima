@@ -2,6 +2,7 @@ import {
     AlertTriangle,
     BarChart01,
     CheckSquare,
+    ClockRewind,
     Download01,
     File05,
     Grid01,
@@ -29,6 +30,7 @@ const ICONS: Record<string, FC<{ className?: string }>> = {
     'bar-chart': BarChart01,
     settings: Settings01,
     shield: Shield01,
+    'clock-rewind': ClockRewind,
 };
 
 interface NavIconProps {

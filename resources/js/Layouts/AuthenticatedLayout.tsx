@@ -45,7 +45,8 @@ export default function AuthenticatedLayout({
         usePage<PageProps>().props;
     const { url } = usePage();
     const role = auth.user?.roles?.[0] as Role | undefined;
-    const navGroups = navGroupsForPermissions(auth.user?.permissions ?? []);
+    const userRoles = auth.user?.roles?.map((r: any) => typeof r === 'string' ? r : r.name) ?? [];
+    const navGroups = navGroupsForPermissions(auth.user?.permissions ?? [], userRoles);
 
     const badgeFor = (item: { href: string; badge?: string | number }) =>
         item.href === '/persetujuan' ? pending_approvals || undefined : item.badge;
