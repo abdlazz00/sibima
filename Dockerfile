@@ -1,5 +1,5 @@
 # Stage 1: Install Composer dependencies
-FROM composer:2.8 AS vendor
+FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install \
@@ -10,7 +10,7 @@ RUN composer install \
     --no-scripts
 
 # Stage 2: Build frontend assets
-FROM node:22-alpine AS frontend
+FROM node:24-alpine AS frontend
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -36,11 +36,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
+    libwebp-dev \
     libicu-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure & install PHP extensions for Laravel, QR Code, DomPDF & PhpSpreadsheet
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         zip \
@@ -52,7 +53,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         pcntl
 
 # Install Composer CLI in production container
-COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Copy application source files
 COPY . /var/www/html

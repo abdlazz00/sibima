@@ -17,7 +17,8 @@ git fetch origin main
 git reset --hard origin/main
 
 echo "🐳 Membangun dan menjalankan ulang container Production..."
-docker compose -p sibima-prod -f docker-compose.yml up -d --build
+docker compose -p sibima-prod -f docker-compose.yml build --pull
+docker compose -p sibima-prod -f docker-compose.yml up -d
 
 echo "⚡ Menjalankan migrasi database & seeder alur..."
 docker compose -p sibima-prod -f docker-compose.yml exec -T app php artisan migrate --force
