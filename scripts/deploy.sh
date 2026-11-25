@@ -17,7 +17,8 @@ git fetch origin staging
 git reset --hard origin/staging
 
 echo "🐳 Membangun dan menjalankan ulang container UAT..."
-docker compose -p sibima-uat -f docker-compose.yml up -d --build
+docker compose -p sibima-uat -f docker-compose.yml build --pull
+docker compose -p sibima-uat -f docker-compose.yml up -d
 
 echo "⚡ Menjalankan migrasi database & seeder alur..."
 docker compose -p sibima-uat -f docker-compose.yml exec -T app php artisan migrate --force
